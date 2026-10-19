@@ -24,4 +24,4 @@ The preinstalled disk also carries KibaOS Setup. Run `C:\<architecture>\kibaos.e
 
 ## Help
 
-If something goes wrong, report it in [Issues](https://github.com/ahmedarif193/KibaOS/issues) with the architecture, the build type, the commit you built and the steps that lead to the problem. Guides and notes are in the [Wiki](https://github.com/ahmedarif193/KibaOS/wiki), and you can ask the team on [Discord](https://discord.gg/BpcKg7FZ2) or [Matrix](https://matrix.to/#/#kibaos:matrix.org).
+If something goes wrong, report it in [Issues](https://github.com/KibaLabsLLC/Kiba/issues) with the architecture, the build type, the commit you built and the steps that lead to the problem. 
