@@ -163,14 +163,14 @@ set(dir_quicklaunch             "reactos/system32/config/systemprofile/AppData/R
 
 cmdenvvar(envvar_systemdrive "SystemDrive" TRUE)
 cmdenvvar(envvar_archdir     "PROCESSOR_ARCHITECTURE:x86=I386" TRUE)
-add_livecd_shortcut("Install LiberNT"
+add_livecd_shortcut("Install KibaOS"
     "shell:system\\cmd.exe"
-    CMDLINE_ARGS "/D /E:ON /C \"start ${envvar_systemdrive}\\${envvar_archdir}\\libernt.exe\""
-    ICON "${envvar_systemdrive}\\${envvar_archdir}\\libernt.exe"
+    CMDLINE_ARGS "/D /E:ON /C \"start ${envvar_systemdrive}\\${envvar_archdir}\\kibaos.exe\""
+    ICON "${envvar_systemdrive}\\${envvar_archdir}\\kibaos.exe"
     MINIMIZE
     FOR livecd
     DESTINATION "${dir_allusers_desktop}")
-add_cd_file(FILE "${CMAKE_CURRENT_BINARY_DIR}/Install LiberNT.lnk"
+add_cd_file(FILE "${CMAKE_CURRENT_BINARY_DIR}/Install KibaOS.lnk"
             TARGET livecd_links
             DESTINATION "${dir_startmenu_programs}"
             FOR preinstall)
@@ -179,7 +179,7 @@ add_livecd_shortcut("Read Me"
     "shell:windows\\readme.txt"
     ICON "${envvar_systemroot}\\system32\\shell32.dll" ICON_INDEX -152
     DESTINATION "${dir_allusers_desktop}")
-add_livecd_shortcut("LiberNT Explorer"
+add_livecd_shortcut("KibaOS Explorer"
     "shell:windows\\explorer.exe" ICON_INDEX 1
     WORKDIR "${envvar_homedrive}${envvar_homepath}"
     DESTINATION "${dir_startmenu_programs}" "${dir_quicklaunch}")

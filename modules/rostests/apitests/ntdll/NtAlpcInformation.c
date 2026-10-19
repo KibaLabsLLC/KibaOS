@@ -1,5 +1,5 @@
 /*
- * PROJECT:         LiberNT API tests
+ * PROJECT:         KibaOS API tests
  * LICENSE:         GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:         ALPC query/set information parity and access tests
  * COPYRIGHT:       Copyright 2026 Ahmed ARIF

@@ -455,7 +455,7 @@ LoadReactOSSetup(
     /* Let the user know we started loading */
     UiDrawBackdrop(UiGetScreenHeight());
     UiDrawStatusText("Setup is loading...");
-    UiDrawProgressBarCenter("Loading LiberNT Setup...");
+    UiDrawProgressBarCenter("Loading KibaOS Setup...");
 
     /* Retrieve the system path */
     *BootPath = ANSI_NULL;

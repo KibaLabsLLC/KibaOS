@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT early desktop splash
+ * PROJECT:     KibaOS early desktop splash
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Shared build-time names for the experimental splash handoff
  */

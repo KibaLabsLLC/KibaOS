@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Setup entry point, installation steps and Setup data
  * COPYRIGHT:   Copyright 2008-2010 Matthias Kupfer <mkupfer@reactos.org>
@@ -8,7 +8,7 @@
  *              Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 #include <winnls.h>
 #include <tzlib.h>
 #include <objbase.h>
@@ -924,18 +924,18 @@ ReadInstalledLanguage(
     {
         RtlAdjustPrivilege(SE_RESTORE_PRIVILEGE, TRUE, FALSE, &Restore);
         RtlAdjustPrivilege(SE_BACKUP_PRIVILEGE, TRUE, FALSE, &Backup);
-        if (RegLoadKeyW(HKEY_USERS, L"LiberNTSetupDetect", Copy) == ERROR_SUCCESS)
+        if (RegLoadKeyW(HKEY_USERS, L"KibaOSSetupDetect", Copy) == ERROR_SUCCESS)
         {
             cbData = cchLocale * sizeof(WCHAR);
-            Found = RegGetValueW(HKEY_USERS, L"LiberNTSetupDetect\\Control Panel\\International", L"Locale",
+            Found = RegGetValueW(HKEY_USERS, L"KibaOSSetupDetect\\Control Panel\\International", L"Locale",
                                  RRF_RT_REG_SZ, NULL, Locale, &cbData) == ERROR_SUCCESS;
             cbData = cchLayout * sizeof(WCHAR);
-            if (RegGetValueW(HKEY_USERS, L"LiberNTSetupDetect\\Keyboard Layout\\Preload", L"1",
+            if (RegGetValueW(HKEY_USERS, L"KibaOSSetupDetect\\Keyboard Layout\\Preload", L"1",
                              RRF_RT_REG_SZ, NULL, Layout, &cbData) != ERROR_SUCCESS)
             {
                 *Layout = UNICODE_NULL;
             }
-            RegUnLoadKeyW(HKEY_USERS, L"LiberNTSetupDetect");
+            RegUnLoadKeyW(HKEY_USERS, L"KibaOSSetupDetect");
         }
         RtlAdjustPrivilege(SE_BACKUP_PRIVILEGE, Backup, FALSE, &Backup);
         RtlAdjustPrivilege(SE_RESTORE_PRIVILEGE, Restore, FALSE, &Restore);
@@ -1249,9 +1249,9 @@ IsSetupAlreadyRunning(
     HANDLE hMutex;
     HWND hWnd;
 
-    hMutex = CreateMutexW(NULL, FALSE, L"Global\\__LiberNT_Setup__");
+    hMutex = CreateMutexW(NULL, FALSE, L"Global\\__KibaOS_Setup__");
     if (!hMutex && GetLastError() == ERROR_PATH_NOT_FOUND)
-        hMutex = CreateMutexW(NULL, FALSE, L"__LiberNT_Setup__");
+        hMutex = CreateMutexW(NULL, FALSE, L"__KibaOS_Setup__");
     if (!hMutex || GetLastError() != ERROR_ALREADY_EXISTS)
         return FALSE;
 

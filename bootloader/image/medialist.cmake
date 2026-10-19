@@ -1,5 +1,5 @@
 ##
-## PROJECT:     LiberNT Boot Loader
+## PROJECT:     KibaOS Boot Loader
 ## LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
 ## PURPOSE:     Replace the boot files of a live medium file list and pack the system into a WIM
 ## COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
@@ -43,7 +43,7 @@ if(WIM)
     endif()
 
     execute_process(
-        COMMAND "${WIMAGE}" capture "${STAGE}" "${WIM}" "LiberNT" --compress=xpress --boot --threads=${_threads}
+        COMMAND "${WIMAGE}" capture "${STAGE}" "${WIM}" "KibaOS" --compress=xpress --boot --threads=${_threads}
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _log
         ERROR_VARIABLE _log)

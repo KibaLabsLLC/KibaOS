@@ -1,8 +1,8 @@
 /*
- * PROJECT:     LiberNT Kernel
+ * PROJECT:     KibaOS Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     In-memory PnP resource database
- * COPYRIGHT:   Copyright LiberNT contributors
+ * COPYRIGHT:   Copyright KibaOS contributors
  */
 
 #include <ntoskrnl.h>

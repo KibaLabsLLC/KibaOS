@@ -4,7 +4,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 IDD_SETUPFRAME DIALOGEX 0, 0, 420, 240
 STYLE DS_SHELLFONT | DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "LiberNT Setup"
+CAPTION "KibaOS Setup"
 FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT "", IDC_FRAME_TITLE, 120, 10, 290, 14, SS_NOPREFIX
@@ -78,7 +78,7 @@ BEGIN
     LTEXT "&Time zone:", IDC_STATIC, 0, 88, 95, 9
     COMBOBOX IDC_TIMEZONELIST, 100, 86, 190, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     AUTOCHECKBOX "Adjust for &daylight saving time automatically", IDC_AUTODAYLIGHT, 100, 105, 190, 10, WS_TABSTOP
-    LTEXT "This account is a member of the Administrators group. If you leave the password empty, LiberNT signs in to it automatically.", IDC_STATIC, 0, 128, 290, 26
+    LTEXT "This account is a member of the Administrators group. If you leave the password empty, KibaOS signs in to it automatically.", IDC_STATIC, 0, 128, 290, 26
 END
 
 IDD_READYPAGE DIALOGEX 0, 0, 290, 160
@@ -86,7 +86,7 @@ STYLE DS_SHELLFONT | DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
     EDITTEXT IDC_READY_SUMMARY, 0, 0, 290, 90, ES_MULTILINE | ES_READONLY | WS_VSCROLL | NOT WS_TABSTOP
-    LTEXT "LiberNT is under active development. Use it for evaluation and testing, not as your main operating system. It may corrupt your data or damage your hardware.", IDC_READY_WARNING, 0, 97, 290, 28
+    LTEXT "KibaOS is under active development. Use it for evaluation and testing, not as your main operating system. It may corrupt your data or damage your hardware.", IDC_READY_WARNING, 0, 97, 290, 28
     AUTOCHECKBOX "I &understand, and I have backed up the data I want to keep.", IDC_CONFIRM_INSTALL, 0, 132, 290, 20, BS_MULTILINE | BS_TOP | WS_TABSTOP
 END
 
@@ -146,14 +146,14 @@ BEGIN
     IDS_EXTEND_BUTTON "E&xtend"
     IDS_RESIZE_PENDING "Partition changes are waiting to be applied. Shrink and extend take effect immediately, so do them before creating, deleting or formatting partitions."
     IDS_RESIZE_FAILED "The partition could not be resized."
-    IDS_CAPTION "LiberNT Setup"
-    IDS_DRIVETITLE "Where do you want to install LiberNT?"
-    IDS_PROCESSTITLE "Installing LiberNT"
-    IDS_PROCESSSUBTITLE "Setup prepares the disk, copies the files, configures LiberNT and installs the bootloader. This can take a few minutes."
-    IDS_ABORTSETUP "LiberNT is not completely installed on your computer. If you quit Setup now, you will need to run Setup again to install LiberNT. Really quit?"
+    IDS_CAPTION "KibaOS Setup"
+    IDS_DRIVETITLE "Where do you want to install KibaOS?"
+    IDS_PROCESSTITLE "Installing KibaOS"
+    IDS_PROCESSSUBTITLE "Setup prepares the disk, copies the files, configures KibaOS and installs the bootloader. This can take a few minutes."
+    IDS_ABORTSETUP "KibaOS is not completely installed on your computer. If you quit Setup now, you will need to run Setup again to install KibaOS. Really quit?"
     IDS_ABORTSETUP2 "Abort installation?"
     IDS_NO_TXTSETUP_SIF "Unable to find 'txtsetup.sif'.\nSetup is unable to continue."
-    IDS_FINISH_NO_REBOOT "Restart your computer to start LiberNT. Do not start from the installation media again.\n\nClick on Restart to immediately restart your computer.\nClick on Postpone to quit the installer and restart your computer at a later time."
+    IDS_FINISH_NO_REBOOT "Restart your computer to start KibaOS. Do not start from the installation media again.\n\nClick on Restart to immediately restart your computer.\nClick on Postpone to quit the installer and restart your computer at a later time."
     IDS_ABORT_NO_REBOOT "Click on Restart to immediately restart your computer.\nClick on Close to quit the installer."
     IDS_INSTALLBTN "&Install"
     IDS_RESTARTBTN "&Restart"
@@ -165,12 +165,12 @@ END
 STRINGTABLE
 BEGIN
     IDS_DISKSUBTITLE "Select a partition or unallocated space. Except for Shrink and Extend, Setup changes your disks only after you click Install."
-    IDS_ACCOUNTZONESUBTITLE "You sign in to LiberNT with this account. LiberNT shows the time of the zone you select."
+    IDS_ACCOUNTZONESUBTITLE "You sign in to KibaOS with this account. KibaOS shows the time of the zone you select."
     IDS_READYTITLE "Ready to install"
     IDS_READYSUBTITLE "Review your choices. Setup starts changing your disks when you click Install."
-    IDS_DONETITLE "LiberNT is installed"
-    IDS_ABORTTITLE "LiberNT was not installed"
-    IDS_DONE_REBOOT "Your computer restarts in a few seconds to start LiberNT. Do not start from the installation media again.\n\nClick Restart to restart now."
+    IDS_DONETITLE "KibaOS is installed"
+    IDS_ABORTTITLE "KibaOS was not installed"
+    IDS_DONE_REBOOT "Your computer restarts in a few seconds to start KibaOS. Do not start from the installation media again.\n\nClick Restart to restart now."
     IDS_ABORT_REBOOT "Setup did not finish. Your computer restarts in a few seconds.\n\nClick Restart to restart now."
     IDS_BACKBTN "&Back"
     IDS_NEXTBTN "&Next"
@@ -201,21 +201,21 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_DISK_SELECT "Select where to install LiberNT."
+    IDS_DISK_SELECT "Select where to install KibaOS."
     IDS_DISK_NO_REGION "This space is too small to hold a new partition."
-    IDS_DISK_NOT_BASIC "LiberNT cannot be installed on this partition. Select a primary partition or unallocated space."
-    IDS_DISK_NOT_FIRMWARE "The firmware of this computer does not see the selected drive, so LiberNT may not start from it.\n\nClick OK to use it anyway."
-    IDS_DISK_NEW_SYSTEM "To make sure that all LiberNT features work correctly, Setup also creates partitions for system files."
+    IDS_DISK_NOT_BASIC "KibaOS cannot be installed on this partition. Select a primary partition or unallocated space."
+    IDS_DISK_NOT_FIRMWARE "The firmware of this computer does not see the selected drive, so KibaOS may not start from it.\n\nClick OK to use it anyway."
+    IDS_DISK_NEW_SYSTEM "To make sure that all KibaOS features work correctly, Setup also creates partitions for system files."
     IDS_DISK_FORMAT_WARN "If you format this partition, all data stored on it will be lost. Back up any files you want to keep first."
-    IDS_DISK_FORMAT_NTFS "LiberNT is installed on NTFS. Setup formats this partition, and all data stored on it will be lost."
-    IDS_DISK_FORMAT_EXISTING "This partition already contains a Windows or LiberNT installation. Setup formats it, and all data stored on it will be lost. Select another partition to keep it."
+    IDS_DISK_FORMAT_NTFS "KibaOS is installed on NTFS. Setup formats this partition, and all data stored on it will be lost."
+    IDS_DISK_FORMAT_EXISTING "This partition already contains a Windows or KibaOS installation. Setup formats it, and all data stored on it will be lost. Select another partition to keep it."
     IDS_DISK_ERASE_WARN "All partitions on Drive %lu, and all data stored on them, are deleted when the installation starts."
     IDS_NEWPART_RANGE "&Size in MB (up to %I64u):"
 END
 
 STRINGTABLE
 BEGIN
-    IDS_READY_TARGET "LiberNT is installed on %s (%s)."
+    IDS_READY_TARGET "KibaOS is installed on %s (%s)."
     IDS_READY_ERASE "Drive %lu is erased."
     IDS_READY_DELETE "%s is deleted."
     IDS_READY_CREATE "%s (%s) is created and formatted as %s."
@@ -227,27 +227,27 @@ BEGIN
     IDS_READY_LANGUAGE "Time and currency format: %s"
     IDS_READY_KEYBOARD "Keyboard: %s"
     IDS_LANGUAGETITLE "Choose your language and keyboard"
-    IDS_LANGUAGESUBTITLE "LiberNT uses this format for dates, times, numbers and currency."
+    IDS_LANGUAGESUBTITLE "KibaOS uses this format for dates, times, numbers and currency."
 END
 
 STRINGTABLE
 BEGIN
-    IDS_INSTALL_FAILED "LiberNT could not be installed"
+    IDS_INSTALL_FAILED "KibaOS could not be installed"
     IDS_INSTALL_STEP_FAILED "%s\nThe step failed with status 0x%08lx."
     IDS_FORMAT_FAILED "Setup could not format %s as %s.\n%s"
     IDS_CHECK_FAILED "Setup found errors on %s that it could not repair (status 0x%08lx). Setup continues."
-    IDS_SETUPLIB_MISSING "Setup cannot load %s. Run libernt.exe from the folder that holds its system32 folder and txtsetup.sif."
+    IDS_SETUPLIB_MISSING "Setup cannot load %s. Run kibaos.exe from the folder that holds its system32 folder and txtsetup.sif."
 END
 
 STRINGTABLE
 BEGIN
     IDS_OOBE_REGIONTITLE "Choose your region format and keyboard"
-    IDS_OOBE_REGIONSUBTITLE "LiberNT uses this format for dates, times, numbers and currency, and this keyboard for typing."
+    IDS_OOBE_REGIONSUBTITLE "KibaOS uses this format for dates, times, numbers and currency, and this keyboard for typing."
     IDS_APPSTITLE "Get the components most programs need"
-    IDS_APPSSUBTITLE "LiberNT downloads them from their publishers and installs them for every account."
+    IDS_APPSSUBTITLE "KibaOS downloads them from their publishers and installs them for every account."
     IDS_APPS_COL_NAME "Component"
     IDS_APPS_COL_SOURCE "Downloaded from"
-    IDS_OOBE_FINISHTITLE "Getting LiberNT ready"
+    IDS_OOBE_FINISHTITLE "Getting KibaOS ready"
     IDS_OOBE_FINISHSUBTITLE "This can take a few minutes. Keep your computer on."
     IDS_OOBE_APPLY_REGION "Applying your region and keyboard..."
     IDS_OOBE_APPLY_TIMEZONE "Setting the time zone..."
@@ -257,7 +257,7 @@ BEGIN
     IDS_OOBE_INSTALLING "Installing %s..."
     IDS_OOBE_APP_FAILED "%s: %s (%s)"
     IDS_OOBE_APPS_FAILED "Some components were not installed"
-    IDS_OOBE_ACCOUNT_FAILED "LiberNT could not create your account (error %lu). LiberNT signs in to the built-in User account instead."
+    IDS_OOBE_ACCOUNT_FAILED "KibaOS could not create your account (error %lu). KibaOS signs in to the built-in User account instead."
     IDS_OOBE_UNKNOWN_ERROR "Unknown error"
 END
 
@@ -303,7 +303,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_ACCOUNTTITLE "Name your computer and create your account"
-    IDS_CONFIGURE_SYSTEM "Configuring LiberNT..."
+    IDS_CONFIGURE_SYSTEM "Configuring KibaOS..."
     IDS_CONFIG_FOLDERS "Creating the system and profile folders"
     IDS_CONFIG_DEVICES "Installing the device classes"
     IDS_CONFIG_NETWORK "Installing the network protocols"
@@ -342,7 +342,7 @@ BEGIN
     LTEXT "", IDC_TYPE_WINSIZE, 12, 57, 136, 9, SS_NOPREFIX
     RTEXT "", IDC_TYPE_LNTSIZE, 148, 57, 136, 9, SS_NOPREFIX
     LTEXT "Start by default:", IDC_TYPE_DEFAULT_LABEL, 12, 73, 62, 9
-    AUTORADIOBUTTON "&LiberNT", IDC_TYPE_DEFAULT_LIBERNT, 76, 72, 70, 10, WS_GROUP | WS_TABSTOP
+    AUTORADIOBUTTON "&KibaOS", IDC_TYPE_DEFAULT_LIBERNT, 76, 72, 70, 10, WS_GROUP | WS_TABSTOP
     AUTORADIOBUTTON "", IDC_TYPE_DEFAULT_WINDOWS, 150, 72, 120, 10
     ICON "", IDC_TYPE_WARNICON, 12, 87, 10, 10, SS_ICON | SS_REALSIZEIMAGE
     LTEXT "", IDC_TYPE_WARNING, 28, 87, 262, 36, SS_NOPREFIX
@@ -352,21 +352,21 @@ END
 STRINGTABLE
 BEGIN
     IDS_TYPETITLE "Installation type"
-    IDS_TYPESUBTITLE "Choose how LiberNT shares this computer."
+    IDS_TYPESUBTITLE "Choose how KibaOS shares this computer."
     IDS_TYPE_FOUND "This computer has %s on %s."
-    IDS_TYPE_ALONGSIDE "Install LiberNT &alongside %s"
+    IDS_TYPE_ALONGSIDE "Install KibaOS &alongside %s"
     IDS_TYPE_SPLITSIZE "%s: %s"
     IDS_TYPE_SHRINKNOTE "Drag the slider to share the space. %s keeps its programs and files. Its partition shrinks as soon as you select Next."
     IDS_TYPE_HIBERNATED "%s is hibernated or was shut down with Fast startup, so its partition cannot be resized safely. Start %s, choose Restart from the Start menu, then start Setup again. You can also turn off Fast startup in Control Panel > Power Options."
-    IDS_TYPE_NOSPACE "%s does not have enough free space to make room for LiberNT, which needs at least %I64u GB. Free some space in it, or choose Something else."
-    IDS_TYPE_NORESIZE "The %s partition cannot be resized. Choose Something else to pick another place for LiberNT."
-    IDS_TYPE_PLANNED "%s was resized to %s. LiberNT will be installed in the new %s partition."
-    IDS_TYPE_WARNING "%s starts by default. To start LiberNT, you must open the computer's boot menu while it starts, usually with F12, F11, F9 or Esc, and choose LiberNT Boot Manager. In Windows you can also use Settings > System > Recovery > Advanced startup > Use a device."
+    IDS_TYPE_NOSPACE "%s does not have enough free space to make room for KibaOS, which needs at least %I64u GB. Free some space in it, or choose Something else."
+    IDS_TYPE_NORESIZE "The %s partition cannot be resized. Choose Something else to pick another place for KibaOS."
+    IDS_TYPE_PLANNED "%s was resized to %s. KibaOS will be installed in the new %s partition."
+    IDS_TYPE_WARNING "%s starts by default. To start KibaOS, you must open the computer's boot menu while it starts, usually with F12, F11, F9 or Esc, and choose KibaOS Boot Manager. In Windows you can also use Settings > System > Recovery > Advanced startup > Use a device."
     IDS_TYPE_CONFIRM_TITLE "Resize %s now?"
-    IDS_TYPE_CONFIRM "%s shrinks from %s to %s right away, before the rest of the installation, and LiberNT gets %s. Make sure the files you want to keep are backed up."
+    IDS_TYPE_CONFIRM "%s shrinks from %s to %s right away, before the rest of the installation, and KibaOS gets %s. Make sure the files you want to keep are backed up."
     IDS_TYPE_WINDOWS11 "Windows 11"
     IDS_TYPE_WINDOWS10 "Windows 10"
     IDS_TYPE_WINDOWS "Windows"
     IDS_READY_DEFAULTOS "Starts by default: %s"
-    IDS_TYPE_LIBERNT "LiberNT"
+    IDS_TYPE_LIBERNT "KibaOS"
 END

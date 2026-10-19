@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Raspberry Pi 3 VC4 WDDM miniport
+ * PROJECT:     KibaOS Raspberry Pi 3 VC4 WDDM miniport
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     BCM2837 HVS4 scanout and cursor-plane programming
  * COPYRIGHT:   Copyright 2026 Ahmed Arif <arif193@gmail.com>

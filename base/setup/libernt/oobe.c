@@ -1,11 +1,11 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
- * PURPOSE:     First-boot setup of a preinstalled LiberNT
+ * PURPOSE:     First-boot setup of a preinstalled KibaOS
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 #include <winnls.h>
 #include <tzlib.h>
 #include <objbase.h>
@@ -19,7 +19,7 @@
 #include <debug.h>
 
 #define OOBE_SKIPPED            1
-#define OOBE_DEFAULT_HIVE       L"LiberNT.FirstBoot.Default"
+#define OOBE_DEFAULT_HIVE       L"KibaOS.FirstBoot.Default"
 #define OOBE_APPLY_TIMEOUT      5000
 #define PM_APPLY_DONE           (WM_APP + 3)
 

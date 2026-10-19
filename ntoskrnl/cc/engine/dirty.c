@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Cache Manager
+ * PROJECT:     KibaOS Cache Manager
  * FILE:        ntoskrnl/cc/engine/dirty.c
  * PURPOSE:     Dirty cached-data tracking
  *

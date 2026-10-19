@@ -46,11 +46,11 @@ BEGIN
     IDS_EXTEND_BUTTON "E&xtend"
     IDS_RESIZE_PENDING "Partition changes are waiting to be applied. Shrink and extend take effect immediately, so do them before creating, deleting or formatting partitions."
     IDS_RESIZE_FAILED "The partition could not be resized."
-    IDS_CAPTION "Instalace systému LiberNT"
+    IDS_CAPTION "Instalace systému KibaOS"
     IDS_DRIVETITLE "Nastavení instalačního oddílu a systémové složky"
     IDS_PROCESSTITLE "Příprava oddílu, kopírování souborů a nastavení systému"
     IDS_PROCESSSUBTITLE "Vytvoření a naformátování oddílu, kopírování souborů, instalace a nastavení zavaděče."
-    IDS_ABORTSETUP "Systém LiberNT není na tomto počítači kompletně nainstalovaný. Pokud nyní ukončíte instalaci, bude ji pro nainstalování systému LiberNT nutné provést znova. Opravdu ukončit?"
+    IDS_ABORTSETUP "Systém KibaOS není na tomto počítači kompletně nainstalovaný. Pokud nyní ukončíte instalaci, bude ji pro nainstalování systému KibaOS nutné provést znova. Opravdu ukončit?"
     IDS_ABORTSETUP2 "Přerušit instalaci?"
     IDS_NO_TXTSETUP_SIF "Soubor 'txtsetup.sif' nenalezen.\nInstalace nemůže pokračovat."
     IDS_FINISH_NO_REBOOT "Setup needs to restart your computer to continue with the second installation step.\n\nClick on Restart to immediately restart your computer.\nClick on Postpone to quit the installer and restart your computer at a later time."
@@ -102,7 +102,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_ACCOUNTTITLE "Name your computer and create your account"
-    IDS_CONFIGURE_SYSTEM "Configuring LiberNT..."
+    IDS_CONFIGURE_SYSTEM "Configuring KibaOS..."
     IDS_CONFIG_FOLDERS "Creating the system and profile folders"
     IDS_CONFIG_DEVICES "Installing the device classes"
     IDS_CONFIG_NETWORK "Installing the network protocols"
@@ -141,7 +141,7 @@ BEGIN
     LTEXT "", IDC_TYPE_WINSIZE, 12, 57, 136, 9, SS_NOPREFIX
     RTEXT "", IDC_TYPE_LNTSIZE, 148, 57, 136, 9, SS_NOPREFIX
     LTEXT "Start by default:", IDC_TYPE_DEFAULT_LABEL, 12, 73, 62, 9
-    AUTORADIOBUTTON "&LiberNT", IDC_TYPE_DEFAULT_LIBERNT, 76, 72, 70, 10, WS_GROUP | WS_TABSTOP
+    AUTORADIOBUTTON "&KibaOS", IDC_TYPE_DEFAULT_LIBERNT, 76, 72, 70, 10, WS_GROUP | WS_TABSTOP
     AUTORADIOBUTTON "", IDC_TYPE_DEFAULT_WINDOWS, 150, 72, 120, 10
     ICON "", IDC_TYPE_WARNICON, 12, 87, 10, 10, SS_ICON | SS_REALSIZEIMAGE
     LTEXT "", IDC_TYPE_WARNING, 28, 87, 262, 36, SS_NOPREFIX
@@ -151,21 +151,21 @@ END
 STRINGTABLE
 BEGIN
     IDS_TYPETITLE "Installation type"
-    IDS_TYPESUBTITLE "Choose how LiberNT shares this computer."
+    IDS_TYPESUBTITLE "Choose how KibaOS shares this computer."
     IDS_TYPE_FOUND "This computer has %s on %s."
-    IDS_TYPE_ALONGSIDE "Install LiberNT &alongside %s"
+    IDS_TYPE_ALONGSIDE "Install KibaOS &alongside %s"
     IDS_TYPE_SPLITSIZE "%s: %s"
     IDS_TYPE_SHRINKNOTE "Drag the slider to share the space. %s keeps its programs and files. Its partition shrinks as soon as you select Next."
     IDS_TYPE_HIBERNATED "%s is hibernated or was shut down with Fast startup, so its partition cannot be resized safely. Start %s, choose Restart from the Start menu, then start Setup again. You can also turn off Fast startup in Control Panel > Power Options."
-    IDS_TYPE_NOSPACE "%s does not have enough free space to make room for LiberNT, which needs at least %I64u GB. Free some space in it, or choose Something else."
-    IDS_TYPE_NORESIZE "The %s partition cannot be resized. Choose Something else to pick another place for LiberNT."
-    IDS_TYPE_PLANNED "%s was resized to %s. LiberNT will be installed in the new %s partition."
-    IDS_TYPE_WARNING "%s starts by default. To start LiberNT, you must open the computer's boot menu while it starts, usually with F12, F11, F9 or Esc, and choose LiberNT Boot Manager. In Windows you can also use Settings > System > Recovery > Advanced startup > Use a device."
+    IDS_TYPE_NOSPACE "%s does not have enough free space to make room for KibaOS, which needs at least %I64u GB. Free some space in it, or choose Something else."
+    IDS_TYPE_NORESIZE "The %s partition cannot be resized. Choose Something else to pick another place for KibaOS."
+    IDS_TYPE_PLANNED "%s was resized to %s. KibaOS will be installed in the new %s partition."
+    IDS_TYPE_WARNING "%s starts by default. To start KibaOS, you must open the computer's boot menu while it starts, usually with F12, F11, F9 or Esc, and choose KibaOS Boot Manager. In Windows you can also use Settings > System > Recovery > Advanced startup > Use a device."
     IDS_TYPE_CONFIRM_TITLE "Resize %s now?"
-    IDS_TYPE_CONFIRM "%s shrinks from %s to %s right away, before the rest of the installation, and LiberNT gets %s. Make sure the files you want to keep are backed up."
+    IDS_TYPE_CONFIRM "%s shrinks from %s to %s right away, before the rest of the installation, and KibaOS gets %s. Make sure the files you want to keep are backed up."
     IDS_TYPE_WINDOWS11 "Windows 11"
     IDS_TYPE_WINDOWS10 "Windows 10"
     IDS_TYPE_WINDOWS "Windows"
     IDS_READY_DEFAULTOS "Starts by default: %s"
-    IDS_TYPE_LIBERNT "LiberNT"
+    IDS_TYPE_LIBERNT "KibaOS"
 END

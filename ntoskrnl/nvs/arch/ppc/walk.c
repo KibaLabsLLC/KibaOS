@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Virtual Memory Subsystem
+ * PROJECT:     KibaOS NT Virtual Memory Subsystem
  * FILE:        ntoskrnl/nvs/arch/ppc/walk.c
  * PURPOSE:     Windows NT PowerPC read-only page table walk
  *

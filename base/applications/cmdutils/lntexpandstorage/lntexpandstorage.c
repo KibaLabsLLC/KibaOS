@@ -1,7 +1,7 @@
 /*
- * PROJECT:     LiberNT storage expansion tool
+ * PROJECT:     KibaOS storage expansion tool
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
- * PURPOSE:     Grow the flashed LiberNT partition to fill the storage device
+ * PURPOSE:     Grow the flashed KibaOS partition to fill the storage device
  * COPYRIGHT:   Copyright 2026 Ahmed Arif
  *
  * Usage: lntexpandstorage [/d N] [/p N] [/pad MB] [/min MB] [/n] [/y] [/r]

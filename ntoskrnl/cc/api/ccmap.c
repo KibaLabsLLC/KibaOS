@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Cache Manager
+ * PROJECT:     KibaOS Cache Manager
  * FILE:        ntoskrnl/cc/api/ccmap.c
  * PURPOSE:     Cached file mapping interfaces
  *

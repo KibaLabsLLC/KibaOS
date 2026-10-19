@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Pool Allocator
+ * PROJECT:     KibaOS Pool Allocator
  * FILE:        ntoskrnl/nvs/pool/debug/poolkdbg.c
  * PURPOSE:     Pool allocator debugger interfaces
  *

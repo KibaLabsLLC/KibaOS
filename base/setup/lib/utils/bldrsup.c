@@ -392,7 +392,7 @@ CreateCommonFreeLdrSections(
     IniSection = IniAddSection(BootStore->IniCache, L"Display");
 
     /* TitleText and MinimalUI */
-    IniAddKey(IniSection, L"TitleText", L"LiberNT Boot Manager");
+    IniAddKey(IniSection, L"TitleText", L"KibaOS Boot Manager");
     IniAddKey(IniSection, L"MinimalUI", L"Yes");
 
     /*
@@ -1065,7 +1065,7 @@ CreateNTOSEntry(
         IniAddKey(IniSection, L"BootType", L"Windows2003");
         IniAddKey(IniSection, L"SystemPath", Options->OsLoadPath);
         IniAddKey(IniSection, L"Options", Options->OsLoadOptions);
-        IniAddKey(IniSection, L"BootLogo", L"LiberNT");
+        IniAddKey(IniSection, L"BootLogo", L"KibaOS");
     }
     else
     if (BootEntry->OsOptionsLength >= sizeof(BOOTSECTOR_OPTIONS) &&

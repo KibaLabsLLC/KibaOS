@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Winlogon
+ * PROJECT:     KibaOS Winlogon
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Experimental early desktop PNG background
  */

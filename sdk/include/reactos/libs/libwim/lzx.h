@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT WIM library
+ * PROJECT:     KibaOS WIM library
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     LZX decompression of WIM resource chunks
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

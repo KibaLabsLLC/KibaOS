@@ -46,13 +46,13 @@ static EVENT_LABEL_ITEM EventLabels[] =
 {
     {
         L"WindowsLogon",
-        L"LiberNT Logon",
+        L"KibaOS Logon",
         IDS_REACTOS_LOGON,
         L"ReactOS_Logon.wav"
     },
     {
         L"WindowsLogoff",
-        L"LiberNT Logoff",
+        L"KibaOS Logoff",
         IDS_REACTOS_LOGOFF,
         L"ReactOS_Logoff.wav"
     },
@@ -68,7 +68,7 @@ static SYSTEM_SCHEME_ITEM SystemSchemes[] =
 {
     {
         L".Default",
-        L"LiberNT Standard",
+        L"KibaOS Standard",
         IDS_REACTOS_DEFAULT_SCHEME
     },
     {

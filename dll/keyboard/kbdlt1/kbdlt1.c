@@ -341,10 +341,10 @@ ROSDATA VSC_LPWSTR extended_key_names[] = {
   { 0x51, L"Page Down" },
   { 0x52, L"Insert" },
   { 0x53, L"Delete" },
-  { 0x54, L"<LiberNT>" },
+  { 0x54, L"<KibaOS>" },
   { 0x55, L"Help" },
-  { 0x56, L"Left LiberNT" },
-  { 0x5b, L"Right LiberNT" },
+  { 0x56, L"Left KibaOS" },
+  { 0x5b, L"Right KibaOS" },
   { 0, NULL },
 };
 

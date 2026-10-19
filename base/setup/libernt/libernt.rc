@@ -5,9 +5,9 @@
 #include "resource.h"
 
 #ifndef REACTOS_STR_FILE_DESCRIPTION
-#define REACTOS_STR_FILE_DESCRIPTION    "LiberNT Setup"
-#define REACTOS_STR_INTERNAL_NAME       "libernt"
-#define REACTOS_STR_ORIGINAL_FILENAME   "libernt.exe"
+#define REACTOS_STR_FILE_DESCRIPTION    "KibaOS Setup"
+#define REACTOS_STR_INTERNAL_NAME       "kibaos"
+#define REACTOS_STR_ORIGINAL_FILENAME   "kibaos.exe"
 #endif
 #include <reactos/version.rc>
 
@@ -21,7 +21,7 @@ IDB_WATERMARK   BITMAP "res/watermark.bmp"
 IDB_LOGO        BITMAP "../../system/userinit/res/rosbitmap.bmp"
 IDB_LOGOMASK    BITMAP "../../system/userinit/res/rosbitmap_mask.bmp"
 
-CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "libernt.exe.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "kibaos.exe.manifest"
 
 /* UTF-8 */
 #pragma code_page(65001)

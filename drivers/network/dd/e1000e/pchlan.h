@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Intel Gigabit Ethernet Driver
+ * PROJECT:     KibaOS Intel Gigabit Ethernet Driver
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Registers of the Intel I219 chipset LAN controller and its PHY
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

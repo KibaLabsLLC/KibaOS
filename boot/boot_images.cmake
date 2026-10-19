@@ -175,10 +175,10 @@ if(DEFINED EFI_PLATFORM_ID AND EXISTS "${REACTOS_SOURCE_DIR}/bootloader/arch/${A
         set(_uefi_media_store media)
     endif()
     set(_uefi_loader_files
-        -mkdir EFI/LiberNT
-        -mkdir EFI/LiberNT/Boot
-        -add $<TARGET_FILE:winload> EFI/LiberNT/Boot/winload.efi
-        -add ${REACTOS_BINARY_DIR}/bootloader/image/${_uefi_media_store}/BCD EFI/LiberNT/Boot/BCD)
+        -mkdir EFI/KibaOS
+        -mkdir EFI/KibaOS/Boot
+        -add $<TARGET_FILE:winload> EFI/KibaOS/Boot/winload.efi
+        -add ${REACTOS_BINARY_DIR}/bootloader/image/${_uefi_media_store}/BCD EFI/KibaOS/Boot/BCD)
     set(_uefi_loader_deps bootmgfw winload bootloader${_uefi_media_store}bcd)
     set(_efisys_sectors 16384)
     set_property(GLOBAL PROPERTY BOOTLOADER_UEFI TRUE)
@@ -278,7 +278,7 @@ endif()
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/bootfiles.sort ${ISO_SORT_FILE_DATA})
 
 # ISO image identifier names
-set(ISO_MANUFACTURER "LiberNT Project") # For both the publisher and the preparer
+set(ISO_MANUFACTURER "KibaOS Project") # For both the publisher and the preparer
 set(ISO_VOLNAME      "ReactOS")         # For both the Volume ID and the Volume set ID
 
 # ISO image options
@@ -476,15 +476,15 @@ add_custom_target(bootcd
     VERBATIM)
 
 
-## LiberNTImg
+## KibaOSImg
 # Create the file list
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/preinstall.cmake.lst "")
 # The NTFS image importer requires every entry to map an image path to a host path.
 
 set(_preinstall_boot_partition_file ${CMAKE_CURRENT_BINARY_DIR}/partition.boot.fat)
 set(_preinstall_system_partition_file ${CMAKE_CURRENT_BINARY_DIR}/partition.ntfs)
-set(_preinstall_image_file ${REACTOS_BINARY_DIR}/LiberNT.img)
-set(_preinstall_vhd_file ${REACTOS_BINARY_DIR}/LiberNT.vhd)
+set(_preinstall_image_file ${REACTOS_BINARY_DIR}/KibaOS.img)
+set(_preinstall_vhd_file ${REACTOS_BINARY_DIR}/KibaOS.vhd)
 # Keep ROSBOOT as an active MBR ESP. UEFI discovers it by type, while the BIOS
 # MBR follows the active flag and loads its FAT32 boot sector. The Raspberry Pi
 # 1-3 boot ROM only scans for FAT MBR ids and skips 0xEF, so the Raspberry Pi
@@ -767,14 +767,14 @@ if(_preinstall_rpi_overlays)
 endif()
 set(_preinstall_partition_deps native-fatten native-ntfsimg
     ${_preinstall_overlay_deps} ${ARM64_BOOT_FILE_DEPS})
-set(_liberntimg_mbr_args)
-set(_liberntimg_deps native-mkdiskimg)
-set(_liberntimg_leading_args)
-set(_liberntimg_boot_partition_args)
-set(_liberntimg_system_partition_args)
+set(_kibaosimg_mbr_args)
+set(_kibaosimg_deps native-mkdiskimg)
+set(_kibaosimg_leading_args)
+set(_kibaosimg_boot_partition_args)
+set(_kibaosimg_system_partition_args)
 if(SPACEMIT_K1_SUPPORT)
-    list(APPEND _liberntimg_mbr_args -gpt -mbr ${SPACEMIT_K1_BOOTINFO})
-    list(APPEND _liberntimg_leading_args
+    list(APPEND _kibaosimg_mbr_args -gpt -mbr ${SPACEMIT_K1_BOOTINFO})
+    list(APPEND _kibaosimg_leading_args
         -data ${SPACEMIT_K1_OPENSBI}
         -start ${SPACEMIT_K1_OPENSBI_START}
         -type da
@@ -790,8 +790,8 @@ if(SPACEMIT_K1_SUPPORT)
         -raw ${SPACEMIT_K1_FSBL}
         -at ${SPACEMIT_K1_FSBL_BACKUP_SECTOR})
     set(_preinstall_boot_partition_fs fat32)
-    list(APPEND _liberntimg_boot_partition_args -name bootfs)
-    list(APPEND _liberntimg_system_partition_args -name ReactOS)
+    list(APPEND _kibaosimg_boot_partition_args -name bootfs)
+    list(APPEND _kibaosimg_system_partition_args -name ReactOS)
     list(APPEND _preinstall_boot_partition_files
         -add ${SPACEMIT_K1_UBOOT_ENV} env_k1-x.txt
         -add ${SPACEMIT_K1_BOOT_SCRIPT} boot.scr
@@ -799,7 +799,7 @@ if(SPACEMIT_K1_SUPPORT)
         -add ${SPACEMIT_K1_RV2_DTB} dtb/x1_orangepi-rv2.dtb)
     list(APPEND _preinstall_partition_deps
         ${SPACEMIT_K1_UBOOT_ENV} ${SPACEMIT_K1_BOOT_SCRIPT} ${SPACEMIT_K1_RV2_DTB})
-    list(APPEND _liberntimg_deps
+    list(APPEND _kibaosimg_deps
         ${SPACEMIT_K1_BOOTINFO} ${SPACEMIT_K1_FSBL} ${SPACEMIT_K1_OPENSBI} ${SPACEMIT_K1_UBOOT})
 endif()
 if(STARFIVE_JH7110_SUPPORT)
@@ -811,17 +811,17 @@ if(STARFIVE_JH7110_SUPPORT)
         -add ${STARFIVE_JH7110_UENV} vf2_uEnv.txt)
     list(APPEND _preinstall_partition_deps ${STARFIVE_JH7110_DTB} ${STARFIVE_JH7110_UENV})
 endif()
-macro(libernt_standard_disk_ids)
-    string(UUID _standard_disk NAMESPACE 354fa6e5-5e45-49af-91bf-1fd2754e470a NAME "LiberNT standard disk" TYPE SHA1)
+macro(kibaos_standard_disk_ids)
+    string(UUID _standard_disk NAMESPACE 354fa6e5-5e45-49af-91bf-1fd2754e470a NAME "KibaOS standard disk" TYPE SHA1)
     string(SUBSTRING "${_standard_disk}" 0 8 _standard_signature)
-    string(UUID _standard_system NAMESPACE 354fa6e5-5e45-49af-91bf-1fd2754e470a NAME "LiberNT standard system partition" TYPE SHA1)
-    if(";${_liberntimg_mbr_args};" MATCHES ";-gpt;")
-        list(APPEND _liberntimg_mbr_args -diskid ${_standard_disk})
-        list(APPEND _liberntimg_system_partition_args -id ${_standard_system})
+    string(UUID _standard_system NAMESPACE 354fa6e5-5e45-49af-91bf-1fd2754e470a NAME "KibaOS standard system partition" TYPE SHA1)
+    if(";${_kibaosimg_mbr_args};" MATCHES ";-gpt;")
+        list(APPEND _kibaosimg_mbr_args -diskid ${_standard_disk})
+        list(APPEND _kibaosimg_system_partition_args -id ${_standard_system})
         set_property(GLOBAL PROPERTY LIBERNT_STANDARD_GPT_DISK ${_standard_disk})
         set_property(GLOBAL PROPERTY LIBERNT_STANDARD_GPT_SYSTEM ${_standard_system})
     else()
-        list(APPEND _liberntimg_mbr_args -signature ${_standard_signature})
+        list(APPEND _kibaosimg_mbr_args -signature ${_standard_signature})
     endif()
     set_property(GLOBAL PROPERTY LIBERNT_STANDARD_SIGNATURE ${_standard_signature})
     set_property(GLOBAL PROPERTY LIBERNT_STANDARD_SYSTEM_START ${_preinstall_system_partition_start})
@@ -841,7 +841,7 @@ if(FREELDR_HAS_OFW_BOOT)
             -add ${REACTOS_BINARY_DIR}/bootloader/bootmgr.bin bootmgr.bin
             -add ${REACTOS_BINARY_DIR}/bootloader/image/standard/BCD Boot/BCD)
         list(APPEND _preinstall_partition_deps bootmgrppc bootloaderstandardbcd)
-        libernt_standard_disk_ids()
+        kibaos_standard_disk_ids()
     endif()
 endif()
 if(FREELDR_HAS_BIOS_BOOT)
@@ -854,8 +854,8 @@ if(FREELDR_HAS_BIOS_BOOT)
         -add ${_freeldr_file} freeldr.sys
         -add $<TARGET_FILE:rosload> rosload.exe)
     list(APPEND _preinstall_partition_deps fat32 freeldr rosload)
-    list(APPEND _liberntimg_mbr_args -mbr ${_dosmbr_file})
-    list(APPEND _liberntimg_deps dosmbr)
+    list(APPEND _kibaosimg_mbr_args -mbr ${_dosmbr_file})
+    list(APPEND _kibaosimg_deps dosmbr)
 endif()
 if(DEFINED EFI_PLATFORM_ID)
     list(APPEND _preinstall_boot_partition_files
@@ -865,17 +865,17 @@ if(DEFINED EFI_PLATFORM_ID)
     list(APPEND _preinstall_partition_deps ${_uefi_loader})
     if(BOOTLOADER_UEFI)
         list(APPEND _preinstall_boot_partition_files
-            -mkdir EFI/LiberNT
-            -mkdir EFI/LiberNT/Boot
-            -add $<TARGET_FILE:bootmgfw> EFI/LiberNT/Boot/bootmgfw.efi
-            -add ${REACTOS_BINARY_DIR}/bootloader/image/standard/BCD EFI/LiberNT/Boot/BCD)
+            -mkdir EFI/KibaOS
+            -mkdir EFI/KibaOS/Boot
+            -add $<TARGET_FILE:bootmgfw> EFI/KibaOS/Boot/bootmgfw.efi
+            -add ${REACTOS_BINARY_DIR}/bootloader/image/standard/BCD EFI/KibaOS/Boot/BCD)
         list(APPEND _preinstall_partition_deps bootloaderstandardbcd)
         if(BOOTLOADER_HTTP_BOOT_URL)
             list(APPEND _preinstall_boot_partition_files
-                -add $<TARGET_FILE:winload> EFI/LiberNT/Boot/winload.efi)
+                -add $<TARGET_FILE:winload> EFI/KibaOS/Boot/winload.efi)
             list(APPEND _preinstall_partition_deps winload)
         endif()
-        libernt_standard_disk_ids()
+        kibaos_standard_disk_ids()
     endif()
     if(_uefi_driver_files)
         list(APPEND _preinstall_boot_partition_files -mkdir EFI/BOOT/drivers)
@@ -925,23 +925,23 @@ add_custom_target(preinstall_partition
     DEPENDS ${_preinstall_partition_deps}
     VERBATIM)
 
-add_custom_target(liberntimg
+add_custom_target(kibaosimg
     COMMAND ${CMAKE_COMMAND} -E rm -f ${_preinstall_image_file}
     COMMAND native-mkdiskimg
         -o ${_preinstall_image_file}
-        ${_liberntimg_mbr_args}
-        ${_liberntimg_leading_args}
+        ${_kibaosimg_mbr_args}
+        ${_kibaosimg_leading_args}
         -partition ${_preinstall_boot_partition_file}
         -start ${_preinstall_boot_partition_start}
         -type ${_preinstall_boot_partition_type}
-        ${_liberntimg_boot_partition_args}
+        ${_kibaosimg_boot_partition_args}
         -partition ${_preinstall_system_partition_file}
         -start ${_preinstall_system_partition_start}
         -type 07
-        ${_liberntimg_system_partition_args}
-    DEPENDS ${_liberntimg_deps}
+        ${_kibaosimg_system_partition_args}
+    DEPENDS ${_kibaosimg_deps}
     VERBATIM)
-add_dependencies(liberntimg preinstall_partition)
+add_dependencies(kibaosimg preinstall_partition)
 
 if(STARFIVE_JH7110_SUPPORT)
     set(_jh7110_boot_partition_file ${CMAKE_CURRENT_BINARY_DIR}/jh7110-bootfs.img)
@@ -974,27 +974,27 @@ if(STARFIVE_JH7110_SUPPORT)
             ${STARFIVE_JH7110_SPL} ${STARFIVE_JH7110_UBOOT}
             ${STARFIVE_JH7110_BOOT_SCRIPT} ${STARFIVE_JH7110_BOOT_SCRIPT_SOURCE}
         VERBATIM)
-    add_dependencies(liberntimg jh7110sdimg)
+    add_dependencies(kibaosimg jh7110sdimg)
 endif()
 
-add_custom_target(liberntvhd
+add_custom_target(kibaosvhd
     COMMAND ${CMAKE_COMMAND} -E rm -f ${_preinstall_vhd_file}
     COMMAND native-mkdiskimg
         -o ${_preinstall_vhd_file}
-        ${_liberntimg_mbr_args}
-        ${_liberntimg_leading_args}
+        ${_kibaosimg_mbr_args}
+        ${_kibaosimg_leading_args}
         -partition ${_preinstall_boot_partition_file}
         -start ${_preinstall_boot_partition_start}
         -type ${_preinstall_boot_partition_type}
-        ${_liberntimg_boot_partition_args}
+        ${_kibaosimg_boot_partition_args}
         -partition ${_preinstall_system_partition_file}
         -start ${_preinstall_system_partition_start}
         -type 07
-        ${_liberntimg_system_partition_args}
+        ${_kibaosimg_system_partition_args}
         -vhd
-    DEPENDS ${_liberntimg_deps}
+    DEPENDS ${_kibaosimg_deps}
     VERBATIM)
-add_dependencies(liberntvhd preinstall_partition)
+add_dependencies(kibaosvhd preinstall_partition)
 
 
 if(DEFINED EFI_PLATFORM_ID)

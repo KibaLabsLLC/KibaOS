@@ -807,7 +807,7 @@ wWinMain(IN HINSTANCE hInst,
         NotifyLogon();
 
     if (bIsLiveCD)
-        StartInstaller(L"libernt.exe");
+        StartInstaller(L"kibaos.exe");
 
     return 0;
 }

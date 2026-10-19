@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Cache Manager
+ * PROJECT:     KibaOS Cache Manager
  * FILE:        ntoskrnl/cc/api/ccmdl.c
  * PURPOSE:     MDL-based cached file access interfaces
  *

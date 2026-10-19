@@ -1,8 +1,8 @@
 /*
- * PROJECT:     LiberNT HAL
+ * PROJECT:     KibaOS HAL
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Header file for MSI (Message Signalled Interrupts) support
- * COPYRIGHT:   Copyright 2026 LiberNT Contributors
+ * COPYRIGHT:   Copyright 2026 KibaOS Contributors
  */
 
 #pragma once
