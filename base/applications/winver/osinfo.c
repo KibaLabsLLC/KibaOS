@@ -7,7 +7,7 @@
 
 #include "winver_p.h"
 
-#define OSINFO_KEY L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+#define OSINFO_KEY L"SOFTWARE\\Kiba Labs, LLC\\KibaOS\\CurrentVersion"
 
 static
 VOID
