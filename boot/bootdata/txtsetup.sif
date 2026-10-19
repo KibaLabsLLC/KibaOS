@@ -578,7 +578,7 @@ DelReg = registry.inf,DelReg
 AddReg = registry.inf,AddReg
 
 [Strings]
-cdname      = "LiberNT Installation Media"
-productname = "LiberNT"
+cdname      = "KibaOS Installation Media"
+productname = "KibaOS"
 
 ; EOF

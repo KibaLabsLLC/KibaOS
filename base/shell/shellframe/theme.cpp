@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Shell Frame
+ * PROJECT:     KibaOS Shell Frame
  * LICENSE:     LGPL-2.1-or-later (https://spdx.org/licenses/LGPL-2.1-or-later)
  * PURPOSE:     Light and dark palettes, accent color, DPI and fonts
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
@@ -134,32 +134,32 @@ Theme::BuildPalette()
     }
     if (m_Dark)
     {
-        window = RGB(32, 32, 32);
+        window = RGB(13, 27, 42);
         c.Window = window;
-        c.Text = white;
-        c.TextSecondary = Blend(0xC5, white, window);
-        c.TextTertiary = Blend(0x8B, white, window);
-        c.TextDisabled = Blend(0x5D, white, window);
-        c.SubtleHover = Blend(0x0F, white, window);
-        c.SubtlePressed = Blend(0x0A, white, window);
-        c.Selected = Blend(0x0F, white, window);
-        c.Card = Blend(0x0D, white, window);
-        c.CardHover = Blend(0x15, white, window);
+        c.Text = RGB(241, 245, 249);
+        c.TextSecondary = Blend(0xC5, RGB(241, 245, 249), window);
+        c.TextTertiary = Blend(0x8B, RGB(241, 245, 249), window);
+        c.TextDisabled = Blend(0x5D, RGB(241, 245, 249), window);
+        c.SubtleHover = Blend(0x0F, RGB(241, 245, 249), window);
+        c.SubtlePressed = Blend(0x0A, RGB(241, 245, 249), window);
+        c.Selected = RGB(0, 113, 227);
+        c.Card = RGB(26, 32, 41);
+        c.CardHover = RGB(30, 41, 59);
         c.CardBorder = Blend(0x19, black, window);
-        c.Divider = Blend(0x15, white, window);
-        c.ControlFill = Blend(0x0F, white, window);
-        c.ControlFillFocus = RGB(0x1F, 0x1F, 0x1F);
-        c.ControlStroke = Blend(0x12, white, window);
-        c.ControlStrongStroke = Blend(0x8B, white, window);
-        c.Glyph = white;
-        c.TabStrip = RGB(32, 32, 32);
-        c.TabSelected = RGB(43, 43, 43);
-        c.ToolbarBand = RGB(43, 43, 43);
-        c.Content = RGB(25, 25, 25);
+        c.Divider = Blend(0x15, RGB(241, 245, 249), window);
+        c.ControlFill = RGB(30, 41, 59);
+        c.ControlFillFocus = RGB(13, 27, 42);
+        c.ControlStroke = Blend(0x12, RGB(241, 245, 249), window);
+        c.ControlStrongStroke = Blend(0x8B, RGB(241, 245, 249), window);
+        c.Glyph = RGB(241, 245, 249);
+        c.TabStrip = RGB(13, 27, 42);
+        c.TabSelected = RGB(26, 32, 41);
+        c.ToolbarBand = RGB(26, 32, 41);
+        c.Content = RGB(13, 27, 42);
     }
     else
     {
-        window = RGB(243, 243, 243);
+        window = RGB(250, 250, 250);
         c.Window = window;
         c.Text = Blend(0xE4, black, window);
         c.TextSecondary = Blend(0x9E, black, window);
@@ -167,7 +167,7 @@ Theme::BuildPalette()
         c.TextDisabled = Blend(0x5C, black, window);
         c.SubtleHover = Blend(0x09, black, window);
         c.SubtlePressed = Blend(0x06, black, window);
-        c.Selected = Blend(0x09, black, window);
+        c.Selected = RGB(0, 113, 227);
         c.Card = Blend(0xB3, white, window);
         c.CardHover = Blend(0x80, RGB(249, 249, 249), window);
         c.CardBorder = Blend(0x0F, black, window);
@@ -182,9 +182,9 @@ Theme::BuildPalette()
         c.ToolbarBand = RGB(248, 248, 248);
         c.Content = white;
     }
-    c.Accent = AccentFromPalette(IsDark());
-    c.AccentText = IsDark() ? black : white;
-    c.CloseHover = RGB(0xC4, 0x2B, 0x1C);
+    c.Accent = RGB(0, 113, 227);
+    c.AccentText = white;
+    c.CloseHover = RGB(239, 68, 68);
     c.CloseText = white;
 
     if (m_Material)

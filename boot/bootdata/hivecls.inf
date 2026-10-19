@@ -110,7 +110,7 @@ HKCR,"anifile\DefaultIcon","",0x00000000,"%1"
 
 ; ReactOS Batch Files
 HKCR,".bat","",0x00000000,"batfile"
-HKCR,"batfile","",0x00000000,"LiberNT Batch File"
+HKCR,"batfile","",0x00000000,"KibaOS Batch File"
 HKCR,"batfile","EditFlags",0x00010001,0x00000010
 HKCR,"batfile","FriendlyTypeName",0x00020000,"@%SystemRoot%\system32\shell32.dll,-201"
 HKCR,"batfile\DefaultIcon","",0x00020000,"%SystemRoot%\system32\shell32.dll,-153"
@@ -127,7 +127,7 @@ HKCR,"cerfile\shell\open\command","",0x00020000,"%SystemRoot%\system32\rundll32.
 
 ; ReactOS Command Script Files
 HKCR,".cmd","",0x00000000,"cmdfile"
-HKCR,"cmdfile","",0x00000000,"LiberNT Command Script"
+HKCR,"cmdfile","",0x00000000,"KibaOS Command Script"
 HKCR,"cmdfile","EditFlags",0x00010001,0x00000010
 HKCR,"cmdfile","FriendlyTypeName",0x00020000,"@%SystemRoot%\system32\shell32.dll,-202"
 HKCR,"cmdfile\DefaultIcon","",0x00020000,"%SystemRoot%\system32\shell32.dll,-153"
@@ -463,7 +463,7 @@ HKCR,"mscfile\shell\open\command","",0x00020000,"%SystemRoot%\system32\mmc.exe "
 
 ; MSI files
 HKCR,".msi","",0x00000000,"Msi.Package"
-HKCR,"Msi.Package","",0x00000000,"LiberNT Installer Package"
+HKCR,"Msi.Package","",0x00000000,"KibaOS Installer Package"
 HKCR,"Msi.Package","FriendlyTypeName",0x00020000,"@%SystemRoot%\system32\msi.dll,-34"
 HKCR,"Msi.Package\DefaultIcon","",0x00000000,"msiexec.exe"
 HKCR,"Msi.Package\shell\Open","",0x00000000,"&Install"
@@ -478,7 +478,7 @@ HKCR,"Msi.Package\shell\Uninstall\command","",0x00020000,"""%SystemRoot%\system3
 
 ; MSP files
 HKCR,".msp","",0x00000000,"Msi.Patch"
-HKCR,"Msi.Patch","",0x00000000,"LiberNT Installer Patch"
+HKCR,"Msi.Patch","",0x00000000,"KibaOS Installer Patch"
 HKCR,"Msi.Patch","FriendlyTypeName",0x00020000,"@%SystemRoot%\system32\msi.dll,-35"
 HKCR,"Msi.Patch\DefaultIcon","",0x00000000,"msiexec.exe"
 HKCR,"Msi.Patch\shell\Open","",0x00000000,"&Apply Patch"
@@ -877,7 +877,7 @@ AVIFILE="Video Clip"
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Cascading Style Sheet"
 MSCFILE="Management Console Document"
-SCFFILE="LiberNT Explorer Command"
+SCFFILE="KibaOS Explorer Command"
 WMZFILE="Compressed Enhanced Metafile"
 WSFFILE="Windows Script File"
 
@@ -950,7 +950,7 @@ AVIFILE="Secuencia de vídeo"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Hoja de estilos en cascada"
-SCFFILE="Órden del explorador de LiberNT"
+SCFFILE="Órden del explorador de KibaOS"
 WMZFILE="Metarchivo mejorado comprimido"
 
 ;; For .reg files, right-click menu
@@ -986,7 +986,7 @@ AVIFILE="Clip Vidéo"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Fichier CSS"
-SCFFILE="Commande de l'explorateur LiberNT"
+SCFFILE="Commande de l'explorateur KibaOS"
 ;WMZFILE="Compressed Enhanced Metafile"
 
 ;; For .reg files, right-click menu
@@ -1058,7 +1058,7 @@ AVIFILE="Arkusz stylu kaskadowego"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 ;CSSFILE="Cascading Style Sheet"
-SCFFILE="Polecenie Eksploratora LiberNT"
+SCFFILE="Polecenie Eksploratora KibaOS"
 WMZFILE="Skompresowany metaplik"
 
 ;; For .reg files, right-click menu
@@ -1095,7 +1095,7 @@ AVIFILE="Sequência de vídeo"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Folha de estilos em cascada"
-SCFFILE="Comando do Explorador LiberNT"
+SCFFILE="Comando do Explorador KibaOS"
 WMZFILE="Metarquivo aprimorado compactado"
 
 ;; For .reg files, right-click menu
@@ -1132,7 +1132,7 @@ AVIFILE="Fișier video"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Foaie de stiluri în cascadă"
-SCFFILE="Comandă de Explorator LiberNT"
+SCFFILE="Comandă de Explorator KibaOS"
 WMZFILE="Metafișier îmbunătățit comprimat"
 
 ;; For .reg files, right-click menu
@@ -1168,7 +1168,7 @@ AVIFILE="Видеозапись"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="Каскадная таблица стилей"
-SCFFILE="Команда проводника LiberNT"
+SCFFILE="Команда проводника KibaOS"
 WMZFILE="Сжатый расширенный метафайл"
 
 ;; For .reg files, right-click menu
@@ -1204,7 +1204,7 @@ AVIFILE="視訊短片"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="階層式樣式表"
-SCFFILE="LiberNT Explorer 命令"
+SCFFILE="KibaOS Explorer 命令"
 ;WMZFILE="Compressed Enhanced Metafile"
 
 ;; For .reg files, right-click menu
@@ -1276,7 +1276,7 @@ AVIFILE="視訊短片"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="階層式樣式表"
-SCFFILE="LiberNT Explorer 命令"
+SCFFILE="KibaOS Explorer 命令"
 ;WMZFILE="Compressed Enhanced Metafile"
 
 ;; For .reg files, right-click menu
@@ -1313,7 +1313,7 @@ AVIFILE="ビデオ クリップ"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="カスケード スタイル シート"
-SCFFILE="LiberNT エクスプローラ コマンド"
+SCFFILE="KibaOS エクスプローラ コマンド"
 WMZFILE="圧縮済み拡張メタファイル"
 
 ;; For .reg files, right-click menu
@@ -1349,7 +1349,7 @@ AVIFILE="视频剪辑"
 
 ;; Misc file types without friendly (localized in .dll resources) name
 CSSFILE="层叠样式表文档"
-SCFFILE="LiberNT Explorer Command"
+SCFFILE="KibaOS Explorer Command"
 ;WMZFILE="Compressed Enhanced Metafile"
 
 ;; For .reg files, right-click menu
