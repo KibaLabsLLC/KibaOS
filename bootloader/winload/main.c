@@ -132,7 +132,7 @@ OslSelectEntry(VOID)
 
     if (!Store || !BcdOpenStore(Store, Size))
     {
-        FwPrint(L"The Boot Configuration Data store is missing or corrupt.\r\n");
+        FwPrint(L"KibaOS startup files could not be found.\r\n");
         return NULL;
     }
 
@@ -144,14 +144,14 @@ OslSelectEntry(VOID)
             return &OslEntries[0];
         }
 
-        FwPrint(L"The boot entry %s is not an operating system loader entry.\r\n", Id);
+        FwPrint(L"Selected startup option is not available.\r\n");
         return NULL;
     }
 
     Count = BmEnumerateEntries(OslEntries, RTL_NUMBER_OF(OslEntries), &Default);
     if (Count == 0)
     {
-        FwPrint(L"The Boot Configuration Data store has no operating system entry.\r\n");
+        FwPrint(L"No startup options found.\r\n");
         return NULL;
     }
 
@@ -349,7 +349,7 @@ OslMain(VOID)
     }
     else if (!DkOpenBcdDevice(&OslParameters.OsDevice, &OsDevice))
     {
-        FwPrint(L"The operating system device was not found.\r\n");
+        FwPrint(L"Storage drive containing KibaOS was not found.\r\n");
         return;
     }
     else
@@ -363,7 +363,7 @@ OslMain(VOID)
     LoaderBlock = OslAllocateLoaderBlock();
     if (!LoaderBlock)
     {
-        FwPrint(L"Not enough memory for the loader block.\r\n");
+        FwPrint(L"Not enough memory to start KibaOS.\r\n");
         return;
     }
 
@@ -371,7 +371,7 @@ OslMain(VOID)
 
     if (!OslLoadSystemHive(LoaderBlock, &OsDevice, SystemRoot))
     {
-        FwPrint(L"The SYSTEM registry hive is missing or corrupt.\r\n");
+        FwPrint(L"System configuration files are missing or damaged.\r\n");
         return;
     }
 
@@ -404,19 +404,19 @@ OslMain(VOID)
         !PeResolveImports(&LoaderBlock->LoadOrderListHead, &OsDevice, Directory, Kernel) ||
         !PeResolveImports(&LoaderBlock->LoadOrderListHead, &OsDevice, Directory, Hal))
     {
-        FwPrint(L"The kernel and the hardware abstraction layer could not be loaded.\r\n");
+        FwPrint(L"System core files could not be loaded.\r\n");
         return;
     }
 
     if (!OslLoadNlsData(LoaderBlock, &OsDevice, SystemRoot))
     {
-        FwPrint(L"The national language support files could not be loaded.\r\n");
+        FwPrint(L"Language support files could not be loaded.\r\n");
         return;
     }
 
     if (!OslLoadBootDrivers(LoaderBlock, &OsDevice, SystemRoot))
     {
-        FwPrint(L"The boot driver list could not be built.\r\n");
+        FwPrint(L"System drivers could not be initialized.\r\n");
         return;
     }
 
@@ -424,13 +424,13 @@ OslMain(VOID)
 
     if (!OslFinalizeLoaderBlock(LoaderBlock, &OsDevice, SystemRoot, Options))
     {
-        FwPrint(L"The operating system partition has no partition number.\r\n");
+        FwPrint(L"System partition error.\r\n");
         return;
     }
 
     if (!OslArchPrepareHandoff(LoaderBlock))
     {
-        FwPrint(L"The kernel address space could not be prepared.\r\n");
+        FwPrint(L"Memory initialization error.\r\n");
         return;
     }
 

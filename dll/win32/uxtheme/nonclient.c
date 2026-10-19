@@ -893,30 +893,33 @@ ThemeDrawDarkCaptionButton(PDRAW_CONTEXT pcontext,
     switch (buttonId)
     {
     case CLOSEBUTTON:
-        MoveToEx(pcontext->hDC, centerX - radius, centerY - radius, NULL);
-        LineTo(pcontext->hDC, centerX + radius + 1, centerY + radius + 1);
-        MoveToEx(pcontext->hDC, centerX + radius, centerY - radius, NULL);
-        LineTo(pcontext->hDC, centerX - radius - 1, centerY + radius + 1);
+        {
+            POINT ptTri[3];
+            HBRUSH triBrush, oldB;
+            ptTri[0].x = centerX;
+            ptTri[0].y = centerY - radius;
+            ptTri[1].x = centerX - radius;
+            ptTri[1].y = centerY + radius;
+            ptTri[2].x = centerX + radius;
+            ptTri[2].y = centerY + radius;
+            triBrush = CreateSolidBrush(foreground);
+            oldB = SelectObject(pcontext->hDC, triBrush);
+            Polygon(pcontext->hDC, ptTri, 3);
+            SelectObject(pcontext->hDC, oldB);
+            DeleteObject(triBrush);
+        }
         break;
 
     case MAXBUTTON:
-        if (pcontext->wi.dwStyle & WS_MAXIMIZE)
-        {
-            Rectangle(pcontext->hDC, centerX - radius + 2, centerY - radius - 1,
-                       centerX + radius + 2, centerY + radius - 1);
-            Rectangle(pcontext->hDC, centerX - radius - 2, centerY - radius + 2,
-                       centerX + radius - 2, centerY + radius + 2);
-        }
-        else
-        {
-            Rectangle(pcontext->hDC, centerX - radius, centerY - radius,
-                       centerX + radius + 1, centerY + radius + 1);
-        }
+        /* Fullscreen hollowed O (circle outline) */
+        Ellipse(pcontext->hDC, centerX - radius, centerY - radius,
+                centerX + radius + 1, centerY + radius + 1);
         break;
 
     case MINBUTTON:
-        MoveToEx(pcontext->hDC, centerX - radius, centerY + radius / 2, NULL);
-        LineTo(pcontext->hDC, centerX + radius + 1, centerY + radius / 2);
+        /* Minus line */
+        MoveToEx(pcontext->hDC, centerX - radius, centerY, NULL);
+        LineTo(pcontext->hDC, centerX + radius + 1, centerY);
         break;
 
     default:
