@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Boot Loader
+ * PROJECT:     KibaOS Boot Loader
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     UEFI network stack bring-up for HTTP boot
  */

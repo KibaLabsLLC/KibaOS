@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Cache Manager
+ * PROJECT:     KibaOS Cache Manager
  * FILE:        ntoskrnl/cc/api/ccflush.c
  * PURPOSE:     Cache flushing and dirty-data writeback interfaces
  *

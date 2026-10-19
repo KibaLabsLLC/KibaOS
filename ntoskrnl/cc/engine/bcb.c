@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Cache Manager
+ * PROJECT:     KibaOS Cache Manager
  * FILE:        ntoskrnl/cc/engine/bcb.c
  * PURPOSE:     Cache buffer control block management
  *

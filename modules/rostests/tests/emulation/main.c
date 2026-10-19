@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT API tests
+ * PROJECT:     KibaOS API tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Console program exercising a process that may run under an emulation host
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

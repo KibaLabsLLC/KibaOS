@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT regression tests
+ * PROJECT:     KibaOS regression tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Exercise failed GUI thread conversion after thread teardown
  */

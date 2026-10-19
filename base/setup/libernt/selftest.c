@@ -1,11 +1,11 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     End-to-end probes of the Setup disk path on blank test disks
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 #include <ntddstor.h>
 #include <fslib/volresize.h>
 #include <ndk/cmfuncs.h>
@@ -730,9 +730,9 @@ SelfTestBoot(
     SelfTestCheck(Context, !SelfTestKeyExists(L"\\Registry\\Machine\\SetupBcd"), L"A.boot", L"BCD hive unloaded");
     SelfTestVolumeIdle(Context, L"A.boot", SystemDevice);
 
-    StringCchPrintfW(Probe, ARRAYSIZE(Probe), L"\\\\?\\GLOBALROOT%s\\EFI\\LiberNT\\Boot\\BCD", SystemDevice);
+    StringCchPrintfW(Probe, ARRAYSIZE(Probe), L"\\\\?\\GLOBALROOT%s\\EFI\\KibaOS\\Boot\\BCD", SystemDevice);
     SelfTestCheck(Context, GetFileAttributesW(Probe) != INVALID_FILE_ATTRIBUTES, L"A.boot", L"BCD present");
-    StringCchPrintfW(Probe, ARRAYSIZE(Probe), L"\\\\?\\GLOBALROOT%s\\EFI\\LiberNT\\Boot\\bootmgfw.efi", SystemDevice);
+    StringCchPrintfW(Probe, ARRAYSIZE(Probe), L"\\\\?\\GLOBALROOT%s\\EFI\\KibaOS\\Boot\\bootmgfw.efi", SystemDevice);
     SelfTestCheck(Context, GetFileAttributesW(Probe) != INVALID_FILE_ATTRIBUTES, L"A.boot", L"boot manager present");
 
     NewSize = GetFirmwareEnvironmentVariableExW(L"BootOrder", L"{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}",

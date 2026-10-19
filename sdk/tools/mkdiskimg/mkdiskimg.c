@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Disk Image Creator
+ * PROJECT:     KibaOS Disk Image Creator
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Assembles a bootable MBR disk image from partition images
  * COPYRIGHT:   Copyright 2026 Ahmed Arif <arif.img@outlook.com>

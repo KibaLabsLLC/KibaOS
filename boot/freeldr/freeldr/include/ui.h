@@ -211,7 +211,7 @@ VOID    UiFadeOut(VOID);                                        // Fades the scr
 typedef enum
 {
     UiMenuIconNone,
-    UiMenuIconLiberNT
+    UiMenuIconKibaOS
 } UI_MENU_ICON;
 
 typedef struct tagUI_MENU_INFO

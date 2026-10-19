@@ -76,7 +76,7 @@ CreateFreeLoaderReactOSEntries(
 
     /* ReactOS */
     // BootEntry->BootEntryKey = MAKESTRKEY(L"ReactOS");
-    BootEntry->FriendlyName = L"\"LiberNT\"";
+    BootEntry->FriendlyName = L"\"KibaOS\"";
     Options->OsLoadOptions  = L"/FASTDETECT";
     AddBootStoreEntry(BootStoreHandle, BootEntry, MAKESTRKEY(L"ReactOS"));
 
@@ -324,7 +324,7 @@ SkipThisEntry:
         RtlStringCchPrintfW(Data->SectionName, ARRAYSIZE(Data->SectionName),
                             L"ReactOS_%lu", Data->i);
         RtlStringCchPrintfW(Data->OsName, ARRAYSIZE(Data->OsName),
-                            L"\"LiberNT %lu\"", Data->i);
+                            L"\"KibaOS %lu\"", Data->i);
         Data->i++;
     }
     return STATUS_SUCCESS;
@@ -354,7 +354,7 @@ UpdateFreeLoaderIni(
     Data.i = 1;
     Data.ArcPath = ArcPath;
     RtlStringCchCopyW(Data.SectionName, ARRAYSIZE(Data.SectionName), L"ReactOS");
-    RtlStringCchCopyW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"LiberNT\"");
+    RtlStringCchCopyW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"KibaOS\"");
 
     //
     // FIXME: We temporarily use EnumerateBootStoreEntries, until
@@ -366,7 +366,7 @@ UpdateFreeLoaderIni(
     if (!Data.UseExistingEntry)
     {
         // RtlStringCchPrintfW(Data.SectionName, ARRAYSIZE(Data.SectionName), L"ReactOS_%lu", Data.i);
-        // RtlStringCchPrintfW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"LiberNT %lu\"", Data.i);
+        // RtlStringCchPrintfW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"KibaOS %lu\"", Data.i);
 
         BootEntry->Version = FreeLdr;
         BootEntry->BootFilePath = NULL;
@@ -416,7 +416,7 @@ UpdateBootIni(
     // Data.i = 1;
     Data.ArcPath = EntryName;
     // RtlStringCchCopyW(Data.SectionName, ARRAYSIZE(Data.SectionName), L"ReactOS");
-    RtlStringCchCopyW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"LiberNT\"");
+    RtlStringCchCopyW(Data.OsName, ARRAYSIZE(Data.OsName), L"\"KibaOS\"");
 
     //
     // FIXME: We temporarily use EnumerateBootStoreEntries, until
@@ -894,8 +894,8 @@ InstallBootloaderFiles(
 #define EFI_LOAD_OPTION_MAX             4096
 #define EFI_BOOT_ORDER_MAX              512
 #define EFI_BOOT_OPTION_SEARCH_MAX      0x1000
-#define EFI_BOOT_MANAGER_DESCRIPTION    L"LiberNT Boot Manager"
-#define EFI_BOOT_MANAGER_FILE           L"\\EFI\\LiberNT\\Boot\\bootmgfw.efi"
+#define EFI_BOOT_MANAGER_DESCRIPTION    L"KibaOS Boot Manager"
+#define EFI_BOOT_MANAGER_FILE           L"\\EFI\\KibaOS\\Boot\\bootmgfw.efi"
 #define EFI_WINDOWS_BOOT_MANAGER_FILE   L"\\EFI\\Microsoft\\Boot\\bootmgfw.efi"
 #define GPT_HEADER_ENTRIES_LBA_OFFSET   72
 #define GPT_HEADER_ENTRY_COUNT_OFFSET   80
@@ -1312,17 +1312,17 @@ InstallBcdStore(
     if (!NT_SUCCESS(Status))
         return Status;
 
-    CombinePaths(Path, ARRAYSIZE(Path), 2, SystemRootPath->Buffer, L"EFI\\LiberNT\\Boot");
+    CombinePaths(Path, ARRAYSIZE(Path), 2, SystemRootPath->Buffer, L"EFI\\KibaOS\\Boot");
     Status = SetupCreateDirectory(Path);
     if (!NT_SUCCESS(Status) && Status != STATUS_OBJECT_NAME_COLLISION)
         return Status;
 
-    CombinePaths(Path, ARRAYSIZE(Path), 2, SystemRootPath->Buffer, L"EFI\\LiberNT\\Boot\\bootmgfw.efi");
+    CombinePaths(Path, ARRAYSIZE(Path), 2, SystemRootPath->Buffer, L"EFI\\KibaOS\\Boot\\bootmgfw.efi");
     Status = SetupCopyFile(BootManagerPath, Path, FALSE);
     if (!NT_SUCCESS(Status))
         return Status;
 
-    CombinePaths(StorePath, ARRAYSIZE(StorePath), 2, SystemRootPath->Buffer, L"EFI\\LiberNT\\Boot\\BCD");
+    CombinePaths(StorePath, ARRAYSIZE(StorePath), 2, SystemRootPath->Buffer, L"EFI\\KibaOS\\Boot\\BCD");
     Status = SetupCopyFile(TemplatePath, StorePath, FALSE);
     if (!NT_SUCCESS(Status))
         return Status;
@@ -1957,7 +1957,7 @@ InstallFatBootcodeToPartition(
         DPRINT1("Update 'boot.ini'\n");
         Status = UpdateBootIni(SystemRootPath->Buffer,
                                L"C:\\bootsect.ros",
-                               L"\"LiberNT\"");
+                               L"\"KibaOS\"");
         if (!NT_SUCCESS(Status))
         {
             DPRINT1("UpdateBootIni() failed (Status %lx)\n", Status);

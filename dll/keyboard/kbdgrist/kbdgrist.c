@@ -354,10 +354,10 @@ ROSDATA VSC_LPWSTR extended_key_names[] = {
   { 0x51, L"Bild-Nach-Unten" },
   { 0x52, L"Einfg" },
   { 0x53, L"Entf" },
-  { 0x54, L"<LiberNT>" },
+  { 0x54, L"<KibaOS>" },
   { 0x55, L"Hilfe" },
-  { 0x56, L"Linke <LiberNT>" },
-  { 0x5b, L"Rechte <LiberNT>" },
+  { 0x56, L"Linke <KibaOS>" },
+  { 0x5b, L"Rechte <KibaOS>" },
   { 0, NULL },
 };
 

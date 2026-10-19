@@ -1,11 +1,11 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Account and time zone page
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 #include <tzlib.h>
 
 #include "resource.h"

@@ -16,8 +16,8 @@ BEGIN
     IDS_PUMPKIN "Calabaza"
     IDS_RAIN "Días de lluvia"
     IDS_RWB "Rojo, Blanco y Azul"
-    IDS_CLASSIC "LiberNT clásico"
-    IDS_STANDARD "LiberNT estándar"
+    IDS_CLASSIC "KibaOS clásico"
+    IDS_STANDARD "KibaOS estándar"
     IDS_ROSE "Rosa"
     IDS_SAND "Arenisca" //Desert
     IDS_SLATE "Pizarra"

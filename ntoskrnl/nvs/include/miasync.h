@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Virtual Memory Subsystem
+ * PROJECT:     KibaOS NT Virtual Memory Subsystem
  * FILE:        ntoskrnl/nvs/include/miasync.h
  * PURPOSE:     Asynchronous memory manager operation definitions
  *

@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT FreeLoader
+ * PROJECT:     KibaOS FreeLoader
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Minimal ARM64 stubs for the UEFI FreeLoader link
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

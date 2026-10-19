@@ -1,11 +1,11 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     First-boot components: table, download, verification and installation
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 
 #define COBJMACROS
 #include <initguid.h>
@@ -541,7 +541,7 @@ InstallOobeApp(
     BOOL Trusted;
 
     if (!GetTempPathW(ARRAYSIZE(Folder), Folder) ||
-        FAILED(StringCchCatW(Folder, ARRAYSIZE(Folder), L"LiberNT Components")) ||
+        FAILED(StringCchCatW(Folder, ARRAYSIZE(Folder), L"KibaOS Components")) ||
         FAILED(StringCchPrintfW(Path, ARRAYSIZE(Path), L"%s\\%s", Folder, App->File)))
     {
         App->Result = ERROR_BUFFER_OVERFLOW;

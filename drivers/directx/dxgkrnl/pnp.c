@@ -1,9 +1,9 @@
 /*
- * PROJECT:     LiberNT WDDM DirectX Graphics Kernel
+ * PROJECT:     KibaOS WDDM DirectX Graphics Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     PnP dispatch for the dxgkrnl control device object and
  *              child PDO enumeration (monitor/output device objects)
- * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
+ * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
  *              Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  *
  * This file contains:

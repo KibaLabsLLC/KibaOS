@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Virtual Memory Subsystem
+ * PROJECT:     KibaOS NT Virtual Memory Subsystem
  * FILE:        ntoskrnl/nvs/nt/ntfault.c
  * PURPOSE:     NT page-fault dispatch and memory manager integration
  *

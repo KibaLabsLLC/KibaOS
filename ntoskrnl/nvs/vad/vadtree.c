@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Virtual Memory Subsystem
+ * PROJECT:     KibaOS NT Virtual Memory Subsystem
  * FILE:        ntoskrnl/nvs/vad/vadtree.c
  * PURPOSE:     Virtual address descriptor tree management
  *

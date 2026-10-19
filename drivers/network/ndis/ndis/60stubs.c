@@ -1,6 +1,6 @@
 /*
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
- * PROJECT:     LiberNT NDIS library
+ * PROJECT:     KibaOS NDIS library
  * FILE:        ndis/60stubs.c
  * PURPOSE:     NDIS 6 filter, protocol, and miscellaneous entry points.
  * PROGRAMMERS: dev-nt6-1 branch (NT 5.2 -> NT 6.1 API upgrade)

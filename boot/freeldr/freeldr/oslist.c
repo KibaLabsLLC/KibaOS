@@ -286,8 +286,8 @@ InitOperatingSystemList(
         Items[i].StartupProfile = 0;
         Items[i].MenuIcon = UiMenuIconNone;
         if (IniReadSettingByName(SectionId, "BootLogo", TempBuffer, sizeof(TempBuffer)) &&
-            !_stricmp(TempBuffer, "LiberNT"))
-            Items[i].MenuIcon = UiMenuIconLiberNT;
+            !_stricmp(TempBuffer, "KibaOS"))
+            Items[i].MenuIcon = UiMenuIconKibaOS;
         Items[i].AdvBootOptsDesc[0] = 0;
         Items[i].SectionId = SectionId;
         Items[i].LoadIdentifier = CopyString(TitleStart);

@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Windows Error Reporting
+ * PROJECT:     KibaOS Windows Error Reporting
  * FILE:        dll/win32/wer/wer.c
  * PURPOSE:     Windows Error Reporting client API
  *

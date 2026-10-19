@@ -9,7 +9,7 @@
 
 /* INCLUDES ******************************************************************/
 
-#include "libernt.h"
+#include "kibaos.h"
 #include <winnls.h>
 
 #define NDEBUG

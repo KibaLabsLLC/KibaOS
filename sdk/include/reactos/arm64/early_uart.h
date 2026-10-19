@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT ARM64 Kernel/Bootloader
+ * PROJECT:     KibaOS ARM64 Kernel/Bootloader
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * FILE:        sdk/include/reactos/arm64/early_uart.h
  * PURPOSE:     ARM64 early UART with runtime ACPI-based detection

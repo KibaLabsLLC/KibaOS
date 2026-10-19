@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT explorerframe
+ * PROJECT:     KibaOS explorerframe
  * LICENSE:     LGPL-2.1-or-later (https://spdx.org/licenses/LGPL-2.1-or-later)
  * PURPOSE:     Docking bar property bag
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

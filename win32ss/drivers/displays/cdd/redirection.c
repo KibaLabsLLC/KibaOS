@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Canonical Display Driver
+ * PROJECT:     KibaOS Canonical Display Driver
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM redirection bitmap allocation and lifetime
  * COPYRIGHT:   Copyright 2026 Ahmed Arif <arif.ing@outlook.com>

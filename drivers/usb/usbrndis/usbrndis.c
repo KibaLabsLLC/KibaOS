@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT USB RNDIS Network Driver
+ * PROJECT:     KibaOS USB RNDIS Network Driver
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     NDIS 6.x miniport driver entry and initialization
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
@@ -1190,7 +1190,7 @@ DriverEntry(
     NDIS_MINIPORT_DRIVER_CHARACTERISTICS MiniportChars;
 
     DPRINT1("USBRNDIS: ========== DRIVER ENTRY ==========\n");
-    DPRINT1("USBRNDIS: LiberNT USB RNDIS NDIS 6.x Driver\n");
+    DPRINT1("USBRNDIS: KibaOS USB RNDIS NDIS 6.x Driver\n");
     DPRINT1("USBRNDIS: NDIS Version: %u.%u\n", NDIS_MINIPORT_MAJOR_VERSION, NDIS_MINIPORT_MINOR_VERSION);
 
     /* Initialize miniport characteristics structure */
@@ -1269,7 +1269,7 @@ RndisInitPerCpuStats(
     /*
      * Get active processor count. KeQueryActiveProcessors returns a bitmask.
      * Count the set bits to get the number of processors.
-     * Use simpler approach for LiberNT compatibility.
+     * Use simpler approach for KibaOS compatibility.
      */
     {
         KAFFINITY AffinityMask = KeQueryActiveProcessors();

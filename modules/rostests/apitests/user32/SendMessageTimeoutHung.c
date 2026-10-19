@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT API tests
+ * PROJECT:     KibaOS API tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Tests for SendMessageTimeout on a window whose thread stopped pumping
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
@@ -20,7 +20,7 @@ HungThread(
 
     Class.lpfnWndProc = DefWindowProcW;
     Class.hInstance = GetModuleHandleW(NULL);
-    Class.lpszClassName = L"LiberNTHungProbe";
+    Class.lpszClassName = L"KibaOSHungProbe";
     RegisterClassW(&Class);
     HungWindow = CreateWindowExW(0, Class.lpszClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 10, 10,
                                  NULL, NULL, Class.hInstance, NULL);
@@ -52,7 +52,7 @@ TestOtherProcess(VOID)
         return;
     }
     SetEnvironmentVariableW(L"LIBERNT_HUNG_CHILD", NULL);
-    for (Tries = 0; Tries < 100 && !(Window = FindWindowW(L"LiberNTHungChild", NULL)); Tries++)
+    for (Tries = 0; Tries < 100 && !(Window = FindWindowW(L"KibaOSHungChild", NULL)); Tries++)
         Sleep(50);
     ok(Window != NULL, "Child window not found\n");
     if (Window)
@@ -95,7 +95,7 @@ RunHungChild(VOID)
 
     Class.lpfnWndProc = DefWindowProcW;
     Class.hInstance = GetModuleHandleW(NULL);
-    Class.lpszClassName = L"LiberNTHungChild";
+    Class.lpszClassName = L"KibaOSHungChild";
     RegisterClassW(&Class);
     CreateWindowExW(0, Class.lpszClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 10, 10, NULL, NULL, Class.hInstance, NULL);
     Sleep(20000);

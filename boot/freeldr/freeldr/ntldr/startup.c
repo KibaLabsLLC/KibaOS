@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Boot Manager
+ * PROJECT:     KibaOS Boot Manager
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Startup settings and diagnostic boot options
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
@@ -24,7 +24,7 @@ static const struct
 {
     {"Boot normally", NULL, NULL},
     {"Boot with debugging", "DEBUG DEBUGPORT=FILE DEBUGPORT=SCREEN", "/NODEBUG/DEBUGPORT="},
-    {"Boot with network assistance", "DEBUG DEBUGPORT=NET HOST_NAME=libernt.com HOST_PORT=50000", "/NODEBUG/DEBUGPORT=NET/HOST_IP=/HOST_NAME=/HOST_PORT="},
+    {"Boot with network assistance", "DEBUG DEBUGPORT=NET HOST_NAME=kibaos.com HOST_PORT=50000", "/NODEBUG/DEBUGPORT=NET/HOST_IP=/HOST_NAME=/HOST_PORT="},
     {"Boot without RAM disk with debugging", "DEBUG DEBUGPORT=FILE DEBUGPORT=SCREEN", "/NODEBUG/DEBUGPORT=/RDPATH=/RDRAMSIZE=/RDIMAGEOFFSET=/RDIMAGELENGTH=", TRUE}
 };
 

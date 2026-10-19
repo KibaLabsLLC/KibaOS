@@ -1,11 +1,11 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Physical disk names from the WMI storage provider
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 
 #define COBJMACROS
 #include <initguid.h>

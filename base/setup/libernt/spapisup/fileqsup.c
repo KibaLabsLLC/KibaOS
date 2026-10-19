@@ -8,7 +8,7 @@
 
 /* INCLUDES *****************************************************************/
 
-#include "libernt.h"
+#include "kibaos.h"
 
 #define NDEBUG
 #include <debug.h>

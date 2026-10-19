@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Windows Runtime
+ * PROJECT:     KibaOS Windows Runtime
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     TaskbarManager capability discovery for unpackaged applications
  */

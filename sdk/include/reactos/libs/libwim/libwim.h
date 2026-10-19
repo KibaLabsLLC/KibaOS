@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT SDK
+ * PROJECT:     KibaOS SDK
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Public umbrella header for libwim (WIM archive support)
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

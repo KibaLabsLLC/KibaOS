@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Pool Allocator
+ * PROJECT:     KibaOS Pool Allocator
  * FILE:        ntoskrnl/nvs/pool/include/poolenv.h
  * PURPOSE:     Pool allocator environment interface
  *

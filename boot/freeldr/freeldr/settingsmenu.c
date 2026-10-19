@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Boot Manager
+ * PROJECT:     KibaOS Boot Manager
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Boot manager settings and power actions
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

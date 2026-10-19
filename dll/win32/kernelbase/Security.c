@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT KernelBase
+ * PROJECT:     KibaOS KernelBase
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Token membership, capability and AppContainer object path helpers
  */

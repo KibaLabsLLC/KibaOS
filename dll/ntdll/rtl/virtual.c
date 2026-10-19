@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Library
+ * PROJECT:     KibaOS NT Library
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     NTDLL virtual-memory compatibility exports
  */

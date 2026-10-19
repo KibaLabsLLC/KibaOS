@@ -1,12 +1,12 @@
 /*
- * PROJECT:     LiberNT Setup
+ * PROJECT:     KibaOS Setup
  * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
  * PURPOSE:     Setup pages for the summary and the finish
  * COPYRIGHT:   Copyright 2018-2024 Hermès Bélusca-Maïto <hermes.belusca-maito@reactos.org>
  *              Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>
  */
 
-#include "libernt.h"
+#include "kibaos.h"
 
 #include "resource.h"
 
@@ -103,11 +103,11 @@ FillSummary(
 
     if (pSetupData->bAlongside)
     {
-        WCHAR LiberNT[32];
+        WCHAR KibaOS[32];
 
-        LoadStringW(pSetupData->hInstance, IDS_TYPE_LIBERNT, LiberNT, ARRAYSIZE(LiberNT));
+        LoadStringW(pSetupData->hInstance, IDS_TYPE_LIBERNT, KibaOS, ARRAYSIZE(KibaOS));
         AppendLine(Text, ARRAYSIZE(Text), IDS_READY_DEFAULTOS,
-                   pSetupData->bWindowsFirst ? pSetupData->WindowsName : LiberNT);
+                   pSetupData->bWindowsFirst ? pSetupData->WindowsName : KibaOS);
     }
 
     StringCchCatW(Text, ARRAYSIZE(Text), L"\r\n");

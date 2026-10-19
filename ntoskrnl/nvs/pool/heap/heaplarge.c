@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT Pool Allocator
+ * PROJECT:     KibaOS Pool Allocator
  * FILE:        ntoskrnl/nvs/pool/heap/heaplarge.c
  * PURPOSE:     Large pool heap allocations
  *

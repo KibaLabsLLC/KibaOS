@@ -1,5 +1,5 @@
 /*
- * PROJECT:     LiberNT NT Virtual Memory Subsystem
+ * PROJECT:     KibaOS NT Virtual Memory Subsystem
  * FILE:        ntoskrnl/nvs/arch/ppc/archdef.h
  * PURPOSE:     Windows NT PowerPC memory manager architecture definitions
  *
