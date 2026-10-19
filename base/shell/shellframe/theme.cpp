@@ -20,6 +20,12 @@ Blend(BYTE alpha, COLORREF fore, COLORREF back)
                (GetBValue(fore) * alpha + GetBValue(back) * (255 - alpha) + 127) / 255);
 }
 
+static int
+Luma(COLORREF color)
+{
+    return GetRValue(color) * 299 + GetGValue(color) * 587 + GetBValue(color) * 114;
+}
+
 static BOOL
 ReadDword(HKEY root, LPCWSTR key, LPCWSTR value, DWORD *data)
 {
@@ -80,7 +86,7 @@ Theme::UpdateMaterial(HWND hwnd)
         return FALSE;
     m_Material = active;
     m_MaterialKey = key;
-    m_MaterialDark = active && GetRValue(key) * 299 + GetGValue(key) * 587 + GetBValue(key) * 114 < 128000;
+    m_MaterialDark = active && Luma(key) < 128000;
     BuildPalette();
     return TRUE;
 }
@@ -99,7 +105,7 @@ Theme::Update(HWND hwnd)
     if (contrast.lpszDefaultScheme)
         LocalFree(contrast.lpszDefaultScheme);
     window = GetSysColor(COLOR_WINDOW);
-    m_HighContrastDark = GetRValue(window) * 299 + GetGValue(window) * 587 + GetBValue(window) * 114 < 128000;
+    m_HighContrastDark = Luma(window) < 128000;
     m_Dark = m_FollowSystem ? m_HighContrastDark : !light;
     BuildPalette();
 
@@ -117,6 +123,7 @@ void
 Theme::BuildPalette()
 {
     COLORREF window, white = RGB(255, 255, 255), black = RGB(0, 0, 0);
+    const COLORREF ink = RGB(241, 245, 249);
 
     Palette &c = m_Colors;
     if (m_HighContrast)
@@ -134,28 +141,28 @@ Theme::BuildPalette()
     }
     if (m_Dark)
     {
-        window = RGB(13, 27, 42);
+        /* Layered slate: window < card < hover, with a light hairline for edges. */
+        window = RGB(16, 20, 28);
         c.Window = window;
-        c.Text = RGB(241, 245, 249);
-        c.TextSecondary = Blend(0xC5, RGB(241, 245, 249), window);
-        c.TextTertiary = Blend(0x8B, RGB(241, 245, 249), window);
-        c.TextDisabled = Blend(0x5D, RGB(241, 245, 249), window);
-        c.SubtleHover = Blend(0x0F, RGB(241, 245, 249), window);
-        c.SubtlePressed = Blend(0x0A, RGB(241, 245, 249), window);
-        c.Selected = RGB(0, 113, 227);
-        c.Card = RGB(26, 32, 41);
-        c.CardHover = RGB(30, 41, 59);
-        c.CardBorder = Blend(0x19, black, window);
-        c.Divider = Blend(0x15, RGB(241, 245, 249), window);
-        c.ControlFill = RGB(30, 41, 59);
-        c.ControlFillFocus = RGB(13, 27, 42);
-        c.ControlStroke = Blend(0x12, RGB(241, 245, 249), window);
-        c.ControlStrongStroke = Blend(0x8B, RGB(241, 245, 249), window);
-        c.Glyph = RGB(241, 245, 249);
-        c.TabStrip = RGB(13, 27, 42);
-        c.TabSelected = RGB(26, 32, 41);
-        c.ToolbarBand = RGB(26, 32, 41);
-        c.Content = RGB(13, 27, 42);
+        c.Text = ink;
+        c.TextSecondary = Blend(0xC5, ink, window);
+        c.TextTertiary = Blend(0x8B, ink, window);
+        c.TextDisabled = Blend(0x5D, ink, window);
+        c.SubtleHover = Blend(0x0F, ink, window);
+        c.SubtlePressed = Blend(0x0A, ink, window);
+        c.Card = RGB(24, 30, 41);
+        c.CardHover = RGB(32, 40, 54);
+        c.CardBorder = Blend(0x14, ink, window);
+        c.Divider = Blend(0x15, ink, window);
+        c.ControlFill = RGB(32, 40, 54);
+        c.ControlFillFocus = window;
+        c.ControlStroke = Blend(0x12, ink, window);
+        c.ControlStrongStroke = Blend(0x8B, ink, window);
+        c.Glyph = ink;
+        c.TabStrip = window;
+        c.TabSelected = c.Card;
+        c.ToolbarBand = c.Card;
+        c.Content = window;
     }
     else
     {
@@ -167,7 +174,6 @@ Theme::BuildPalette()
         c.TextDisabled = Blend(0x5C, black, window);
         c.SubtleHover = Blend(0x09, black, window);
         c.SubtlePressed = Blend(0x06, black, window);
-        c.Selected = RGB(0, 113, 227);
         c.Card = Blend(0xB3, white, window);
         c.CardHover = Blend(0x80, RGB(249, 249, 249), window);
         c.CardBorder = Blend(0x0F, black, window);
@@ -182,33 +188,36 @@ Theme::BuildPalette()
         c.ToolbarBand = RGB(248, 248, 248);
         c.Content = white;
     }
-    c.Accent = RGB(0, 113, 227);
-    c.AccentText = white;
+
+    /* System accent, with readable text on top of it. */
+    c.Accent = AccentFromPalette(m_Dark);
+    c.AccentText = Luma(c.Accent) < 140000 ? white : black;
+    c.Selected = c.Accent;
     c.CloseHover = RGB(239, 68, 68);
     c.CloseText = white;
 
     if (m_Material)
     {
-        COLORREF k = m_MaterialKey, ink = m_MaterialDark ? white : black;
+        COLORREF k = m_MaterialKey, mink = m_MaterialDark ? white : black;
 
         c.Window = c.TabStrip = c.ToolbarBand = c.Content = k;
         c.Text = AvoidKey(m_MaterialDark ? white : Blend(0xE4, black, k), k);
         c.Glyph = c.Text;
-        c.TextSecondary = AvoidKey(Blend(m_MaterialDark ? 0xC5 : 0x9E, ink, k), k);
-        c.TextTertiary = AvoidKey(Blend(m_MaterialDark ? 0x8B : 0x72, ink, k), k);
-        c.TextDisabled = AvoidKey(Blend(0x5D, ink, k), k);
-        c.SubtleHover = AvoidKey(Blend(0x14, ink, k), k);
-        c.SubtlePressed = AvoidKey(Blend(0x0C, ink, k), k);
-        c.Selected = AvoidKey(Blend(0x14, ink, k), k);
+        c.TextSecondary = AvoidKey(Blend(m_MaterialDark ? 0xC5 : 0x9E, mink, k), k);
+        c.TextTertiary = AvoidKey(Blend(m_MaterialDark ? 0x8B : 0x72, mink, k), k);
+        c.TextDisabled = AvoidKey(Blend(0x5D, mink, k), k);
+        c.SubtleHover = AvoidKey(Blend(0x14, mink, k), k);
+        c.SubtlePressed = AvoidKey(Blend(0x0C, mink, k), k);
+        c.Selected = AvoidKey(Blend(0x14, mink, k), k);
         c.TabSelected = AvoidKey(Blend(m_MaterialDark ? 0x14 : 0x80, white, k), k);
         c.Card = AvoidKey(Blend(m_MaterialDark ? 0x0D : 0xB3, white, k), k);
         c.CardHover = AvoidKey(Blend(m_MaterialDark ? 0x15 : 0xD0, white, k), k);
-        c.CardBorder = AvoidKey(Blend(0x19, ink, k), k);
-        c.Divider = AvoidKey(Blend(0x19, ink, k), k);
+        c.CardBorder = AvoidKey(Blend(0x19, mink, k), k);
+        c.Divider = AvoidKey(Blend(0x19, mink, k), k);
         c.ControlFill = AvoidKey(Blend(m_MaterialDark ? 0x14 : 0xB3, white, k), k);
         c.ControlFillFocus = AvoidKey(m_MaterialDark ? Blend(0xB3, RGB(0x1E, 0x1E, 0x1E), k) : white, k);
-        c.ControlStroke = AvoidKey(Blend(0x19, ink, k), k);
-        c.ControlStrongStroke = AvoidKey(Blend(0x8B, ink, k), k);
+        c.ControlStroke = AvoidKey(Blend(0x19, mink, k), k);
+        c.ControlStrongStroke = AvoidKey(Blend(0x8B, mink, k), k);
     }
 }
 
