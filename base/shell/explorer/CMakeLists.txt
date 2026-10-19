@@ -36,8 +36,6 @@ list(APPEND SOURCE
 file(GLOB explorer_rc_deps res/*.*)
 add_rc_deps(explorer.rc ${explorer_rc_deps}
     ${REACTOS_SOURCE_DIR}/media/graphics/start-button/default.png
-    ${REACTOS_SOURCE_DIR}/media/graphics/start-button/hover.png
-    ${REACTOS_SOURCE_DIR}/media/graphics/start-button/pressed.png
     ${REACTOS_SOURCE_DIR}/dll/shellext/netshell/res/tray/wifi_1.ico
     ${REACTOS_SOURCE_DIR}/dll/shellext/netshell/res/tray/wifi_2.ico
     ${REACTOS_SOURCE_DIR}/dll/shellext/netshell/res/tray/wifi_3.ico
