@@ -10998,6 +10998,9 @@ static LRESULT CALLBACK KibaEditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam
     return CallWindowProcW(g_fnKibaEditProc, hWnd, uMsg, wParam, lParam);
 }
 
+class CTrayKibaCenterWnd;
+static CTrayKibaCenterWnd *g_pTrayKibaCenter = NULL;
+
 class CTrayKibaCenterWnd :
     public CWindowImpl<CTrayKibaCenterWnd, CWindow, CTrayFlyoutTraits>,
     public CTrayFlyoutAnimation
@@ -11114,9 +11117,7 @@ public:
 
     VOID FadeOut()
     {
-        if (m_AnimPhase == TFY_CLOSE)
-            return;
-        StartAnimate(m_hWnd, TFY_CLOSE, &m_Pal, m_size.cx, m_size.cy);
+        BeginFlyoutClose(m_hWnd);
     }
 
     VOID Toggle(HWND hwndOwner, const RECT *prcAnchor)
@@ -11132,8 +11133,7 @@ public:
         int x = mi.rcWork.left + (mi.rcWork.right - mi.rcWork.left - m_size.cx) / 2;
         int y = mi.rcWork.top + (mi.rcWork.bottom - mi.rcWork.top - m_size.cy) / 3;
 
-        SetWindowPos(HWND_TOPMOST, x, y, m_size.cx, m_size.cy, SWP_NOACTIVATE | SWP_SHOWWINDOW);
-        StartAnimate(m_hWnd, TFY_OPEN, &m_Pal, m_size.cx, m_size.cy);
+        BeginFlyoutOpen(m_hWnd, x, y, m_size.cx, m_size.cy, m_Pal.PanelBg);
         if (m_hwndEdit)
             ::SetFocus(m_hwndEdit);
     }
@@ -11153,7 +11153,7 @@ public:
         if (m_hwndEdit)
         {
             ::SendMessageW(m_hwndEdit, WM_SETFONT, (WPARAM)m_hFontInput, TRUE);
-            g_fnKibaEditProc = (WNDPROC)SetWindowLongPtrW(m_hwndEdit, GWLP_WNDPROC, (LONG_PTR)KibaEditSubclassProc);
+            g_fnKibaEditProc = (WNDPROC)::SetWindowLongPtrW(m_hwndEdit, GWLP_WNDPROC, (LONG_PTR)KibaEditSubclassProc);
         }
 
         UpdateMatches();
@@ -11282,8 +11282,7 @@ public:
 
     LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
-        if (wParam == TFY_TIMER_ANIM)
-            StepAnimate(m_hWnd, m_size.cx, m_size.cy);
+        HandleFlyoutAnimation(m_hWnd, wParam);
         return 0;
     }
 
@@ -11487,8 +11486,6 @@ public:
         MESSAGE_HANDLER(WM_PAINT, OnPaint)
     END_MSG_MAP()
 };
-
-static CTrayKibaCenterWnd *g_pTrayKibaCenter = NULL;
 
 BOOL TrayKibaCenter_IsOpen(VOID)
 {

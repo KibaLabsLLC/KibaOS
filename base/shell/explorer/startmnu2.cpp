@@ -728,7 +728,7 @@ SM2ExecRightCmd(int nCmd)
         case SM2C_ASSIST:    ShellExecuteW(NULL, NULL, L"netassist.exe", NULL, NULL, SW_SHOWNORMAL); break;
         case SM2C_KIBA_CENTER:
         {
-            HWND hwndTray = GetTrayWnd();
+            HWND hwndTray = FindWindowW(L"Shell_TrayWnd", NULL);
             if (hwndTray)
                 ::PostMessageW(hwndTray, TWM_SHOWKIBACENTER, 0, 0);
             break;
