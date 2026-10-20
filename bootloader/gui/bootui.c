@@ -832,20 +832,47 @@ BootUiEditBox(PCSTR Message, PCHAR Edit, ULONG Length)
 static VOID
 BootUiSetProgressBarText(PCSTR Text)
 {
-    RtlStringCbCopyA(BootUiProgressText, sizeof(BootUiProgressText), Text);
+    if (!Text || !*Text || !_stricmp(Text, "Starting KibaOS..."))
+    {
+        RtlStringCbCopyA(BootUiProgressText, sizeof(BootUiProgressText), "Preparing your natural experience...");
+    }
+    else
+    {
+        RtlStringCbCopyA(BootUiProgressText, sizeof(BootUiProgressText), Text);
+    }
 }
 
 static VOID
 BootUiTickProgressBar(ULONG Progress)
 {
-    ULONG Width = min(720, BootUiWidth - 64);
-    ULONG Left = (BootUiWidth - Width) / 2;
-    ULONG Top = BootUiHeight - 100;
-    BootUiRect(0, Top - 20, BootUiWidth, 120, 0, 0, 255);
-    BootUiCentered(Top, BootUiProgressText, max(14, BootUiFontSize - 3), BOOTUI_MUTED);
-    BootUiRect(Left, Top + 44, Width, 10, 5, 0x23314A, 255);
-    BootUiRect(Left, Top + 44, Width * min(Progress, 10000) / 10000, 10, 5, BOOTUI_ACCENT, 255);
-    BootUiPresentRegion(Top - 20, 120);
+    static const SHORT OffsetX[12] = { 18,  16,   9,   0,  -9, -16, -18, -16,  -9,   0,   9,  16 };
+    static const SHORT OffsetY[12] = {  0,   9,  16,  18,  16,   9,   0,  -9, -16, -18, -16,  -9 };
+    LONG CenterX = (LONG)BootUiWidth / 2;
+    LONG CenterY = (LONG)BootUiHeight - 65;
+    ULONG Active = (Progress / 150) % 12;
+    ULONG I, Dist, Alpha;
+    CHAR MarketingText[260];
+
+    if (!BootUiProgressText[0] || !_stricmp(BootUiProgressText, "Starting KibaOS..."))
+    {
+        RtlStringCbCopyA(MarketingText, sizeof(MarketingText), "Preparing your natural experience...");
+    }
+    else
+    {
+        RtlStringCbCopyA(MarketingText, sizeof(MarketingText), BootUiProgressText);
+    }
+
+    BootUiRect(0, CenterY - 50, BootUiWidth, 110, 0, 0, 255);
+    BootUiCentered(CenterY - 38, MarketingText, max(14, BootUiFontSize - 3), BOOTUI_TEXT);
+
+    for (I = 0; I < 12; ++I)
+    {
+        Dist = (12 + Active - I) % 12;
+        Alpha = max(35, 255 - Dist * 18);
+        BootUiRect(CenterX + OffsetX[I] - 2, CenterY + OffsetY[I] - 2, 5, 5, 2, BOOTUI_ACCENT, Alpha);
+    }
+
+    BootUiPresentRegion(CenterY - 50, 110);
 }
 
 static VOID

@@ -8,7 +8,6 @@
 #include "winload.h"
 #include <ramdisk.h>
 #include <wim.h>
-
 #define RD_SECTOR_SIZE        512
 #define RD_MAX_SIZE           0xFFFFF000ULL
 #define RD_MINIMUM_EXTRA      (64ULL * 1024 * 1024)
@@ -59,7 +58,7 @@ RdAdvance(
         return;
 
     RdPercent = Percent;
-    FwPrint(L"\rStarting KibaOS... %lu%%", Percent);
+    FwPrint(L"\rPreparing your natural experience... %lu%%", Percent);
 }
 
 static
