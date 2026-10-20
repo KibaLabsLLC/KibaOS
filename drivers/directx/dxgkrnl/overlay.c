@@ -850,3 +850,78 @@ DxgkOverlayCleanupDevice(
         DxgkpFreeOverlay(Overlay);
     }
 }
+
+NTSTATUS
+DxgkGetOverlayStateWithAccessMode(
+    _Inout_ D3DKMT_GETOVERLAYSTATE *Data,
+    _In_ KPROCESSOR_MODE EmbeddedBufferMode)
+{
+    PDXGKRNL_ADAPTER Adapter;
+    PDXGKRNL_DEVICE Device;
+    PDXGKRNL_OVERLAY Overlay;
+    PVOID Object;
+    NTSTATUS Status;
+
+    UNREFERENCED_PARAMETER(EmbeddedBufferMode);
+
+    PAGED_CODE();
+    if (Data == NULL || Data->hOverlay == 0)
+        return STATUS_INVALID_PARAMETER;
+
+    Data->OverlayEnabled = FALSE;
+
+    Status = DxgkReferenceOwnedDeviceByHandle(Data->hDevice,
+                                               PsGetCurrentProcess(),
+                                               &Adapter,
+                                               &Device);
+    if (!NT_SUCCESS(Status))
+        return Status;
+
+    Status = DxgkReferenceOwnedHandle(Data->hOverlay,
+                                       DxgkHandleTypeOverlay,
+                                       PsGetCurrentProcess(),
+                                       DxgkpReferenceOverlay,
+                                       &Object);
+    if (!NT_SUCCESS(Status))
+        goto CleanupDevice;
+
+    Overlay = Object;
+    if (Overlay->Device != Device)
+    {
+        Status = STATUS_INVALID_PARAMETER;
+        goto CleanupOverlay;
+    }
+
+    if (DXGK_CB_FULL(Adapter, DxgkDdiGetOverlayState) != NULL)
+    {
+        DXGKARG_GETOVERLAYSTATE Args;
+        RtlZeroMemory(&Args, sizeof(Args));
+        Args.hOverlay = Overlay->hMiniportOverlay;
+        Status = DXGK_CB_FULL(Adapter, DxgkDdiGetOverlayState)(
+                     Adapter->MiniportDeviceContext,
+                     &Args);
+        if (NT_SUCCESS(Status))
+        {
+            Data->OverlayEnabled = Args.OverlayEnabled;
+        }
+    }
+    else
+    {
+        Data->OverlayEnabled = (InterlockedCompareExchange(&Overlay->Destroying, 0, 0) == 0);
+        Status = STATUS_SUCCESS;
+    }
+
+CleanupOverlay:
+    DxgkpDereferenceOverlay(Overlay);
+CleanupDevice:
+    DxgkDereferenceDevice(Device);
+    return Status;
+}
+
+NTSTATUS
+NTAPI
+DxgkGetOverlayState(
+    _Inout_ D3DKMT_GETOVERLAYSTATE *Data)
+{
+    return DxgkGetOverlayStateWithAccessMode(Data, KernelMode);
+}

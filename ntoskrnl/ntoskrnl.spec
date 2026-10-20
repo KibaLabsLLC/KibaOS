@@ -2945,7 +2945,13 @@
 @ stdcall PsReferenceKernelStack(ptr)
 @ stub -arch=win64 PsReferenceSiloContext
 @ stub -arch=win64 PsRegisterAltSystemCallHandler
-@ stub -arch=win64 PsRegisterPicoProvider
+@ stdcall PsRegisterPicoProvider(ptr ptr)
+@ stdcall PsCreatePicoProcess(ptr ptr ptr ptr)
+@ stdcall PsCreatePicoThread(ptr ptr ptr)
+@ stdcall PsGetPicoProcessContext(ptr)
+@ stdcall PsGetPicoThreadContext(ptr)
+@ stdcall PsSetPicoThreadContext(ptr ptr)
+@ stdcall PsIsPicoProcess(ptr)
 @ stub -arch=win64 PsRegisterProcessAvailableCpusChangeNotification
 @ stub -arch=win64 PsRegisterSiloMonitor
 @ stub -arch=win64 PsRegisterSyscallProvider

@@ -3304,6 +3304,16 @@ DxgkDestroyOverlay(
     _In_ CONST D3DKMT_DESTROYOVERLAY *Data);
 
 NTSTATUS
+NTAPI
+DxgkGetOverlayState(
+    _Inout_ D3DKMT_GETOVERLAYSTATE *Data);
+
+NTSTATUS
+DxgkGetOverlayStateWithAccessMode(
+    _Inout_ D3DKMT_GETOVERLAYSTATE *Data,
+    _In_ KPROCESSOR_MODE EmbeddedBufferMode);
+
+NTSTATUS
 DxgkOverlayCleanupDevice(
     _In_ PDXGKRNL_DEVICE Device);
 

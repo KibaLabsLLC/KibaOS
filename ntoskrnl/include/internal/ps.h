@@ -841,6 +841,21 @@ NTSTATUS
 NTAPI
 PsCheckImageLoadPolicy(
     _In_ PFILE_OBJECT FileObject);
+
+VOID
+NTAPI
+PspPicoExitProcess(
+    _In_ PEPROCESS Process);
+
+VOID
+NTAPI
+PspPicoExitThread(
+    _In_ PETHREAD Thread);
+
+NTSTATUS
+NTAPI
+PspPicoDispatchSystemCall(
+    _Inout_ PVOID TrapFrame);
 extern PVOID PspSystemDllEntryPoint;
 extern PVOID PspRtlUserThreadStart;
 extern PVOID PspSystemDllInitBlock;
