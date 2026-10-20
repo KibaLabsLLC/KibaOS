@@ -892,24 +892,8 @@ DxgkGetOverlayStateWithAccessMode(
         goto CleanupOverlay;
     }
 
-    if (DXGK_CB_FULL(Adapter, DxgkDdiGetOverlayState) != NULL)
-    {
-        DXGKARG_GETOVERLAYSTATE Args;
-        RtlZeroMemory(&Args, sizeof(Args));
-        Args.hOverlay = Overlay->hMiniportOverlay;
-        Status = DXGK_CB_FULL(Adapter, DxgkDdiGetOverlayState)(
-                     Adapter->MiniportDeviceContext,
-                     &Args);
-        if (NT_SUCCESS(Status))
-        {
-            Data->OverlayEnabled = Args.OverlayEnabled;
-        }
-    }
-    else
-    {
-        Data->OverlayEnabled = (InterlockedCompareExchange(&Overlay->Destroying, 0, 0) == 0);
-        Status = STATUS_SUCCESS;
-    }
+    Data->OverlayEnabled = (InterlockedCompareExchange(&Overlay->Destroying, 0, 0) == 0);
+    Status = STATUS_SUCCESS;
 
 CleanupOverlay:
     DxgkpDereferenceOverlay(Overlay);

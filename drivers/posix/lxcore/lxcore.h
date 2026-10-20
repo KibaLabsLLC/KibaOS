@@ -8,6 +8,9 @@
 #pragma once
 
 #include <ntddk.h>
+#include <ndk/ketypes.h>
+#include <ndk/kefuncs.h>
+#include <ndk/mmfuncs.h>
 #include <reactos/pico.h>
 
 #define LXCORE_DEVICE_NAME      L"\\Device\\LxCore"

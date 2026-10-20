@@ -1292,7 +1292,7 @@ APIENTRY
 NtGdiDdDDIGetOverlayState(_Inout_ D3DKMT_GETOVERLAYSTATE* unnamedParam1)
 {
     RETURN_STATUS_IF_NULL(unnamedParam1);
-    return STATUS_NOT_IMPLEMENTED;
+    D3DKMT_CALL_CALLBACK(RxgkIntPfnGetOverlayState, unnamedParam1);
 }
 
 NTSTATUS
