@@ -31,15 +31,8 @@ static const WCHAR immersive_dark_mode_propW[] = L"ReactOS.Dwm.ImmersiveDarkMode
 static BOOL
 ThemeGetGlassKey(HWND hWnd, COLORREF *pcrKey)
 {
-    ULONG_PTR color;
-
-    if (!GetPropW(hWnd, DWM_PROP_BACKDROP_REGION))
-        return FALSE;
-    color = (ULONG_PTR)GetPropW(hWnd, DWM_PROP_BACKDROP_COLOR);
-    if (!color)
-        return FALSE;
-    *pcrKey = (COLORREF)(color - 1);
-    return TRUE;
+    /* Window frame glass/transparency removed for a clean, solid, nature-inspired feel */
+    return FALSE;
 }
 
 static void

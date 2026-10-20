@@ -454,7 +454,7 @@ SetupFrameProc(
             }
             {
                 HDC hdc = GetDC(hwnd);
-                Frame.Corner = MulDiv(8, hdc ? GetDeviceCaps(hdc, LOGPIXELSX) : 96, 96);
+                Frame.Corner = MulDiv(18, hdc ? GetDeviceCaps(hdc, LOGPIXELSX) : 96, 96);
                 if (hdc)
                     ReleaseDC(hwnd, hdc);
             }
