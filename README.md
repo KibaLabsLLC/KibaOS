@@ -10,17 +10,17 @@
 
 KibaOS is a free, Windows-compatible operating system from Kiba Labs, built on the NT architecture. It targets Windows® 11 compatibility, with room for freestyle and experimental features.
 
-KibaOS is based on [KibaOS](https://github.com/ahmedarif193/KibaOS), a free NT operating system, which is in turn based on ReactOS, the Open Source effort to develop an operating system that is compatible with applications and drivers written for the Microsoft Windows NT family of operating systems. KibaOS inherits KibaOS's focus on 64-bit platforms: amd64, arm64 and riscv64.
+KibaOS is based on [LiberNT](https://github.com/ahmedarif193/LiberNT), a free NT operating system, which is in turn based on ReactOS, the Open Source effort to develop an operating system that is compatible with applications and drivers written for the Microsoft Windows NT family of operating systems. KibaOS inherits LiberNT's focus on 64-bit platforms: amd64, arm64 and riscv64.
 
-KibaOS is licensed under the [GNU GPL 3.0](COPYING). Code inherited from KibaOS and ReactOS keeps the licence stated in its file headers, most of it GPL 2.0 or later. The GPL 2.0, LGPL 2.1 and BSD texts those files refer to are in [COPYING2](COPYING2), [COPYING.LIB](COPYING.LIB) and [COPYING.ARM](COPYING.ARM).
+KibaOS is licensed under the [GNU GPL 3.0](COPYING). Code inherited from LiberNT and ReactOS keeps the licence stated in its file headers, most of it GPL 2.0 or later. The GPL 2.0, LGPL 2.1 and BSD texts those files refer to are in [COPYING2](COPYING2), [COPYING.LIB](COPYING.LIB) and [COPYING.ARM](COPYING.ARM).
 
-The changes made in KibaOS are Copyright © 2026 Kiba Labs and the KibaOS contributors. Code inherited from KibaOS, ReactOS and third parties keeps the copyright notices of its authors. See [CREDITS.md](CREDITS.md).
+The changes made in KibaOS are Copyright © 2026 Kiba Labs and the KibaOS contributors. Code inherited from LiberNT, ReactOS and third parties keeps the copyright notices of its authors. See [CREDITS.md](CREDITS.md).
 
 KibaOS is an independent project. It is not affiliated with, endorsed by or sponsored by Microsoft. Windows® is a registered trademark of Microsoft Corporation.
 
 ### Status
 
-KibaOS is in early development and tracks KibaOS's pre-release builds. Expect rough edges, and expect hardware support to depend on what KibaOS supports upstream. Windows 11 is the compatibility reference.
+KibaOS is in early development and tracks LiberNT's pre-release builds. Expect rough edges, and expect hardware support to depend on what LiberNT supports upstream. Windows 11 is the compatibility reference.
 
 ## Support KibaOS
 
@@ -30,8 +30,8 @@ We want KibaOS to be a free NT operating system that anyone can try, hack on and
 
 KibaOS would not exist without the projects below. With respect and gratitude to their teams and contributors:
 
-- **KibaOS**, the direct upstream: [github.com/ahmedarif193/KibaOS](https://github.com/ahmedarif193/KibaOS)
-- **ReactOS**, the project KibaOS is based on: [github.com/reactos/reactos](https://github.com/reactos/reactos)
+- **LiberNT**, the direct upstream: [github.com/ahmedarif193/LiberNT](https://github.com/ahmedarif193/LiberNT)
+- **ReactOS**, the project LiberNT is based on: [github.com/reactos/reactos](https://github.com/reactos/reactos)
 
 ## Building
 
@@ -112,7 +112,7 @@ Each target builds everything it needs first, and the files are written to the o
 
 ## What KibaOS Enables
 
-KibaOS brings modern hardware and platforms to the NT architecture, building on KibaOS's work. The current focus is:
+KibaOS brings modern hardware and platforms to the NT architecture, building on LiberNT's work. The current focus is:
 
 - 64-bit platform support on amd64, arm64 and riscv64: kernel, HAL and FreeLoader
 - UEFI boot, GOP framebuffer, and early display support
@@ -128,6 +128,6 @@ Report bugs and suggest features in [Issues](https://github.com/KibaLabsLLC/Kiba
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [PULL_REQUEST_MANAGEMENT.md](PULL_REQUEST_MANAGEMENT.md).
 
-Changes that are not specific to KibaOS, such as kernel, driver and compatibility fixes, belong upstream in [KibaOS](https://github.com/ahmedarif193/KibaOS) where possible, which keeps this fork easy to rebase.
+Changes that are not specific to KibaOS, such as kernel, driver and compatibility fixes, belong upstream in [LiberNT](https://github.com/ahmedarif193/LiberNT) where possible, which keeps this fork easy to rebase.
 
 **Legal notice:** If you have seen proprietary Microsoft Windows source code (including but not limited to the leaked Windows NT 3.5, NT 4, 2000 source code and the Windows Research Kernel), your contribution won't be accepted because of potential copyright violation.
