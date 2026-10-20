@@ -2482,7 +2482,7 @@ LRESULT CALLBACK CatalogProc(HWND window, UINT message, WPARAM wParam, LPARAM lP
                 ListView_SetItemState(state->list, 0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
                 ListView_EnsureVisible(state->list, 0, FALSE);
             }
-            std::wstring caption = L"rosget — winget catalog (" + FormatCount(state->catalog.packages.size()) + L" packages)";
+            std::wstring caption = L"KibaOS Apps — Community & WinGet Catalog (" + FormatCount(state->catalog.packages.size()) + L" packages)";
             SetWindowTextW(window, caption.c_str());
             return 0;
         }
@@ -2580,7 +2580,7 @@ Status RunCatalogGui(SourceManager &source, const std::string &initialQuery)
     SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0);
     const int width = std::min<int>(state.theme.Px(1040), work.right - work.left - 40);
     const int height = std::min<int>(state.theme.Px(700), work.bottom - work.top - 40);
-    HWND window = CreateWindowExW(0, L"RosGetCatalog", L"rosget — winget catalog",
+    HWND window = CreateWindowExW(0, L"RosGetCatalog", L"KibaOS Apps — Community & WinGet Catalog",
                                   WS_OVERLAPPEDWINDOW,
                                   work.left + (work.right - work.left - width) / 2,
                                   work.top + (work.bottom - work.top - height) / 2,

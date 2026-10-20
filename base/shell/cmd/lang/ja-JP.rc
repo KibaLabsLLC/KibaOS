@@ -507,7 +507,7 @@ RESTORE       ウィンドウを元のサイズに戻します。\n\
     STRING_ERROR_WHILE_PROCESSING "%s の処理中にエラーが発生しました\n"
     STRING_SET_ENV_ERROR "環境変数 '%s' は未定義です。\n"
     STRING_CMD_INFOLINE "  KibaOS Command Prompt                                      Type HELP = Help  "
-    STRING_CMD_COPYRIGHT "(C) Copyright 2026 LiberNT Team.\n(C) Copyright 1996-%s ReactOS Team.\n"
+    STRING_CMD_COPYRIGHT "(C) Copyright 2026 KibaOS Team.\n(C) Copyright 2026 LiberNT Team.\n(C) Copyright 1996-%s ReactOS Team.\n"
     STRING_REACTOS_VERSION "KibaOS [Version %s %s]\n"
     STRING_CMD_SHELLINFO "\nKibaOS Command Line Interpreter\nVersion %s %s"
     STRING_VERSION_RUNNING_ON "実行中: "

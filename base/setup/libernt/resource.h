@@ -45,6 +45,7 @@
 #define IDC_FRAME_PAGE       2203
 #define IDC_FRAME_BACK       2204
 #define IDC_FRAME_NEXT       2205
+#define IDC_TRY_KIBAOS       2206
 
 #define IDD_DISKPAGE         2210
 #define IDC_DISKLIST         2211

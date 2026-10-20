@@ -170,7 +170,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APPTITLE "ReactOS アプリ マネージャ"
+    IDS_APPTITLE "KibaOS Apps"
     IDS_APP_AUTHORS "Copyright 2009 Dmitry Chapyshev"
     IDS_WELCOME_TITLE "ReactOS アプリ マネージャへようこそ!"
     IDS_WELCOME_TEXT "左側からカテゴリを選択し、インストールまたはアンインストールするアプリを選んでください。\nReactOS ウェブ サイト: "
