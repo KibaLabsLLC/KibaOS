@@ -31,6 +31,7 @@ enum SM2RCMD
     SM2C_CONTROL,
     SM2C_PRINTERS,
     SM2C_ASSIST,
+    SM2C_KIBA_CENTER,
     SM2C_GAP
 };
 
@@ -725,6 +726,13 @@ SM2ExecRightCmd(int nCmd)
         case SM2C_CONTROL:   ShellExecuteW(NULL, NULL, L"ms-settings:", NULL, NULL, SW_SHOWNORMAL); break;
         case SM2C_PRINTERS:  ShellExecuteW(NULL, NULL, L"ms-settings:devices", NULL, NULL, SW_SHOWNORMAL); break;
         case SM2C_ASSIST:    ShellExecuteW(NULL, NULL, L"netassist.exe", NULL, NULL, SW_SHOWNORMAL); break;
+        case SM2C_KIBA_CENTER:
+        {
+            HWND hwndTray = GetTrayWnd();
+            if (hwndTray)
+                ::PostMessageW(hwndTray, TWM_SHOWKIBACENTER, 0, 0);
+            break;
+        }
     }
 }
 
@@ -736,6 +744,8 @@ struct SM2RIGHTDEF
 
 static const SM2RIGHTDEF g_SM2RightDefs[] =
 {
+    { L"Kiba Center (Win+K)",   SM2C_KIBA_CENTER },
+    { NULL,                    SM2C_GAP },
     { L"Documents",            SM2C_DOCUMENTS },
     { L"Pictures",             SM2C_PICTURES },
     { L"Music",                SM2C_MUSIC },

@@ -32,5 +32,8 @@ VOID TrayOverflow_Refresh(VOID);
 VOID TrayQuickSettings_Toggle(IN HWND hwndOwner, IN const RECT *prcAnchor);
 BOOL TrayQuickSettings_IsOpen(VOID);
 
+VOID TrayKibaCenter_Toggle(IN HWND hwndOwner, IN const RECT *prcAnchor);
+BOOL TrayKibaCenter_IsOpen(VOID);
+
 VOID TrayFlyouts_Destroy(VOID);
 VOID TrayFlyoutsAux_Destroy(VOID);

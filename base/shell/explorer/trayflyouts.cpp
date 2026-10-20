@@ -10957,8 +10957,575 @@ TrayNotifCenter_Refresh(VOID)
     }
 }
 
+struct KIBA_COMMAND_ITEM
+{
+    LPCWSTR pszName;
+    LPCWSTR pszDesc;
+    LPCWSTR pszCmd;
+    UINT nIconId;
+};
+
+static const KIBA_COMMAND_ITEM g_KibaCmdList[] =
+{
+    { L"Command Prompt", L"System Console", L"cmd.exe", IDI_FLU_WRENCH },
+    { L"KibaOS Settings", L"System Configuration", L"ms-settings:", IDI_FLU_SETTINGS },
+    { L"File Explorer", L"File Manager", L"explorer.exe", IDI_FLU_FOLDEROPEN },
+    { L"Task Manager", L"Performance & Processes", L"taskmgr.exe", IDI_FLU_GRID },
+    { L"Control Panel", L"Legacy System Settings", L"control.exe", IDI_FLU_OPTIONS },
+    { L"Calculator", L"Math Utility", L"calc.exe", IDI_FLU_SQUARE },
+    { L"Notepad", L"Text Editor", L"notepad.exe", IDI_FLU_DOCUMENT },
+    { L"Device Manager", L"Hardware Devices", L"devmgmt.msc", IDI_FLU_HARDDRIVE },
+    { L"Registry Editor", L"System Registry", L"regedit.exe", IDI_FLU_WRENCH },
+    { L"Lock Workstation", L"Security Action", L"lock", IDI_FLU_LOCK },
+    { L"Restart KibaOS", L"Power Action", L"restart", IDI_FLU_REFRESH },
+    { L"Power Off System", L"Power Action", L"shutdown", IDI_FLU_LOCK },
+    { L"Mute Audio", L"Sound Action", L"mute", IDI_FLU_SPKMUTE },
+    { L"Toggle Dark Mode", L"Appearance Action", L"dark", IDI_FLU_TILES }
+};
+
+static WNDPROC g_fnKibaEditProc = NULL;
+static LRESULT CALLBACK KibaEditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    HWND hwndParent = GetParent(hWnd);
+    if (uMsg == WM_KEYDOWN)
+    {
+        if (wParam == VK_ESCAPE || wParam == VK_RETURN || wParam == VK_UP || wParam == VK_DOWN)
+        {
+            SendMessageW(hwndParent, WM_KEYDOWN, wParam, lParam);
+            return 0;
+        }
+    }
+    return CallWindowProcW(g_fnKibaEditProc, hWnd, uMsg, wParam, lParam);
+}
+
+class CTrayKibaCenterWnd :
+    public CWindowImpl<CTrayKibaCenterWnd, CWindow, CTrayFlyoutTraits>,
+    public CTrayFlyoutAnimation
+{
+public:
+    DECLARE_WND_CLASS_EX(L"KibaCenterFlyout", CS_DROPSHADOW, COLOR_WINDOW)
+
+    SM2_FLYOUT_PALETTE m_Pal;
+    HWND m_hwndOwner;
+    HWND m_hwndEdit;
+    HFONT m_hFont;
+    HFONT m_hFontTitle;
+    HFONT m_hFontSmall;
+    HFONT m_hFontInput;
+    WCHAR m_szSearch[128];
+    int m_nSelectedIndex;
+    int m_nMatchCount;
+    int m_Matches[16];
+    SIZE m_size;
+
+    CTrayKibaCenterWnd() : m_hwndOwner(NULL), m_hwndEdit(NULL),
+                           m_hFont(NULL), m_hFontTitle(NULL), m_hFontSmall(NULL), m_hFontInput(NULL),
+                           m_nSelectedIndex(0), m_nMatchCount(0)
+    {
+        ZeroMemory(&m_Pal, sizeof(m_Pal));
+        ZeroMemory(&m_size, sizeof(m_size));
+        m_szSearch[0] = UNICODE_NULL;
+        ZeroMemory(m_Matches, sizeof(m_Matches));
+    }
+
+    int Sc(int v) const { return ShellScaleForDpi(v); }
+
+    VOID UpdateMatches()
+    {
+        m_nMatchCount = 0;
+        if (m_szSearch[0] == UNICODE_NULL)
+        {
+            for (UINT i = 0; i < _countof(g_KibaCmdList) && m_nMatchCount < 16; i++)
+                m_Matches[m_nMatchCount++] = (int)i;
+        }
+        else
+        {
+            for (UINT i = 0; i < _countof(g_KibaCmdList) && m_nMatchCount < 16; i++)
+            {
+                if (StrStrIW(g_KibaCmdList[i].pszName, m_szSearch) != NULL ||
+                    StrStrIW(g_KibaCmdList[i].pszDesc, m_szSearch) != NULL ||
+                    StrStrIW(g_KibaCmdList[i].pszCmd, m_szSearch) != NULL)
+                {
+                    m_Matches[m_nMatchCount++] = (int)i;
+                }
+            }
+        }
+        if (m_nSelectedIndex >= m_nMatchCount)
+            m_nSelectedIndex = m_nMatchCount > 0 ? m_nMatchCount - 1 : 0;
+    }
+
+    VOID ExecuteIndex(int idx)
+    {
+        if (idx < 0 || idx >= m_nMatchCount)
+        {
+            if (m_szSearch[0] != UNICODE_NULL)
+                ShellExecuteW(m_hWnd, L"open", m_szSearch, NULL, NULL, SW_SHOWNORMAL);
+            FadeOut();
+            return;
+        }
+
+        int cmdIdx = m_Matches[idx];
+        LPCWSTR pszCmd = g_KibaCmdList[cmdIdx].pszCmd;
+
+        if (wcscmp(pszCmd, L"lock") == 0)
+        {
+            LockWorkStation();
+        }
+        else if (wcscmp(pszCmd, L"shutdown") == 0)
+        {
+            ExitWindowsEx(EWX_SHUTDOWN, SHTDN_REASON_FLAG_PLANNED);
+        }
+        else if (wcscmp(pszCmd, L"restart") == 0)
+        {
+            ExitWindowsEx(EWX_REBOOT, SHTDN_REASON_FLAG_PLANNED);
+        }
+        else if (wcscmp(pszCmd, L"mute") == 0)
+        {
+            keybd_event(VK_VOLUME_MUTE, 0, 0, 0);
+            keybd_event(VK_VOLUME_MUTE, 0, KEYEVENTF_KEYUP, 0);
+        }
+        else if (wcscmp(pszCmd, L"dark") == 0)
+        {
+            HKEY hKey;
+            if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_SET_VALUE, &hKey) == ERROR_SUCCESS)
+            {
+                DWORD dwVal = 0;
+                DWORD dwSize = sizeof(dwVal);
+                RegQueryValueExW(hKey, L"AppsUseLightTheme", NULL, NULL, (LPBYTE)&dwVal, &dwSize);
+                dwVal = dwVal ? 0 : 1;
+                RegSetValueExW(hKey, L"AppsUseLightTheme", 0, REG_DWORD, (const BYTE*)&dwVal, sizeof(dwVal));
+                RegCloseKey(hKey);
+            }
+        }
+        else
+        {
+            ShellExecuteW(m_hWnd, L"open", pszCmd, NULL, NULL, SW_SHOWNORMAL);
+        }
+
+        FadeOut();
+    }
+
+    VOID OnFinalMessage(HWND hWnd) override
+    {
+        if (g_pTrayKibaCenter == this)
+            g_pTrayKibaCenter = NULL;
+        delete this;
+    }
+
+    VOID FadeOut()
+    {
+        if (m_AnimPhase == TFY_CLOSE)
+            return;
+        StartAnimate(m_hWnd, TFY_CLOSE, &m_Pal, m_size.cx, m_size.cy);
+    }
+
+    VOID Toggle(HWND hwndOwner, const RECT *prcAnchor)
+    {
+        m_hwndOwner = hwndOwner;
+        m_size.cx = Sc(680);
+        m_size.cy = Sc(500);
+
+        HMONITOR hMon = MonitorFromWindow(hwndOwner ? hwndOwner : GetDesktopWindow(), MONITOR_DEFAULTTONEAREST);
+        MONITORINFO mi = { sizeof(mi) };
+        GetMonitorInfoW(hMon, &mi);
+
+        int x = mi.rcWork.left + (mi.rcWork.right - mi.rcWork.left - m_size.cx) / 2;
+        int y = mi.rcWork.top + (mi.rcWork.bottom - mi.rcWork.top - m_size.cy) / 3;
+
+        SetWindowPos(HWND_TOPMOST, x, y, m_size.cx, m_size.cy, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        StartAnimate(m_hWnd, TFY_OPEN, &m_Pal, m_size.cx, m_size.cy);
+        if (m_hwndEdit)
+            ::SetFocus(m_hwndEdit);
+    }
+
+    LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        StartMenu2_GetFlyoutPalette(&m_Pal);
+        m_hFontTitle = TfyCreateFont(18, FW_BOLD);
+        m_hFont = TfyCreateFont(13, FW_NORMAL);
+        m_hFontSmall = TfyCreateFont(11, FW_NORMAL);
+        m_hFontInput = TfyCreateFont(14, FW_NORMAL);
+
+        m_hwndEdit = ::CreateWindowExW(0, L"EDIT", L"",
+                                       WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+                                       0, 0, 0, 0,
+                                       m_hWnd, (HMENU)1001, hExplorerInstance, NULL);
+        if (m_hwndEdit)
+        {
+            ::SendMessageW(m_hwndEdit, WM_SETFONT, (WPARAM)m_hFontInput, TRUE);
+            g_fnKibaEditProc = (WNDPROC)SetWindowLongPtrW(m_hwndEdit, GWLP_WNDPROC, (LONG_PTR)KibaEditSubclassProc);
+        }
+
+        UpdateMatches();
+        SetTimer(TFY_TIMER_ANIM, 15, NULL);
+        return 0;
+    }
+
+    LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        KillTimer(TFY_TIMER_ANIM);
+        if (m_hFontTitle) DeleteObject(m_hFontTitle);
+        if (m_hFont) DeleteObject(m_hFont);
+        if (m_hFontSmall) DeleteObject(m_hFontSmall);
+        if (m_hFontInput) DeleteObject(m_hFontInput);
+        return 0;
+    }
+
+    LRESULT OnCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        if (LOWORD(wParam) == 1001 && HIWORD(wParam) == EN_CHANGE)
+        {
+            if (m_hwndEdit)
+            {
+                ::GetWindowTextW(m_hwndEdit, m_szSearch, _countof(m_szSearch));
+                UpdateMatches();
+                Invalidate();
+            }
+        }
+        return 0;
+    }
+
+    LRESULT OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        if (wParam == VK_ESCAPE)
+        {
+            FadeOut();
+            return 0;
+        }
+        else if (wParam == VK_DOWN)
+        {
+            if (m_nMatchCount > 0)
+            {
+                m_nSelectedIndex = min(m_nSelectedIndex + 1, m_nMatchCount - 1);
+                Invalidate();
+            }
+            return 0;
+        }
+        else if (wParam == VK_UP)
+        {
+            if (m_nMatchCount > 0)
+            {
+                m_nSelectedIndex = max(m_nSelectedIndex - 1, 0);
+                Invalidate();
+            }
+            return 0;
+        }
+        else if (wParam == VK_RETURN)
+        {
+            ExecuteIndex(m_nSelectedIndex);
+            return 0;
+        }
+        return 0;
+    }
+
+    LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        int pad = Sc(16);
+        int listTop = Sc(105);
+
+        if (m_szSearch[0] != UNICODE_NULL)
+        {
+            int rowH = Sc(44);
+            int idx = (y - listTop) / rowH;
+            if (idx >= 0 && idx < m_nMatchCount)
+            {
+                ExecuteIndex(idx);
+            }
+        }
+        else
+        {
+            int gridTop = Sc(128);
+            int itemW = Sc(152);
+            int itemH = Sc(72);
+            int gap = Sc(12);
+
+            for (int i = 0; i < 8; i++)
+            {
+                int rx = pad + (i % 4) * (itemW + gap);
+                int ry = gridTop + (i / 4) * (itemH + gap);
+                RECT rcTile = { rx, ry, rx + itemW, ry + itemH };
+                if (x >= rcTile.left && x <= rcTile.right && y >= rcTile.top && y <= rcTile.bottom)
+                {
+                    ExecuteIndex(i);
+                    return 0;
+                }
+            }
+
+            int actTop = Sc(328);
+            int actW = Sc(152);
+            int actH = Sc(54);
+            for (int i = 0; i < 4; i++)
+            {
+                int rx = pad + i * (actW + gap);
+                RECT rcAct = { rx, actTop, rx + actW, actTop + actH };
+                if (x >= rcAct.left && x <= rcAct.right && y >= rcAct.top && y <= rcAct.bottom)
+                {
+                    if (i == 0) ShellExecuteW(m_hWnd, L"open", L"ms-settings:network", NULL, NULL, SW_SHOWNORMAL);
+                    else if (i == 1) ExecuteIndex(1);
+                    else if (i == 2) ExecuteIndex(12);
+                    else if (i == 3) ExecuteIndex(13);
+                    return 0;
+                }
+            }
+        }
+        return 0;
+    }
+
+    LRESULT OnActivate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        if (LOWORD(wParam) == WA_INACTIVE)
+            FadeOut();
+        return 0;
+    }
+
+    LRESULT OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        if (wParam == TFY_TIMER_ANIM)
+            StepAnimate(m_hWnd, m_size.cx, m_size.cy);
+        return 0;
+    }
+
+    LRESULT OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(&ps);
+        RECT rcClient;
+        GetClientRect(&rcClient);
+
+        HDC hdcMem = CreateCompatibleDC(hdc);
+        HBITMAP hbm = CreateCompatibleBitmap(hdc, rcClient.right, rcClient.bottom);
+        HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, hbm);
+
+        HBRUSH hbrBg = CreateSolidBrush(m_Pal.PanelBg);
+        FillRect(hdcMem, &rcClient, hbrBg);
+        DeleteObject(hbrBg);
+
+        TfyDrawFlyoutFrame(hdcMem, &rcClient, &m_Pal);
+
+        int pad = Sc(16);
+        SetBkMode(hdcMem, TRANSPARENT);
+
+        HFONT hOldFont = (HFONT)SelectObject(hdcMem, m_hFontTitle);
+        SetTextColor(hdcMem, m_Pal.PanelText);
+        TextOutW(hdcMem, pad, pad, L"Kiba Center", 11);
+
+        SelectObject(hdcMem, m_hFontSmall);
+        SetTextColor(hdcMem, m_Pal.DimText);
+
+        MEMORYSTATUSEX ms = { sizeof(ms) };
+        GlobalMemoryStatusEx(&ms);
+        SYSTEM_POWER_STATUS sps;
+        GetSystemPowerStatus(&sps);
+
+        WCHAR szStatus[128];
+        StringCchPrintfW(szStatus, _countof(szStatus), L"RAM: %u%% | Power: %s (%u%%)",
+                         ms.dwMemoryLoad,
+                         (sps.ACLineStatus == 1) ? L"AC" : L"Battery",
+                         sps.BatteryLifePercent != 255 ? sps.BatteryLifePercent : 100);
+        RECT rcSys = { rcClient.right - Sc(300), pad, rcClient.right - pad, pad + Sc(24) };
+        DrawTextW(hdcMem, szStatus, -1, &rcSys, DT_RIGHT | DT_SINGLELINE | DT_VCENTER);
+
+        int inputTop = Sc(50);
+        int inputH = Sc(40);
+        RECT rcInput = { pad, inputTop, rcClient.right - pad, inputTop + inputH };
+
+        HBRUSH hbrInput = CreateSolidBrush(TfyMix(m_Pal.PanelBg, m_Pal.PanelText, 25));
+        FillRect(hdcMem, &rcInput, hbrInput);
+        DeleteObject(hbrInput);
+
+        HBRUSH hbrBrd = CreateSolidBrush(m_Pal.Border);
+        FrameRect(hdcMem, &rcInput, hbrBrd);
+        DeleteObject(hbrBrd);
+
+        HICON hSearchIco = TfyFluentIcon(IDI_FLU_SEARCH, Sc(20));
+        if (hSearchIco)
+            DrawIconEx(hdcMem, pad + Sc(10), inputTop + Sc(10), hSearchIco, Sc(20), Sc(20), 0, NULL, DI_NORMAL);
+
+        if (m_hwndEdit)
+        {
+            ::SetWindowPos(m_hwndEdit, NULL, pad + Sc(38), inputTop + Sc(8),
+                           rcClient.right - pad * 2 - Sc(48), inputH - Sc(16), SWP_NOZORDER);
+        }
+
+        if (m_szSearch[0] != UNICODE_NULL)
+        {
+            int listTop = Sc(105);
+            int rowH = Sc(44);
+
+            for (int i = 0; i < m_nMatchCount; i++)
+            {
+                int cmdIdx = m_Matches[i];
+                int ry = listTop + i * rowH;
+                if (ry + rowH > rcClient.bottom - Sc(30))
+                    break;
+
+                RECT rcRow = { pad, ry, rcClient.right - pad, ry + rowH };
+
+                if (i == m_nSelectedIndex)
+                {
+                    HBRUSH hbrSel = CreateSolidBrush(m_Pal.HotFill);
+                    FillRect(hdcMem, &rcRow, hbrSel);
+                    DeleteObject(hbrSel);
+                    HBRUSH hbrSelBrd = CreateSolidBrush(m_Pal.HotBorder);
+                    FrameRect(hdcMem, &rcRow, hbrSelBrd);
+                    DeleteObject(hbrSelBrd);
+                }
+
+                HICON hIco = TfyFluentIcon(g_KibaCmdList[cmdIdx].nIconId, Sc(24));
+                if (hIco)
+                    DrawIconEx(hdcMem, pad + Sc(10), ry + Sc(10), hIco, Sc(24), Sc(24), 0, NULL, DI_NORMAL);
+
+                SelectObject(hdcMem, m_hFont);
+                SetTextColor(hdcMem, m_Pal.PanelText);
+                TextOutW(hdcMem, pad + Sc(44), ry + Sc(6), g_KibaCmdList[cmdIdx].pszName, (int)wcslen(g_KibaCmdList[cmdIdx].pszName));
+
+                SelectObject(hdcMem, m_hFontSmall);
+                SetTextColor(hdcMem, m_Pal.DimText);
+                TextOutW(hdcMem, pad + Sc(44), ry + Sc(24), g_KibaCmdList[cmdIdx].pszDesc, (int)wcslen(g_KibaCmdList[cmdIdx].pszDesc));
+            }
+        }
+        else
+        {
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(100), L"Pinned System Apps & Commands", 29);
+
+            int gridTop = Sc(128);
+            int itemW = Sc(152);
+            int itemH = Sc(72);
+            int gap = Sc(12);
+
+            for (int i = 0; i < 8 && i < _countof(g_KibaCmdList); i++)
+            {
+                int rx = pad + (i % 4) * (itemW + gap);
+                int ry = gridTop + (i / 4) * (itemH + gap);
+                RECT rcTile = { rx, ry, rx + itemW, ry + itemH };
+
+                HBRUSH hbrTile = CreateSolidBrush(TfyMix(m_Pal.PanelBg, m_Pal.PanelText, 20));
+                FillRect(hdcMem, &rcTile, hbrTile);
+                DeleteObject(hbrTile);
+
+                HBRUSH hbrTileBrd = CreateSolidBrush(m_Pal.Border);
+                FrameRect(hdcMem, &rcTile, hbrTileBrd);
+                DeleteObject(hbrTileBrd);
+
+                HICON hIco = TfyFluentIcon(g_KibaCmdList[i].nIconId, Sc(24));
+                if (hIco)
+                    DrawIconEx(hdcMem, rx + Sc(12), ry + Sc(12), hIco, Sc(24), Sc(24), 0, NULL, DI_NORMAL);
+
+                SelectObject(hdcMem, m_hFont);
+                SetTextColor(hdcMem, m_Pal.PanelText);
+                RECT rcLabel = { rx + Sc(12), ry + Sc(42), rx + itemW - Sc(8), ry + itemH - Sc(4) };
+                DrawTextW(hdcMem, g_KibaCmdList[i].pszName, -1, &rcLabel, DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS);
+            }
+
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(300), L"Quick System Actions", 20);
+
+            int actTop = Sc(328);
+            int actW = Sc(152);
+            int actH = Sc(54);
+
+            static const struct { LPCWSTR pszName; UINT nIcon; } s_QuickActs[] =
+            {
+                { L"Wi-Fi", IDI_FLU_WIFI4 },
+                { L"Settings", IDI_FLU_SETTINGS },
+                { L"Mute Audio", IDI_FLU_SPKMUTE },
+                { L"Dark Mode", IDI_FLU_TILES }
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                int rx = pad + i * (actW + gap);
+                RECT rcAct = { rx, actTop, rx + actW, actTop + actH };
+
+                HBRUSH hbrAct = CreateSolidBrush(TfyMix(m_Pal.PanelBg, m_Pal.PanelText, 20));
+                FillRect(hdcMem, &rcAct, hbrAct);
+                DeleteObject(hbrAct);
+
+                HBRUSH hbrActBrd = CreateSolidBrush(m_Pal.Border);
+                FrameRect(hdcMem, &rcAct, hbrActBrd);
+                DeleteObject(hbrActBrd);
+
+                HICON hIco = TfyFluentIcon(s_QuickActs[i].nIcon, Sc(20));
+                if (hIco)
+                    DrawIconEx(hdcMem, rx + Sc(10), actTop + Sc(17), hIco, Sc(20), Sc(20), 0, NULL, DI_NORMAL);
+
+                SelectObject(hdcMem, m_hFontSmall);
+                SetTextColor(hdcMem, m_Pal.PanelText);
+                RECT rcActLbl = { rx + Sc(36), actTop, rx + actW - Sc(4), actTop + actH };
+                DrawTextW(hdcMem, s_QuickActs[i].pszName, -1, &rcActLbl, DT_SINGLELINE | DT_VCENTER);
+            }
+        }
+
+        SelectObject(hdcMem, m_hFontSmall);
+        SetTextColor(hdcMem, m_Pal.DimText);
+        RECT rcFooter = { pad, rcClient.bottom - Sc(28), rcClient.right - pad, rcClient.bottom - Sc(6) };
+        DrawTextW(hdcMem, L"Win+K | OS Command Center | Press Esc to dismiss", -1, &rcFooter, DT_SINGLELINE | DT_VCENTER);
+
+        SelectObject(hdcMem, hOldFont);
+        BitBlt(hdc, 0, 0, rcClient.right, rcClient.bottom, hdcMem, 0, 0, SRCCOPY);
+        SelectObject(hdcMem, hbmOld);
+        DeleteObject(hbm);
+        DeleteDC(hdcMem);
+
+        EndPaint(&ps);
+        return 0;
+    }
+
+    BEGIN_MSG_MAP(CTrayKibaCenterWnd)
+        MESSAGE_HANDLER(WM_CREATE, OnCreate)
+        MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+        MESSAGE_HANDLER(WM_COMMAND, OnCommand)
+        MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown)
+        MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
+        MESSAGE_HANDLER(WM_ACTIVATE, OnActivate)
+        MESSAGE_HANDLER(WM_TIMER, OnTimer)
+        MESSAGE_HANDLER(WM_PAINT, OnPaint)
+    END_MSG_MAP()
+};
+
+static CTrayKibaCenterWnd *g_pTrayKibaCenter = NULL;
+
+BOOL TrayKibaCenter_IsOpen(VOID)
+{
+    return g_pTrayKibaCenter && g_pTrayKibaCenter->IsWindow() &&
+           g_pTrayKibaCenter->IsWindowVisible() && g_pTrayKibaCenter->m_AnimPhase != TFY_CLOSE;
+}
+
+VOID TrayKibaCenter_Toggle(IN HWND hwndOwner, IN const RECT *prcAnchor)
+{
+    if (g_pTrayKibaCenter && g_pTrayKibaCenter->IsWindow())
+    {
+        if (g_pTrayKibaCenter->IsWindowVisible() && g_pTrayKibaCenter->m_AnimPhase != TFY_CLOSE)
+        {
+            g_pTrayKibaCenter->FadeOut();
+            return;
+        }
+        ::DestroyWindow(g_pTrayKibaCenter->m_hWnd);
+        g_pTrayKibaCenter = NULL;
+    }
+
+    CTrayKibaCenterWnd *pKibaCenter = new CTrayKibaCenterWnd();
+    if (!pKibaCenter)
+        return;
+    if (!pKibaCenter->Create(hwndOwner, CWindow::rcDefault, NULL))
+    {
+        delete pKibaCenter;
+        return;
+    }
+    g_pTrayKibaCenter = pKibaCenter;
+    pKibaCenter->Toggle(hwndOwner, prcAnchor);
+}
+
 VOID TrayFlyoutsAux_Destroy(VOID)
 {
+    if (g_pTrayKibaCenter && g_pTrayKibaCenter->IsWindow())
+        ::DestroyWindow(g_pTrayKibaCenter->m_hWnd);
+    g_pTrayKibaCenter = NULL;
     if (g_pTrayQuickSettings && g_pTrayQuickSettings->IsWindow())
         ::DestroyWindow(g_pTrayQuickSettings->m_hWnd);
     g_pTrayQuickSettings = NULL;

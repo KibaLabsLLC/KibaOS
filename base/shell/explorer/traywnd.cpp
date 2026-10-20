@@ -48,6 +48,7 @@ HRESULT TrayWindowCtxMenuCreator(ITrayWindow * TrayWnd, IN HWND hWndOwner, ICont
 #define IDHK_QUICK_SETTINGS 0x20a
 #define IDHK_SETTINGS 0x20b
 #define IDHK_ACCESSIBILITY 0x20c
+#define IDHK_KIBA_CENTER 0x20d
 
 enum { NONE, TILED, CASCADED } g_Arrangement = NONE;
 
@@ -1016,6 +1017,10 @@ public:
                 TrayQuickSettings_Toggle(hwndButton, &rc);
             break;
         }
+        case IDHK_KIBA_CENTER:
+            HideStartMenu();
+            TrayKibaCenter_Toggle(m_hWnd, NULL);
+            break;
         case IDHK_NEXT_TASK:
             break;
         case IDHK_PREV_TASK:
@@ -2771,6 +2776,7 @@ ChangePos:
             MAKELONG(IDHK_QUICK_SETTINGS, MAKEWORD('A', MOD_WIN)),
             MAKELONG(IDHK_SETTINGS,       MAKEWORD('I', MOD_WIN)),
             MAKELONG(IDHK_ACCESSIBILITY,  MAKEWORD('U', MOD_WIN)),
+            MAKELONG(IDHK_KIBA_CENTER,    MAKEWORD('K', MOD_WIN)),
         };
         static const UINT taskmods[] =
         {
@@ -3494,6 +3500,13 @@ HandleTrayContextMenu:
         return TRUE;
     }
 
+    LRESULT OnShowKibaCenter(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        HideStartMenu();
+        TrayKibaCenter_Toggle(m_hWnd, NULL);
+        return TRUE;
+    }
+
     LRESULT OnShowCalendarFlyout(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
         RECT rcAnchor;
@@ -3931,6 +3944,7 @@ HandleTrayContextMenu:
         MESSAGE_HANDLER(TWM_SHOWNETWORKFLYOUT, OnShowNetworkFlyout)
         MESSAGE_HANDLER(TWM_SHOWCALENDARFLYOUT, OnShowCalendarFlyout)
         MESSAGE_HANDLER(TWM_SHOWPOWERFLYOUT, OnShowPowerFlyout)
+        MESSAGE_HANDLER(TWM_SHOWKIBACENTER, OnShowKibaCenter)
         MESSAGE_HANDLER(TWM_DOEXITWINDOWS, OnDoExitWindows)
         MESSAGE_HANDLER(TWM_GETTASKSWITCH, OnGetTaskSwitch)
         MESSAGE_HANDLER(TWM_SETZORDER, OnSetZOrder)
