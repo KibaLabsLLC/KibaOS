@@ -246,12 +246,13 @@ jobs:
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
 
           ARCH="${{ matrix.arch }}"
+          SF_ARCH="${ARCH}-nt"
           PARENT="/home/frs/project/kibaos"
-          REMOTE_DIR="${PARENT}/${ARCH}"
-          MARKER="last-build-number-${ARCH}.txt"
+          REMOTE_DIR="${PARENT}/${SF_ARCH}"
+          MARKER="last-build-number-${SF_ARCH}.txt"
 
           # Make sure the arch directory exists (errors if it already does; ignored).
-          printf '%s\n' "cd ${PARENT}" "mkdir ${ARCH}" "bye" \
+          printf '%s\n' "cd ${PARENT}" "mkdir ${SF_ARCH}" "bye" \
             | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
                 "$SF_USER@frs.sourceforge.net" >/dev/null 2>&1 || true
 
@@ -264,7 +265,7 @@ jobs:
           if [ -s "${MARKER}" ]; then
             PREV_NUM="$(cat "${MARKER}")"
             PREV="kibaos-v${PREV_NUM}-${ARCH}"
-            echo "Removing previous ${ARCH} build: ${PREV}.*"
+            echo "Removing previous ${SF_ARCH} build: ${PREV}.*"
             printf '%s\n' \
               "cd ${REMOTE_DIR}" \
               "rm ${PREV}.iso" \
@@ -277,7 +278,27 @@ jobs:
               | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
                   "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
           else
-            echo "No previous build marker for ${ARCH} -- nothing to delete."
+            echo "No previous build marker for ${SF_ARCH} -- checking for old builds."
+          fi
+
+          # Prune any remaining old build files in REMOTE_DIR
+          echo "Scanning for and pruning any remaining old build files in ${REMOTE_DIR}..."
+          REMOTE_FILES=$(printf '%s\n' "cd ${REMOTE_DIR}" "ls -1" "bye" \
+            | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
+                "$SF_USER@frs.sourceforge.net" 2>/dev/null \
+            | grep '^kibaos-v' || true)
+
+          CURRENT_BUILD="kibaos-v${{ github.run_number }}-${ARCH}"
+          if [ -n "$REMOTE_FILES" ]; then
+            OLD_FILES=$(echo "$REMOTE_FILES" | grep -v "^${CURRENT_BUILD}\." || true)
+            if [ -n "$OLD_FILES" ]; then
+              echo "Pruning old build files from ${REMOTE_DIR}:"
+              echo "$OLD_FILES"
+              RM_CMDS=$(echo "$OLD_FILES" | sed 's/^/rm /')
+              printf '%s\n' "cd ${REMOTE_DIR}" "$RM_CMDS" "bye" \
+                | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
+                    "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
+            fi
           fi
 
           # Upload this build.
