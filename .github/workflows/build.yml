@@ -44,7 +44,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build flex bison ccache wget xz-utils tar \
             python3-mako python3-yaml python3-packaging glslang-tools msitools \
-            sshpass rsync
+            sshpass rsync gcab
 
       - name: Compute RosBE bootstrap SHA
         id: rosbe_spec
@@ -190,34 +190,38 @@ jobs:
           OUT=${{ steps.configure.outputs.outdir }}
           BASE="kibaos-v${{ github.run_number }}-${{ matrix.arch }}"
           mkdir -p ota_dist
+          CAB_NAME="${BASE}-payload.cab"
 
-          # Create CAB file containing system payload binaries
+          # Create CAB file containing system payload binaries.
+          # Run from inside $OUT so the CAB stores "bootcd.iso", not the full path.
           if command -v gcab >/dev/null 2>&1; then
-            gcab -c "ota_dist/${BASE}-payload.cab" "$OUT/bootcd.iso"
+            (cd "$OUT" && gcab -c "$GITHUB_WORKSPACE/ota_dist/${CAB_NAME}" bootcd.iso)
           else
-            tar -czf "ota_dist/${BASE}-payload.cab" -C "$OUT" bootcd.iso
+            tar -czf "ota_dist/${CAB_NAME}" -C "$OUT" bootcd.iso
           fi
 
-          CAB_SIZE=$(stat -c%s "ota_dist/${BASE}-payload.cab")
-          CAB_SHA256=$(sha256sum "ota_dist/${BASE}-payload.cab" | awk '{print $1}')
+          export CAB_NAME
+          export CAB_SIZE=$(stat -c%s "ota_dist/${CAB_NAME}")
+          export CAB_SHA256=$(sha256sum "ota_dist/${CAB_NAME}" | awk '{print $1}')
+          export BUILD_NUMBER=${{ github.run_number }}
 
           # Generate ota_manifest.json
-          python3 -c "
-import json
-manifest = {
-    'manifest_version': 1,
-    'os_version': '10.0',
-    'build_number': ${{ github.run_number }},
-    'min_update_version': 1,
-    'cabs': [{
-        'name': '${BASE}-payload.cab',
-        'sha256': '${CAB_SHA256}',
-        'size': ${CAB_SIZE}
-    }]
-}
-with open('ota_dist/ota_manifest.json', 'w') as f:
-    json.dump(manifest, f, indent=2)
-"
+          python3 - <<'PY'
+          import json, os
+          manifest = {
+              'manifest_version': 1,
+              'os_version': '10.0',
+              'build_number': int(os.environ['BUILD_NUMBER']),
+              'min_update_version': 1,
+              'cabs': [{
+                  'name': os.environ['CAB_NAME'],
+                  'sha256': os.environ['CAB_SHA256'],
+                  'size': int(os.environ['CAB_SIZE']),
+              }],
+          }
+          with open('ota_dist/ota_manifest.json', 'w') as f:
+              json.dump(manifest, f, indent=2)
+          PY
 
       # ── Verify OTA Manifest & CAB ──────────────────────────────────────────
       - name: Verify OTA Manifest and CAB
@@ -282,11 +286,9 @@ with open('ota_dist/ota_manifest.json', 'w') as f:
 
           # Upload OTA CABs first, manifest last if on release branch or tag
           if [[ "${{ github.ref }}" == refs/heads/release/* || "${{ github.ref }}" == refs/tags/* ]]; then
-            sshpass -e sftp -oStrictHostKeyChecking=no "$SF_USER@frs.sourceforge.net" <<EOF
-              cd ${REMOTE_DIR}
-              mkdir ota
-              bye
-EOF
+            printf '%s\n' "cd ${REMOTE_DIR}" "mkdir ota" "bye" \
+              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
+                  "$SF_USER@frs.sourceforge.net" >/dev/null 2>&1 || true
             # Upload CAB files first
             sshpass -e rsync -avP ota_dist/*.cab "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
             # Upload manifest last
