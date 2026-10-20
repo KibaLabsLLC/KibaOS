@@ -1,7 +1,7 @@
 /*
  * VideoPort driver — WDDM detection and handoff helpers
  *
- * Copyright (C) 2024 KibaOS Team
+ * Copyright (C) 2024 LiberNT Team
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

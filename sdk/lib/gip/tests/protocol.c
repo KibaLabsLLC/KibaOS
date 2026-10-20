@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright (c) 2026 KibaOS contributors
+ * Copyright (c) 2026 LiberNT contributors
  * Wire-vector and receive-state regression tests for the actual library.
  */
 #include <gip.h>

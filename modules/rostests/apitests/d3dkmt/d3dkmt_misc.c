@@ -6,7 +6,7 @@
  *              process scheduling-priority class, in-process context priority,
  *              trim / budget-change notifications, InvalidateCache,
  *              QueryStatistics and QueryVideoMemoryInfo budget edge cases.
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * This file pins to WDDM 2.0 (DXGKDDI_INTERFACE_VERSION == 0x5023, set by the
  * test CMakeLists). Entry points whose PFND3DKMT_* typedef only exists at a

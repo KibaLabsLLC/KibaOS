@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Capability advertisement and fallback behavior
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * It is fine not to implement optional hardware queues, native fences,
  * cross-adapter resources or protected content, provided the stack reports

@@ -4,7 +4,7 @@
  * PURPOSE:     DMA command scheduling DDIs for softgpu.sys.
  *              Implements SubmitCommand, PreemptCommand, BuildPagingBuffer,
  *              QueryCurrentFence, Patch, and the fence-completion DPC.
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  *
  * Architecture notes (amd64/x86)
  * ================================

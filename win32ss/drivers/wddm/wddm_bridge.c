@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Display Driver Model - Win32k/dxgkrnl Bridge
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Kernel-to-kernel communication channel to \Device\DxgKrnl
- * COPYRIGHT:   Copyright 2025 KibaOS Contributors
+ * COPYRIGHT:   Copyright 2025 LiberNT Contributors
  *
  * BACKGROUND
  * ----------

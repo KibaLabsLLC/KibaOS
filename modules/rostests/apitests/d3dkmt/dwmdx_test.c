@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Windows parity for the DWM D3DKMT window redirection surface
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Covers the surface added for the shared-GPU-redirection path:
  *   dwmapi ordinal 100/101 (DwmpDxGetWindowSharedSurface /

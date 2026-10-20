@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Display Driver Model - Win32k/dxgkrnl Bridge
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     D3DKMT kernel-mode entry points (IOCTL bridge to dxgkrnl)
- * COPYRIGHT:   Copyright 2025 KibaOS Contributors
+ * COPYRIGHT:   Copyright 2025 LiberNT Contributors
  *
  * OVERVIEW
  * --------

@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM 2.0 paging queue tests (D3DKMTCreatePagingQueue / DestroyPagingQueue)
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Paging queues are the WDDM 2.0 synchronization primitive that serialises
  * residency operations (MakeResident/Evict, GPU virtual-address mapping) for a

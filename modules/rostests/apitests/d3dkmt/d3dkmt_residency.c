@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM 2.0 residency management tests
  *              (MakeResident / Evict / OfferAllocations / ReclaimAllocations)
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * WDDM 2.0 moved residency under explicit application control: the runtime
  * makes allocations resident (paging them into a memory segment) before the

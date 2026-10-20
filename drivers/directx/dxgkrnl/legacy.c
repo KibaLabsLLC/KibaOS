@@ -9,7 +9,7 @@
  *              detection is based on the DXGKRNL_MINIPORT_CONTEXT::InitData
  *              version field — see adapter.c for the threshold value.
  *
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  */
 
 #include "dxgkrnl_private.h"

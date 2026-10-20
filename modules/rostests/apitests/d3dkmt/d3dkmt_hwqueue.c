@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM 2.0 hardware scheduling / submission tests
  *              (CreateHwQueue / DestroyHwQueue / SubmitCommand[ToHwQueue])
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * WDDM 2.0 added GPU-side scheduling: with hardware scheduling enabled, work is
  * submitted to a per-engine hardware queue created on a hardware context, each

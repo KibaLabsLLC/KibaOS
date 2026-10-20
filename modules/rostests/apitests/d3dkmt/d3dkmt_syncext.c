@@ -4,7 +4,7 @@
  * PURPOSE:     Extended D3DKMT synchronization-object matrix and keyed-mutex
  *              lifecycle tests (goes deeper/wider than d3dkmt_sync.c / sync2.c /
  *              surface.c, which only cover the basic NULL contracts).
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Two groups:
  *

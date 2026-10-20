@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     In-memory PnP resource database
- * COPYRIGHT:   Copyright KibaOS contributors
+ * COPYRIGHT:   Copyright LiberNT contributors
  */
 
 #include <ntoskrnl.h>

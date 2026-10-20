@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Breadth coverage of the remaining D3DKMT surface (contract checks)
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Each group validates the portable contract (NULL is refused) for a family of
  * D3DKMT entry points, so the suite exercises the full documented surface and

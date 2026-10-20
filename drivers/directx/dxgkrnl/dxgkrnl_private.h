@@ -4,7 +4,7 @@
  * PURPOSE:     Master internal header for dxgkrnl.sys — defines all private
  *              data structures, global state, and function prototypes shared
  *              across all translation units in the dxgkrnl module.
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  *
  * Design notes
  * ============

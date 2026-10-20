@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS WDDM DirectX Graphics Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     VidMm paging-operation state machine
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * One owned state machine for every WDDM paging packet kind: transfer, fill,
  * discard, map/unmap aperture, page-table update, TLB flush, and residency

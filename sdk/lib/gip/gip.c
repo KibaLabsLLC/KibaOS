@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later
- * Copyright (c) 2026 KibaOS contributors
+ * Copyright (c) 2026 LiberNT contributors
  * MS-GIPUSB framing, host receive engine and device command codecs.
  */
 #include <gip.h>

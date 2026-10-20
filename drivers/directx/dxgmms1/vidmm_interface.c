@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS DirectX GPU Memory Manager and Scheduler
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Static VidMmInterface and VidSchInterface dispatch tables
- * COPYRIGHT:   Copyright 2024-2026 KibaOS Team
+ * COPYRIGHT:   Copyright 2024-2026 LiberNT Team
  *
  * dxgmms1.sys exports two versioned dispatch tables as data symbols:
  *
