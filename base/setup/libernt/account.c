@@ -37,7 +37,7 @@ GenerateComputerName(
     UINT i;
 
     srand(GetTickCount());
-    StringCchCopyW(Buffer, MAX_COMPUTERNAME_LENGTH + 1, L"LIBERNT-");
+    StringCchCopyW(Buffer, MAX_COMPUTERNAME_LENGTH + 1, L"KIBAOS-");
     for (i = (UINT)wcslen(Buffer); i < MAX_COMPUTERNAME_LENGTH; i++)
         Buffer[i] = Chars[rand() % (ARRAYSIZE(Chars) - 1)];
     Buffer[MAX_COMPUTERNAME_LENGTH] = UNICODE_NULL;

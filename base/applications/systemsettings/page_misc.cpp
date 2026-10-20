@@ -636,6 +636,6 @@ BuildUpdates(PageBuilder &page)
         page.Info(Str(IDS_KERNEL_VERSION), kernel);
     page.Group(Str(IDS_RELATED));
     page.Link(Str(IDS_LIBERNT_WEBSITE), Str(IDS_LIBERNT_WEBSITE_DESC), L"globe_20_regular",
-              [](int) { Launch(L"https://libernt.com/"); });
+              [](int) { Launch(L"https://kibaos.com"); });
     page.Navigate(Str(IDS_PAGE_ABOUT), Str(IDS_ABOUT_DESC), L"info_20_regular", PageId::About);
 }
