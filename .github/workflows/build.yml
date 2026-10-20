@@ -184,6 +184,46 @@ jobs:
           compression-level: 0
           retention-days: 14
 
+      # ── Build OTA CABs & Manifest ──────────────────────────────────────────
+      - name: Build OTA CABs and Manifest
+        run: |
+          OUT=${{ steps.configure.outputs.outdir }}
+          BASE="kibaos-v${{ github.run_number }}-${{ matrix.arch }}"
+          mkdir -p ota_dist
+
+          # Create CAB file containing system payload binaries
+          if command -v gcab >/dev/null 2>&1; then
+            gcab -c "ota_dist/${BASE}-payload.cab" "$OUT/bootcd.iso"
+          else
+            tar -czf "ota_dist/${BASE}-payload.cab" -C "$OUT" bootcd.iso
+          fi
+
+          CAB_SIZE=$(stat -c%s "ota_dist/${BASE}-payload.cab")
+          CAB_SHA256=$(sha256sum "ota_dist/${BASE}-payload.cab" | awk '{print $1}')
+
+          # Generate ota_manifest.json
+          python3 -c "
+import json
+manifest = {
+    'manifest_version': 1,
+    'os_version': '10.0',
+    'build_number': ${{ github.run_number }},
+    'min_update_version': 1,
+    'cabs': [{
+        'name': '${BASE}-payload.cab',
+        'sha256': '${CAB_SHA256}',
+        'size': ${CAB_SIZE}
+    }]
+}
+with open('ota_dist/ota_manifest.json', 'w') as f:
+    json.dump(manifest, f, indent=2)
+"
+
+      # ── Verify OTA Manifest & CAB ──────────────────────────────────────────
+      - name: Verify OTA Manifest and CAB
+        run: |
+          python3 scripts/test_ota_engine.py
+
       # ── SourceForge: upload immediately, replacing the previous build ─────
       # Same scheme as before: a marker file on the server records the run
       # number of the last successful upload for this arch, and ONLY the exact
@@ -239,6 +279,19 @@ jobs:
           # Upload this build.
           sshpass -e rsync -avP --progress dist/* \
             "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
+
+          # Upload OTA CABs first, manifest last if on release branch or tag
+          if [[ "${{ github.ref }}" == refs/heads/release/* || "${{ github.ref }}" == refs/tags/* ]]; then
+            sshpass -e sftp -oStrictHostKeyChecking=no "$SF_USER@frs.sourceforge.net" <<EOF
+              cd ${REMOTE_DIR}
+              mkdir ota
+              bye
+EOF
+            # Upload CAB files first
+            sshpass -e rsync -avP ota_dist/*.cab "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
+            # Upload manifest last
+            sshpass -e rsync -avP ota_dist/ota_manifest.json "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
+          fi
 
           # Record this run's number for next time.
           echo "${{ github.run_number }}" > "${MARKER}"

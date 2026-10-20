@@ -410,7 +410,7 @@ public:
         int xBase = ((rc.right - w) / 2);
         int yBase = ((rc.bottom - h) / 2);
 
-        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
+        HBRUSH hbr = CreateSolidBrush(UX_TOKEN_COLOR_SURFACE_LIGHT);
         HGDIOBJ hbrOld = SelectObject(hdc, hbr);
         HGDIOBJ hpenOld = SelectObject(hdc, GetStockObject(NULL_PEN));
 

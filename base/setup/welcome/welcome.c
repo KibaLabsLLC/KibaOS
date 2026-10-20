@@ -44,8 +44,9 @@
 
 #include "resource.h"
 
-#define LIGHT_BLUE RGB(214, 239, 247)
-#define DARK_BLUE  RGB(107, 123, 140)
+#include <reactos/ux_tokens.h>
+#define LIGHT_BLUE UX_TOKEN_COLOR_BACKGROUND_LIGHT
+#define DARK_BLUE  UX_TOKEN_COLOR_ACCENT_PRIMARY
 
 #define TITLE_WIDTH  480
 #define TITLE_HEIGHT  93
