@@ -168,7 +168,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APPTITLE "Управителят за приложения на РеактОС"
+    IDS_APPTITLE "KibaOS Apps"
     IDS_APP_AUTHORS "Copyright 2009 Dmitry Chapyshev"
     IDS_WELCOME_TITLE "Управителят на приложенията на РеактОС ви приветства"
     IDS_WELCOME_TEXT "Изберете раздел от лявата страна, след което изберете приложение за слагане или премахване.\nСтраницата на РеактОС: "

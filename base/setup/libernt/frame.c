@@ -401,17 +401,12 @@ FramePaintColumn(
 }
 
 static VOID
-FrameCenter(
+FrameFullScreen(
     _In_ HWND hwnd)
 {
-    RECT rcWork, rcWindow;
-
-    SystemParametersInfoW(SPI_GETWORKAREA, 0, &rcWork, 0);
-    GetWindowRect(hwnd, &rcWindow);
-    SetWindowPos(hwnd, HWND_TOP,
-                 rcWork.left + ((rcWork.right - rcWork.left) - (rcWindow.right - rcWindow.left)) / 2,
-                 rcWork.top + ((rcWork.bottom - rcWork.top) - (rcWindow.bottom - rcWindow.top)) / 2,
-                 0, 0, SWP_NOSIZE);
+    INT cxScreen = GetSystemMetrics(SM_CXSCREEN);
+    INT cyScreen = GetSystemMetrics(SM_CYSCREEN);
+    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, cxScreen, cyScreen, SWP_SHOWWINDOW);
 }
 
 static INT_PTR CALLBACK
@@ -480,7 +475,7 @@ SetupFrameProc(
                              rc.right - rc.left, rc.bottom - rc.top, SWP_NOACTIVATE);
             }
 
-            FrameCenter(hwnd);
+            FrameFullScreen(hwnd);
             FrameShowPage(FrameNextPage(0));
             return FALSE;
         }
@@ -500,6 +495,9 @@ SetupFrameProc(
                 case IDOK:
                 case IDC_FRAME_NEXT:
                     FrameNext();
+                    return TRUE;
+                case IDC_TRY_KIBAOS:
+                    EndDialog(hwnd, IDIGNORE);
                     return TRUE;
                 case IDC_FRAME_BACK:
                     FrameBack();

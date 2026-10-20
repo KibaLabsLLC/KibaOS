@@ -173,7 +173,7 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_APPTITLE "מנהל היישומים של ReactOS"
+    IDS_APPTITLE "KibaOS Apps"
     IDS_APP_AUTHORS "Copyright 2009 Dmitry Chapyshev"
     IDS_WELCOME_TITLE "ברוכים הבאים למנהל היישומים של ReactOS!"
     IDS_WELCOME_TEXT "בחר קטגוריה בצד שמאל, לאחר מכן בחר יישום להתקנה או להסרה.\nהאתר של KibaOS: "
