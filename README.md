@@ -4,7 +4,7 @@
 
 ## Quick Links
 
-[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/winget-rosbe)
+[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/libernt-build-toolchain)
 
 ## What is KibaOS?
 
@@ -44,7 +44,7 @@ You need Git, CMake, Ninja and a C/C++ compiler for your own machine. RosBE adds
 On Linux or macOS:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/ahmedarif193/winget-rosbe/main/rosbe-unix-bootstrap.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ahmedarif193/libernt-build-toolchain/main/rosbe-unix-bootstrap.sh | sh
 ```
 
 On Windows, we suggest WSL2. Install it with `wsl --install`, open the Linux terminal it adds, and follow the Linux steps there. Keep the source inside the Linux file system rather than under `/mnt/c`, where builds run slower.
