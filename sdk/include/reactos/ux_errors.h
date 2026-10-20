@@ -11,6 +11,7 @@
 #define _UX_ERRORS_H_
 
 #include <windows.h>
+#include <wininet.h>
 
 #ifdef __cplusplus
 extern "C" {

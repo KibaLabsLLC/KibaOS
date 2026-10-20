@@ -49,6 +49,7 @@
 #include <ui/rosdlgs.h>
 #include <shellutils.h>
 #include <reactos/trayicons.h>
+#include <reactos/ux_tokens.h>
 
 #include "tmschema.h"
 #include "resource.h"
