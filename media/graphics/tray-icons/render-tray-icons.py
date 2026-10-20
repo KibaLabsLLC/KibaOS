@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PROJECT:     LiberNT shell
+PROJECT:     KibaOS shell
 LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
 PURPOSE:     Render the notification area status icons on the pixel grid
 COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif.ing@outlook.com>

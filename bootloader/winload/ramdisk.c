@@ -59,7 +59,7 @@ RdAdvance(
         return;
 
     RdPercent = Percent;
-    FwPrint(L"\rLoading files... %lu%%", Percent);
+    FwPrint(L"\rStarting KibaOS... %lu%%", Percent);
 }
 
 static
@@ -353,7 +353,7 @@ RdCreateVolume(
     RdSize = ALIGN_UP_BY(PayloadBytes + max(ExtraBytes, RD_MINIMUM_EXTRA), MM_PAGE_SIZE);
     if (RdSize > RD_MAX_SIZE)
     {
-        FwPrint(L"The RAM disk is larger than 4 GB.\r\n");
+        FwPrint(L"System memory limit exceeded.\r\n");
         return FALSE;
     }
 
@@ -362,7 +362,7 @@ RdCreateVolume(
         RdBase = MmAllocateHighMemoryWithType((SIZE_T)RdSize, LoaderXIPRom);
     if (!RdBase)
     {
-        FwPrint(L"Not enough memory for a %I64u MB RAM disk.\r\n", RdSize >> 20);
+        FwPrint(L"Not enough memory to load KibaOS.\r\n");
         return FALSE;
     }
 
@@ -488,7 +488,7 @@ OslBuildRamdisk(
 
     if (Path[0] == UNICODE_NULL ? !HaveMedium : File.Size == 0)
     {
-        FwPrint(L"The RAM disk source was not found.\r\n");
+        FwPrint(L"KibaOS system files were not found.\r\n");
         return FALSE;
     }
 
@@ -536,7 +536,7 @@ OslBuildRamdisk(
 
     if (!Success)
     {
-        FwPrint(L"The RAM disk could not be built from its source.\r\n");
+        FwPrint(L"KibaOS could not be loaded from disk.\r\n");
         return FALSE;
     }
 
