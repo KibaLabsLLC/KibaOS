@@ -4,7 +4,7 @@
 
 ## Quick Links
 
-[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/ahmedarif193/winget-rosbe)
+[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/winget-rosbe)
 
 ## What is KibaOS?
 
