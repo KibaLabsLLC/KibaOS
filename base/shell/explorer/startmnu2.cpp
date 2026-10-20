@@ -70,14 +70,14 @@ struct SM2PALETTE
 
 static const SM2PALETTE g_SM2PalLight =
 {
-    RGB( 59,  86, 115), RGB(255, 255, 255), RGB( 34,  34,  34),
+    RGB( 59,  86, 115), UX_TOKEN_COLOR_SURFACE_LIGHT, RGB( 34,  34,  34),
     RGB(219, 219, 219), RGB(212, 231, 248), RGB(125, 177, 227),
-    RGB( 93, 128, 161), RGB(255, 255, 255), RGB(118, 149, 178), RGB(129, 157, 184),
+    RGB( 93, 128, 161), UX_TOKEN_COLOR_SURFACE_LIGHT, RGB(118, 149, 178), RGB(129, 157, 184),
     RGB( 77, 110, 142), RGB(104, 137, 168), RGB(171, 192, 212),
-    RGB(255, 255, 255), RGB(163, 163, 163), RGB(121, 121, 121),
+    UX_TOKEN_COLOR_SURFACE_LIGHT, RGB(163, 163, 163), RGB(121, 121, 121),
     RGB( 68,  68,  68), RGB(205, 205, 205), RGB(166, 166, 166),
     RGB(180, 187, 194), RGB(129, 154, 178), RGB(238, 242, 246),
-    RGB( 34,  34,  34), RGB(255, 255, 255)
+    RGB( 34,  34,  34), UX_TOKEN_COLOR_SURFACE_LIGHT
 };
 
 static const SM2PALETTE g_SM2PalDark =
@@ -200,10 +200,10 @@ VOID StartMenu2_GetFlyoutPalette(OUT SM2_FLYOUT_PALETTE *pPal)
     pPal->HotBorder = pBase->HotBorder;
     pPal->Border = pBase->Border;
     pPal->AccentBg = GetSysColor(COLOR_HIGHLIGHT);
-    pPal->AccentText = RGB(255, 255, 255);
+    pPal->AccentText = UX_TOKEN_COLOR_SURFACE_LIGHT;
     if (bDark)
     {
-        pPal->AccentBg = SM2Mix(pPal->AccentBg, RGB(255, 255, 255), 110);
+        pPal->AccentBg = SM2Mix(pPal->AccentBg, UX_TOKEN_COLOR_SURFACE_LIGHT, 110);
         pPal->AccentText = RGB(0, 0, 0);
     }
 }
@@ -799,7 +799,7 @@ public:
         HBITMAP hbm = CreateCompatibleBitmap(hdc, rc.right, rc.bottom);
         HGDIOBJ hbmOld = SelectObject(hdcMem, hbm);
 
-        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
+        HBRUSH hbr = CreateSolidBrush(UX_TOKEN_COLOR_SURFACE_LIGHT);
         FillRect(hdcMem, &rc, hbr);
         DeleteObject(hbr);
 

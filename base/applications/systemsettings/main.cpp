@@ -7,6 +7,7 @@
 
 #define SECURITY_WIN32
 #include "settings.h"
+#include <reactos/ux_tokens.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
@@ -49,8 +50,8 @@ GlassColor(const Theme &theme, GlassTone tone)
 {
     static const COLORREF Tones[] =
     {
-        RGB(255, 255, 255), RGB(0xC8, 0xC8, 0xC8), RGB(0x80, 0x80, 0x80), RGB(0x1C, 0x1C, 0x1C),
-        RGB(0x30, 0x30, 0x30), RGB(0x60, 0x60, 0x60), RGB(0, 0, 0),
+        UX_TOKEN_COLOR_SURFACE_LIGHT, UX_TOKEN_COLOR_TEXT_SECONDARY_DARK, UX_TOKEN_COLOR_TEXT_SECONDARY_LIGHT, UX_TOKEN_COLOR_BACKGROUND_DARK,
+        UX_TOKEN_COLOR_SURFACE_DARK, UX_TOKEN_COLOR_BORDER_DARK, UX_TOKEN_COLOR_TEXT_PRIMARY_LIGHT,
     };
     const Palette &c = theme.Colors();
 
@@ -1075,11 +1076,11 @@ private:
 
         canvas.Graphics().Flush(Gdiplus::FlushIntentionSync);
         if (m_HotAccount || TopLevel(m_Page) == PageId::Accounts)
-            FillRoundGlass(canvas.Dc(), tile, m_Theme.ScaleF(6.0f), RGB(255, 255, 255),
+            FillRoundGlass(canvas.Dc(), tile, m_Theme.ScaleF((float)UX_TOKEN_CORNER_RADIUS_SMALL), UX_TOKEN_COLOR_SURFACE_LIGHT,
                            TopLevel(m_Page) == PageId::Accounts ? 26 : 13);
         SetRect(&avatar, tile.left + m_Theme.Scale(6), tile.top + m_Theme.Scale(6), tile.left + m_Theme.Scale(38),
                 tile.top + m_Theme.Scale(38));
-        FillRoundGlass(canvas.Dc(), avatar, m_Theme.ScaleF(16.0f), RGB(255, 255, 255), 26);
+        FillRoundGlass(canvas.Dc(), avatar, m_Theme.ScaleF((float)UX_TOKEN_CORNER_RADIUS_LARGE), UX_TOKEN_COLOR_SURFACE_LIGHT, 26);
         CenterIcon(canvas, avatar, m_Theme.Scale(18), L"person_20_regular", GlassColor(m_Theme, GlassTone::Text));
         SetRect(&name, avatar.right + m_Theme.Scale(10), tile.top + m_Theme.Scale(4), tile.right - m_Theme.Scale(8),
                 tile.top + m_Theme.Scale(22));
@@ -1556,7 +1557,7 @@ private:
             pill.bottom -= m_Theme.Scale(2);
             pill.right -= m_Theme.Scale(4);
             if (selected || hot)
-                FillRoundGlass(hdc, pill, m_Theme.ScaleF(6.0f), RGB(255, 255, 255), selected ? 26 : 13);
+                FillRoundGlass(hdc, pill, m_Theme.ScaleF((float)UX_TOKEN_CORNER_RADIUS_SMALL), UX_TOKEN_COLOR_SURFACE_LIGHT, selected ? 26 : 13);
             ImageList_Draw(m_NavImages, data.iImage, hdc, pill.left + m_Theme.Scale(14), (rc.top + rc.bottom - size) / 2,
                            ILD_TRANSPARENT);
             label = pill;

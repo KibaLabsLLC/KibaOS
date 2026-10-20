@@ -137,33 +137,30 @@ wWinMain(HINSTANCE hInstance,
     LPWSTR *argv;
     int argc;
 
-    /* Show the control panel window if no argument or "panel" was passed */
+    /* Redirect control panel calls to systemsettings.exe (One Settings Surface) */
     if (*lpCmdLine == 0 || !_wcsicmp(lpCmdLine, L"panel"))
-        return OpenShellFolder(L"");
+        return ShellExec(L"systemsettings.exe", NULL);
+    if (StrStrIW(lpCmdLine, L"timedate.cpl") || !_wcsicmp(lpCmdLine, L"date/time"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:dateandtime");
+    if (StrStrIW(lpCmdLine, L"desk.cpl") || !_wcsicmp(lpCmdLine, L"desktop") || !_wcsicmp(lpCmdLine, L"color"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:personalization");
+    if (StrStrIW(lpCmdLine, L"main.cpl") || !_wcsicmp(lpCmdLine, L"mouse") || !_wcsicmp(lpCmdLine, L"keyboard"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:devices");
+    if (StrStrIW(lpCmdLine, L"mmsys.cpl"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:sound");
+    if (StrStrIW(lpCmdLine, L"appwiz.cpl"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:appsfeatures");
+    if (StrStrIW(lpCmdLine, L"usrmgr.cpl") || StrStrIW(lpCmdLine, L"nusrmgr.cpl") || !_wcsicmp(lpCmdLine, L"userpasswords"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:yourinfo");
+    if (StrStrIW(lpCmdLine, L"sysdm.cpl"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:about");
+    if (StrStrIW(lpCmdLine, L"powercfg.cpl"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:powersleep");
+    if (StrStrIW(lpCmdLine, L"intl.cpl") || !_wcsicmp(lpCmdLine, L"international"))
+        return ShellExec(L"systemsettings.exe", L"ms-settings:regionlanguage");
 
-    /* Map legacy control panels */
-    if (!_wcsicmp(lpCmdLine, L"sticpl.cpl")) lpCmdLine = (LPWSTR) L"scannercamera";
-
-    /* Check one of the built-in control panel handlers */
-    if (!_wcsicmp(lpCmdLine, L"admintools"))           return OpenShellFolder(L"\\::{D20EA4E1-3957-11d2-A40B-0C5020524153}");
-    else if (!_wcsicmp(lpCmdLine, L"color"))           return RunControlPanel(L"desk.cpl,,2");
-    else if (!_wcsicmp(lpCmdLine, L"date/time"))       return RunControlPanel(L"timedate.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"desktop"))         return RunControlPanel(L"desk.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"folders"))         return RUNDLL(L"shell32.dll,Options_RunDLL");
-    else if (!_wcsicmp(lpCmdLine, L"fonts"))           return OpenShellFolder(L"\\::{D20EA4E1-3957-11d2-A40B-0C5020524152}");
-    else if (!_wcsicmp(lpCmdLine, L"infrared"))        return RunControlPanel(L"irprops.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"international"))   return RunControlPanel(L"intl.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"keyboard"))        return RunControlPanel(L"main.cpl @1");
-    else if (!_wcsicmp(lpCmdLine, L"mouse"))           return RunControlPanel(L"main.cpl @0");
-    else if (!_wcsicmp(lpCmdLine, L"netconnections"))  return OpenShellFolder(L"\\::{7007ACC7-3202-11D1-AAD2-00805FC1270E}");
-    else if (!_wcsicmp(lpCmdLine, L"netware"))         return RunControlPanel(L"nwc.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"ports"))           return RunControlPanel(L"sysdm.cpl,,1");
-    else if (!_wcsicmp(lpCmdLine, L"printers"))        return OpenShellFolder(L"\\::{2227A280-3AEA-1069-A2DE-08002B30309D}");
-    else if (!_wcsicmp(lpCmdLine, L"scannercamera"))   return OpenShellFolder(L"\\::{E211B736-43FD-11D1-9EFB-0000F8757FCD}");
-    else if (!_wcsicmp(lpCmdLine, L"schedtasks"))      return OpenShellFolder(L"\\::{D6277990-4C6A-11CF-8D87-00AA0060F5BF}");
-    else if (!_wcsicmp(lpCmdLine, L"telephony"))       return RunControlPanel(L"telephon.cpl");
-    else if (!_wcsicmp(lpCmdLine, L"userpasswords"))   return OpenUserAccounts();                    /* Graphical User Account Manager */
-    else if (!_wcsicmp(lpCmdLine, L"userpasswords2"))  return RUNDLL(L"netplwiz.dll,UsersRunDll");   /* Dialog based advanced User Account Manager */
+    /* Show default unified settings surface */
+    return ShellExec(L"systemsettings.exe", NULL);
 
     /* https://learn.microsoft.com/en-us/windows/win32/shell/executing-control-panel-items#windows-vista-canonical-names */
     argv = CommandLineToArgvW(lpCmdLine, &argc);

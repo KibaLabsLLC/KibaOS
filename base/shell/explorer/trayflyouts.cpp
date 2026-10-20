@@ -7455,7 +7455,7 @@ public:
         DeleteObject(hbrEdge);
         if (bChecked)
         {
-            HPEN hPen = CreatePen(PS_SOLID, Sc(2), RGB(255, 255, 255));
+            HPEN hPen = CreatePen(PS_SOLID, Sc(2), UX_TOKEN_COLOR_SURFACE_LIGHT);
             HGDIOBJ hOldPen = SelectObject(hdc, hPen);
             MoveToEx(hdc, rcBox.left + Sc(3), cy, NULL);
             LineTo(hdc, rcBox.left + Sc(6), cy + Sc(3));
@@ -9745,7 +9745,7 @@ public:
                          CardFill(bBodyHot || bBadgeHot, m_iPressed == m_iHot && (bBodyHot || bBadgeHot)));
         if (bActive)
         {
-            crBadge = bBadgeHot ? TfyMix(m_Pal.AccentBg, RGB(255, 255, 255), 28) : m_Pal.AccentBg;
+            crBadge = bBadgeHot ? TfyMix(m_Pal.AccentBg, UX_TOKEN_COLOR_SURFACE_LIGHT, 28) : m_Pal.AccentBg;
             crGlyph = m_Pal.AccentText;
         }
         else

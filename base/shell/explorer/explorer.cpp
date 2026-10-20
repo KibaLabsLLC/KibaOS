@@ -19,6 +19,8 @@
  */
 
 #include "precomp.h"
+#include <reactos/ux_errors.h>
+#include <strsafe.h>
 #include <browseui_undoc.h>
 
 HINSTANCE hExplorerInstance;
@@ -181,7 +183,10 @@ StartWithDesktop(IN HINSTANCE hInstance)
     {
         WCHAR Message[256];
         LoadStringW(hInstance, IDS_STARTUP_ERROR, Message, _countof(Message));
-        MessageBox(NULL, Message, NULL, MB_ICONERROR);
+        const UX_ERROR_ENTRY *err = UxGetErrorEntry(GetLastError());
+        WCHAR szMsg[512];
+        StringCchPrintfW(szMsg, 512, L"%s\n\nReason: %s\n\nAction: %s", err->WhatHappened, err->WhyItHappened, err->WhatToDoNext);
+        MessageBoxW(NULL, szMsg, L"KibaOS Shell Error", MB_ICONERROR | MB_OK);
         return 1;
     }
 

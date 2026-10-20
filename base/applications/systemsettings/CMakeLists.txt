@@ -10,6 +10,7 @@ list(APPEND SOURCE
     page_apps.cpp
     page_accounts.cpp
     page_time.cpp
+    page_updates.cpp
     page_misc.cpp
     pointer.cpp
     bootloader.cpp
