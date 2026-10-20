@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     DWM compositor ExtEscape integration tests
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Tests the ExtEscape-based DWM compositor control interface:
  *   0x44574D01 = DWM_ESCAPE_SUPPRESS_CURSOR

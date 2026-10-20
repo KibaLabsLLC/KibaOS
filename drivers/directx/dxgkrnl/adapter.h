@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Public declarations for adapter.c
  *              (miniport registration and adapter lifecycle)
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * Include this header from dxgkrnl source files that need to call the
  * adapter subsystem API.  Miniport drivers do NOT include this header;

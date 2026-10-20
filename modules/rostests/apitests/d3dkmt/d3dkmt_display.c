@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Tests for D3DKMT display management
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Tests: D3DKMTSetVidPnSourceOwner, D3DKMTGetDisplayModeList,
  *        D3DKMTSetDisplayMode, D3DKMTWaitForVerticalBlankEvent,

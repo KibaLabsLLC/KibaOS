@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS DirectX GPU Memory Manager and Scheduler
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     GPU video memory (segment) allocator for dxgmms1.sys
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * This file implements the heap within each GPU memory segment:
  *

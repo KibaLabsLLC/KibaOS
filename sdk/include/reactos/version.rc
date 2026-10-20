@@ -19,7 +19,7 @@
 #define REACTOS_DEFAULT_STR_COMPANY_NAME    "KibaOS Project"
 #define REACTOS_DEFAULT_STR_DESCRIPTION     "KibaOS Core Component"
 #define REACTOS_DEFAULT_STR_INTERNAL_NAME   ""
-#define REACTOS_DEFAULT_STR_LEGAL_COPYRIGHT "(C) 1996-" COPYRIGHT_YEAR " ReactOS and KibaOS contributors"
+#define REACTOS_DEFAULT_STR_LEGAL_COPYRIGHT "(C) 1996-" COPYRIGHT_YEAR " ReactOS and LiberNT contributors"
 #define REACTOS_DEFAULT_STR_PRODUCT_NAME    "KibaOS Operating System"
 
 /* Set defaults for everything, unless overridden */

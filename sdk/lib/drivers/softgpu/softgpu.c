@@ -4,7 +4,7 @@
  * PURPOSE:     DriverEntry and core DDI callbacks for softgpu.sys.
  *              Implements a configurable WDDM ABI miniport with a
  *              physical/software engine and a bounded system-RAM segment.
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  *
  * Target device: a platform provider supplies the adapter binding and
  * firmware-display contract; this file contains only the software engine.

@@ -2,7 +2,7 @@
  * PROJECT:         KibaOS Kernel
  * LICENSE:         GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:         Windows thermal cooling request aggregation
- * COPYRIGHT:       Copyright 2026 KibaOS Project
+ * COPYRIGHT:       Copyright 2026 LiberNT Project
  */
 
 #include <ntoskrnl.h>

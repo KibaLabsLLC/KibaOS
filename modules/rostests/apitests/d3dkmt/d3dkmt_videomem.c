@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM 2.0 video memory budgeting test (QueryVideoMemoryInfo)
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * D3DKMTQueryVideoMemoryInfo reports the per-process memory budget and current
  * usage for a memory segment group (local = dedicated VRAM, non-local = shared

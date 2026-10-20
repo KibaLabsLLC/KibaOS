@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS DirectX Graphics Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     PnP dispatch declarations and child PDO device extension
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * WDDM types shared across dxgkrnl translation units (DXGK_INTERFACE,
  * DXGK_START_INFO, DXGK_CHILD_DESCRIPTOR, etc.) are defined in

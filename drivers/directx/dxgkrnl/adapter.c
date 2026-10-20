@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     WDDM miniport registration, adapter PnP/Power lifecycle,
  *              and DxgkCb* callbacks exported to miniport drivers
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  *
  * Overview
  * --------

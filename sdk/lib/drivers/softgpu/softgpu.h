@@ -4,7 +4,7 @@
  * PURPOSE:     Private header for softgpu.sys — WDDM 2.0 ABI miniport with a
  *              physical/software engine and no GPU MMU, targeting QEMU STD
  *              VGA (PCI VEN_1234&DEV_1111) or the firmware framebuffer.
- * COPYRIGHT:   Copyright 2024 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2024 LiberNT WDDM Team
  *
  * Architecture notes
  * ==================

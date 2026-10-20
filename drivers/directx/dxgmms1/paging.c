@@ -4,7 +4,7 @@
  * PURPOSE:     WDDM GPU paging engine
  *              Moves allocations between VRAM and system RAM by constructing
  *              and submitting paging DMA buffers to the GPU copy engine.
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * ARCHITECTURE NOTES (amd64/x86)
  * --------------------------------

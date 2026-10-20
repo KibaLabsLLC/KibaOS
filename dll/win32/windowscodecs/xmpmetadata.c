@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Windows Imaging Component
  * LICENSE:     LGPL-2.1-or-later (https://spdx.org/licenses/LGPL-2.1-or-later)
  * PURPOSE:     XMP structure and array metadata readers
- * COPYRIGHT:   Copyright 2026 KibaOS contributors
+ * COPYRIGHT:   Copyright 2026 LiberNT contributors
  */
 
 #include <stdarg.h>

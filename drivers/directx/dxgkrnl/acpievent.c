@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Delivery of ACPI and power-state events to the miniport
  *              through DxgkDdiNotifyAcpiEvent.
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Three sources feed the miniport:
  *

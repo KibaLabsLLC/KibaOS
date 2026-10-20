@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS DirectX GPU Memory Manager and Scheduler
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     dxgkrnl registration interface and adapter lifecycle
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * This file implements:
  *   DxgkMmsRegister()             — exported; called by dxgkrnl at init

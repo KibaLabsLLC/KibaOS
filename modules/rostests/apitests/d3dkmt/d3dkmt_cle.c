@@ -6,7 +6,7 @@
  *              hand-computed independently from the mesa v3d_packet.xml
  *              field layouts (start/size attributes), NOT from the
  *              encoder under test.
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  */
 
 #include "precomp.h"

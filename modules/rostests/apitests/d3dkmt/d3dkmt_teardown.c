@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS D3DKMT API Tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Teardown, exhaustion and contention
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Every other subtest exercises objects that are created and destroyed in the
  * order the API documents.  Nothing exercises the orders a real application

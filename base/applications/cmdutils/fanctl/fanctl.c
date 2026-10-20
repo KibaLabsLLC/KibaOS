@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS fan control utility
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Control ACPI thermal zones through the Windows thermal ABI
- * COPYRIGHT:   Copyright 2026 KibaOS Project
+ * COPYRIGHT:   Copyright 2026 LiberNT Project
  */
 
 #define WIN32_NO_STATUS

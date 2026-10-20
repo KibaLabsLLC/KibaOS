@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Kernel
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Parallel PnP device-tree enumeration
- * COPYRIGHT:   Copyright KibaOS contributors
+ * COPYRIGHT:   Copyright LiberNT contributors
  */
 
 #include <ntoskrnl.h>

@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Advanced colour (HDR) state of a display output, between user
  *              mode (DisplayConfig, DXGI) and dxgkrnl
- * COPYRIGHT:   Copyright 2026 KibaOS Contributors
+ * COPYRIGHT:   Copyright 2026 LiberNT Contributors
  */
 
 #pragma once

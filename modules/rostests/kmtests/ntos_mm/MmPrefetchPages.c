@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS kernel-mode tests
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Kernel-mode test for MmPrefetchPages
- * COPYRIGHT:   Copyright 2026 KibaOS Project
+ * COPYRIGHT:   Copyright 2026 LiberNT Project
  */
 
 #include <kmt_test.h>

@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Windows Imaging Component
  * LICENSE:     LGPL-2.1-or-later (https://spdx.org/licenses/LGPL-2.1-or-later)
  * PURPOSE:     JPEG XR encoding and decoding with the Microsoft reference codec
- * COPYRIGHT:   Copyright 2026 KibaOS contributors
+ * COPYRIGHT:   Copyright 2026 LiberNT contributors
  */
 
 #define COBJMACROS

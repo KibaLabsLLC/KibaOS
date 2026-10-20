@@ -5,7 +5,7 @@
  *              render-command escape (Render -> vidsch queue -> fence-at-
  *              kick -> SubmitCommand -> per-node completion -> retire)
  *              against the rpi5vc4 miniport's driver-private DMA stream.
- * COPYRIGHT:   Copyright 2026 KibaOS WDDM Team
+ * COPYRIGHT:   Copyright 2026 LiberNT WDDM Team
  *
  * Win11-green rule: success is asserted ONLY when the adapter positively
  * identifies as rpi5vc4 (the RPI5VC4 info escape succeeds).  On any other

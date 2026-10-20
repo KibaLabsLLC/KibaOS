@@ -2,7 +2,7 @@
  * PROJECT:     KibaOS Storport NVMe miniport
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     Adapter discovery, resources and Storport entry points
- * COPYRIGHT:   Copyright 2026 KibaOS Project
+ * COPYRIGHT:   Copyright 2026 LiberNT Project
  */
 
 #include "stornvme.h"

@@ -3,7 +3,7 @@
  * LICENSE:     GPL-3.0-or-later (https://spdx.org/licenses/GPL-3.0-or-later)
  * PURPOSE:     GPU command-buffer scheduler — public interface exported to the
  *              rest of dxgmms1 and to dxgkrnl via the DXGMMS_INTERFACE table.
- * COPYRIGHT:   Copyright 2024 KibaOS Team
+ * COPYRIGHT:   Copyright 2024 LiberNT Team
  *
  * WDDM scheduling model overview
  * --------------------------------
