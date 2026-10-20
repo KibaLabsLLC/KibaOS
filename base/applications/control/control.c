@@ -72,27 +72,6 @@ OpenControlPanelItem(LPCWSTR Name, LPCWSTR Page)
 }
 
 static INT
-OpenShellFolder(LPWSTR lpFolderCLSID)
-{
-    WCHAR szParameters[MAX_PATH];
-
-    /*
-     * Open a shell folder using "explorer.exe". If Explorer shell is not
-     * available, use ReactOS's alternative file browser instead.
-     * The passed CLSIDs are all subfolders of the "Control Panel" shell folder.
-     */
-    StringCbCopyW(szParameters, sizeof(szParameters), L"/n,::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{21EC2020-3AEA-1069-A2DD-08002B30309D}");
-    StringCbCatW(szParameters, sizeof(szParameters), lpFolderCLSID);
-
-    return (INT_PTR)ShellExecuteW(NULL,
-                                  L"open",
-                                  GetShellWindow() ? L"explorer.exe" : L"filebrowser.exe",
-                                  szParameters,
-                                  NULL,
-                                  SW_SHOWDEFAULT) > 32;
-}
-
-static INT
 RunControlPanel(LPCWSTR lpCmd)
 {
     WCHAR szParameters[MAX_PATH];
@@ -101,29 +80,6 @@ RunControlPanel(LPCWSTR lpCmd)
         return 0;
 
     return RUNDLL(szParameters);
-}
-
-static BOOL
-OpenUserAccounts(VOID)
-{
-    WCHAR szPath[MAX_PATH];
-
-    GetSystemDirectoryW(szPath, _countof(szPath));
-    PathAppendW(szPath, L"lusrmgr.msc");
-    if (IsOS(OS_ANYSERVER) && ShellExec(szPath, NULL))
-        return TRUE;
-
-    /* 
-     * TODO: OpenControlPanelItem(L"Microsoft.UserAccounts", NULL) on Vista+ (needs usercpl.dll)
-     * See: https://learn.microsoft.com/en-us/windows/win32/shell/controlpanel-canonical-names#user-accounts
-     */
-
-    GetSystemDirectoryW(szPath, _countof(szPath));
-    PathAppendW(szPath, L"nusrmgr.cpl"); /* The name used on WinXP */
-    if (PathFileExistsW(szPath) && RunControlPanel(szPath))
-        return TRUE;
-
-    return RunControlPanel(L"usrmgr.cpl"); /* ROS specific name (CORE-10226) */
 }
 
 INT
