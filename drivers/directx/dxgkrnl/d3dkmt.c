@@ -13414,8 +13414,14 @@ DxgkpDispatchBufferedIoctlWorker(
 
         case IOCTL_D3DKMT_GETOVERLAYSTATE:
         {
-            /* Overlay state query was added after the Vista overlay DDIs. */
-            return STATUS_NOT_SUPPORTED;
+            if (InputLength < sizeof(D3DKMT_GETOVERLAYSTATE) || SystemBuffer == NULL)
+                return STATUS_BUFFER_TOO_SMALL;
+            Status = DxgkGetOverlayStateWithAccessMode(
+                         (D3DKMT_GETOVERLAYSTATE *)SystemBuffer,
+                         EmbeddedBufferMode);
+            if (NT_SUCCESS(Status))
+                KmtRequest->Information = sizeof(D3DKMT_GETOVERLAYSTATE);
+            return Status;
         }
 
         /* ---- WDDM 1.2 stubs ------------------------------------------------ */
@@ -13823,6 +13829,7 @@ DxgkpDispatchBufferedIoctlWorker(
             pInterface->RxgkIntPfnDestroyOverlay       = (PDXGADAPTER_DESTROYOVERLAY)DxgkDestroyOverlay;
             pInterface->RxgkIntPfnFlipOverlay          = (PDXGADAPTER_FLIPOVERLAY)DxgkFlipOverlay;
             pInterface->RxgkIntPfnUpdateOverlay        = (PDXGADAPTER_UPDATEOVERLAY)DxgkUpdateOverlay;
+            pInterface->RxgkIntPfnGetOverlayState      = (PDXGADAPTER_GETOVERLAYSTATE)DxgkGetOverlayState;
             pInterface->RxgkIntPfnGetContextSchedulingPriority = (PDXGADAPTER_GETCONTEXTSCHEDULINGPRIORITY)DxgkGetContextSchedulingPriority;
             pInterface->RxgkIntPfnGetDeviceState       = (PDXGADAPTER_GETDEVICESTATE)DxgkGetDeviceState;
             pInterface->RxgkIntPfnSetContextSchedulingPriority = (PDXGADAPTER_SETCONTEXTSCHEDULINGPRIORITY)DxgkSetContextSchedulingPriority;

@@ -1768,6 +1768,13 @@ KiSystemServiceHandler(IN PKTRAP_FRAME TrapFrame,
 
     /* Set thread fields */
     Thread->TrapFrame = TrapFrame;
+
+    /* Check if thread is a Pico process thread */
+    if (PspPicoDispatchSystemCall(TrapFrame) != STATUS_NOT_IMPLEMENTED)
+    {
+        KeGetPcr()->NtTib.ExceptionList = TrapFrame->ExceptionList;
+        return;
+    }
     Thread->PreviousMode = KiUserTrap(TrapFrame);
 
     /* Enable interrupts */

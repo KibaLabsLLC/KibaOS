@@ -518,6 +518,9 @@ PspExitThread(IN NTSTATUS ExitStatus)
     CurrentProcess = (PEPROCESS)Thread->ThreadsProcess;
     ASSERT((Thread) == PsGetCurrentThread());
 
+    /* Notify Pico provider if this is a Pico thread */
+    PspPicoExitThread(Thread);
+
     /* Can't terminate a thread if it attached another process */
     if (KeIsAttachedProcess())
     {
@@ -1198,6 +1201,9 @@ PspExitProcess(IN BOOLEAN LastThread,
 
         /* Run the Notification Routines */
         PspRunCreateProcessNotifyRoutines(Process, FALSE);
+
+        /* Notify Pico provider if this is a Pico process */
+        PspPicoExitProcess(Process);
     }
 
     /* Cleanup the power state */
