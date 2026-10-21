@@ -1,9 +1,21 @@
 <p align="center">
-  <img src="https://github.com/KibaLabsLLC/Kiba/blob/f9dfed3c5b773fc98b754e514bb2b9d4294cb73f/assets/README/9A269086-C289-46E0-B262-47B3BF77FAB0.png" width="250" alt="KibaOS Banner">
+<img width="600" alt="Kiba Labs banner" src="https://github.com/user-attachments/assets/0dfcfaf9-1fbc-4fd4-88d2-addd1bb46507" />
 </p>
 
+<h1 align="center">KibaOS</h1>
+<h2 align="center">
+A new dawn in how we interact with our computers, no longer is it a machine, but second nature.
 
-# KibaOS
+
+  Simple. Refined. Libre.
+
+
+</h2>
+
+## Quick Links
+
+[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/libernt-build-toolchain)
+
 
 [![License](https://img.shields.io/badge/license-GNU_GPL_3.0-0161B6.svg)](COPYING)
 
@@ -14,11 +26,11 @@
 
 [![Download KibaOS](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/kibaos/files/latest/download)
 
-## Quick Links
-
-[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/libernt-build-toolchain)
-
 ## What is KibaOS?
+
+<p align="center">
+  <img src="https://github.com/KibaLabsLLC/Kiba/blob/f9dfed3c5b773fc98b754e514bb2b9d4294cb73f/assets/README/9A269086-C289-46E0-B262-47B3BF77FAB0.png" width="450" alt="KibaOS Banner">
+</p>
 
 KibaOS is a free, Windows-compatible operating system from Kiba Labs, built on the NT architecture. It targets Windows® 11 compatibility, with room for freestyle and experimental features.
 
