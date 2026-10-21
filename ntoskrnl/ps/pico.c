@@ -84,7 +84,7 @@ PsCreatePicoProcess(
     Status = ObReferenceObjectByHandle(
                  *ProcessHandle,
                  PROCESS_ALL_ACCESS,
-                 *PsProcessType,
+                 PsProcessType,
                  KernelMode,
                  (PVOID*)&Process,
                  NULL);
@@ -118,7 +118,7 @@ PsCreatePicoThread(
     Status = ObReferenceObjectByHandle(
                  ProcessHandle,
                  PROCESS_ALL_ACCESS,
-                 *PsProcessType,
+                 PsProcessType,
                  KernelMode,
                  (PVOID*)&Process,
                  NULL);
@@ -146,7 +146,7 @@ PsCreatePicoThread(
         NTSTATUS RefStatus = ObReferenceObjectByHandle(
                                  *ThreadHandle,
                                  THREAD_ALL_ACCESS,
-                                 *PsThreadType,
+                                 PsThreadType,
                                  KernelMode,
                                  (PVOID*)&Thread,
                                  NULL);
