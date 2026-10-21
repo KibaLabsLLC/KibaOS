@@ -68,6 +68,18 @@ typedef struct _KI_SAMPLE_MAP
 
 #define MAX_TIMER_DPCS                      16
 
+#define KIBA_DPC_RING_SIZE                  256
+#define KIBA_DPC_PRIORITY_HIGH              0
+#define KIBA_DPC_PRIORITY_LOW               1
+#define KIBA_DPC_PRIORITY_COUNT             2
+
+typedef struct _KIBA_DPC_RING_BUFFER
+{
+    volatile ULONG Head;
+    volatile ULONG Tail;
+    PKDPC Entries[KIBA_DPC_RING_SIZE];
+} KIBA_DPC_RING_BUFFER, *PKIBA_DPC_RING_BUFFER;
+
 typedef struct _DPC_QUEUE_ENTRY
 {
     PKDPC Dpc;

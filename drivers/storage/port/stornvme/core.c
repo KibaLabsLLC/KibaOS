@@ -655,3 +655,50 @@ NvmeResetController(_In_ PNVME_DEVICE_EXTENSION Device)
     NvmeReleaseLock(Device, &Lock);
     return TRUE;
 }
+
+BOOLEAN
+NvmeSubmitDirectBypassedCommand(
+    _In_ PNVME_DEVICE_EXTENSION Device,
+    _In_ ULONG QueueId,
+    _In_ PVOID CommandBuffer,
+    _In_ ULONG CommandLength)
+{
+    PNVME_QUEUE Queue;
+    PNVME_COMMAND Command;
+    ULONG NextTail;
+
+    if (!Device || !CommandBuffer || CommandLength < sizeof(NVME_COMMAND))
+    {
+        return FALSE;
+    }
+
+    if (QueueId == 0 || QueueId > Device->IoQueueCount)
+    {
+        Queue = NvmeSelectQueue(Device);
+    }
+    else
+    {
+        Queue = &Device->IoQueues[QueueId - 1];
+    }
+
+    if (!Queue || !Queue->Created || !Queue->Sq)
+    {
+        return FALSE;
+    }
+
+    Command = (PNVME_COMMAND)CommandBuffer;
+
+    /* Direct hardware submission bypassing standard IRP allocation */
+    NextTail = (Queue->SqTail + 1) % Queue->Entries;
+    if (NextTail == Queue->SqHead)
+    {
+        return FALSE; /* Queue full */
+    }
+
+    Queue->Sq[Queue->SqTail] = *Command;
+    KeMemoryBarrier();
+    Queue->SqTail = NextTail;
+    NvmeWriteRegister(Device, Queue->SqDoorbell, Queue->SqTail);
+
+    return TRUE;
+}

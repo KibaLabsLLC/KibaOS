@@ -221,6 +221,9 @@ BOOLEAN NvmeResetController(_In_ PNVME_DEVICE_EXTENSION Device);
 /* pci.c */
 VOID NvmeMaskDeviceInterrupts(_In_ PNVME_DEVICE_EXTENSION Device, _In_ BOOLEAN Mask);
 
+/* Direct Storage Kernel Bypass */
+BOOLEAN NvmeSubmitDirectBypassedCommand(_In_ PNVME_DEVICE_EXTENSION Device, _In_ ULONG QueueId, _In_ PVOID CommandBuffer, _In_ ULONG CommandLength);
+
 /* queue.c */
 ULONG NvmeQueueVector(_In_ PNVME_DEVICE_EXTENSION Device, _In_ ULONG QueueId);
 BOOLEAN NvmeCreateIoQueues(_In_ PNVME_DEVICE_EXTENSION Device);
