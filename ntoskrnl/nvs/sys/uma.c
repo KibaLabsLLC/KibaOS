@@ -8,7 +8,7 @@
 #include <ntoskrnl.h>
 #include <reactos/uma.h>
 
-static KIBA_UMA_DOMAIN KiPrimaryUmaDomain = {
+static __attribute__((unused)) KIBA_UMA_DOMAIN KiPrimaryUmaDomain = {
     .DomainId = 0,
     .TotalPages = 0,
     .FreePages = 0,
