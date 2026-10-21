@@ -1108,6 +1108,24 @@ typedef struct _PP_LOOKASIDE_LIST
     struct _GENERAL_LOOKASIDE *L;
 } PP_LOOKASIDE_LIST, *PPP_LOOKASIDE_LIST;
 
+typedef struct _KAPC_STATE
+{
+    LIST_ENTRY ApcListHead[2];
+    struct _KPROCESS *Process;
+    BOOLEAN KernelApcInProgress;
+    BOOLEAN KernelApcPending;
+    BOOLEAN UserApcPending;
+} KAPC_STATE, *PKAPC_STATE, *RESTRICTED_POINTER PRKAPC_STATE;
+
+typedef struct _KQUEUE
+{
+    DISPATCHER_HEADER Header;
+    LIST_ENTRY EntryListHead;
+    ULONG CurrentCount;
+    ULONG MaximumCount;
+    LIST_ENTRY ThreadListHead;
+} KQUEUE, *PKQUEUE, *RESTRICTED_POINTER PRKQUEUE;
+
 //
 // Architectural Types
 //
