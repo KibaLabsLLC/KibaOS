@@ -125,23 +125,7 @@ typedef struct _REMOTE_PORT_VIEW
     LPC_PVOID ViewBase;
 } REMOTE_PORT_VIEW, *PREMOTE_PORT_VIEW;
 
-typedef struct _KAPC_STATE
-{
-    LIST_ENTRY ApcListHead[2];
-    struct _KPROCESS *Process;
-    BOOLEAN KernelApcInProgress;
-    BOOLEAN KernelApcPending;
-    BOOLEAN UserApcPending;
-} KAPC_STATE, *PKAPC_STATE, *RESTRICTED_POINTER PRKAPC_STATE;
-
-typedef struct _KQUEUE
-{
-    DISPATCHER_HEADER Header;
-    LIST_ENTRY EntryListHead;
-    ULONG CurrentCount;
-    ULONG MaximumCount;
-    LIST_ENTRY ThreadListHead;
-} KQUEUE, *PKQUEUE, *RESTRICTED_POINTER PRKQUEUE;
+#include <ketypes.h>
 
 typedef struct _ACE_HEADER
 {
