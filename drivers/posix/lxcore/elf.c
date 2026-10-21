@@ -158,7 +158,7 @@ LxLoadElfImage(
     Status = ObReferenceObjectByHandle(
                  ProcessHandle,
                  PROCESS_ALL_ACCESS,
-                 PsProcessType,
+                 *PsProcessType,
                  KernelMode,
                  (PVOID*)&ProcessObject,
                  NULL);
@@ -249,7 +249,7 @@ LxLoadElfImage(
     {
         PETHREAD ThreadObject;
 
-        if (NT_SUCCESS(ObReferenceObjectByHandle(ThreadHandle, THREAD_ALL_ACCESS, PsThreadType, KernelMode, (PVOID*)&ThreadObject, NULL)))
+        if (NT_SUCCESS(ObReferenceObjectByHandle(ThreadHandle, THREAD_ALL_ACCESS, *PsThreadType, KernelMode, (PVOID*)&ThreadObject, NULL)))
         {
             *ProcessId = HandleToUlong(PsGetThreadProcessId(ThreadObject));
             ObDereferenceObject(ThreadObject);

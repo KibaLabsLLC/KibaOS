@@ -431,6 +431,21 @@ KeIsAttachedProcess(
     VOID
 );
 
+NTKERNELAPI
+VOID
+NTAPI
+KeStackAttachProcess(
+    _Inout_ PRKPROCESS Process,
+    _Out_ PKAPC_STATE ApcState
+);
+
+NTKERNELAPI
+VOID
+NTAPI
+KeUnstackDetachProcess(
+    _In_ PKAPC_STATE ApcState
+);
+
 VOID
 NTAPI
 KeSetEventBoostPriority(
