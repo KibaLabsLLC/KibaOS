@@ -15,7 +15,7 @@ Author:
     Alex Ionescu (alexi@tinykrnl.org) - Updated - 27-Feb-2006
 
 --*/
-#ifndef _NTIFS_
+#if !defined(_NTIFS_) && !defined(_NTIFS_INCLUDED_)
 #ifndef NTOS_MODE_USER
 #define _NTIFS_
 
