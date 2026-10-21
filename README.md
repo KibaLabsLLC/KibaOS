@@ -1,6 +1,18 @@
+<p align="center">
+  <img src="https://github.com/KibaLabsLLC/Kiba/blob/f9dfed3c5b773fc98b754e514bb2b9d4294cb73f/assets/README/9A269086-C289-46E0-B262-47B3BF77FAB0.png" width="250" alt="KibaOS Banner">
+</p>
+
+
 # KibaOS
 
 [![License](https://img.shields.io/badge/license-GNU_GPL_3.0-0161B6.svg)](COPYING)
+
+[![Build Status](https://img.shields.io/github/actions/workflow/status/KibaLabsLLC/KibaOS/build.yml?branch=main-nt10&label=Build&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/KibaLabsLLC/KibaOS/actions)
+
+[![SourceForge](https://img.shields.io/sourceforge/dt/kibaos?style=for-the-badge&color=orange&logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/kibaos/)
+
+
+[![Download KibaOS](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/kibaos/files/latest/download)
 
 ## Quick Links
 
