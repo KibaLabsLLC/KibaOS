@@ -1,5 +1,5 @@
 <p align="center">
-<img width="600" alt="Kiba Labs banner" src="https://github.com/user-attachments/assets/0dfcfaf9-1fbc-4fd4-88d2-addd1bb46507" />
+<img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/main-nt10/GH_MEDIA/kiba-banner-mascot.png?raw=true" />
 </p>
 
 <h1 align="center">KibaOS</h1>
