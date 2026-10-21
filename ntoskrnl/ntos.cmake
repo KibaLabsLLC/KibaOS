@@ -134,6 +134,7 @@ list(APPEND SOURCE
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/ksr.c
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/iomdl.c
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/iomgr.c
+    ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/ioring.c
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/iorsrce.c
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/iotimer.c
     ${REACTOS_SOURCE_DIR}/ntoskrnl/io/iomgr/iowork.c

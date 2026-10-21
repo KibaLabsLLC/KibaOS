@@ -42,6 +42,78 @@ ULONG KiDPCTimeout = 110;
 
 
 static PVOID volatile KiActiveDpc[MAXIMUM_PROCESSORS];
+static KIBA_DPC_RING_BUFFER KiProcessorDpcRings[MAXIMUM_PROCESSORS][KIBA_DPC_PRIORITY_COUNT];
+
+static BOOLEAN
+KibaEnqueueDpcRing(
+    _In_ ULONG Cpu,
+    _In_ ULONG Priority,
+    _In_ PKDPC Dpc)
+{
+    PKIBA_DPC_RING_BUFFER Ring;
+    ULONG Tail, Head, NextTail;
+
+    if (Cpu >= MAXIMUM_PROCESSORS || Priority >= KIBA_DPC_PRIORITY_COUNT || !Dpc)
+        return FALSE;
+
+    Ring = &KiProcessorDpcRings[Cpu][Priority];
+    do {
+        Tail = Ring->Tail;
+        Head = Ring->Head;
+        if ((Tail - Head) >= KIBA_DPC_RING_SIZE)
+        {
+            return FALSE;
+        }
+        NextTail = Tail + 1;
+    } while (InterlockedCompareExchange((volatile LONG*)&Ring->Tail, NextTail, Tail) != (LONG)Tail);
+
+    Ring->Entries[Tail & (KIBA_DPC_RING_SIZE - 1)] = Dpc;
+    KeMemoryBarrier();
+    return TRUE;
+}
+
+static PKDPC
+KibaDequeueDpcRing(
+    _In_ ULONG Cpu)
+{
+    PKIBA_DPC_RING_BUFFER Ring;
+    ULONG Head, Tail, NextHead;
+    PKDPC Dpc;
+    ULONG Priority;
+
+    if (Cpu >= MAXIMUM_PROCESSORS)
+        return NULL;
+
+    /* Prioritize hardware-bound IO DPCs (KIBA_DPC_PRIORITY_HIGH) over background system metrics DPCs */
+    for (Priority = 0; Priority < KIBA_DPC_PRIORITY_COUNT; Priority++)
+    {
+        Ring = &KiProcessorDpcRings[Cpu][Priority];
+        do {
+            Head = Ring->Head;
+            Tail = Ring->Tail;
+            if (Head == Tail)
+            {
+                break;
+            }
+
+            Dpc = Ring->Entries[Head & (KIBA_DPC_RING_SIZE - 1)];
+            if (!Dpc)
+            {
+                YieldProcessor();
+                continue;
+            }
+
+            NextHead = Head + 1;
+            if (InterlockedCompareExchange((volatile LONG*)&Ring->Head, NextHead, Head) == (LONG)Head)
+            {
+                Ring->Entries[Head & (KIBA_DPC_RING_SIZE - 1)] = NULL;
+                return Dpc;
+            }
+        } while (TRUE);
+    }
+
+    return NULL;
+}
 
 static __inline__ VOID KiBeginDpcExecution(_In_ PKPRCB Prcb, _In_ PKDPC Dpc)
 {
@@ -660,9 +732,37 @@ KiRetireDpcList(IN PKPRCB Prcb)
             _disable();
         }
 
-        /* Loop while we have entries in the queue */
+        /* Loop while we have entries in the queue or lock-free ring */
         while (DpcData->DpcQueueDepth != 0)
         {
+            /* Fast path: Check lock-free multi-priority ring buffer first */
+            Dpc = KibaDequeueDpcRing(Prcb->Number);
+            if (Dpc)
+            {
+                KiBeginDpcExecution(Prcb, Dpc);
+                Dpc->DpcData = NULL;
+                DeferredRoutine = Dpc->DeferredRoutine;
+                DeferredContext = Dpc->DeferredContext;
+                SystemArgument1 = Dpc->SystemArgument1;
+                SystemArgument2 = Dpc->SystemArgument2;
+
+                DpcData->DpcQueueDepth--;
+
+                _enable();
+                DeferredRoutine(Dpc, DeferredContext, SystemArgument1, SystemArgument2);
+                KiEndDpcExecution(Prcb, Dpc);
+                _disable();
+
+                DpcsRetired++;
+                if ((DpcsRetired >= KI_MAXIMUM_DPCS_PER_BATCH) ||
+                    (Prcb->QuantumEnd != FALSE) ||
+                    (Prcb->NextThread != NULL))
+                {
+                    break;
+                }
+                continue;
+            }
+
             /* Lock the DPC data and get the DPC entry*/
             KeAcquireSpinLockAtDpcLevel(&DpcData->DpcLock);
 
@@ -894,32 +994,37 @@ KeInsertQueueDpc(IN PKDPC Dpc,
         DpcData->DpcCount++;
         DpcConfigured = TRUE;
 
-        /* Check if this is a high importance DPC */
-        if (Dpc->Importance == HighImportance)
+        /* Enqueue into per-core lock-free multi-priority ring buffer */
         {
+            ULONG Priority = (Dpc->Importance == HighImportance || Dpc->Importance == MediumHighImportance) ? KIBA_DPC_PRIORITY_HIGH : KIBA_DPC_PRIORITY_LOW;
+            if (!KibaEnqueueDpcRing(Cpu, Priority, Dpc))
+            {
+                /* Fallback to list if ring buffer is full */
+                if (Dpc->Importance == HighImportance)
+                {
 #if (NTDDI_VERSION >= NTDDI_LONGHORN)
-            /* Vista+: push to head of singly-linked list */
-            PushEntryList(&DpcData->DpcList.ListHead, (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry);
-            if (!DpcData->DpcList.LastEntry)
-                DpcData->DpcList.LastEntry = (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry;
+                    PushEntryList(&DpcData->DpcList.ListHead, (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry);
+                    if (!DpcData->DpcList.LastEntry)
+                        DpcData->DpcList.LastEntry = (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry;
 #else
-            InsertHeadList(&DpcData->DpcListHead, &Dpc->DpcListEntry);
+                    InsertHeadList(&DpcData->DpcListHead, &Dpc->DpcListEntry);
 #endif
-        }
-        else
-        {
+                }
+                else
+                {
 #if (NTDDI_VERSION >= NTDDI_LONGHORN)
-            /* Vista+: append to tail of singly-linked list */
-            PSINGLE_LIST_ENTRY Entry = (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry;
-            Entry->Next = NULL;
-            if (DpcData->DpcList.LastEntry)
-                DpcData->DpcList.LastEntry->Next = Entry;
-            else
-                DpcData->DpcList.ListHead.Next = Entry;
-            DpcData->DpcList.LastEntry = Entry;
+                    PSINGLE_LIST_ENTRY Entry = (PSINGLE_LIST_ENTRY)&Dpc->DpcListEntry;
+                    Entry->Next = NULL;
+                    if (DpcData->DpcList.LastEntry)
+                        DpcData->DpcList.LastEntry->Next = Entry;
+                    else
+                        DpcData->DpcList.ListHead.Next = Entry;
+                    DpcData->DpcList.LastEntry = Entry;
 #else
-            InsertTailList(&DpcData->DpcListHead, &Dpc->DpcListEntry);
+                    InsertTailList(&DpcData->DpcListHead, &Dpc->DpcListEntry);
 #endif
+                }
+            }
         }
 
         /* Check if this is the DPC on the threaded list */

@@ -1393,44 +1393,24 @@ KiDisplayBlueScreen(IN ULONG MessageId,
         if (HardErrMessage) InbvDisplayString(HardErrMessage);
     }
 
-    /* Begin the display */
+    /* Begin the display with modern simplified UI */
     InbvDisplayString("\r\n");
-
-    /* Print out initial message */
-    KeGetBugMessageText(BUGCHECK_MESSAGE_INTRO, NULL);
+    InbvDisplayString("Whoops! That wasn't supposed to happen. KibaOS encountered a critical error and will now restart.");
     InbvDisplayString("\r\n\r\n");
 
     /* Check if we have a driver */
     if (KiBugCheckDriver)
     {
-        /* Print out into to driver name */
-        KeGetBugMessageText(BUGCODE_ID_DRIVER, NULL);
-
-        /* Convert and print out driver name */
         KeBugCheckUnicodeToAnsi(KiBugCheckDriver, AnsiName, sizeof(AnsiName));
-        InbvDisplayString(" ");
+        InbvDisplayString("What failed: ");
         InbvDisplayString(AnsiName);
         InbvDisplayString("\r\n\r\n");
     }
 
-    /* Check if this is the generic message */
-    if (MessageId == BUGCODE_PSS_MESSAGE)
-    {
-        /* It is, so get the bug code string as well */
-        KeGetBugMessageText(BugCheckCode, NULL);
-        InbvDisplayString("\r\n\r\n");
-    }
-
-    /* The legacy restart, BIOS, and Safe Mode advice wastes the crash screen. */
-    InbvDisplayString("\r\n");
-
-    /* Print message for technical information */
-    KeGetBugMessageText(BUGCHECK_TECH_INFO, NULL);
-
-    /* Show the technical Data */
+    /* Show the technical Stop Code Data */
     RtlStringCbPrintfA(AnsiName,
                        sizeof(AnsiName),
-                       "\r\n\r\n*** STOP: 0x%08lX (0x%p,0x%p,0x%p,0x%p)\r\n\r\n",
+                       "Stop code: 0x%08lX (0x%p, 0x%p, 0x%p, 0x%p)\r\n\r\n",
                        BugCheckCode,
                        (PVOID)KiBugCheckData[1],
                        (PVOID)KiBugCheckData[2],
