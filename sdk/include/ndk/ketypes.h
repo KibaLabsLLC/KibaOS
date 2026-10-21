@@ -1108,6 +1108,7 @@ typedef struct _PP_LOOKASIDE_LIST
     struct _GENERAL_LOOKASIDE *L;
 } PP_LOOKASIDE_LIST, *PPP_LOOKASIDE_LIST;
 
+#ifndef _NTIFS_INCLUDED_
 typedef struct _KAPC_STATE
 {
     LIST_ENTRY ApcListHead[2];
@@ -1125,6 +1126,7 @@ typedef struct _KQUEUE
     ULONG MaximumCount;
     LIST_ENTRY ThreadListHead;
 } KQUEUE, *PKQUEUE, *RESTRICTED_POINTER PRKQUEUE;
+#endif
 
 //
 // Architectural Types
