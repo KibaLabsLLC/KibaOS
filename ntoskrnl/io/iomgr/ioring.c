@@ -100,7 +100,7 @@ KibaExecuteBypassedIoSqe(
     Status = ObReferenceObjectByHandle(
         Sqe->FileHandle,
         (Sqe->Opcode == KIBA_IORING_OP_READ) ? FILE_READ_DATA : FILE_WRITE_DATA,
-        *IoFileObjectType,
+        IoFileObjectType,
         KernelMode,
         (PVOID*)&FileObject,
         NULL);

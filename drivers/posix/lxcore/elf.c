@@ -220,7 +220,7 @@ LxLoadElfImage(
 
                     if (NT_SUCCESS(Status))
                     {
-                        KeStackAttachProcess(ProcessObject, &ApcState);
+                        KeStackAttachProcess((PRKPROCESS)ProcessObject, &ApcState);
                         RtlCopyMemory((PVOID)VirtAddr, TempBuffer, (SIZE_T)Phdr.p_filesz);
                         KeUnstackDetachProcess(&ApcState);
                     }

@@ -52,6 +52,7 @@ typedef struct _RTL_HEAP_PARAMETERS
 typedef PVOID PFS_FILTER_CALLBACKS;
 typedef USHORT SECURITY_DESCRIPTOR_CONTROL, *PSECURITY_DESCRIPTOR_CONTROL;
 
+#if !defined(_NTDDK_) && !defined(_NTDDK_INCLUDED_) && !defined(_WDMDDK_) && !defined(_WDM_INCLUDED_)
 typedef struct _RTL_SPLAY_LINKS
 {
     struct _RTL_SPLAY_LINKS *Parent;
@@ -61,6 +62,7 @@ typedef struct _RTL_SPLAY_LINKS
 
 typedef struct _RTL_GENERIC_TABLE RTL_GENERIC_TABLE, *PRTL_GENERIC_TABLE;
 typedef ULONG TABLE_SEARCH_RESULT;
+#endif
 
 #if defined(USE_LPC6432)
 #define LPC_CLIENT_ID CLIENT_ID64
@@ -133,12 +135,14 @@ typedef struct _ACE_HEADER
     USHORT AceSize;
 } ACE_HEADER, *PACE_HEADER;
 
+#if !defined(_NTDDK_) && !defined(_NTDDK_INCLUDED_) && !defined(_WDMDDK_) && !defined(_WDM_INCLUDED_)
 typedef enum _RTL_GENERIC_COMPARE_RESULTS
 {
     GenericLessThan,
     GenericGreaterThan,
     GenericEqual
 } RTL_GENERIC_COMPARE_RESULTS;
+#endif
 
 typedef struct _SID_IDENTIFIER_AUTHORITY
 {
