@@ -79,6 +79,7 @@ LxDispatchSystemCall(
     LONG_PTR Result = 0;
 
     UNREFERENCED_PARAMETER(PicoThreadContext);
+    UNREFERENCED_PARAMETER(Arg2);
 
     if (TrapFrame == NULL)
         return STATUS_INVALID_PARAMETER;
