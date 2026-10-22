@@ -106,13 +106,16 @@ private:
     BOOL m_bDragging;
     POINT m_ptDragStart;
 
+    // Sprite memory cache
+    Bitmap* m_pCachedSprites[KIBA_STATE_COUNT][8];
+
 public:
     CKibaCompanionWindow()
         : m_hWnd(NULL)
         , m_hParentTray(NULL)
         , m_hWinEventHook(NULL)
         , m_gdiplusToken(0)
-        , m_bEnabled(TRUE)
+        , m_bEnabled(FALSE)
         , m_CurrentState(KIBA_STATE_IDLE)
         , m_CurrentFrameIndex(0)
         , m_bShowBubble(FALSE)
@@ -127,6 +130,14 @@ public:
         m_WndSize.cy = 280;
         m_ptPosition.x = 100;
         m_ptPosition.y = 100;
+
+        for (int i = 0; i < KIBA_STATE_COUNT; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                m_pCachedSprites[i][j] = NULL;
+            }
+        }
     }
 
     ~CKibaCompanionWindow()
@@ -178,8 +189,8 @@ public:
             EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
             NULL, s_WinEventProc, 0, 0, WINEVENT_OUTOFCONTEXT);
 
-        // Set animation timer (120ms tick)
-        SetTimer(m_hWnd, IDT_ANIMATION_TIMER, 120, NULL);
+        // Set animation timer (300ms tick for smooth pace)
+        SetTimer(m_hWnd, IDT_ANIMATION_TIMER, 300, NULL);
 
         if (m_bEnabled)
         {
@@ -192,6 +203,53 @@ public:
         }
 
         return TRUE;
+    }
+
+    VOID ClearCachedSprites()
+    {
+        for (int i = 0; i < KIBA_STATE_COUNT; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (m_pCachedSprites[i][j])
+                {
+                    delete m_pCachedSprites[i][j];
+                    m_pCachedSprites[i][j] = NULL;
+                }
+            }
+        }
+    }
+
+    Bitmap* GetSpriteBitmap(KIBA_STATE state, UINT frameIndex)
+    {
+        if (state < 0 || state >= KIBA_STATE_COUNT) return NULL;
+        const SPRITE_SET& set = g_SpriteSets[state];
+        if (set.Count == 0) return NULL;
+        UINT idx = frameIndex % set.Count;
+        if (idx >= 8) return NULL;
+
+        if (m_pCachedSprites[state][idx])
+            return m_pCachedSprites[state][idx];
+
+        const WCHAR* szRelative = set.Files[idx];
+        Bitmap* pBmp = new Bitmap(szRelative);
+        if (pBmp->GetLastStatus() != Ok)
+        {
+            delete pBmp;
+            WCHAR szFullPath[MAX_PATH];
+            GetWindowsDirectoryW(szFullPath, _countof(szFullPath));
+            PathCombineW(szFullPath, szFullPath, szRelative);
+            pBmp = new Bitmap(szFullPath);
+        }
+
+        if (pBmp->GetLastStatus() == Ok)
+        {
+            m_pCachedSprites[state][idx] = pBmp;
+            return pBmp;
+        }
+
+        delete pBmp;
+        return NULL;
     }
 
     VOID Shutdown()
@@ -209,6 +267,8 @@ public:
             DestroyWindow(m_hWnd);
             m_hWnd = NULL;
         }
+
+        ClearCachedSprites();
 
         if (m_gdiplusToken)
         {
@@ -410,43 +470,23 @@ private:
         HBITMAP hBitmap = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
         HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
 
-        // Initialize GDI+ Graphics object over memory DC
-        Graphics graphics(hdcMem);
+        // Render using GDI+ Bitmap with PixelFormat32bppPARGB for true premultiplied ARGB transparency
+        Bitmap bmp(m_WndSize.cx, m_WndSize.cy, PixelFormat32bppPARGB);
+        Graphics graphics(&bmp);
         graphics.SetSmoothingMode(SmoothingModeAntiAlias);
+        graphics.SetTextRenderingHint(TextRenderingHintAntiAliasGridFit);
         graphics.Clear(Color(0, 0, 0, 0)); // Fully transparent base
 
-        // Load current sprite frame
-        const SPRITE_SET& set = g_SpriteSets[m_CurrentState];
-        if (set.Count > 0)
+        // Draw current sprite frame from cache
+        Bitmap* pSpriteBmp = GetSpriteBitmap(m_CurrentState, m_CurrentFrameIndex);
+        if (pSpriteBmp)
         {
-            UINT frame = m_CurrentFrameIndex % set.Count;
-            const WCHAR* szSpritePath = set.Files[frame];
-
-            // Resolve full system path for sprite asset
-            WCHAR szFullPath[MAX_PATH];
-            GetWindowsDirectoryW(szFullPath, _countof(szFullPath));
-            // Check current working dir or system path
-            Image image(szSpritePath);
-            if (image.GetLastStatus() != Ok)
-            {
-                // Fallback attempt with relative path
-                PathCombineW(szFullPath, szFullPath, szSpritePath);
-                Image imgFallback(szFullPath);
-                if (imgFallback.GetLastStatus() == Ok)
-                {
-                    graphics.DrawImage(&imgFallback, 20, 80, 200, 200);
-                }
-            }
-            else
-            {
-                graphics.DrawImage(&image, 20, 80, 200, 200);
-            }
+            graphics.DrawImage(pSpriteBmp, 20, 80, 200, 200);
         }
 
         // Render Speech Bubble if active
         if (m_bShowBubble)
         {
-            // Draw bubble background
             GraphicsPath path(FillModeAlternate);
             RectF bubbleRect(10.0f, 5.0f, 220.0f, 75.0f);
             AddRoundRectToPath(path, bubbleRect, 10.0f);
@@ -457,7 +497,6 @@ private:
             graphics.FillPath(&bgBrush, &path);
             graphics.DrawPath(&borderPen, &path);
 
-            // Draw text
             FontFamily fontFamily(L"Segoe UI", NULL);
             Font titleFont(&fontFamily, 9, FontStyleBold, UnitPoint);
             Font msgFont(&fontFamily, 8, FontStyleRegular, UnitPoint);
@@ -476,6 +515,22 @@ private:
                 Font actionFont(&fontFamily, 8, FontStyleBold, UnitPoint);
                 graphics.DrawString(m_szBubbleAction, -1, &actionFont, actionRect, NULL, &actionBrush);
             }
+        }
+
+        // Copy scanlines from GDI+ PARGB Bitmap directly into DIB section pBits
+        BitmapData bmpData;
+        Rect rect(0, 0, m_WndSize.cx, m_WndSize.cy);
+        if (bmp.LockBits(&rect, ImageLockModeRead, PixelFormat32bppPARGB, &bmpData) == Ok)
+        {
+            BYTE* pDst = (BYTE*)pBits;
+            BYTE* pSrc = (BYTE*)bmpData.Scan0;
+            UINT stride = m_WndSize.cx * 4;
+
+            for (INT y = 0; y < m_WndSize.cy; y++)
+            {
+                memcpy(pDst + (y * stride), pSrc + (y * bmpData.Stride), stride);
+            }
+            bmp.UnlockBits(&bmpData);
         }
 
         // Apply Layered Window update
@@ -643,7 +698,7 @@ extern "C" {
 BOOL KibaCompanion_IsEnabled(VOID)
 {
     HKEY hKey;
-    DWORD dwEnabled = 1; // Default to ON
+    DWORD dwEnabled = 0; // Default to OFF
     DWORD dwSize = sizeof(dwEnabled);
 
     if (RegOpenKeyExW(HKEY_CURRENT_USER, KIBA_REG_KEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
