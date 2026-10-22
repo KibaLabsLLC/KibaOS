@@ -9,6 +9,7 @@ list(APPEND SOURCE
     desktop.cpp
     explorer.cpp
     notifyiconscust.cpp
+    predictive_ui.cpp
     rshell.cpp
     settings.cpp
     shellservice.cpp
