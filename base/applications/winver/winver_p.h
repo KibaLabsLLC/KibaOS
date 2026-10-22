@@ -14,6 +14,7 @@
 #include <winbase.h>
 #include <winreg.h>
 #include <winuser.h>
+#include <lmcons.h>
 #include <commctrl.h>
 #include <shellapi.h>
 
