@@ -178,16 +178,7 @@ CreateAlphaLogo(
     INT x, y;
 
     Size->cx = Size->cy = 0;
-    hLogo = LoadImageW(hInstance, MAKEINTRESOURCEW(IDB_LOGO), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
-    hMask = LoadImageW(hInstance, MAKEINTRESOURCEW(IDB_LOGOMASK), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
-    if (!hLogo || !hMask ||
-        !GetObjectW(hLogo, sizeof(LogoBitmap), &LogoBitmap) ||
-        !GetObjectW(hMask, sizeof(MaskBitmap), &MaskBitmap) ||
-        LogoBitmap.bmWidth != MaskBitmap.bmWidth ||
-        LogoBitmap.bmHeight != MaskBitmap.bmHeight)
-    {
-        goto Quit;
-    }
+    return NULL;
 
     hdcLogo = CreateCompatibleDC(NULL);
     hdcMask = CreateCompatibleDC(NULL);

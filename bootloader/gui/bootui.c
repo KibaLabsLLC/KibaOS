@@ -847,8 +847,9 @@ BootUiTickProgressBar(ULONG Progress)
 {
     static const SHORT OffsetX[12] = { 18,  16,   9,   0,  -9, -16, -18, -16,  -9,   0,   9,  16 };
     static const SHORT OffsetY[12] = {  0,   9,  16,  18,  16,   9,   0,  -9, -16, -18, -16,  -9 };
+    ULONG LogoTop = BootUiHeight < 600 ? 12 : 28;
     LONG CenterX = (LONG)BootUiWidth / 2;
-    LONG CenterY = (LONG)BootUiHeight - 65;
+    LONG CenterY = (LONG)(LogoTop + 42 + 36);
     ULONG Active = (Progress / 150) % 12;
     ULONG I, Dist, Alpha;
     CHAR MarketingText[260];
@@ -862,8 +863,9 @@ BootUiTickProgressBar(ULONG Progress)
         RtlStringCbCopyA(MarketingText, sizeof(MarketingText), BootUiProgressText);
     }
 
-    BootUiRect(0, CenterY - 50, BootUiWidth, 110, 0, 0, 255);
-    BootUiCentered(CenterY - 38, MarketingText, max(14, BootUiFontSize - 3), BOOTUI_TEXT);
+    BootUiRect(0, 0, BootUiWidth, CenterY + 50, 0, 0, 255);
+    BootUiBrand();
+    BootUiCentered(CenterY + 28, MarketingText, max(14, BootUiFontSize - 3), BOOTUI_TEXT);
 
     for (I = 0; I < 12; ++I)
     {
