@@ -295,7 +295,7 @@ public:
                 TroubleshootConnectedDevices();
             }
         }
-        else if (wParam == DBT_DEVICEREMOVALCOMPLETE)
+        else if (wParam == DBT_DEVICEREMOVECOMPLETE)
         {
             SetState(KIBA_STATE_REACTING);
             ShowSpeechBubble(L"Device Removed", L"An external device was disconnected.", NULL, 3000);
@@ -398,7 +398,7 @@ private:
         HDC hdcScreen = GetDC(NULL);
         HDC hdcMem = CreateCompatibleDC(hdcScreen);
 
-        BITMAPINFO bmi = { 0 };
+        BITMAPINFO bmi = {};
         bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi.bmiHeader.biWidth = m_WndSize.cx;
         bmi.bmiHeader.biHeight = -m_WndSize.cy; // top-down
@@ -447,7 +447,7 @@ private:
         if (m_bShowBubble)
         {
             // Draw bubble background
-            GraphicsPath path;
+            GraphicsPath path(FillModeAlternate);
             RectF bubbleRect(10.0f, 5.0f, 220.0f, 75.0f);
             AddRoundRectToPath(path, bubbleRect, 10.0f);
 
@@ -458,8 +458,9 @@ private:
             graphics.DrawPath(&borderPen, &path);
 
             // Draw text
-            Font titleFont(L"Segoe UI", 9, FontStyleBold, UnitPoint);
-            Font msgFont(L"Segoe UI", 8, FontStyleRegular, UnitPoint);
+            FontFamily fontFamily(L"Segoe UI", NULL);
+            Font titleFont(&fontFamily, 9, FontStyleBold, UnitPoint);
+            Font msgFont(&fontFamily, 8, FontStyleRegular, UnitPoint);
             SolidBrush textBrush(Color(255, 30, 30, 30));
             SolidBrush actionBrush(Color(255, 0, 102, 204));
 
@@ -472,7 +473,7 @@ private:
 
             if (m_szBubbleAction[0] != L'\0')
             {
-                Font actionFont(L"Segoe UI", 8, FontStyleBold, UnitPoint);
+                Font actionFont(&fontFamily, 8, FontStyleBold, UnitPoint);
                 graphics.DrawString(m_szBubbleAction, -1, &actionFont, actionRect, NULL, &actionBrush);
             }
         }
