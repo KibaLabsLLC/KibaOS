@@ -4,9 +4,9 @@
 
 <h1 align="center">KibaOS</h1>
 <h2 align="center">
-A new dawn in how we interact with our computers, no longer is it a machine, but second nature.
 
-Simple. Refined. Libre.
+★ Simple. Refined. Libre. ★
+
 </h2>
 
 ## Quick Links
