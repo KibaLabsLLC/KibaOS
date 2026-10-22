@@ -132,5 +132,29 @@ def test_engine():
 
     print("OTA Engine Verification Tests Passed Successfully!")
 
+def test_generated_ota_dist():
+    manifest_path = os.path.join("ota_dist", "ota_manifest.json")
+    if not os.path.exists(manifest_path):
+        return
+
+    print(f"Verifying generated OTA package in {manifest_path}...")
+    with open(manifest_path, "r") as f:
+        manifest_json = f.read()
+
+    engine = OTAEngine(current_build_number=1)
+    dummy_url = "https://downloads.sourceforge.net/project/kibaos/amd64-nt/ota/ota_manifest.json"
+    manifest = engine.verify_manifest(manifest_json, dummy_url)
+
+    for cab in manifest["cabs"]:
+        cab_path = os.path.join("ota_dist", cab["name"])
+        assert os.path.exists(cab_path), f"CAB file {cab_path} missing"
+        with open(cab_path, "rb") as f:
+            cab_data = f.read()
+        engine.verify_cab(cab_data, cab["sha256"], cab["size"])
+        print(f"Verified CAB {cab['name']} (size: {cab['size']}, sha256: {cab['sha256'][:8]}...)")
+
+    print("All generated OTA artifacts in ota_dist verified successfully!")
+
 if __name__ == '__main__':
     test_engine()
+    test_generated_ota_dist()
