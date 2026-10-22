@@ -43,7 +43,13 @@ KibaOS is based on [LiberNT](https://github.com/ahmedarif193/LiberNT), which is 
 
 ---
 
-## Operating System Features
+<h1 align="center">Desktop Screenshot</h1>
+
+<p align="center">
+  <img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/main-nt10/GH_MEDIA/Screenshot_20261020_221943.png?raw=true" />
+</p>
+
+<h1 align="center">Operating System Features</h1> 
 
 ### Kernel and Storage
 - **NVS Memory Manager:** Cleanroom NT10 memory manager (`ntoskrnl/nvs`) providing dedicated kernel pool allocation and architecture descriptors.
@@ -123,7 +129,8 @@ For detailed installation instructions, see [INSTALL.md](INSTALL.md) and [Buildi
 
 ---
 
-## Upstream Gratitude
+
+<h1 align="center">Upstream Gratitude</h1> 
 
 KibaOS builds upon the foundational work of the following upstream open-source projects:
 
@@ -132,7 +139,7 @@ KibaOS builds upon the foundational work of the following upstream open-source p
 
 ---
 
-## Contributing
+<h1 align="center">Contributing</h1> 
 
 We welcome contributions from developers and testers. Please review [CONTRIBUTING.md](CONTRIBUTING.md), [PULL_REQUEST_MANAGEMENT.md](PULL_REQUEST_MANAGEMENT.md), and the [Developer Guide](docs/wiki/Developer-Guide.md) before submitting patches.
 
