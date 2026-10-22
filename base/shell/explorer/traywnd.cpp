@@ -384,7 +384,21 @@ public:
         if (uMsg == WM_KEYUP && wParam != VK_SPACE)
             return 0;
 
+        POINT pt;
+        GetCursorPos(&pt);
+        g_PredictiveEngine.OnPointerDown(pt, 101);
+        g_PredictiveEngine.OnTargetSelected(101);
+
         GetParent().PostMessage(TWM_OPENSTARTMENU);
+        return 0;
+    }
+
+    LRESULT OnLButtonUp(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        POINT pt;
+        GetCursorPos(&pt);
+        g_PredictiveEngine.OnPointerUp(pt, 101);
+        bHandled = FALSE;
         return 0;
     }
 
@@ -516,10 +530,21 @@ public:
 
     BEGIN_MSG_MAP(CStartButton)
         MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
+        MESSAGE_HANDLER(WM_LBUTTONUP, OnLButtonUp)
         MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBkgnd)
         MESSAGE_HANDLER(WM_THEMECHANGED, OnThemeChanged)
         MESSAGE_HANDLER(WM_PAINT, OnPaint)
+        MESSAGE_HANDLER(WM_MOUSEMOVE, OnMouseMove)
     END_MSG_MAP()
+
+    LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        POINT pt;
+        GetCursorPos(&pt);
+        g_PredictiveEngine.OnPointerMove(pt, GetTickCount());
+        bHandled = FALSE;
+        return 0;
+    }
 };
 
 class CTrayWindow :
@@ -2749,6 +2774,14 @@ ChangePos:
         UpdateFonts();
 
         InitShellServices(&m_ShellServices);
+        g_PredictiveEngine.Initialize();
+
+        if (m_StartButton.m_hWnd)
+        {
+            RECT rcBtn;
+            ::GetWindowRect(m_StartButton.m_hWnd, &rcBtn);
+            g_PredictiveEngine.RegisterTarget(101, PREDICTIVE_TARGET_START_BUTTON, m_StartButton.m_hWnd, rcBtn);
+        }
 
         if (IsAutoHideState())
         {
@@ -3204,6 +3237,12 @@ ChangePos:
     {
         if (!ppt || !prcStartBtn || !pwi)
             return FALSE;
+
+        RECT adaptiveHitArea;
+        if (g_PredictiveEngine.HitTestTarget(101, *ppt, &adaptiveHitArea))
+        {
+            return TRUE;
+        }
 
         switch (m_Position)
         {
@@ -3670,6 +3709,10 @@ HandleTrayContextMenu:
 
     LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
+        POINT pt;
+        GetCursorPos(&pt);
+        g_PredictiveEngine.OnPointerMove(pt, GetTickCount());
+
         SendMessage(m_TrayNotify, uMsg, wParam, lParam);
 
         if (IsAutoHideState())

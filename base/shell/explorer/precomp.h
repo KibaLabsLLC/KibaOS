@@ -50,10 +50,12 @@
 #include <shellutils.h>
 #include <reactos/trayicons.h>
 #include <reactos/ux_tokens.h>
+#include <reactos/predictive_ui.h>
 
 #include "tmschema.h"
 #include "resource.h"
 #include "taskbarpin.h"
+#include "predictive_ui.h"
 
 #include <wine/debug.h>
 
