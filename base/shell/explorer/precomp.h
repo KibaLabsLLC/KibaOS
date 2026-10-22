@@ -56,6 +56,7 @@
 #include "resource.h"
 #include "taskbarpin.h"
 #include "predictive_ui.h"
+#include "kiba_companion.h"
 
 #include <wine/debug.h>
 

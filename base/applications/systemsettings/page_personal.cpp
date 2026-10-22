@@ -15,6 +15,7 @@ extern "C"
 #include <algorithm>
 
 #define PERSONALIZE_KEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"
+#define KIBA_KEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\KibaCompanion"
 #define EXPLORER_KEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer"
 #define ADVANCED_KEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced"
 #define DESKTOP_KEY L"Control Panel\\Desktop"
@@ -79,6 +80,16 @@ BuildPersonalization(PageBuilder &page)
                 (effects & DWM_EFFECT_SHADOWS) != 0, [](int on) { SetEffect(DWM_EFFECT_SHADOWS, on != 0); });
     page.Toggle(Str(IDS_CONTENT_BLUR), Str(IDS_CONTENT_BLUR_DESC), L"window_apps_20_regular",
                 (effects & DWM_EFFECT_CONTENT_BLUR) != 0, [](int on) { SetEffect(DWM_EFFECT_CONTENT_BLUR, on != 0); });
+
+    DWORD kibaEnabled = ReadDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", 1);
+    page.Group(Str(IDS_KIBA_COMPANION));
+    page.Toggle(Str(IDS_KIBA_COMPANION), Str(IDS_KIBA_COMPANION_DESC), L"bot_20_regular",
+                kibaEnabled != 0,
+                [](int on)
+                {
+                    WriteDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", on != 0 ? 1 : 0);
+                    BroadcastSetting(L"TraySettings");
+                });
 
     page.Group();
     page.Navigate(Str(IDS_PAGE_BACKGROUND), Str(IDS_BACKGROUND_DESC), L"image_20_regular", PageId::Background)
