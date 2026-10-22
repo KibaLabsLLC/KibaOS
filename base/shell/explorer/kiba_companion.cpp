@@ -17,42 +17,42 @@ using namespace Gdiplus;
 
 // Sprite mappings
 static const WCHAR* g_IdleSprites[] = {
-    L"media/graphics/kiba/sprite_01.png",
-    L"media/graphics/kiba/sprite_02.png",
-    L"media/graphics/kiba/sprite_03.png",
-    L"media/graphics/kiba/sprite_04.png",
-    L"media/graphics/kiba/sprite_05.png",
-    L"media/graphics/kiba/sprite_06.png"
+    L"media\\graphics\\kiba\\sprite_01.png",
+    L"media\\graphics\\kiba\\sprite_02.png",
+    L"media\\graphics\\kiba\\sprite_03.png",
+    L"media\\graphics\\kiba\\sprite_04.png",
+    L"media\\graphics\\kiba\\sprite_05.png",
+    L"media\\graphics\\kiba\\sprite_06.png"
 };
 
 static const WCHAR* g_ReactingSprites[] = {
-    L"media/graphics/kiba/sprite_07.png",
-    L"media/graphics/kiba/sprite_08.png",
-    L"media/graphics/kiba/sprite_09.png",
-    L"media/graphics/kiba/sprite_10.png",
-    L"media/graphics/kiba/sprite_11.png"
+    L"media\\graphics\\kiba\\sprite_07.png",
+    L"media\\graphics\\kiba\\sprite_08.png",
+    L"media\\graphics\\kiba\\sprite_09.png",
+    L"media\\graphics\\kiba\\sprite_10.png",
+    L"media\\graphics\\kiba\\sprite_11.png"
 };
 
 static const WCHAR* g_TalkingSprites[] = {
-    L"media/graphics/kiba/sprite_12.png",
-    L"media/graphics/kiba/sprite_13.png",
-    L"media/graphics/kiba/sprite_14.png",
-    L"media/graphics/kiba/sprite_15.png",
-    L"media/graphics/kiba/sprite_16.png"
+    L"media\\graphics\\kiba\\sprite_12.png",
+    L"media\\graphics\\kiba\\sprite_13.png",
+    L"media\\graphics\\kiba\\sprite_14.png",
+    L"media\\graphics\\kiba\\sprite_15.png",
+    L"media\\graphics\\kiba\\sprite_16.png"
 };
 
 static const WCHAR* g_TroubleshootingSprites[] = {
-    L"media/graphics/kiba/sprite_17.png",
-    L"media/graphics/kiba/sprite_18.png",
-    L"media/graphics/kiba/sprite_19.png",
-    L"media/graphics/kiba/sprite_20.png",
-    L"media/graphics/kiba/sprite_21.png"
+    L"media\\graphics\\kiba\\sprite_17.png",
+    L"media\\graphics\\kiba\\sprite_18.png",
+    L"media\\graphics\\kiba\\sprite_19.png",
+    L"media\\graphics\\kiba\\sprite_20.png",
+    L"media\\graphics\\kiba\\sprite_21.png"
 };
 
 static const WCHAR* g_AlertSprites[] = {
-    L"media/graphics/kiba/sprite_22.png",
-    L"media/graphics/kiba/sprite_23.png",
-    L"media/graphics/kiba/sprite_24.png"
+    L"media\\graphics\\kiba\\sprite_22.png",
+    L"media\\graphics\\kiba\\sprite_23.png",
+    L"media\\graphics\\kiba\\sprite_24.png"
 };
 
 struct SPRITE_SET {
@@ -126,8 +126,8 @@ public:
         m_szBubbleTitle[0] = L'\0';
         m_szBubbleMessage[0] = L'\0';
         m_szBubbleAction[0] = L'\0';
-        m_WndSize.cx = 240;
-        m_WndSize.cy = 280;
+        m_WndSize.cx = 180;
+        m_WndSize.cy = 170;
         m_ptPosition.x = 100;
         m_ptPosition.y = 100;
 
@@ -232,14 +232,15 @@ public:
             return m_pCachedSprites[state][idx];
 
         const WCHAR* szRelative = set.Files[idx];
-        Bitmap* pBmp = new Bitmap(szRelative, FALSE);
+        WCHAR szFullPath[MAX_PATH];
+        GetWindowsDirectoryW(szFullPath, _countof(szFullPath));
+        PathCombineW(szFullPath, szFullPath, szRelative);
+
+        Bitmap* pBmp = new Bitmap(szFullPath, FALSE);
         if (pBmp->GetLastStatus() != Ok)
         {
             delete pBmp;
-            WCHAR szFullPath[MAX_PATH];
-            GetWindowsDirectoryW(szFullPath, _countof(szFullPath));
-            PathCombineW(szFullPath, szFullPath, szRelative);
-            pBmp = new Bitmap(szFullPath, FALSE);
+            pBmp = new Bitmap(szRelative, FALSE);
         }
 
         if (pBmp->GetLastStatus() == Ok)
@@ -470,65 +471,86 @@ private:
         HBITMAP hBitmap = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
         HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
 
-        // Render using GDI+ Bitmap with PixelFormat32bppPARGB for true premultiplied ARGB transparency
-        Bitmap bmp(m_WndSize.cx, m_WndSize.cy, PixelFormat32bppPARGB);
+        // Render using GDI+ Bitmap with PixelFormat32bppARGB so Graphics constructor succeeds
+        Bitmap bmp(m_WndSize.cx, m_WndSize.cy, PixelFormat32bppARGB);
         Graphics graphics(&bmp);
         graphics.SetSmoothingMode(SmoothingModeAntiAlias);
         graphics.SetTextRenderingHint(TextRenderingHintAntiAliasGridFit);
         graphics.Clear(Color(0, 0, 0, 0)); // Fully transparent base
 
-        // Draw current sprite frame from cache
+        // Draw current sprite frame from cache (scaled down to 100x100)
         Bitmap* pSpriteBmp = GetSpriteBitmap(m_CurrentState, m_CurrentFrameIndex);
         if (pSpriteBmp)
         {
-            graphics.DrawImage(pSpriteBmp, 20, 80, 200, 200);
+            graphics.DrawImage(pSpriteBmp, 40, 65, 100, 100);
         }
 
         // Render Speech Bubble if active
         if (m_bShowBubble)
         {
             GraphicsPath path(FillModeAlternate);
-            RectF bubbleRect(10.0f, 5.0f, 220.0f, 75.0f);
-            AddRoundRectToPath(path, bubbleRect, 10.0f);
+            RectF bubbleRect(10.0f, 5.0f, 160.0f, 55.0f);
+            AddRoundRectToPath(path, bubbleRect, 8.0f);
 
             SolidBrush bgBrush(Color(240, 255, 255, 255));
-            Pen borderPen(Color(200, 0, 120, 215), 2.0f);
+            Pen borderPen(Color(200, 0, 120, 215), 1.5f);
 
             graphics.FillPath(&bgBrush, &path);
             graphics.DrawPath(&borderPen, &path);
 
             FontFamily fontFamily(L"Segoe UI", NULL);
-            Font titleFont(&fontFamily, 9, FontStyleBold, UnitPoint);
-            Font msgFont(&fontFamily, 8, FontStyleRegular, UnitPoint);
+            Font titleFont(&fontFamily, 8, FontStyleBold, UnitPoint);
+            Font msgFont(&fontFamily, 7.5f, FontStyleRegular, UnitPoint);
             SolidBrush textBrush(Color(255, 30, 30, 30));
             SolidBrush actionBrush(Color(255, 0, 102, 204));
 
-            RectF titleRect(16.0f, 8.0f, 208.0f, 16.0f);
-            RectF msgRect(16.0f, 24.0f, 208.0f, 38.0f);
-            RectF actionRect(16.0f, 60.0f, 208.0f, 16.0f);
+            RectF titleRect(15.0f, 8.0f, 150.0f, 14.0f);
+            RectF msgRect(15.0f, 22.0f, 150.0f, 24.0f);
+            RectF actionRect(15.0f, 44.0f, 150.0f, 12.0f);
 
             graphics.DrawString(m_szBubbleTitle, -1, &titleFont, titleRect, NULL, &textBrush);
             graphics.DrawString(m_szBubbleMessage, -1, &msgFont, msgRect, NULL, &textBrush);
 
             if (m_szBubbleAction[0] != L'\0')
             {
-                Font actionFont(&fontFamily, 8, FontStyleBold, UnitPoint);
+                Font actionFont(&fontFamily, 7.5f, FontStyleBold, UnitPoint);
                 graphics.DrawString(m_szBubbleAction, -1, &actionFont, actionRect, NULL, &actionBrush);
             }
         }
 
-        // Copy scanlines from GDI+ PARGB Bitmap directly into DIB section pBits
+        // Premultiply alpha while copying pixels into DIB section pBits for UpdateLayeredWindow
         BitmapData bmpData;
         Rect rect(0, 0, m_WndSize.cx, m_WndSize.cy);
-        if (bmp.LockBits(&rect, ImageLockModeRead, PixelFormat32bppPARGB, &bmpData) == Ok)
+        if (bmp.LockBits(&rect, ImageLockModeRead, PixelFormat32bppARGB, &bmpData) == Ok)
         {
             BYTE* pDst = (BYTE*)pBits;
             BYTE* pSrc = (BYTE*)bmpData.Scan0;
-            UINT stride = m_WndSize.cx * 4;
 
             for (INT y = 0; y < m_WndSize.cy; y++)
             {
-                memcpy(pDst + (y * stride), pSrc + (y * bmpData.Stride), stride);
+                DWORD* pSrcRow = (DWORD*)(pSrc + (y * bmpData.Stride));
+                DWORD* pDstRow = (DWORD*)(pDst + (y * m_WndSize.cx * 4));
+
+                for (INT x = 0; x < m_WndSize.cx; x++)
+                {
+                    DWORD argb = pSrcRow[x];
+                    BYTE a = (BYTE)(argb >> 24);
+                    BYTE r = (BYTE)(argb >> 16);
+                    BYTE g = (BYTE)(argb >> 8);
+                    BYTE b = (BYTE)(argb);
+
+                    if (a == 0)
+                    {
+                        pDstRow[x] = 0;
+                    }
+                    else
+                    {
+                        BYTE pr = (BYTE)((UINT)r * a / 255);
+                        BYTE pg = (BYTE)((UINT)g * a / 255);
+                        BYTE pb = (BYTE)((UINT)b * a / 255);
+                        pDstRow[x] = ((DWORD)a << 24) | ((DWORD)pr << 16) | ((DWORD)pg << 8) | pb;
+                    }
+                }
             }
             bmp.UnlockBits(&bmpData);
         }
