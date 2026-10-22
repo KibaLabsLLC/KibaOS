@@ -81,7 +81,7 @@ BuildPersonalization(PageBuilder &page)
     page.Toggle(Str(IDS_CONTENT_BLUR), Str(IDS_CONTENT_BLUR_DESC), L"window_apps_20_regular",
                 (effects & DWM_EFFECT_CONTENT_BLUR) != 0, [](int on) { SetEffect(DWM_EFFECT_CONTENT_BLUR, on != 0); });
 
-    DWORD kibaEnabled = ReadDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", 1);
+    DWORD kibaEnabled = ReadDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", 0);
     page.Group(Str(IDS_KIBA_COMPANION));
     page.Toggle(Str(IDS_KIBA_COMPANION), Str(IDS_KIBA_COMPANION_DESC), L"bot_20_regular",
                 kibaEnabled != 0,

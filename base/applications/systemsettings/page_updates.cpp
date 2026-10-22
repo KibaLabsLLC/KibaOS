@@ -103,7 +103,7 @@ static bool FetchHttpsData(const std::wstring& url, std::string& outData, std::w
         return false;
     }
 
-    DWORD flags = INTERNET_FLAG_SECURE | INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
+    DWORD flags = INTERNET_FLAG_SECURE | INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP;
     HINTERNET hUrl = InternetOpenUrlW(hInet, url.c_str(), NULL, 0, flags, 0);
     if (!hUrl)
     {
@@ -111,6 +111,19 @@ static bool FetchHttpsData(const std::wstring& url, std::string& outData, std::w
         InternetCloseHandle(hInet);
         outError = L"Failed to connect to update server (error " + std::to_wstring(err) + L")";
         return false;
+    }
+
+    DWORD statusCode = 0;
+    DWORD statusSize = sizeof(statusCode);
+    if (HttpQueryInfoW(hUrl, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, &statusCode, &statusSize, NULL))
+    {
+        if (statusCode != 200)
+        {
+            InternetCloseHandle(hUrl);
+            InternetCloseHandle(hInet);
+            outError = L"Update server returned HTTP error " + std::to_wstring(statusCode);
+            return false;
+        }
     }
 
     char buffer[4096];
@@ -124,6 +137,16 @@ static bool FetchHttpsData(const std::wstring& url, std::string& outData, std::w
 
     InternetCloseHandle(hUrl);
     InternetCloseHandle(hInet);
+
+    // Strip UTF-8 BOM if present
+    if (outData.size() >= 3 &&
+        (unsigned char)outData[0] == 0xEF &&
+        (unsigned char)outData[1] == 0xBB &&
+        (unsigned char)outData[2] == 0xBF)
+    {
+        outData.erase(0, 3);
+    }
+
     return true;
 }
 
@@ -185,27 +208,37 @@ static bool DownloadHttpsFile(const std::wstring& url, const std::wstring& destP
 
 static bool ParseOtaManifestJson(const std::string& jsonStr, OtaManifest& outManifest, std::wstring& outError)
 {
+    std::string str = jsonStr;
+    if (str.size() >= 3 &&
+        (unsigned char)str[0] == 0xEF &&
+        (unsigned char)str[1] == 0xBB &&
+        (unsigned char)str[2] == 0xBF)
+    {
+        str.erase(0, 3);
+    }
+
     auto findKeyInt = [&](const std::string& key, int& val) -> bool {
-        std::size_t pos = jsonStr.find("\"" + key + "\"");
+        std::size_t pos = str.find("\"" + key + "\"");
         if (pos == std::string::npos) return false;
-        pos = jsonStr.find(':', pos);
+        pos = str.find(':', pos);
         if (pos == std::string::npos) return false;
         pos++;
-        while (pos < jsonStr.size() && (jsonStr[pos] == ' ' || jsonStr[pos] == '\t' || jsonStr[pos] == '\n' || jsonStr[pos] == '\r')) pos++;
-        val = std::atoi(jsonStr.c_str() + pos);
+        while (pos < str.size() && (str[pos] == ' ' || str[pos] == '\t' || str[pos] == '\n' || str[pos] == '\r' || str[pos] == '"')) pos++;
+        if (pos >= str.size()) return false;
+        val = std::atoi(str.c_str() + pos);
         return true;
     };
 
     auto findKeyString = [&](const std::string& key, std::string& val) -> bool {
-        std::size_t pos = jsonStr.find("\"" + key + "\"");
+        std::size_t pos = str.find("\"" + key + "\"");
         if (pos == std::string::npos) return false;
-        pos = jsonStr.find(':', pos);
+        pos = str.find(':', pos);
         if (pos == std::string::npos) return false;
-        pos = jsonStr.find('"', pos);
+        pos = str.find('"', pos);
         if (pos == std::string::npos) return false;
-        std::size_t endPos = jsonStr.find('"', pos + 1);
+        std::size_t endPos = str.find('"', pos + 1);
         if (endPos == std::string::npos) return false;
-        val = jsonStr.substr(pos + 1, endPos - pos - 1);
+        val = str.substr(pos + 1, endPos - pos - 1);
         return true;
     };
 
@@ -230,56 +263,60 @@ static bool ParseOtaManifestJson(const std::string& jsonStr, OtaManifest& outMan
     outManifest.MinUpdateVersion = static_cast<DWORD>(minVer);
     outManifest.OsVersion = std::wstring(osVerStr.begin(), osVerStr.end());
 
-    std::size_t cabsPos = jsonStr.find("\"cabs\"");
+    std::size_t cabsPos = str.find("\"cabs\"");
     if (cabsPos == std::string::npos)
     {
         outError = L"Manifest missing required cabs field";
         return false;
     }
 
-    std::size_t cabBlockStart = jsonStr.find('{', cabsPos);
-    if (cabBlockStart != std::string::npos)
+    std::size_t searchPos = cabsPos;
+    while (true)
     {
-        std::size_t cabBlockEnd = jsonStr.find('}', cabBlockStart);
-        if (cabBlockEnd != std::string::npos)
+        std::size_t cabBlockStart = str.find('{', searchPos);
+        if (cabBlockStart == std::string::npos) break;
+
+        std::size_t cabBlockEnd = str.find('}', cabBlockStart);
+        if (cabBlockEnd == std::string::npos) break;
+
+        std::string cabSub = str.substr(cabBlockStart, cabBlockEnd - cabBlockStart + 1);
+
+        OtaCabInfo cabInfo;
+        std::string cabName, cabSha256;
+        int cabSize = 0;
+
+        std::size_t nPos = cabSub.find("\"name\"");
+        if (nPos != std::string::npos)
         {
-            std::string cabSub = jsonStr.substr(cabBlockStart, cabBlockEnd - cabBlockStart + 1);
-
-            OtaCabInfo cabInfo;
-            std::string cabName, cabSha256;
-            int cabSize = 0;
-
-            std::size_t nPos = cabSub.find("\"name\"");
-            if (nPos != std::string::npos)
-            {
-                std::size_t q1 = cabSub.find('"', cabSub.find(':', nPos));
-                std::size_t q2 = (q1 != std::string::npos) ? cabSub.find('"', q1 + 1) : std::string::npos;
-                if (q2 != std::string::npos) cabName = cabSub.substr(q1 + 1, q2 - q1 - 1);
-            }
-
-            std::size_t sPos = cabSub.find("\"sha256\"");
-            if (sPos != std::string::npos)
-            {
-                std::size_t q1 = cabSub.find('"', cabSub.find(':', sPos));
-                std::size_t q2 = (q1 != std::string::npos) ? cabSub.find('"', q1 + 1) : std::string::npos;
-                if (q2 != std::string::npos) cabSha256 = cabSub.substr(q1 + 1, q2 - q1 - 1);
-            }
-
-            std::size_t zPos = cabSub.find("\"size\"");
-            if (zPos != std::string::npos)
-            {
-                std::size_t cPos = cabSub.find(':', zPos);
-                if (cPos != std::string::npos) cabSize = std::atoi(cabSub.c_str() + cPos + 1);
-            }
-
-            if (!cabName.empty() && !cabSha256.empty() && cabSize > 0)
-            {
-                cabInfo.Name = std::wstring(cabName.begin(), cabName.end());
-                cabInfo.Sha256 = cabSha256;
-                cabInfo.Size = static_cast<std::size_t>(cabSize);
-                outManifest.Cabs.push_back(cabInfo);
-            }
+            std::size_t q1 = cabSub.find('"', cabSub.find(':', nPos));
+            std::size_t q2 = (q1 != std::string::npos) ? cabSub.find('"', q1 + 1) : std::string::npos;
+            if (q2 != std::string::npos) cabName = cabSub.substr(q1 + 1, q2 - q1 - 1);
         }
+
+        std::size_t sPos = cabSub.find("\"sha256\"");
+        if (sPos != std::string::npos)
+        {
+            std::size_t q1 = cabSub.find('"', cabSub.find(':', sPos));
+            std::size_t q2 = (q1 != std::string::npos) ? cabSub.find('"', q1 + 1) : std::string::npos;
+            if (q2 != std::string::npos) cabSha256 = cabSub.substr(q1 + 1, q2 - q1 - 1);
+        }
+
+        std::size_t zPos = cabSub.find("\"size\"");
+        if (zPos != std::string::npos)
+        {
+            std::size_t cPos = cabSub.find(':', zPos);
+            if (cPos != std::string::npos) cabSize = std::atoi(cabSub.c_str() + cPos + 1);
+        }
+
+        if (!cabName.empty() && !cabSha256.empty() && cabSize > 0)
+        {
+            cabInfo.Name = std::wstring(cabName.begin(), cabName.end());
+            cabInfo.Sha256 = cabSha256;
+            cabInfo.Size = static_cast<std::size_t>(cabSize);
+            outManifest.Cabs.push_back(cabInfo);
+        }
+
+        searchPos = cabBlockEnd + 1;
     }
 
     if (outManifest.Cabs.empty())
