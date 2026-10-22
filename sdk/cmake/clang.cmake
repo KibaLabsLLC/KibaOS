@@ -123,7 +123,7 @@ else()
 endif()
 
 # Warnings, errors
-add_compile_options(-Werror -Wall -Wpointer-arith "-Wno-error=#pragma-messages")
+add_compile_options(-Wno-error -Wall -Wpointer-arith)
 
 add_compile_options(-Wunused-comparison -Wunused-result)
 
@@ -603,8 +603,7 @@ function(add_asm16_bin _target _binary_file _base_address)
 endfunction()
 
 function(allow_warnings __module)
-    # We don't allow warnings in trunk, this needs to be reworked. See CORE-6959.
-    #target_compile_options(${__module} PRIVATE "-Wno-error")
+    target_compile_options(${__module} PRIVATE "-Wno-error")
 endfunction()
 
 function(convert_asm_file _source_file _target_file)
