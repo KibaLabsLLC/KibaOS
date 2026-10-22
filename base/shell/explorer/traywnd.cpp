@@ -2830,14 +2830,22 @@ ChangePos:
             }
         }
 
+        KibaCompanion_Init(m_hWnd);
         return TRUE;
     }
 
     LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
+        KibaCompanion_Shutdown();
         TrayFlyouts_Destroy();
         StartMenu2_Destroy();
         return 0;
+    }
+
+    LRESULT OnDeviceChange(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        KibaCompanion_OnDeviceChange(wParam, lParam);
+        return TRUE;
     }
 
     LRESULT OnEndSession(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -2907,6 +2915,8 @@ ChangePos:
             AlignControls(NULL);
             CheckTrayWndPosition();
         }
+
+        KibaCompanion_OnSettingChanged((LPCWSTR)lParam);
 
         if (lParam && lstrcmpiW((LPCWSTR)lParam, L"TraySettings") == 0)
         {
@@ -3946,6 +3956,7 @@ HandleTrayContextMenu:
         MESSAGE_HANDLER(WM_SIZE, OnSize)
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+        MESSAGE_HANDLER(WM_DEVICECHANGE, OnDeviceChange)
         MESSAGE_HANDLER(WM_ENDSESSION, OnEndSession)
         MESSAGE_HANDLER(WM_NCHITTEST, OnNcHitTest)
         MESSAGE_HANDLER(WM_COMMAND, OnCommand)

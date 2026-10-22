@@ -1,5 +1,6 @@
 
 add_subdirectory(fonts)
+add_subdirectory(graphics)
 add_subdirectory(inf)
 add_subdirectory(nls)
 add_subdirectory(sdb)
