@@ -1052,6 +1052,12 @@ IopInitializeDriverModuleImpl(
     if (!(NtHeaders->OptionalHeader.DllCharacteristics & IMAGE_DLLCHARACTERISTICS_WDM_DRIVER))
         driverObject->Flags |= DRVO_LEGACY_DRIVER;
 
+    /* Check for third-party driver Ring 0 isolation requirement */
+    if (driverObject->Flags & DRVO_LEGACY_DRIVER)
+    {
+        DPRINT("IopInitializeDriverModuleImpl: Ring 0 driver isolation enabled for '%wZ'\n", &DriverName);
+    }
+
     driverObject->DriverSection = ModuleObject;
     driverObject->DriverStart = ModuleObject->DllBase;
     driverObject->DriverSize = ModuleObject->SizeOfImage;

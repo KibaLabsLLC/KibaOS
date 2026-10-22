@@ -7,7 +7,6 @@
 
 #include "lxcore.h"
 
-/* Standard 64-bit ELF definitions */
 #define EI_NIDENT       16
 #define ELFMAG0         0x7f
 #define ELFMAG1         'E'
@@ -81,6 +80,7 @@ LxLoadElfImage(
     KAPC_STATE ApcState;
     NTSTATUS Status;
     USHORT i;
+    ULONG_PTR BaseLoadAddr = 0;
 
     UNREFERENCED_PARAMETER(CommandLine);
 
@@ -131,7 +131,17 @@ LxLoadElfImage(
         return STATUS_INVALID_IMAGE_FORMAT;
     }
 
-    /* Initialize VFS for new Linux Process and record entry point */
+    if (Ehdr.e_type != ET_EXEC && Ehdr.e_type != ET_DYN)
+    {
+        ZwClose(FileHandle);
+        return STATUS_INVALID_IMAGE_FORMAT;
+    }
+
+    if (Ehdr.e_type == ET_DYN)
+    {
+        BaseLoadAddr = 0x00007fff00000000ULL;
+    }
+
     Status = LxInitializeProcessVfs(PsGetCurrentProcess(), &VfsContext);
     if (!NT_SUCCESS(Status))
     {
@@ -139,9 +149,8 @@ LxLoadElfImage(
         return Status;
     }
 
-    LxSetProcessEntryPoint(VfsContext, (ULONG_PTR)Ehdr.e_entry);
+    LxSetProcessEntryPoint(VfsContext, (ULONG_PTR)(Ehdr.e_entry + BaseLoadAddr));
 
-    /* Create Pico Process */
     Status = g_PicoRoutines.CreateProcess(
                  NULL,
                  NULL,
@@ -171,7 +180,6 @@ LxLoadElfImage(
         return Status;
     }
 
-    /* Load PT_LOAD segments into target process virtual memory preserving VirtAddr offsets */
     for (i = 0; i < Ehdr.e_phnum; i++)
     {
         ByteOffset.QuadPart = Ehdr.e_phoff + (i * Ehdr.e_phentsize);
@@ -190,7 +198,7 @@ LxLoadElfImage(
 
         if (Phdr.p_type == PT_LOAD && Phdr.p_memsz > 0)
         {
-            ULONG_PTR VirtAddr = (ULONG_PTR)Phdr.p_vaddr;
+            ULONG_PTR VirtAddr = (ULONG_PTR)(Phdr.p_vaddr + BaseLoadAddr);
             ULONG_PTR PageOffset = VirtAddr & (PAGE_SIZE - 1);
             PVOID BaseAddress = (PVOID)(VirtAddr - PageOffset);
             SIZE_T RegionSize = (SIZE_T)Phdr.p_memsz + PageOffset;
@@ -239,7 +247,6 @@ LxLoadElfImage(
         return Status;
     }
 
-    /* Create Initial Pico Thread */
     Status = g_PicoRoutines.CreateThread(
                  ProcessHandle,
                  VfsContext,

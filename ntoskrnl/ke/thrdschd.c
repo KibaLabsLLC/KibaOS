@@ -1224,6 +1224,40 @@ KiReadyThread(IN PKTHREAD Thread)
 }
 
 VOID
+FASTCALL
+KiUpdateCfsVirtualRuntime(
+    IN PKTHREAD Thread,
+    IN ULONG ExecutedDeltaMs)
+{
+    ULONG Weight = (ULONG)(32 - (Thread->Priority & 0x1F));
+    ULONGLONG VruntimeDelta;
+
+    if (Weight == 0)
+        Weight = 1;
+
+    VruntimeDelta = ((ULONGLONG)ExecutedDeltaMs * 1024ULL) / (ULONGLONG)Weight;
+    Thread->WaitTime += (ULONG)VruntimeDelta;
+}
+
+NTSTATUS
+FASTCALL
+KiFastThreadMigrationHandoff(
+    IN PKTHREAD CurrentThread,
+    IN PKTHREAD TargetThread)
+{
+    PKPRCB Prcb = KeGetCurrentPrcb();
+
+    if (CurrentThread == NULL || TargetThread == NULL)
+        return STATUS_INVALID_PARAMETER;
+
+    TargetThread->QuantumReset = CurrentThread->QuantumReset;
+    TargetThread->State = Standby;
+    Prcb->NextThread = TargetThread;
+
+    return STATUS_SUCCESS;
+}
+
+VOID
 NTAPI
 KiAdjustQuantumThread(IN PKTHREAD Thread)
 {
