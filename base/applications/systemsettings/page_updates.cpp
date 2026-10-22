@@ -646,11 +646,11 @@ void BuildUpdates(PageBuilder &page)
     });
 
     page.Choice(L"Update channel", L"Select update distribution channel", L"channel_20_regular",
-                { L"Stable (Recommended)", L"Beta", L"Developer" }, (int)channel, [](int choice) {
+                { L"Stable (Recommended)", L"Beta", L"Developer" }, (int)channel, [host = page.Host](int choice) {
         WriteDword(HKEY_CURRENT_USER, UPDATE_REG_KEY, L"Channel", choice);
         s_OtaState = OtaState::Idle;
-        if (page.Host)
-            page.Host->Refresh();
+        if (host)
+            host->Refresh();
     });
 
     page.Toggle(L"Pause updates", L"Temporarily pause automatic background downloads", L"pause_20_regular", paused != 0, [](int state) {
@@ -666,8 +666,8 @@ void BuildUpdates(PageBuilder &page)
         L"Rollback active: Previous stable image restored" :
         L"Revert system files to the previous stable state if issues occur";
 
-    page.Button(L"Roll back to previous version", rollbackDetail.c_str(), L"arrow_undo_20_regular", L"Roll back", [](int action) {
-        if (Confirm(page.Host ? page.Host->Window() : NULL, L"Confirm System Rollback",
+    page.Button(L"Roll back to previous version", rollbackDetail.c_str(), L"arrow_undo_20_regular", L"Roll back", [host = page.Host](int action) {
+        if (Confirm(host ? host->Window() : NULL, L"Confirm System Rollback",
                     L"Are you sure you want to roll back KibaOS to the previous system version? This will restore system binaries and restart.", L"Roll back"))
         {
             // Remove boot success marker to force rollback verification on reboot
@@ -675,10 +675,10 @@ void BuildUpdates(PageBuilder &page)
             DeleteFileW(KIBAOS_UPDATER_JOURNAL_PATH);
 
             s_OtaState = OtaState::RollbackDone;
-            if (page.Host)
+            if (host)
             {
-                PromptRestart(page.Host->Window(), L"System rollback prepared.");
-                page.Host->Refresh();
+                PromptRestart(host->Window(), L"System rollback prepared.");
+                host->Refresh();
             }
         }
     });
