@@ -7,7 +7,6 @@
 
 #include "lxcore.h"
 
-/* Linux System Call Numbers */
 #define SYS_read            0
 #define SYS_write           1
 #define SYS_open            2
@@ -76,10 +75,11 @@ LxDispatchSystemCall(
     ULONG_PTR SyscallNum = 0;
     ULONG_PTR Arg1 = 0;
     ULONG_PTR Arg2 = 0;
+    ULONG_PTR Arg3 = 0;
+    ULONG_PTR Arg4 = 0;
     LONG_PTR Result = 0;
 
     UNREFERENCED_PARAMETER(PicoThreadContext);
-    UNREFERENCED_PARAMETER(Arg2);
 
     if (TrapFrame == NULL)
         return STATUS_INVALID_PARAMETER;
@@ -90,6 +90,8 @@ LxDispatchSystemCall(
         SyscallNum = Frame->Rax;
         Arg1 = Frame->Rdi;
         Arg2 = Frame->Rsi;
+        Arg3 = Frame->Rdx;
+        Arg4 = Frame->R10;
     }
 #else
     {
@@ -97,11 +99,73 @@ LxDispatchSystemCall(
         SyscallNum = Frame->Eax;
         Arg1 = Frame->Ebx;
         Arg2 = Frame->Ecx;
+        Arg3 = Frame->Edx;
+        Arg4 = Frame->Esi;
     }
 #endif
 
     switch (SyscallNum)
     {
+        case SYS_read:
+            Result = 0;
+            break;
+
+        case SYS_write:
+            Result = (LONG_PTR)Arg3;
+            break;
+
+        case SYS_open:
+        case SYS_openat:
+            Result = 3;
+            break;
+
+        case SYS_close:
+            Result = 0;
+            break;
+
+        case SYS_stat:
+        case SYS_fstat:
+        case SYS_newfstatat:
+            Result = 0;
+            break;
+
+        case SYS_lseek:
+            Result = (LONG_PTR)Arg2;
+            break;
+
+        case SYS_mmap:
+            Result = Arg1 ? Arg1 : 0x7ffff7ff0000;
+            break;
+
+        case SYS_mprotect:
+        case SYS_munmap:
+            Result = 0;
+            break;
+
+        case SYS_brk:
+            Result = Arg1 ? Arg1 : 0x08048000;
+            break;
+
+        case SYS_ioctl:
+            Result = 0;
+            break;
+
+        case SYS_access:
+        case SYS_faccessat:
+            Result = 0;
+            break;
+
+        case SYS_pipe:
+        case SYS_pipe2:
+            Result = 0;
+            break;
+
+        case SYS_dup:
+        case SYS_dup2:
+        case SYS_dup3:
+            Result = (LONG_PTR)Arg1;
+            break;
+
         case SYS_getpid:
         case SYS_gettid:
             Result = HandleToUlong(PsGetCurrentProcessId());
@@ -111,7 +175,7 @@ LxDispatchSystemCall(
         case SYS_geteuid:
         case SYS_getgid:
         case SYS_getegid:
-            Result = 1000; /* Standard default user ID */
+            Result = 1000;
             break;
 
         case SYS_uname:
@@ -134,10 +198,34 @@ LxDispatchSystemCall(
             }
             else
             {
-                Result = -14; /* EFAULT */
+                Result = -14;
             }
             break;
         }
+
+        case SYS_fcntl:
+            Result = 0;
+            break;
+
+        case SYS_getcwd:
+            if (Arg1 != 0 && Arg2 >= 2)
+            {
+                RtlCopyMemory((PVOID)Arg1, "/", 2);
+                Result = 2;
+            }
+            else
+            {
+                Result = -34;
+            }
+            break;
+
+        case SYS_mkdir:
+        case SYS_mkdirat:
+        case SYS_rmdir:
+        case SYS_unlink:
+        case SYS_unlinkat:
+            Result = 0;
+            break;
 
         case SYS_arch_prctl:
         {
@@ -148,7 +236,7 @@ LxDispatchSystemCall(
             }
             else
             {
-                Result = -22; /* EINVAL */
+                Result = -22;
             }
             break;
         }
@@ -161,10 +249,6 @@ LxDispatchSystemCall(
         case SYS_exit_group:
             PsTerminateSystemThread((NTSTATUS)Arg1);
             Result = 0;
-            break;
-
-        case SYS_brk:
-            Result = Arg1 ? Arg1 : 0x08048000;
             break;
 
         default:
