@@ -1,157 +1,143 @@
 <p align="center">
-<img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/main-nt10/GH_MEDIA/kiba-banner-mascot.png?raw=true" />
+  <img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/main-nt10/GH_MEDIA/kiba-banner-mascot.png?raw=true" />
 </p>
 
 <h1 align="center">KibaOS</h1>
 <h2 align="center">
 A new dawn in how we interact with our computers, no longer is it a machine, but second nature.
 
-
-  Simple. Refined. Libre.
-
-
+Simple. Refined. Libre.
 </h2>
 
 ## Quick Links
 
-[Website](https://kibaos.com) • [Source code](https://github.com/KibaLabsLLC/KibaOS) • [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) • [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki) • [Build environment](https://github.com/LiberNT/libernt-build-toolchain)
-
+[Website](https://kibaos.com) | [Source Code](https://github.com/KibaLabsLLC/KibaOS) | [Documentation Wiki](docs/wiki/Home.md) | [Issues](https://github.com/KibaLabsLLC/KibaOS/issues) | [Build Environment](https://github.com/LiberNT/libernt-build-toolchain)
 
 [![License](https://img.shields.io/badge/license-GNU_GPL_3.0-0161B6.svg)](COPYING)
-
 [![Build Status](https://img.shields.io/github/actions/workflow/status/KibaLabsLLC/KibaOS/build.yml?branch=main-nt10&label=Build&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/KibaLabsLLC/KibaOS/actions)
-
 [![SourceForge](https://img.shields.io/sourceforge/dt/kibaos?style=for-the-badge&color=orange&logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/kibaos/)
 
+---
 
-[![Download KibaOS](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/kibaos/files/latest/download)
+## Important Notices
 
-## What is KibaOS?
+### Legal and Trademark Notice
+KibaOS is an independent open-source operating system project developed by Kiba Labs and contributors. It is not affiliated with, endorsed by, or sponsored by Microsoft Corporation. Windows is a registered trademark of Microsoft Corporation in the United States and other countries.
 
-<p align="center">
-  <img src="https://github.com/KibaLabsLLC/Kiba/blob/f9dfed3c5b773fc98b754e514bb2b9d4294cb73f/assets/README/9A269086-C289-46E0-B262-47B3BF77FAB0.png" width="450" alt="KibaOS Banner">
-</p>
+### Cleanroom Source Code Policy Notice
+KibaOS enforces strict cleanroom engineering standards. Contributions, references, or code derived from proprietary or leaked source code (including leaked Windows NT source code or the Windows Research Kernel) are strictly forbidden and will not be accepted.
 
-KibaOS is a free, Windows-compatible operating system from Kiba Labs, built on the NT architecture. It targets Windows® 11 compatibility, with room for freestyle and experimental features.
+### Development Status Notice
+KibaOS is currently in active early development and tracks pre-release builds. System behavior and hardware support depend on upstream integration. Windows 11 serves as the reference implementation for API and driver compatibility.
 
-KibaOS is based on [LiberNT](https://github.com/ahmedarif193/LiberNT), a free NT operating system, which is in turn based on ReactOS, the Open Source effort to develop an operating system that is compatible with applications and drivers written for the Microsoft Windows NT family of operating systems. KibaOS inherits LiberNT's focus on 64-bit platforms: amd64, arm64 and riscv64.
+### Licensing Notice
+KibaOS is licensed under the [GNU GPL 3.0](COPYING). Code inherited from LiberNT and ReactOS retains the license specified in its respective file headers, primarily GPL 2.0 or later. Full license texts for GPL 2.0, LGPL 2.1, and BSD are available in [COPYING2](COPYING2), [COPYING.LIB](COPYING.LIB), and [COPYING.ARM](COPYING.ARM).
 
-KibaOS is licensed under the [GNU GPL 3.0](COPYING). Code inherited from LiberNT and ReactOS keeps the licence stated in its file headers, most of it GPL 2.0 or later. The GPL 2.0, LGPL 2.1 and BSD texts those files refer to are in [COPYING2](COPYING2), [COPYING.LIB](COPYING.LIB) and [COPYING.ARM](COPYING.ARM).
+---
 
-The changes made in KibaOS are Copyright © 2026 Kiba Labs and the KibaOS contributors. Code inherited from LiberNT, ReactOS and third parties keeps the copyright notices of its authors. See [CREDITS.md](CREDITS.md).
+## Overview
 
-KibaOS is an independent project. It is not affiliated with, endorsed by or sponsored by Microsoft. Windows® is a registered trademark of Microsoft Corporation.
+KibaOS is a free, Windows-compatible NT operating system developed by Kiba Labs targeting Windows 11 compatibility across modern 64-bit platforms.
 
-### Status
+KibaOS is based on [LiberNT](https://github.com/ahmedarif193/LiberNT), which is in turn based on ReactOS. KibaOS expands upon this foundation with dedicated support for 64-bit architectures (`amd64`, `arm64`, and `riscv64`), an updated kernel memory manager, modern graphics compositing, and performance enhancements.
 
-KibaOS is in early development and tracks LiberNT's pre-release builds. Expect rough edges, and expect hardware support to depend on what LiberNT supports upstream. Windows 11 is the compatibility reference.
+---
 
-## Support KibaOS
+## Operating System Features
 
-We want KibaOS to be a free NT operating system that anyone can try, hack on and rely on. Support the project by reporting bugs, sending patches, or joining the community. See [Contributing](#contributing) to get started.
+### Kernel and Storage
+- **NVS Memory Manager:** Cleanroom NT10 memory manager (`ntoskrnl/nvs`) providing dedicated kernel pool allocation and architecture descriptors.
+- **Cleanroom Cache Manager:** Modern file system cache manager (`ntoskrnl/cc`) designed for low latency.
+- **Storage I/O Ring Interface:** Asynchronous direct-to-storage I/O ring structures for kernel-bypassed operations.
+- **Modern NTFS Driver & Library:** Rewritten NTFS file system implementation (`drivers/filesystems/ntfs_new`) alongside FastFAT and CDFS support.
 
-## Upstream
+### Graphics and Display
+- **WDDM Kernel Infrastructure:** Windows Display Driver Model driver framework (`dxgkrnl`) and Win32k thunk dispatch interfaces.
+- **Desktop Window Manager (DWM):** Hardware-accelerated window compositing engine with Fluent UI visual design tokens and rounded frame corners.
+- **UEFI GOP Boot Display:** Seamless early boot progress animation and GOP graphics framebuffer handoff.
 
-KibaOS would not exist without the projects below. With respect and gratitude to their teams and contributors:
+### Subsystem and Emulation
+- **WoW64 Subsystem:** Execution of 32-bit applications on 64-bit kernel targets.
+- **ARM64 Translation:** FEX binary translation integration and ARM64EC / CHPE support for ARM64 targets.
+- **Pico Process Subsystem:** Kernel Pico provider interface enabling lightweight subsystem integration (LXCore).
 
-- **LiberNT**, the direct upstream: [github.com/ahmedarif193/LiberNT](https://github.com/ahmedarif193/LiberNT)
-- **ReactOS**, the project LiberNT is based on: [github.com/reactos/reactos](https://github.com/reactos/reactos)
+### Hardware and Board Support
+- **USB & SD Drivers:** Native xHCI USB controller driver stack and SD bus driver.
+- **Raspberry Pi BSP:** Board support packages including VideoCore graphics acceleration, RP1 Ethernet, and CYW43455 Wi-Fi.
+- **Unified Audio & Networking:** High Definition Audio (HDAudio) driver framework and network device stacks.
 
-## Building
+---
 
-KibaOS builds with RosBE, a cross-build toolchain. The steps below work on Linux and macOS, and on Windows through WSL2.
+## Documentation Wiki
 
-### 1. Install the tools
+Comprehensive guides and technical documentation are available in the repository [docs/wiki](docs/wiki/Home.md) folder:
 
-You need Git, CMake, Ninja and a C/C++ compiler for your own machine. RosBE adds the compilers that build KibaOS.
+- **[Wiki Home](docs/wiki/Home.md):** Documentation overview and key project principles.
+- **[Features List](docs/wiki/Features.md):** Detailed technical capabilities across kernel, storage, and shell components.
+- **[Architecture & Subsystems](docs/wiki/Architecture-and-Subsystems.md):** In-depth analysis of NVS, WDDM/DWM, WoW64, and driver stacks.
+- **[Building & Installation Guide](docs/wiki/Building-and-Installation.md):** Step-by-step instructions for RosBE compilation, QEMU execution, and setup installation.
+- **[Developer Guide](docs/wiki/Developer-Guide.md):** Guidelines on cleanroom compliance, coding conventions, and testing against Windows 11 baselines.
+- **[Frequently Asked Questions (FAQ)](docs/wiki/FAQ.md):** Answers to common questions regarding compatibility, licensing, and architecture.
 
+---
+
+## Building KibaOS
+
+KibaOS compiles using the RosBE cross-build toolchain on Linux, macOS, or Windows (WSL2).
+
+### 1. Install Tools
 On Linux or macOS:
-
-```
+```bash
 curl -fsSL https://raw.githubusercontent.com/ahmedarif193/libernt-build-toolchain/main/rosbe-unix-bootstrap.sh | sh
 ```
+On Windows, install WSL2 (`wsl --install`) and execute the bootstrap script inside the Linux terminal.
 
-On Windows, we suggest WSL2. Install it with `wsl --install`, open the Linux terminal it adds, and follow the Linux steps there. Keep the source inside the Linux file system rather than under `/mnt/c`, where builds run slower.
-
-### 2. Get the source
-
-```
+### 2. Get the Source
+```bash
 git clone https://github.com/KibaLabsLLC/KibaOS.git
 cd KibaOS
 ```
 
-The first configure run also fetches the submodule and external sources the build needs.
-
 ### 3. Configure
-
-```
+```bash
 ./configure.sh
 ```
+Common options:
+- `./configure.sh -a arm64`: Target ARM64 architecture.
+- `./configure.sh -a amd64 --release`: Optimized AMD64 release build.
+- `./configure.sh menuconfig`: Interactive terminal configuration menu.
 
-With no options, this sets up an AMD64 Debug build with Clang in the folder `output-Clang-amd64-debug`. The folder name always follows the pattern `output-<compiler>-<architecture>-<debug|release>`.
-
-| Option                | What it does                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| `-a`, `--arch <arch>` | Chooses the target architecture: `amd64` (default), `i386`, `arm64` or `riscv64`.             |
-| `--clang`             | Builds with Clang/LLVM from RosBE. This is the default.                                       |
-| `--gcc`               | Builds with GCC from RosBE instead of Clang. The macOS RosBE does not include GCC.            |
-| `-r`, `--release`     | Makes an optimized Release build. Without it you get a Debug build, which is easier to debug. |
-| `menuconfig`          | Opens a menu to choose optional components first. Your choices are kept in the output folder. |
-| `makefiles`           | Uses `make` instead of Ninja.                                                                 |
-| `--no-feeds-update`   | Skips fetching the external sources listed in `feeds.conf`, for example when offline.         |
-| `-D<name>=<value>`    | Passes a setting straight to CMake.                                                           |
-
-For example:
-
-```
-./configure.sh -a arm64              # ARM64 Debug build with Clang
-./configure.sh -a i386 --gcc         # 32-bit x86 build with GCC
-./configure.sh -a amd64 --release    # optimized AMD64 build
-```
-
-For a more personalized build, add `menuconfig`:
-
-```
-./configure.sh menuconfig
-```
-
-It opens a menu, much like the Linux kernel's, where you choose the target, compiler and build type, and switch features on or off. Press `?` on any option for help, `S` to save and `Q` to quit. Your choices are saved in the output folder and used every time you configure it again.
-
-### 4. Build
-
-Go to the output folder and run Ninja with the target you want:
-
-```
+### 4. Build Image
+```bash
 cd output-Clang-amd64-debug
 ninja kibaosimg
 ```
 
-| Command           | Creates      | Use it to                                                                                                                                                 |
-| ----------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ninja bootcd`    | `bootcd.iso` | Install KibaOS from a CD image, in a virtual machine or on a PC.                                                                                          |
-| `ninja kibaosimg` | `KibaOS.img` | Boot a disk with KibaOS already installed. Start it in a virtual machine such as QEMU, or write it to a USB drive or SD card. It boots with UEFI or BIOS. |
-| `ninja kibaosvhd` | `KibaOS.vhd` | Use the same preinstalled disk in virtual machines that take VHD disks, such as Hyper-V and VirtualBox.                                                   |
+| Target | Output | Usage |
+| --- | --- | --- |
+| `ninja bootcd` | `bootcd.iso` | Bootable ISO image for installation via KibaOS Setup. |
+| `ninja kibaosimg` | `KibaOS.img` | Disk image with preinstalled KibaOS booting on UEFI or BIOS. |
+| `ninja kibaosvhd` | `KibaOS.vhd` | Virtual Hard Disk image for Hyper-V and VirtualBox. |
 
-Each target builds everything it needs first, and the files are written to the output folder.
+For detailed installation instructions, see [INSTALL.md](INSTALL.md) and [Building & Installation Guide](docs/wiki/Building-and-Installation.md).
 
-## What KibaOS Enables
+---
 
-KibaOS brings modern hardware and platforms to the NT architecture, building on LiberNT's work. The current focus is:
+## Upstream Gratitude
 
-- 64-bit platform support on amd64, arm64 and riscv64: kernel, HAL and FreeLoader
-- UEFI boot, GOP framebuffer, and early display support
-- PCIe, PCI, PnP, USB/xHCI, SD/eMMC, and storage/bus drivers
-- Board support, including the Raspberry Pi and its RP1 I/O controller
-- Windows 11 (NT10) compatibility and driver-model work
+KibaOS builds upon the foundational work of the following upstream open-source projects:
 
-See [INSTALL.md](INSTALL.md) for installation instructions.
+- **LiberNT** (Direct Upstream): [github.com/ahmedarif193/LiberNT](https://github.com/ahmedarif193/LiberNT)
+- **ReactOS**: [github.com/reactos/reactos](https://github.com/reactos/reactos)
+
+---
 
 ## Contributing
 
-Report bugs and suggest features in [Issues](https://github.com/KibaLabsLLC/KibaOS/issues), and find guides and notes in the [Wiki](https://github.com/KibaLabsLLC/KibaOS/wiki).
+We welcome contributions from developers and testers. Please review [CONTRIBUTING.md](CONTRIBUTING.md), [PULL_REQUEST_MANAGEMENT.md](PULL_REQUEST_MANAGEMENT.md), and the [Developer Guide](docs/wiki/Developer-Guide.md) before submitting patches.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [PULL_REQUEST_MANAGEMENT.md](PULL_REQUEST_MANAGEMENT.md).
+---
 
-Changes that are not specific to KibaOS, such as kernel, driver and compatibility fixes, belong upstream in [LiberNT](https://github.com/ahmedarif193/LiberNT) where possible, which keeps this fork easy to rebase.
+## Copyright Notice
 
-**Legal notice:** If you have seen proprietary Microsoft Windows source code (including but not limited to the leaked Windows NT 3.5, NT 4, 2000 source code and the Windows Research Kernel), your contribution won't be accepted because of potential copyright violation.
+The changes made in KibaOS are Copyright © 2026 Kiba Labs and the KibaOS contributors. Code inherited from LiberNT, ReactOS and third parties keeps the copyright notices of its authors. See [CREDITS.md](CREDITS.md).
