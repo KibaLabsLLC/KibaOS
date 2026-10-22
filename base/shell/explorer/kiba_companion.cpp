@@ -232,14 +232,14 @@ public:
             return m_pCachedSprites[state][idx];
 
         const WCHAR* szRelative = set.Files[idx];
-        Bitmap* pBmp = new Bitmap(szRelative);
+        Bitmap* pBmp = new Bitmap(szRelative, FALSE);
         if (pBmp->GetLastStatus() != Ok)
         {
             delete pBmp;
             WCHAR szFullPath[MAX_PATH];
             GetWindowsDirectoryW(szFullPath, _countof(szFullPath));
             PathCombineW(szFullPath, szFullPath, szRelative);
-            pBmp = new Bitmap(szFullPath);
+            pBmp = new Bitmap(szFullPath, FALSE);
         }
 
         if (pBmp->GetLastStatus() == Ok)
