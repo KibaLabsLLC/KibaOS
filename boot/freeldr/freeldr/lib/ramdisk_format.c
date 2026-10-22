@@ -201,7 +201,7 @@ FormatFat32Volume(IN PUCHAR VolumeBase,
     BootSector->Reserved1 = 0;
     BootSector->BootSignature = 0x29;
     BootSector->VolumeSerialNumber = 0x20250101;
-    RtlCopyMemory(BootSector->VolumeLabel, "REACTOS    ", sizeof(BootSector->VolumeLabel));
+    RtlCopyMemory(BootSector->VolumeLabel, "KIBAOS     ", sizeof(BootSector->VolumeLabel));
     RtlCopyMemory(BootSector->FileSystemType, "FAT32   ", sizeof(BootSector->FileSystemType));
     BootSector->BootSectorMagic = 0xAA55;
 

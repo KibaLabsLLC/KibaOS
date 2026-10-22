@@ -1393,24 +1393,24 @@ KiDisplayBlueScreen(IN ULONG MessageId,
         if (HardErrMessage) InbvDisplayString(HardErrMessage);
     }
 
-    /* Begin the display with modern simplified UI */
-    InbvDisplayString("\r\n");
-    InbvDisplayString("Whoops! That wasn't supposed to happen. KibaOS encountered a critical error and will now restart.");
-    InbvDisplayString("\r\n\r\n");
+    /* Begin the display with modern minimalist UI */
+    InbvDisplayString("\r\n  :(  \r\n\r\n");
+    InbvDisplayString("  Your system ran into a problem and needs to restart.\r\n");
+    InbvDisplayString("  KibaOS is collecting crash diagnostic data and will restart for you.\r\n\r\n");
 
     /* Check if we have a driver */
     if (KiBugCheckDriver)
     {
         KeBugCheckUnicodeToAnsi(KiBugCheckDriver, AnsiName, sizeof(AnsiName));
-        InbvDisplayString("What failed: ");
+        InbvDisplayString("  What failed: ");
         InbvDisplayString(AnsiName);
-        InbvDisplayString("\r\n\r\n");
+        InbvDisplayString("\r\n");
     }
 
     /* Show the technical Stop Code Data */
     RtlStringCbPrintfA(AnsiName,
                        sizeof(AnsiName),
-                       "Stop code: 0x%08lX (0x%p, 0x%p, 0x%p, 0x%p)\r\n\r\n",
+                       "  Stop code: 0x%08lX (0x%p, 0x%p, 0x%p, 0x%p)\r\n\r\n",
                        BugCheckCode,
                        (PVOID)KiBugCheckData[1],
                        (PVOID)KiBugCheckData[2],
