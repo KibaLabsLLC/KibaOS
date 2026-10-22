@@ -4,7 +4,6 @@ Welcome to the official KibaOS documentation wiki. KibaOS is a free, open-source
 
 ## Documentation Index
 
-- [NT ABI Specification](NT-ABI-Specification.md): Deep-dive into calling conventions, NT Native API, IoRing, UMS, async metadata, dirty throttling, NVMe, FUSE, A/B image rollback, and service supervisor.
 - [Features](Features.md): Overview of capabilities across kernel, storage, graphics, and shell subsystems.
 - [Architecture and Subsystems](Architecture-and-Subsystems.md): Detailed technical information on NVS, WDDM/DWM, Pico provider, WoW64, and hardware drivers.
 - [Building and Installation](Building-and-Installation.md): Step-by-step guides for compiling KibaOS with RosBE and running prebuilt disk images.
