@@ -1,0 +1,10 @@
+title: KibaOS Wiki
+description: Technical Documentation, NT ABI Specification, Architecture, and Development Guide for KibaOS
+theme: jekyll-theme-primer
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  - wiki

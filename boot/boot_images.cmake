@@ -279,7 +279,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/bootfiles.sort ${ISO_SORT_FILE_DATA})
 
 # ISO image identifier names
 set(ISO_MANUFACTURER "KibaOS Project") # For both the publisher and the preparer
-set(ISO_VOLNAME      "ReactOS")         # For both the Volume ID and the Volume set ID
+set(ISO_VOLNAME      "KibaOS")          # For both the Volume ID and the Volume set ID
 
 # ISO image options
 # Preserve Windows DLL names such as avformat-62.dll in the primary ISO directory.
@@ -791,7 +791,7 @@ if(SPACEMIT_K1_SUPPORT)
         -at ${SPACEMIT_K1_FSBL_BACKUP_SECTOR})
     set(_preinstall_boot_partition_fs fat32)
     list(APPEND _kibaosimg_boot_partition_args -name bootfs)
-    list(APPEND _kibaosimg_system_partition_args -name ReactOS)
+    list(APPEND _kibaosimg_system_partition_args -name KibaOS)
     list(APPEND _preinstall_boot_partition_files
         -add ${SPACEMIT_K1_UBOOT_ENV} env_k1-x.txt
         -add ${SPACEMIT_K1_BOOT_SCRIPT} boot.scr
