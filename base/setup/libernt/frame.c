@@ -377,20 +377,6 @@ FramePaintColumn(
     rc.right = Frame.Watermark.cx;
     FillRect(hdc, &rc, GetStockObject(BLACK_BRUSH));
 
-    if (Frame.hWatermark)
-    {
-        HDC hdcMem = CreateCompatibleDC(hdc);
-
-        if (hdcMem)
-        {
-            HGDIOBJ hOld = SelectObject(hdcMem, Frame.hWatermark);
-
-            BitBlt(hdc, 0, 0, Frame.Watermark.cx, min(Frame.Watermark.cy, rc.bottom), hdcMem, 0, 0, SRCCOPY);
-            SelectObject(hdcMem, hOld);
-            DeleteDC(hdcMem);
-        }
-    }
-
     GetClientRect(hwnd, &rc);
     FramePaintPanelEdge(hdc, Frame.Watermark.cx, 0, rc.right - Frame.Watermark.cx, Frame.Corner, Frame.Corner,
                         GetSysColor(COLOR_3DFACE));
@@ -440,13 +426,9 @@ SetupFrameProc(
                 pSetupData->hBoldFont = CreateFrameFont(0);
             SetDlgItemFont(hwnd, IDC_FRAME_TITLE, pSetupData->hTitleFont, FALSE);
 
-            Frame.hWatermark = LoadImageW(pSetupData->hInstance, MAKEINTRESOURCEW(IDB_WATERMARK),
-                                          IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
-            if (Frame.hWatermark && GetObjectW(Frame.hWatermark, sizeof(bm), &bm))
-            {
-                Frame.Watermark.cx = bm.bmWidth;
-                Frame.Watermark.cy = bm.bmHeight;
-            }
+            Frame.hWatermark = NULL;
+            Frame.Watermark.cx = 0;
+            Frame.Watermark.cy = 0;
             {
                 HDC hdc = GetDC(hwnd);
                 Frame.Corner = MulDiv(18, hdc ? GetDeviceCaps(hdc, LOGPIXELSX) : 96, 96);

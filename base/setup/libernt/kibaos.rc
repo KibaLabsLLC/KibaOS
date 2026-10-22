@@ -16,10 +16,6 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 /* Icons */
 IDI_MAIN        ICON "../../../win32ss/user/user32/resources/oic_reactos.ico"
 
-/* Bitmaps */
-IDB_WATERMARK   BITMAP "res/watermark.bmp"
-IDB_LOGO        BITMAP "../../system/userinit/res/rosbitmap.bmp"
-IDB_LOGOMASK    BITMAP "../../system/userinit/res/rosbitmap_mask.bmp"
 
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "kibaos.exe.manifest"
 

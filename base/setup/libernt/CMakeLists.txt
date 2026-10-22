@@ -22,8 +22,6 @@ list(APPEND SOURCE
 
 file(GLOB kibaos_rc_deps res/*.*)
 list(APPEND kibaos_rc_deps
-    ${REACTOS_SOURCE_DIR}/base/system/userinit/res/rosbitmap.bmp
-    ${REACTOS_SOURCE_DIR}/base/system/userinit/res/rosbitmap_mask.bmp
     ${REACTOS_SOURCE_DIR}/win32ss/user/user32/resources/oic_reactos.ico)
 add_rc_deps(kibaos.rc ${kibaos_rc_deps})
 add_executable(kibaos ${SOURCE} kibaos.rc)

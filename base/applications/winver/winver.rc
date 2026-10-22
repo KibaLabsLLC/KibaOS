@@ -14,6 +14,21 @@
 /* UTF-8 */
 #pragma code_page(65001)
 
+IDD_WINVER DIALOGEX 0, 0, 260, 155
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About KibaOS"
+FONT 9, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "KibaOS Operating System", IDC_WINVER_TITLE, 14, 14, 232, 14
+    LTEXT           "Version 11.0 (Build 10001 x64)", IDC_WINVER_BUILD, 14, 32, 232, 12
+    LTEXT           "Copyright (C) 2026 KibaOS Project. All rights reserved.", IDC_WINVER_COPYRIGHT, 14, 48, 232, 18
+    CONTROL         "", -1, "Static", SS_ETCHEDHORZ, 14, 70, 232, 1
+    LTEXT           "Licensed under GPL-3.0 to:", -1, 14, 76, 232, 10
+    LTEXT           "Registered User", IDC_WINVER_USER, 14, 88, 232, 10
+    LTEXT           "Installed Physical RAM: 8192 MB", IDC_WINVER_MEM, 14, 104, 232, 10
+    DEFPUSHBUTTON   "OK", IDOK, 196, 128, 50, 14
+END
+
 #ifdef LANGUAGE_EN_US
     #include "lang/en-US.rc"
 #endif

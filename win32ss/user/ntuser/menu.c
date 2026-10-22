@@ -3220,7 +3220,7 @@ static BOOL FASTCALL MENU_ShowPopup(PWND pwndOwner, PMENU menu, UINT id, UINT fl
         UserSetProp(pWnd, AtomDwmTransitionFromRB,
                     (HANDLE)(ULONG_PTR)DWM_TRANSITION_POINT(x + dx + width, y + dy + height), FALSE);
         UserSetProp(pWnd, AtomDwmTransition,
-                    (HANDLE)(ULONG_PTR)DWM_TRANSITION_PACK(MenuTransitionSeq, 0, 255, 150), FALSE);
+                    (HANDLE)(ULONG_PTR)DWM_TRANSITION_PACK(MenuTransitionSeq, 0, 255, 90), FALSE);
     }
     co_WinPosSetWindowPos( pWnd, HWND_TOPMOST, x, y, width, height, SWP_SHOWWINDOW | SWP_NOACTIVATE);
 

@@ -30,10 +30,21 @@ extern "C" {
 #define UX_TOKEN_COLOR_BORDER_DARK          RGB(60, 60, 60)
 #define UX_TOKEN_COLOR_BORDER_LIGHT         RGB(229, 229, 229)
 
+/* Latent Space & Nature Design System Tokens (COLORREF) */
+#define UX_TOKEN_COLOR_NATURE_LEAF          RGB(46, 125, 50)
+#define UX_TOKEN_COLOR_NATURE_MIST          RGB(236, 242, 240)
+#define UX_TOKEN_COLOR_NATURE_EARTH         RGB(44, 53, 57)
+#define UX_TOKEN_COLOR_NATURE_GLOW          RGB(129, 199, 132)
+
 /* Geometry and Corner Radii (DPI 96 base pixels) */
 #define UX_TOKEN_CORNER_RADIUS_DEFAULT     8
 #define UX_TOKEN_CORNER_RADIUS_SMALL       4
 #define UX_TOKEN_CORNER_RADIUS_LARGE       12
+#define UX_TOKEN_CORNER_RADIUS_ORGANIC     16
+
+/* Latent Space Dynamics & Motion Constants */
+#define UX_TOKEN_SPRING_TENSION            180
+#define UX_TOKEN_SPRING_FRICTION           14
 
 /* Spacing and Padding Tokens (pixels) */
 #define UX_TOKEN_MARGIN_SMALL              4

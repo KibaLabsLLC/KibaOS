@@ -1592,16 +1592,26 @@ IntCompositionCubeRoot(_In_ ULONGLONG Value)
 static ULONG
 IntCompositionEase(_In_ ULONG Progress, _In_ BOOL Accelerate)
 {
-    ULONGLONG t, p;
+    ULONGLONG t, t2, t3, p;
+
+    if (Progress >= COMPOSITION_ANIM_SCALE)
+        return Accelerate ? 0 : COMPOSITION_ANIM_SCALE;
 
     if (Accelerate)
         Progress = COMPOSITION_ANIM_SCALE - Progress;
-    t = IntCompositionCubeRoot((ULONGLONG)Progress << 32);
-    p = ((3 * t * t) >> 16) - ((2 * t * t * t) >> 32);
+
+    /* Quintic smoothstep easing curve: 10t^3 - 15t^4 + 6t^5 */
+    t = Progress;
+    t2 = (t * t) >> 16;
+    t3 = (t2 * t) >> 16;
+    p = (t3 * ((10 * (ULONGLONG)COMPOSITION_ANIM_SCALE) + 6 * t2 - 15 * t)) >> 16;
+
     if (p > COMPOSITION_ANIM_SCALE)
         p = COMPOSITION_ANIM_SCALE;
+
     if (Accelerate)
         return COMPOSITION_ANIM_SCALE - (ULONG)p;
+
     return (ULONG)p;
 }
 

@@ -285,59 +285,40 @@ InbvGopLogoRasterize(
     _In_ ULONG Progress)
 {
     const INBV_LOGO_STATE *S = &g_Logo;
-    INBV_LOGO_RECT Rects[4];
-    LONG OverlapY[RTL_NUMBER_OF(Rects)];
-    ULONG Arm, i, x, y;
+    static const SHORT DotX[12] = { 18,  16,   9,   0,  -9, -16, -18, -16,  -9,   0,   9,  16 };
+    static const SHORT DotY[12] = {  0,   9,  16,  18,  16,   9,   0,  -9, -16, -18, -16,  -9 };
+    LONG CenterX = (LONG)S->Width / 2;
+    LONG CenterY = (LONG)S->Height / 2;
+    ULONG Active = (Progress / 10) % 12;
+    ULONG x, y, i;
 
-    for (Arm = 0; Arm < 2; Arm++)
-    {
-        PINBV_LOGO_RECT Stem = &Rects[Arm * 2];
-        PINBV_LOGO_RECT Foot = &Rects[Arm * 2 + 1];
-        LONG StemLength, FootLength, Length, StemFill, FootFill;
-
-        *Stem = S->Shape[Arm][0];
-        *Foot = S->Shape[Arm][1];
-        StemLength = Stem->Bottom - Stem->Top;
-        FootLength = Foot->Right - Foot->Left;
-        Length = (LONG)(((ULONGLONG)Progress * (ULONG)(StemLength + FootLength)) /
-                        INBV_LOGO_PROGRESS_MAX);
-        StemFill = min(Length, StemLength);
-        FootFill = Length - StemFill;
-
-        if (Arm == 0)
-        {
-            Stem->Bottom = Stem->Top + StemFill;
-            Foot->Right = Foot->Left + FootFill;
-        }
-        else
-        {
-            Stem->Top = Stem->Bottom - StemFill;
-            Foot->Left = Foot->Right - FootFill;
-        }
-    }
+    if (!S->Frame || !S->Width || !S->Height)
+        return;
 
     for (y = 0; y < S->Height; y++)
     {
         PULONG Row = S->Frame + (SIZE_T)y * S->Width;
 
-        for (i = 0; i < RTL_NUMBER_OF(Rects); i++)
-            OverlapY[i] = InbvGopLogoOverlap(Rects[i].Top, Rects[i].Bottom, (LONG)y);
-
         for (x = 0; x < S->Width; x++)
         {
-            ULONG Coverage = 0;
+            ULONG MaxCoverage = 0;
 
-            for (i = 0; i < RTL_NUMBER_OF(Rects); i++)
+            for (i = 0; i < 12; i++)
             {
-                if (OverlapY[i])
+                LONG dx = (LONG)x - (CenterX + DotX[i]);
+                LONG dy = (LONG)y - (CenterY + DotY[i]);
+                LONG distSq = dx * dx + dy * dy;
+
+                if (distSq <= 9)
                 {
-                    Coverage += (ULONG)(OverlapY[i] *
-                                        InbvGopLogoOverlap(Rects[i].Left, Rects[i].Right, (LONG)x));
+                    ULONG Dist = (12 + Active - i) % 12;
+                    ULONG Alpha = max(35UL, 255UL - Dist * 18UL);
+                    if (Alpha > MaxCoverage)
+                        MaxCoverage = Alpha;
                 }
             }
 
-            Coverage = (Coverage * 255 + 32768) >> 16;
-            Row[x] = S->Lut[min(Coverage, 255UL)];
+            Row[x] = S->Lut[min(MaxCoverage, 255UL)];
         }
     }
 }
