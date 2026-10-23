@@ -168,7 +168,7 @@ InbvGopValidateWordmarkHeader(_In_ const BITMAPINFOHEADER *Header)
     if (Header->biBitCount == 4)
         return Header->biCompression == BI_RGB;
 
-    if (Header->biBitCount == 32)
+    if (Header->biBitCount == 24 || Header->biBitCount == 32)
     {
         return Header->biCompression == BI_RGB || Header->biCompression == BI_BITFIELDS;
     }
@@ -933,12 +933,17 @@ InbvRenderBsodMascotScreen(
     if (!SrcWidth || !SrcHeight)
         return;
 
-    if (InbvGopQueryInfo(&FbInfo))
+    if (InbvGopQueryInfo(&FbInfo) && FbInfo.RedMask != 0)
     {
         RedMask = FbInfo.RedMask; GreenMask = FbInfo.GreenMask; BlueMask = FbInfo.BlueMask;
-        RedShift = InbvMaskShift(RedMask); GreenShift = InbvMaskShift(GreenMask); BlueShift = InbvMaskShift(BlueMask);
-        RedMax = InbvMaskMax(RedMask >> RedShift); GreenMax = InbvMaskMax(GreenMask >> GreenShift); BlueMax = InbvMaskMax(BlueMask >> BlueShift);
     }
+    else
+    {
+        RedMask = 0x00FF0000; GreenMask = 0x0000FF00; BlueMask = 0x000000FF;
+    }
+
+    RedShift = InbvMaskShift(RedMask); GreenShift = InbvMaskShift(GreenMask); BlueShift = InbvMaskShift(BlueMask);
+    RedMax = InbvMaskMax(RedMask >> RedShift); GreenMax = InbvMaskMax(GreenMask >> GreenShift); BlueMax = InbvMaskMax(BlueMask >> BlueShift);
 
     Bits = Bitmap + Header->biSize;
     if (Header->biBitCount == 4)
