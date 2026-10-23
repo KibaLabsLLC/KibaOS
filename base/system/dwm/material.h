@@ -10,8 +10,8 @@
 /* The software material uses three box passes at half resolution, whereas
  * the GPU material uses a full-resolution Gaussian. These radii are chosen
  * as a perceptual pair rather than as numerically identical kernels. */
-#define DWM_MATERIAL_BLUR_RADIUS_96       6
-#define DWM_GPU_MATERIAL_BLUR_RADIUS      20
+#define DWM_MATERIAL_BLUR_RADIUS_96       0
+#define DWM_GPU_MATERIAL_BLUR_RADIUS      0
 
 /* Keep the dither below the point where display scaling turns it into grit. */
 #define DWM_MATERIAL_SATURATION           20
