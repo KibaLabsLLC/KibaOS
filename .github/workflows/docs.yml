@@ -22,10 +22,11 @@ concurrency:
 
 jobs:
   deploy-pages:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,15 +34,24 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Install mdBook
         run: |
-          curl -sSL \
-            https://github.com/rust-lang/mdBook/releases/latest/download/mdbook-linux-amd64.tar.gz \
-            | tar -xz
-          sudo install mdbook /usr/local/bin/mdbook
+          cargo install mdbook --locked
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Verify mdBook
+        run: mdbook --version
 
       - name: Build documentation
         run: mdbook build docs/wiki
+
+      - name: Verify generated site
+        run: |
+          test -f docs/wiki/book/index.html
+          echo "mdBook output verified."
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -59,15 +69,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Sync docs/wiki to GitHub Wiki
+        shell: bash
         run: |
           echo "Syncing docs/wiki files to GitHub Wiki repository..."
+
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki_repo || exit 0
+
           if [ -d "wiki_repo" ]; then
             cp -r docs/wiki/* wiki_repo/
             cd wiki_repo
+
             git add .
-            git diff-index --quiet HEAD || git commit -m "Update Wiki documentation from docs/wiki"
+
+            if ! git diff-index --quiet HEAD; then
+              git commit -m "Update Wiki documentation from docs/wiki"
+            fi
+
             git push origin master || git push origin main || true
           fi
