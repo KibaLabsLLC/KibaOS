@@ -33,6 +33,22 @@ VOID
 NTAPI
 InbvGopLogoStop(VOID);
 
+VOID
+NTAPI
+InbvRenderCrashOverlay(VOID);
+
+VOID
+NTAPI
+InbvRenderCrashAnimation(VOID);
+
+VOID
+NTAPI
+InbvRenderCrashQrCode(
+    _In_ z_ PCSTR Url,
+    _In_ ULONG X,
+    _In_ ULONG Y,
+    _In_ ULONG ModulePixelSize);
+
 #ifdef __cplusplus
 }
 #endif

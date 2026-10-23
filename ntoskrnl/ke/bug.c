@@ -10,6 +10,7 @@
 
 #include <ntoskrnl.h>
 #include <internal/dump.h>
+#include "../inbv/inbvgop.h"
 
 #ifdef KDBG
 #include <kdbg/kdb.h>
@@ -1350,38 +1351,37 @@ KiDisplayBlueScreen(IN ULONG MessageId,
                      &BugCheckCode, sizeof(BugCheckCode),
                      NULL, NULL);
 
-    /* Check if bootvid is installed */
+    /* Force acquisition of display ownership unconditionally on crash */
+    InbvAcquireDisplayOwnership();
+    InbvResetDisplay();
+
     if (InbvIsBootDriverInstalled())
     {
         InbvQueryDisplayInfo(&DisplayInfo);
 
-        if (KiIsScreenDebuggingEnabled() &&
-            (InbvGetDisplayState() == INBV_DISPLAY_STATE_OWNED))
-        {
-            /*
-             * Preserve the screen-debug log and its cursor. The crash report
-             * will append through the existing bootvid scrolling path.
-             */
-            InbvSetTextColor(BV_COLOR_WHITE);
-            InbvInstallDisplayStringFilter(NULL);
-            InbvEnableDisplayString(TRUE);
-        }
-        else
-        {
-            /* Acquire ownership and reset the display */
-            InbvAcquireDisplayOwnership();
-            InbvResetDisplay();
+        /* Display minimalist screen: Black background with white text */
+        InbvSolidColorFill(0, 0, DisplayInfo.Width - 1, DisplayInfo.Height - 1, BV_COLOR_BLACK);
+        InbvSetTextColor(BV_COLOR_WHITE);
+        InbvInstallDisplayStringFilter(NULL);
+        InbvEnableDisplayString(TRUE);
 
-            /* Display blue screen */
-            InbvSolidColorFill(0, 0, DisplayInfo.Width - 1, DisplayInfo.Height - 1, BV_COLOR_BLUE);
-            InbvSetTextColor(BV_COLOR_WHITE);
-            InbvInstallDisplayStringFilter(NULL);
-            InbvEnableDisplayString(TRUE);
-            InbvSetScrollRegion(0, 0, DisplayInfo.Width - 1, DisplayInfo.Height - 1);
+        /* Set scroll region to leave right-side quiet zone for QR code canvas */
+        ULONG RightMargin = (DisplayInfo.Width > 220) ? (DisplayInfo.Width - 200) : (DisplayInfo.Width - 1);
+        InbvSetScrollRegion(0, 0, RightMargin, DisplayInfo.Height - 1);
 #ifndef _WINKD_
-            if (KdDisplayTransportKey(FALSE))
-                InbvSetScrollRegion(0, DisplayInfo.CharacterHeight, DisplayInfo.Width - 1, DisplayInfo.Height - 1);
+        if (KdDisplayTransportKey(FALSE))
+            InbvSetScrollRegion(0, DisplayInfo.CharacterHeight, RightMargin, DisplayInfo.Height - 1);
 #endif
+
+        /* Render minimalist overlay mask and error pulse animation */
+        InbvRenderCrashOverlay();
+        InbvRenderCrashAnimation();
+
+        /* Dynamically render QR Code for stop code */
+        {
+            CHAR QrUrl[128];
+            RtlStringCbPrintfA(QrUrl, sizeof(QrUrl), "https://kibaos.org/stop?code=0x%08lX", BugCheckCode);
+            InbvRenderCrashQrCode(QrUrl, DisplayInfo.Width > 200 ? DisplayInfo.Width - 180 : 10, 40, 4);
         }
     }
 
