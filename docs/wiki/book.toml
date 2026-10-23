@@ -1,0 +1,8 @@
+[book]
+title = "KibaOS Wiki"
+authors = ["Kiba Labs, LLC"]
+language = "en"
+src = "src"
+[output.html]
+default-theme = "dark"
+preferred-dark-theme = "navy"
