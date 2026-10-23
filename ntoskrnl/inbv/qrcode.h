@@ -17,7 +17,7 @@
 ULONG
 NTAPI
 KiGenerateQrCode(
-    _In_ z_ PCSTR Text,
+    _In_z_ PCSTR Text,
     _Out_ UCHAR Matrix[QR_MAX_SIZE][QR_MAX_SIZE]);
 
 #endif /* _QRCODE_H_ */
