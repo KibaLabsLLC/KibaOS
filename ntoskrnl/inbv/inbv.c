@@ -172,10 +172,23 @@ InbvGetResourceAddress(
     _In_ ULONG ResourceNumber)
 {
     /* Validate the resource number */
-    if (ResourceNumber > ResourceCount) return NULL;
+    if (ResourceNumber > IDB_MAX_RESOURCES) return NULL;
 
-    /* Return the address */
-    return ResourceList[ResourceNumber];
+    if (ResourceNumber <= ResourceCount && ResourceList[ResourceNumber] != NULL)
+        return ResourceList[ResourceNumber];
+
+    if (KeLoaderBlock != NULL)
+    {
+        PVOID Res = FindBitmapResource(KeLoaderBlock, ResourceNumber);
+        if (Res != NULL)
+        {
+            if (ResourceNumber < RTL_NUMBER_OF(ResourceList))
+                ResourceList[ResourceNumber] = Res;
+            return Res;
+        }
+    }
+
+    return NULL;
 }
 
 CODE_SEG("INIT")
