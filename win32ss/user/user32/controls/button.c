@@ -194,13 +194,86 @@ static inline UINT get_button_type( LONG window_style )
     return (window_style & BS_TYPEMASK);
 }
 
+/* Double-buffered button painter to eliminate flickering */
+static void paint_button_double_buffered( HWND hwnd, HDC hdcTarget, UINT btn_type, UINT action )
+{
+    RECT rc;
+    HDC hdcMem;
+    HBITMAP hbmpMem, hbmpOld;
+    int width, height;
+
+    if (!btnPaintFunc[btn_type] || !IsWindowVisible(hwnd))
+        return;
+
+    GetClientRect( hwnd, &rc );
+    width = rc.right - rc.left;
+    height = rc.bottom - rc.top;
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    hdcMem = CreateCompatibleDC( hdcTarget );
+    if (hdcMem)
+    {
+        hbmpMem = CreateCompatibleBitmap( hdcTarget, width, height );
+        if (hbmpMem)
+        {
+            int nOldMode;
+            HBRUSH hbrush;
+            HWND parent = GetParent(hwnd);
+            UINT message = (btn_type == BS_PUSHBUTTON ||
+                            btn_type == BS_DEFPUSHBUTTON ||
+                            btn_type == BS_PUSHLIKE ||
+                            btn_type == BS_USERBUTTON ||
+                            btn_type == BS_OWNERDRAW) ?
+                            WM_CTLCOLORBTN : WM_CTLCOLORSTATIC;
+
+            if (!parent) parent = hwnd;
+
+            hbmpOld = SelectObject( hdcMem, hbmpMem );
+
+            SetViewportOrgEx( hdcMem, -rc.left, -rc.top, NULL );
+
+            /* Fill background of memory bitmap before drawing control content */
+            hbrush = GetControlColor(parent, hwnd, hdcMem, message);
+            if (hbrush)
+            {
+                RECT rcZero = {0, 0, width, height};
+                FillRect(hdcMem, &rcZero, hbrush);
+            }
+
+            nOldMode = SetBkMode( hdcMem, OPAQUE );
+            btnPaintFunc[btn_type]( hwnd, hdcMem, action );
+            SetBkMode( hdcMem, nOldMode );
+
+            BitBlt( hdcTarget, rc.left, rc.top, width, height, hdcMem, rc.left, rc.top, SRCCOPY );
+
+            SelectObject( hdcMem, hbmpOld );
+            DeleteObject( hbmpMem );
+        }
+        else
+        {
+            int nOldMode = SetBkMode( hdcTarget, OPAQUE );
+            btnPaintFunc[btn_type]( hwnd, hdcTarget, action );
+            SetBkMode( hdcTarget, nOldMode );
+        }
+        DeleteDC( hdcMem );
+    }
+    else
+    {
+        int nOldMode = SetBkMode( hdcTarget, OPAQUE );
+        btnPaintFunc[btn_type]( hwnd, hdcTarget, action );
+        SetBkMode( hdcTarget, nOldMode );
+    }
+}
+
 /* paint a button of any type */
 static inline void paint_button( HWND hwnd, LONG style, UINT action )
 {
     if (btnPaintFunc[style] && IsWindowVisible(hwnd))
     {
         HDC hdc = GetDC( hwnd );
-        btnPaintFunc[style]( hwnd, hdc, action );
+        paint_button_double_buffered( hwnd, hdc, style, action );
         ReleaseDC( hwnd, hdc );
     }
 }
@@ -336,16 +409,9 @@ LRESULT WINAPI ButtonWndProc_common(HWND hWnd, UINT uMsg,
             HBRUSH hBrush;
             HWND parent = GetParent(hWnd);
             if (!parent) parent = hWnd;
-#ifdef __REACTOS__
             hBrush = GetControlColor( parent, hWnd, hdc, WM_CTLCOLORBTN);
-#else
-            hBrush = (HBRUSH)SendMessageW(parent, WM_CTLCOLORBTN, (WPARAM)hdc, (LPARAM)hWnd);
-            if (!hBrush) /* did the app forget to call defwindowproc ? */
-                hBrush = (HBRUSH)DefWindowProcW(parent, WM_CTLCOLORBTN,
-                                                (WPARAM)hdc, (LPARAM)hWnd);
-#endif
             GetClientRect(hWnd, &rc);
-            FillRect(hdc, &rc, hBrush);
+            if (hBrush) FillRect(hdc, &rc, hBrush);
         }
         return 1;
 
@@ -354,12 +420,7 @@ LRESULT WINAPI ButtonWndProc_common(HWND hWnd, UINT uMsg,
     {
         PAINTSTRUCT ps;
         HDC hdc = wParam ? (HDC)wParam : BeginPaint( hWnd, &ps );
-        if (btnPaintFunc[btn_type])
-        {
-            int nOldMode = SetBkMode( hdc, OPAQUE );
-            (btnPaintFunc[btn_type])( hWnd, hdc, ODA_DRAWENTIRE );
-            SetBkMode(hdc, nOldMode); /*  reset painting mode */
-        }
+        paint_button_double_buffered( hWnd, hdc, btn_type, ODA_DRAWENTIRE );
         if ( !wParam ) EndPaint( hWnd, &ps );
         break;
     }

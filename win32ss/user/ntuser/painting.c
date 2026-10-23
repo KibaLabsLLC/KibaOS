@@ -413,6 +413,8 @@ co_IntPaintWindows(PWND Wnd, ULONG Flags, BOOL Recurse)
 
          if (Wnd->head.pti == PsGetCurrentThreadWin32Thread())
          {
+            IntCompositionPaintBegin(Wnd);
+
             if (Wnd->state & WNDS_SENDNCPAINT)
             {
                TempRegion = IntGetNCUpdateRgn(Wnd, TRUE);
@@ -449,6 +451,8 @@ co_IntPaintWindows(PWND Wnd, ULONG Flags, BOOL Recurse)
                   UserReleaseDC(Wnd, hDC, FALSE);
                }
             }
+
+            IntCompositionPaintEnd(Wnd);
          }
 
       }
