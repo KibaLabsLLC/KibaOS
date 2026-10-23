@@ -37,5 +37,6 @@
 /* ReactOS additions */
 #define IDB_COPYRIGHT       22
 #define IDB_REACTOS_GOP_LOGO 23
+#define IDB_BSOD_MASCOT     24
 
-#define IDB_MAX_RESOURCES   IDB_REACTOS_GOP_LOGO
+#define IDB_MAX_RESOURCES   IDB_BSOD_MASCOT

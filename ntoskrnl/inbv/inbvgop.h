@@ -49,6 +49,12 @@ InbvRenderCrashQrCode(
     _In_ ULONG Y,
     _In_ ULONG ModulePixelSize);
 
+VOID
+NTAPI
+InbvRenderBsodMascotScreen(
+    _In_ ULONG BugCheckCode,
+    _In_opt_ PCSTR BugCheckName);
+
 #ifdef __cplusplus
 }
 #endif

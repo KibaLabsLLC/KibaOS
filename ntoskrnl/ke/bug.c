@@ -1357,66 +1357,34 @@ KiDisplayBlueScreen(IN ULONG MessageId,
 
     if (InbvIsBootDriverInstalled())
     {
-        InbvQueryDisplayInfo(&DisplayInfo);
-
-        /* Display minimalist screen: Black background with white text */
-        InbvSolidColorFill(0, 0, DisplayInfo.Width - 1, DisplayInfo.Height - 1, BV_COLOR_BLACK);
-        InbvSetTextColor(BV_COLOR_WHITE);
-        InbvInstallDisplayStringFilter(NULL);
-        InbvEnableDisplayString(TRUE);
-
-        /* Set scroll region to leave right-side quiet zone for QR code canvas */
-        ULONG RightMargin = (DisplayInfo.Width > 220) ? (DisplayInfo.Width - 200) : (DisplayInfo.Width - 1);
-        InbvSetScrollRegion(0, 0, RightMargin, DisplayInfo.Height - 1);
-#ifndef _WINKD_
-        if (KdDisplayTransportKey(FALSE))
-            InbvSetScrollRegion(0, DisplayInfo.CharacterHeight, RightMargin, DisplayInfo.Height - 1);
-#endif
-
-        /* Render minimalist overlay mask and error pulse animation */
-        InbvRenderCrashOverlay();
-        InbvRenderCrashAnimation();
-
-        /* Dynamically render QR Code for stop code */
+        PSTR DriverName = NULL;
+        if (KiBugCheckDriver)
         {
-            CHAR QrUrl[128];
-            RtlStringCbPrintfA(QrUrl, sizeof(QrUrl), "https://kibaos.org/stop?code=0x%08lX", BugCheckCode);
-            InbvRenderCrashQrCode(QrUrl, DisplayInfo.Width > 200 ? DisplayInfo.Width - 180 : 10, 40, 4);
+            KeBugCheckUnicodeToAnsi(KiBugCheckDriver, AnsiName, sizeof(AnsiName));
+            DriverName = AnsiName;
         }
+
+        InbvRenderBsodMascotScreen(BugCheckCode, DriverName);
     }
 
     /* Check if this is a hard error */
     if (IsHardError)
     {
         /* Display caption and message */
-        if (HardErrCaption) InbvDisplayString(HardErrCaption);
-        if (HardErrMessage) InbvDisplayString(HardErrMessage);
+        if (HardErrCaption) KiLogBugCheckString(HardErrCaption);
+        if (HardErrMessage) KiLogBugCheckString(HardErrMessage);
     }
 
-    /* Begin the display with modern minimalist UI */
-    InbvDisplayString("\r\n  :(  \r\n\r\n");
-    InbvDisplayString("  Your system ran into a problem and needs to restart.\r\n");
-    InbvDisplayString("  KibaOS is collecting crash diagnostic data and will restart for you.\r\n\r\n");
-
-    /* Check if we have a driver */
-    if (KiBugCheckDriver)
-    {
-        KeBugCheckUnicodeToAnsi(KiBugCheckDriver, AnsiName, sizeof(AnsiName));
-        InbvDisplayString("  What failed: ");
-        InbvDisplayString(AnsiName);
-        InbvDisplayString("\r\n");
-    }
-
-    /* Show the technical Stop Code Data */
+    /* Log technical Stop Code Data */
     RtlStringCbPrintfA(AnsiName,
                        sizeof(AnsiName),
-                       "  Stop code: 0x%08lX (0x%p, 0x%p, 0x%p, 0x%p)\r\n\r\n",
+                       "Stop code: 0x%08lX (0x%p, 0x%p, 0x%p, 0x%p)\r\n\r\n",
                        BugCheckCode,
                        (PVOID)KiBugCheckData[1],
                        (PVOID)KiBugCheckData[2],
                        (PVOID)KiBugCheckData[3],
                        (PVOID)KiBugCheckData[4]);
-    KiDisplayAndLogBugCheckString(AnsiName);
+    KiLogBugCheckString(AnsiName);
 
     KiDisplayBugCheckRegisters(TrapFrame, Context);
     KiDisplayBugCheckBackTrace(TrapFrame, Context);

@@ -583,6 +583,12 @@ InbvGopReadWordmarkPixel(
         Color->Green = Palette[Index].rgbGreen;
         Color->Blue = Palette[Index].rgbBlue;
     }
+    else if (BitCount == 24)
+    {
+        Color->Blue = Row[X * 3 + 0];
+        Color->Green = Row[X * 3 + 1];
+        Color->Red = Row[X * 3 + 2];
+    }
     else
     {
         ULONG Pixel;
@@ -876,5 +882,177 @@ InbvRenderCrashQrCode(
 
             InbvSolidColorFill(mx, my, mx + ModulePixelSize - 1, my + ModulePixelSize - 1, Color);
         }
+    }
+}
+
+VOID
+NTAPI
+InbvRenderBsodMascotScreen(
+    _In_ ULONG BugCheckCode,
+    _In_opt_ PCSTR BugCheckName)
+{
+    PUCHAR Bitmap;
+    PBITMAPINFOHEADER Header;
+    ULONG SrcWidth, SrcHeight, SrcDelta;
+    ULONG ScreenWidth, ScreenHeight;
+    VID_DISPLAY_INFO DisplayInfo;
+    LOADER_PARAMETER_FRAMEBUFFER FbInfo;
+    BOOLEAN TopDown = FALSE;
+    PUCHAR Bits;
+    LPRGBQUAD Palette = NULL;
+    ULONG PaletteCount = 0;
+    ULONG SourceRedMask = 0x00ff0000;
+    ULONG SourceGreenMask = 0x0000ff00;
+    ULONG SourceBlueMask = 0x000000ff;
+    ULONG SourceAlphaMask = 0;
+
+    ULONG RedMask = 0, GreenMask = 0, BlueMask = 0;
+    ULONG RedShift = 0, GreenShift = 0, BlueShift = 0;
+    ULONG RedMax = 0, GreenMax = 0, BlueMax = 0;
+
+    InbvQueryDisplayInfo(&DisplayInfo);
+    ScreenWidth = DisplayInfo.Width;
+    ScreenHeight = DisplayInfo.Height;
+    if (ScreenWidth == 0 || ScreenHeight == 0)
+        return;
+
+    /* Fill background with BSOD light blue */
+    InbvSolidColorFill(0, 0, ScreenWidth - 1, ScreenHeight - 1, BV_COLOR_LIGHT_BLUE);
+
+    Bitmap = InbvGetResourceAddress(IDB_BSOD_MASCOT);
+    if (!Bitmap)
+        return;
+
+    Header = (PBITMAPINFOHEADER)Bitmap;
+    if (!InbvGopValidateWordmarkHeader(Header))
+        return;
+
+    SrcWidth = (ULONG)Header->biWidth;
+    SrcHeight = (Header->biHeight < 0) ? (ULONG)(-Header->biHeight) : (ULONG)Header->biHeight;
+    TopDown = (Header->biHeight < 0);
+    if (!SrcWidth || !SrcHeight)
+        return;
+
+    if (InbvGopQueryInfo(&FbInfo))
+    {
+        RedMask = FbInfo.RedMask; GreenMask = FbInfo.GreenMask; BlueMask = FbInfo.BlueMask;
+        RedShift = InbvMaskShift(RedMask); GreenShift = InbvMaskShift(GreenMask); BlueShift = InbvMaskShift(BlueMask);
+        RedMax = InbvMaskMax(RedMask >> RedShift); GreenMax = InbvMaskMax(GreenMask >> GreenShift); BlueMax = InbvMaskMax(BlueMask >> BlueShift);
+    }
+
+    Bits = Bitmap + Header->biSize;
+    if (Header->biBitCount == 4)
+    {
+        PaletteCount = Header->biClrUsed ? min(Header->biClrUsed, 16UL) : 16;
+        Palette = (LPRGBQUAD)Bits;
+        Bits += PaletteCount * sizeof(*Palette);
+    }
+    else if (Header->biCompression == BI_BITFIELDS)
+    {
+        const ULONG *Masks = (const ULONG *)(Bitmap + sizeof(BITMAPINFOHEADER));
+        SourceRedMask = Masks[0];
+        SourceGreenMask = Masks[1];
+        SourceBlueMask = Masks[2];
+        if (Header->biSize >= sizeof(BITMAPINFOHEADER) + 4 * sizeof(ULONG))
+            SourceAlphaMask = Masks[3];
+        else
+            Bits += 3 * sizeof(*Masks);
+    }
+
+    SrcDelta = (ULONG)((((ULONGLONG)SrcWidth * Header->biBitCount + 31) / 32) * 4);
+    if (!SrcDelta)
+        return;
+
+    /* Blit base mascot image scaled to ScreenWidth x ScreenHeight */
+    for (ULONG dy = 0; dy < ScreenHeight; dy++)
+    {
+        ULONG sy = (ULONG)min((ULONGLONG)SrcHeight - 1, ((ULONGLONG)dy * SrcHeight) / ScreenHeight);
+
+        static ULONG LineBuf[1024];
+        ULONG produced = 0;
+        while (produced < ScreenWidth)
+        {
+            ULONG toDo = min((ULONG)1024, ScreenWidth - produced);
+            for (ULONG dx = 0; dx < toDo; dx++)
+            {
+                ULONG sx0 = (ULONG)min((ULONGLONG)SrcWidth - 1, ((ULONGLONG)(produced + dx) * SrcWidth) / ScreenWidth);
+                INBV_GOP_RGB C00;
+
+                InbvGopReadWordmarkPixel(Bits, SrcDelta, Header->biBitCount,
+                                         TopDown, SrcHeight, sx0, sy,
+                                         Palette, PaletteCount,
+                                         SourceRedMask, SourceGreenMask,
+                                         SourceBlueMask, SourceAlphaMask, &C00);
+
+                LineBuf[dx] = InbvPackColor(RedMask, GreenMask, BlueMask,
+                                            RedShift, GreenShift, BlueShift,
+                                            RedMax, GreenMax, BlueMax,
+                                            (UCHAR)C00.Red, (UCHAR)C00.Green, (UCHAR)C00.Blue);
+            }
+            VidBufferToScreenBlt((PUCHAR)LineBuf,
+                                 produced,
+                                 dy,
+                                 toDo,
+                                 1,
+                                 toDo * sizeof(ULONG));
+            produced += toDo;
+        }
+    }
+
+    /*
+     * Overlay dynamic QR code:
+     * In reference image (1586x992), QR box inside area is centered around X=120..380, Y=500..780
+     */
+    {
+        CHAR QrUrl[128];
+        ULONG QrX, QrY, QrBoxWidth, ModuleSize;
+        UCHAR Matrix[QR_MAX_SIZE][QR_MAX_SIZE];
+        ULONG QrSize;
+
+        RtlStringCbPrintfA(QrUrl, sizeof(QrUrl), "https://kibaos.org/stop?code=0x%08lX", BugCheckCode);
+
+        QrSize = KiGenerateQrCode(QrUrl, Matrix);
+        if (QrSize > 0)
+        {
+            QrX = (118 * ScreenWidth) / SrcWidth;
+            QrY = (500 * ScreenHeight) / SrcHeight;
+            QrBoxWidth = (260 * ScreenWidth) / SrcWidth;
+            ModuleSize = max(1UL, QrBoxWidth / QrSize);
+
+            for (ULONG r = 0; r < QrSize; r++)
+            {
+                for (ULONG c = 0; c < QrSize; c++)
+                {
+                    UCHAR Module = Matrix[r][c];
+                    UCHAR Color = Module ? BV_COLOR_LIGHT_BLUE : BV_COLOR_WHITE;
+                    ULONG mx = QrX + c * ModuleSize;
+                    ULONG my = QrY + r * ModuleSize;
+
+                    InbvSolidColorFill(mx, my, mx + ModuleSize - 1, my + ModuleSize - 1, Color);
+                }
+            }
+        }
+    }
+
+    /*
+     * Overlay dynamic STOP code string:
+     * In reference image (1586x992), STOP code string location is at relative X=430, Y=674
+     */
+    {
+        CHAR StopText[128];
+        ULONG StopX = (430 * ScreenWidth) / SrcWidth;
+        ULONG StopY = (674 * ScreenHeight) / SrcHeight;
+
+        if (BugCheckName && BugCheckName[0] != '\0')
+        {
+            RtlStringCbPrintfA(StopText, sizeof(StopText), "%s", BugCheckName);
+        }
+        else
+        {
+            RtlStringCbPrintfA(StopText, sizeof(StopText), "0x%08lX", BugCheckCode);
+        }
+
+        InbvSetTextColor(BV_COLOR_WHITE);
+        VidDisplayStringXY(StopText, StopX, StopY, TRUE);
     }
 }
