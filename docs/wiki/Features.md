@@ -1,3 +1,7 @@
+<p align="center">
+<img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/5dae868ed1caac1629ebd14959d92f3b0216e5e6/GH_MEDIA/F37FC284-F214-4989-B85C-1256AE8F9BD8.png?raw=true" />
+</p>
+
 # KibaOS Features
 
 KibaOS delivers a modern operating system experience based on the NT architecture. The following feature overview highlights key functionality built into the kernel, driver stacks, user subsystem, and desktop environment.

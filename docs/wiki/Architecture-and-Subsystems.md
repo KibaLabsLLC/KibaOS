@@ -1,3 +1,7 @@
+<p align="center">
+<img width="600" alt="Kiba Labs banner" src="https://github.com/KibaLabsLLC/KibaOS/blob/5dae868ed1caac1629ebd14959d92f3b0216e5e6/GH_MEDIA/F37FC284-F214-4989-B85C-1256AE8F9BD8.png?raw=true" />
+</p>
+
 # Architecture and Subsystems
 
 This document provides a technical overview of the primary subsystems and architectural design decisions in KibaOS.
@@ -24,7 +28,7 @@ Defined in `sdk/include/reactos/ioring.h` and implemented in `ntoskrnl/io/iomgr/
 KibaOS implements the Windows Display Driver Model kernel interface (`drivers/directx/dxgkrnl`), providing system call dispatch thunks (`win32ss/gdi/ntgdi/d3dkmt.c`) for user-mode display drivers.
 
 ### Desktop Window Manager (DWM)
-Located in `base/system/dwm`, DWM manages hardware-accelerated desktop compositing. Frame borders, client areas, and non-client caption controls are rendered using centralized UX tokens (`sdk/include/reactos/ux_tokens.h`) and DWM corner radius constants (`sdk/include/reactos/dwmframe.h`).
+DWM manages hardware-accelerated desktop compositing. Frame borders, client areas, and non-client caption controls are rendered using centralized UX tokens (`sdk/include/reactos/ux_tokens.h`) and DWM corner radius constants (`sdk/include/reactos/dwmframe.h`).
 
 ## Architecture Portability and WoW64
 
