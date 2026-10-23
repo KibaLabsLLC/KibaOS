@@ -89,7 +89,7 @@ static VOID SetAlignmentPattern(UCHAR M[QR_MAX_SIZE][QR_MAX_SIZE], ULONG x, ULON
 ULONG
 NTAPI
 KiGenerateQrCode(
-    _In_ z_ PCSTR Text,
+    _In_z_ PCSTR Text,
     _Out_ UCHAR Matrix[QR_MAX_SIZE][QR_MAX_SIZE])
 {
     ULONG r, c, i, j;

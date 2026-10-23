@@ -854,7 +854,7 @@ InbvRenderCrashAnimation(VOID)
 VOID
 NTAPI
 InbvRenderCrashQrCode(
-    _In_ z_ PCSTR Url,
+    _In_z_ PCSTR Url,
     _In_ ULONG X,
     _In_ ULONG Y,
     _In_ ULONG ModulePixelSize)
