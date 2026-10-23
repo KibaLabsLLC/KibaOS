@@ -1,4 +1,3 @@
-
 list(APPEND SOURCE
     main.cpp
     util.cpp
@@ -8,6 +7,7 @@ list(APPEND SOURCE
     page_network.cpp
     page_personal.cpp
     page_apps.cpp
+    page_history.cpp
     page_accounts.cpp
     page_time.cpp
     page_updates.cpp

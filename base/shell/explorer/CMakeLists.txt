@@ -7,6 +7,8 @@ endif()
 list(APPEND SOURCE
     appbar.cpp
     desktop.cpp
+    desktop_memory.cpp
+    intent_wm.cpp
     explorer.cpp
     kiba_companion.cpp
     notifyiconscust.cpp
@@ -14,6 +16,7 @@ list(APPEND SOURCE
     rshell.cpp
     settings.cpp
     shellservice.cpp
+    spatial_workspace.cpp
     startbutton.cpp
     startctxmnu.cpp
     startmnu.cpp
@@ -32,6 +35,7 @@ list(APPEND SOURCE
     trayntfy.cpp
     trayprop.cpp
     traywnd.cpp
+    universal_settings.cpp
     util.cpp
     precomp.h)
 
