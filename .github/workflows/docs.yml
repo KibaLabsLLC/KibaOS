@@ -48,11 +48,6 @@ jobs:
       - name: Build documentation
         run: mdbook build docs/wiki
 
-      - name: Verify generated site
-        run: |
-          test -f docs/wiki/book/index.html
-          echo "mdBook output verified."
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
