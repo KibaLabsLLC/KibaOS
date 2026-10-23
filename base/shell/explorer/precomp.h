@@ -34,6 +34,7 @@
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shlwapi.h>
+#include <psapi.h>
 #include <uxtheme.h>
 #include <process.h>
 #include <strsafe.h>
