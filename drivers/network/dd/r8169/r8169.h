@@ -29,9 +29,9 @@
 #define R8169_MAX_MULTICAST          32
 
 #define R8169_MAC_OPTIONS            (NDIS_MAC_OPTION_COPY_LOOKAHEAD_DATA | \
-                                      NDIS_MAC_OPTION_TRANSFORMS_EXECUTE | \
+                                      NDIS_MAC_OPTION_TRANSFERS_NOT_PEND | \
                                       NDIS_MAC_OPTION_NO_LOOPBACK | \
-                                      NDIS_MAC_OPTION_802_1P_PRIORITY)
+                                      NDIS_MAC_OPTION_8021P_PRIORITY)
 
 #define R8169_SUPPORTED_FILTERS      (NDIS_PACKET_TYPE_DIRECTED | \
                                       NDIS_PACKET_TYPE_MULTICAST | \

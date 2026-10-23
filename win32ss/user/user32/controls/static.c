@@ -39,6 +39,7 @@ static void STATIC_PaintIconfn( HWND hwnd, HDC hdc, DWORD style );
 static void STATIC_PaintBitmapfn( HWND hwnd, HDC hdc, DWORD style );
 static void STATIC_PaintEnhMetafn( HWND hwnd, HDC hdc, DWORD style );
 static void STATIC_PaintEtchedfn( HWND hwnd, HDC hdc, DWORD style );
+static HBRUSH STATIC_SendWmCtlColorStatic( HWND hwnd, HDC hdc );
 
 static COLORREF color_3dshadow, color_3ddkshadow, color_3dhighlight;
 
