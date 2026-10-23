@@ -9,7 +9,13 @@ Welcome to the official KibaOS documentation wiki. KibaOS is a free, open-source
 ## Documentation Index
 
 - [Features](Features.md): Overview of capabilities across kernel, storage, graphics, and shell subsystems.
-- [Architecture and Subsystems](Architecture-and-Subsystems.md): Detailed technical information on NVS, WDDM/DWM, Pico provider, WoW64, and hardware drivers.
+- [Architecture and Subsystems](Architecture-and-Subsystems.md): High-level technical overview on NVS, WDDM/DWM, Pico provider, WoW64, and hardware drivers.
+- [Kernel and Executive Services](Kernel-Executive.md): Detailed breakdown of NVS Memory Manager, Cache Manager, lock-free DPC ring buffers, UMA, and Storage I/O Ring.
+- [Graphics, Desktop Window Manager, and UI Design System](Graphics-and-UI.md): WDDM driver model, Win32k thunks, non-client window rendering, UX tokens, error catalog, Predictive UI, and Kiba Companion.
+- [Device Drivers and Hardware Support](Device-Drivers-and-Hardware.md): Storage/NVMe, USB stack, Realtek Ethernet, WFP/IPSec, HDAudio, and Raspberry Pi BSP.
+- [Subsystems and Compatibility Layers](Subsystems-and-Compatibility.md): WoW64, POSIX/Linux subsystem (LXCore), ARM64 FEX/CHPE translation, and NT Native API specifications.
+- [User Experience, Shell, and Desktop Environment](User-Experience-and-Shell.md): Explorer shell engine, taskbar flyouts, System Settings, and first-boot onboarding setup wizard.
+- [System Maintenance, Diagnostics, and OTA Engine](System-Maintenance-and-OTA.md): Over-the-air update state machine, verification framework, boot success rollback marker, and ForceBugCheck utility.
 - [Building and Installation](Building-and-Installation.md): Step-by-step guides for compiling KibaOS with RosBE and running prebuilt disk images.
 - [Developer Guide](Developer-Guide.md): Guidelines for code contributions, cleanroom compliance, testing against Windows 11 baselines, and coding standards.
 - [Frequently Asked Questions (FAQ)](FAQ.md): Common queries about system compatibility, project origin, licensing, and hardware support.
