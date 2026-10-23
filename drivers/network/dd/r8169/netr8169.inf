@@ -1,0 +1,56 @@
+[Version]
+Signature="$CHICAGO$"
+Class=Net
+ClassGUID={4d36e972-e325-11ce-bfc1-08002be10318}
+Provider=%Realtek%
+DriverVer=01/01/2026,1.0.0.1
+CatalogFile=r8169.cat
+
+[Manufacturer]
+%Realtek%=Realtek,NTamd64
+
+[Realtek.NTamd64]
+%R8169.DeviceDesc%=R8169.NDI, PCI\VEN_10EC&DEV_8169
+%R8168.DeviceDesc%=R8169.NDI, PCI\VEN_10EC&DEV_8168
+%R8167.DeviceDesc%=R8169.NDI, PCI\VEN_10EC&DEV_8167
+%R8101.DeviceDesc%=R8169.NDI, PCI\VEN_10EC&DEV_8136
+
+[R8169.NDI]
+Characteristics=0x84 ; NCF_PHYSICAL | NCF_HAS_UI
+BusType=5 ; PCI
+AddReg=R8169.Reg
+CopyFiles=R8169.CopyFiles
+
+[R8169.NDI.Services]
+AddService=r8169, 2, R8169.Service, R8169.EventLog
+
+[R8169.Reg]
+HKR, Ndi, Service, 0, "r8169"
+HKR, Ndi\Interfaces, UpperRange, 0, "ndis5"
+HKR, Ndi\Interfaces, LowerRange, 0, "ethernet"
+
+[R8169.CopyFiles]
+r8169.sys,,,2
+
+[R8169.Service]
+DisplayName=%R8169.Service.DispName%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\r8169.sys
+LoadOrderGroup=NDIS
+
+[R8169.EventLog]
+AddReg=R8169.AddEventLog.Reg
+
+[R8169.AddEventLog.Reg]
+HKR,, EventMessageFile, 0x00020000, "%%SystemRoot%%\System32\netevent.dll"
+HKR,, TypesSupported, 0x00010001, 7
+
+[Strings]
+Realtek="Realtek Semiconductor Corp."
+R8169.DeviceDesc="Realtek RTL8169 PCI Gigabit Ethernet Adapter"
+R8168.DeviceDesc="Realtek RTL8168/RTL8111 PCI Express Gigabit Ethernet Adapter"
+R8167.DeviceDesc="Realtek RTL8167 PCI Gigabit Ethernet Adapter"
+R8101.DeviceDesc="Realtek RTL8101E/RTL8102E PCI Express Fast Ethernet Adapter"
+R8169.Service.DispName="Realtek Gigabit Ethernet Driver"
