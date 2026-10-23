@@ -12,6 +12,7 @@
 #include "logo.h"
 #include "resource.h"
 #include "inbvgop.h"
+#include "qrcode.h"
 
 
 #ifndef BI_RGB
@@ -807,4 +808,73 @@ InbvGopHandleBootBitmap(VOID)
 
     InbvEnableDisplayString(FALSE);
     return TRUE;
+}
+
+VOID
+NTAPI
+InbvRenderCrashOverlay(VOID)
+{
+    VID_DISPLAY_INFO DisplayInfo;
+    InbvQueryDisplayInfo(&DisplayInfo);
+    if (DisplayInfo.Width == 0 || DisplayInfo.Height == 0)
+        return;
+
+    /* Draw minimalist top accent line for crash screen overlay mask */
+    InbvSolidColorFill(0, 0, DisplayInfo.Width - 1, 3, BV_COLOR_WHITE);
+}
+
+VOID
+NTAPI
+InbvRenderCrashAnimation(VOID)
+{
+    VID_DISPLAY_INFO DisplayInfo;
+    ULONG i, x, y, size = 16;
+
+    InbvQueryDisplayInfo(&DisplayInfo);
+    if (DisplayInfo.Width == 0 || DisplayInfo.Height == 0)
+        return;
+
+    x = 20;
+    y = 20;
+
+    /* Render multi-frame error pulse animation using KeStallExecutionProcessor for HIGH_LEVEL IRQL safety */
+    for (i = 0; i < 4; i++)
+    {
+        InbvSolidColorFill(x, y, x + size + (i * 2), y + size + (i * 2), BV_COLOR_WHITE);
+        KeStallExecutionProcessor(30000); /* 30ms stall */
+    }
+}
+
+VOID
+NTAPI
+InbvRenderCrashQrCode(
+    _In_ z_ PCSTR Url,
+    _In_ ULONG X,
+    _In_ ULONG Y,
+    _In_ ULONG ModulePixelSize)
+{
+    UCHAR Matrix[QR_MAX_SIZE][QR_MAX_SIZE];
+    ULONG QrSize;
+    ULONG r, c, mx, my;
+
+    QrSize = KiGenerateQrCode(Url, Matrix);
+    if (QrSize == 0)
+        return;
+
+    if (ModulePixelSize == 0)
+        ModulePixelSize = 3;
+
+    for (r = 0; r < QrSize; r++)
+    {
+        for (c = 0; c < QrSize; c++)
+        {
+            UCHAR Module = Matrix[r][c];
+            UCHAR Color = Module ? BV_COLOR_WHITE : BV_COLOR_BLACK;
+
+            mx = X + c * ModulePixelSize;
+            my = Y + r * ModulePixelSize;
+
+            InbvSolidColorFill(mx, my, mx + ModulePixelSize - 1, my + ModulePixelSize - 1, Color);
+        }
+    }
 }
