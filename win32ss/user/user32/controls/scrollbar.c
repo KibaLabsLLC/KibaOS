@@ -1373,20 +1373,62 @@ ScrollBarWndProc_common(WNDPROC DefWindowProc, HWND Wnd, UINT Msg, WPARAM wParam
 
           Dc = (0 != wParam ? (HDC) wParam : BeginPaint(Wnd, &Ps));
 
-          if (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEGRIP)
-            {
-              IntScrollDrawSizeGrip(Wnd, Dc);
-            }
-          else if (0 != (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEBOX))
-            {
-              RECT Rect;
-              GetClientRect(Wnd, &Rect);
-              FillRect(Dc, &Rect, GetSysColorBrush(COLOR_BTNFACE));
-            }
-          else
-            {
-              IntDrawScrollBar(Wnd, Dc, SB_CTL/*, TRUE, TRUE*/);
-            }
+          {
+              RECT rc;
+              GetClientRect(Wnd, &rc);
+              int width = rc.right - rc.left;
+              int height = rc.bottom - rc.top;
+              HDC hdcMem = (width > 0 && height > 0) ? CreateCompatibleDC(Dc) : NULL;
+              if (hdcMem)
+              {
+                  HBITMAP hbmpMem = CreateCompatibleBitmap(Dc, width, height);
+                  if (hbmpMem)
+                  {
+                      HBITMAP hbmpOld = SelectObject(hdcMem, hbmpMem);
+                      HBRUSH hbrush = GetControlBrush(Wnd, hdcMem, WM_CTLCOLORSCROLLBAR);
+                      if (!hbrush) hbrush = GetSysColorBrush(COLOR_BTNFACE);
+                      if (hbrush)
+                      {
+                          RECT rcZero = {0, 0, width, height};
+                          FillRect(hdcMem, &rcZero, hbrush);
+                      }
+                      if (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEGRIP)
+                      {
+                          IntScrollDrawSizeGrip(Wnd, hdcMem);
+                      }
+                      else if (0 != (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEBOX))
+                      {
+                          FillRect(hdcMem, &rc, GetSysColorBrush(COLOR_BTNFACE));
+                      }
+                      else
+                      {
+                          IntDrawScrollBar(Wnd, hdcMem, SB_CTL);
+                      }
+                      BitBlt(Dc, rc.left, rc.top, width, height, hdcMem, rc.left, rc.top, SRCCOPY);
+                      SelectObject(hdcMem, hbmpOld);
+                      DeleteObject(hbmpMem);
+                  }
+                  else
+                  {
+                      if (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEGRIP)
+                          IntScrollDrawSizeGrip(Wnd, Dc);
+                      else if (0 != (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEBOX))
+                          FillRect(Dc, &rc, GetSysColorBrush(COLOR_BTNFACE));
+                      else
+                          IntDrawScrollBar(Wnd, Dc, SB_CTL);
+                  }
+                  DeleteDC(hdcMem);
+              }
+              else
+              {
+                  if (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEGRIP)
+                      IntScrollDrawSizeGrip(Wnd, Dc);
+                  else if (0 != (GetWindowLongPtrW(Wnd, GWL_STYLE) & SBS_SIZEBOX))
+                      FillRect(Dc, &rc, GetSysColorBrush(COLOR_BTNFACE));
+                  else
+                      IntDrawScrollBar(Wnd, Dc, SB_CTL);
+              }
+          }
 
           if (0 == wParam)
             {

@@ -1848,6 +1848,8 @@ ForceNCPaintErase(PWND Wnd, HRGN hRgn, PREGION pRgn)
        }
    }
 
+   IntCompositionPaintBegin(Wnd);
+
    IntSendNCPaint( Wnd, hRgn ); // Region can be deleted by the application.
 
    if (Wnd->hrgnUpdate)
@@ -1864,6 +1866,8 @@ ForceNCPaintErase(PWND Wnd, HRGN hRgn, PREGION pRgn)
       }
       UserReleaseDC(Wnd, hDC, FALSE);
    }
+
+   IntCompositionPaintEnd(Wnd);
 
    if (Create)
    {

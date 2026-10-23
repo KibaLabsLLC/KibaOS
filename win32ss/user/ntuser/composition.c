@@ -3051,14 +3051,27 @@ IntCompositionDwmGetFrame(_In_ PVOID pUser)
                 {
                     POINTL Source;
                     if (e->Redirect.FrontValid && e->Redirect.BackDirtyValid)
+                    {
                         PublishedBounds = e->Redirect.BackDirtyRect;
-                    Source.x = PublishedBounds.left;
-                    Source.y = PublishedBounds.top;
-                    BackingPublished = IntEngBitBlt(
-                        &e->Redirect.psurfFront->SurfObj,
-                        &e->Redirect.psurf->SurfObj,
-                        NULL, NULL, NULL, &PublishedBounds, &Source,
-                        NULL, NULL, NULL, ROP4_SRCCOPY);
+                        PublishedBounds.left = max(0, min(PublishedBounds.left, e->Redirect.cx));
+                        PublishedBounds.top = max(0, min(PublishedBounds.top, e->Redirect.cy));
+                        PublishedBounds.right = max(PublishedBounds.left, min(PublishedBounds.right, e->Redirect.cx));
+                        PublishedBounds.bottom = max(PublishedBounds.top, min(PublishedBounds.bottom, e->Redirect.cy));
+                    }
+                    if (PublishedBounds.right > PublishedBounds.left && PublishedBounds.bottom > PublishedBounds.top)
+                    {
+                        Source.x = PublishedBounds.left;
+                        Source.y = PublishedBounds.top;
+                        BackingPublished = IntEngBitBlt(
+                            &e->Redirect.psurfFront->SurfObj,
+                            &e->Redirect.psurf->SurfObj,
+                            NULL, NULL, NULL, &PublishedBounds, &Source,
+                            NULL, NULL, NULL, ROP4_SRCCOPY);
+                    }
+                    else
+                    {
+                        BackingPublished = TRUE;
+                    }
                     if (BackingPublished)
                         InterlockedExchange(&e->BackComplete, FALSE);
                 }

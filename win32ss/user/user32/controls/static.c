@@ -269,15 +269,55 @@ static VOID STATIC_TryPaintFcn(HWND hwnd, LONG full_style)
     GetClientRect( hwnd, &rc );
     if (!IsRectEmpty(&rc) && IsWindowVisible(hwnd) && staticPaintFunc[style])
     {
-	HDC hdc;
-        HRGN hrgn;
+        HDC hdc;
+        int width, height;
 
-	hdc = GetDC( hwnd );
-        hrgn = set_control_clipping( hdc, &rc );
-	(staticPaintFunc[style])( hwnd, hdc, full_style );
-        SelectClipRgn( hdc, hrgn );
-        if (hrgn) DeleteObject( hrgn );
-	ReleaseDC( hwnd, hdc );
+        hdc = GetDC( hwnd );
+        width = rc.right - rc.left;
+        height = rc.bottom - rc.top;
+
+        if (width > 0 && height > 0)
+        {
+            HDC hdcMem = CreateCompatibleDC( hdc );
+            if (hdcMem)
+            {
+                HBITMAP hbmpMem = CreateCompatibleBitmap( hdc, width, height );
+                if (hbmpMem)
+                {
+                    HBITMAP hbmpOld = SelectObject( hdcMem, hbmpMem );
+                    HBRUSH hbrush = STATIC_SendWmCtlColorStatic(hwnd, hdcMem);
+                    if (hbrush)
+                    {
+                        RECT rcZero = {0, 0, width, height};
+                        FillRect(hdcMem, &rcZero, hbrush);
+                    }
+                    HRGN hrgn = set_control_clipping( hdcMem, &rc );
+                    (staticPaintFunc[style])( hwnd, hdcMem, full_style );
+                    SelectClipRgn( hdcMem, hrgn );
+                    if (hrgn) DeleteObject( hrgn );
+
+                    BitBlt( hdc, rc.left, rc.top, width, height, hdcMem, rc.left, rc.top, SRCCOPY );
+                    SelectObject( hdcMem, hbmpOld );
+                    DeleteObject( hbmpMem );
+                }
+                else
+                {
+                    HRGN hrgn = set_control_clipping( hdc, &rc );
+                    (staticPaintFunc[style])( hwnd, hdc, full_style );
+                    SelectClipRgn( hdc, hrgn );
+                    if (hrgn) DeleteObject( hrgn );
+                }
+                DeleteDC( hdcMem );
+            }
+            else
+            {
+                HRGN hrgn = set_control_clipping( hdc, &rc );
+                (staticPaintFunc[style])( hwnd, hdc, full_style );
+                SelectClipRgn( hdc, hrgn );
+                if (hrgn) DeleteObject( hrgn );
+            }
+        }
+        ReleaseDC( hwnd, hdc );
     }
 }
 
@@ -403,14 +443,55 @@ LRESULT WINAPI StaticWndProc_common( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
             RECT rect;
             HDC hdc = wParam ? (HDC)wParam : BeginPaint(hwnd, &ps);
             GetClientRect( hwnd, &rect );
+            if (!IsRectEmpty(&rect))
             {
-                HRGN hrgn = set_control_clipping( hdc, &rect );
-                if (staticPaintFunc[style])
-                    (staticPaintFunc[style])( hwnd, hdc, full_style );
+                int width = rect.right - rect.left;
+                int height = rect.bottom - rect.top;
+                HDC hdcMem = (width > 0 && height > 0) ? CreateCompatibleDC(hdc) : NULL;
+                if (hdcMem)
+                {
+                    HBITMAP hbmpMem = CreateCompatibleBitmap(hdc, width, height);
+                    if (hbmpMem)
+                    {
+                        HBITMAP hbmpOld = SelectObject(hdcMem, hbmpMem);
+                        HBRUSH hbrush = STATIC_SendWmCtlColorStatic(hwnd, hdcMem);
+                        if (hbrush)
+                        {
+                            RECT rcZero = {0, 0, width, height};
+                            FillRect(hdcMem, &rcZero, hbrush);
+                        }
+                        HRGN hrgn = set_control_clipping( hdcMem, &rect );
+                        if (staticPaintFunc[style])
+                            (staticPaintFunc[style])( hwnd, hdcMem, full_style );
+                        SelectClipRgn( hdcMem, hrgn );
+                        if (hrgn) DeleteObject( hrgn );
+
+                        BitBlt(hdc, rect.left, rect.top, width, height, hdcMem, rect.left, rect.top, SRCCOPY);
+                        SelectObject(hdcMem, hbmpOld);
+                        DeleteObject(hbmpMem);
+                    }
+                    else
+                    {
+                        HRGN hrgn = set_control_clipping( hdc, &rect );
+                        if (staticPaintFunc[style])
+                            (staticPaintFunc[style])( hwnd, hdc, full_style );
+                        else
+                            STATIC_SendWmCtlColorStatic(hwnd, hdc);
+                        SelectClipRgn( hdc, hrgn );
+                        if (hrgn) DeleteObject( hrgn );
+                    }
+                    DeleteDC(hdcMem);
+                }
                 else
-                    STATIC_SendWmCtlColorStatic(hwnd, hdc);
-                SelectClipRgn( hdc, hrgn );
-                if (hrgn) DeleteObject( hrgn );
+                {
+                    HRGN hrgn = set_control_clipping( hdc, &rect );
+                    if (staticPaintFunc[style])
+                        (staticPaintFunc[style])( hwnd, hdc, full_style );
+                    else
+                        STATIC_SendWmCtlColorStatic(hwnd, hdc);
+                    SelectClipRgn( hdc, hrgn );
+                    if (hrgn) DeleteObject( hrgn );
+                }
             }
             if (!wParam) EndPaint(hwnd, &ps);
         }
