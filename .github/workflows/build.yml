@@ -212,7 +212,7 @@ jobs:
               'manifest_version': 1,
               'os_version': '10.0',
               'build_number': int(os.environ['BUILD_NUMBER']),
-              'min_update_version': 1,
+              'min_update_version': 0,
               'cabs': [{
                   'name': os.environ['CAB_NAME'],
                   'sha256': os.environ['CAB_SHA256'],

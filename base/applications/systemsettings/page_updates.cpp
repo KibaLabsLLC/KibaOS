@@ -73,7 +73,19 @@ static DWORD GetCurrentBuildNumber()
     DWORD buildNum = ReadDword(HKEY_CURRENT_USER, UPDATE_REG_KEY, L"CurrentBuildNumber", 0);
     if (buildNum == 0)
     {
-        buildNum = ReadDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"CurrentBuildNumber", 10001);
+        std::wstring ntBuildStr = ReadString(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"CurrentBuildNumber");
+        if (!ntBuildStr.empty())
+        {
+            buildNum = static_cast<DWORD>(std::wcstoul(ntBuildStr.c_str(), NULL, 10));
+        }
+        else
+        {
+            buildNum = ReadDword(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", L"CurrentBuildNumber", 0);
+        }
+    }
+    if (buildNum >= 10000)
+    {
+        buildNum = 0;
     }
     return buildNum;
 }
@@ -606,6 +618,8 @@ void BuildUpdates(PageBuilder &page)
                     s_OtaMessage = errStr;
                     return;
                 }
+
+                WriteDword(HKEY_CURRENT_USER, UPDATE_REG_KEY, L"CurrentBuildNumber", s_AvailableBuildNumber);
 
                 s_OtaState = OtaState::Staged;
             }, [host]() {
