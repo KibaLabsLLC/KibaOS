@@ -477,6 +477,13 @@ InbvEnableDisplayString(
     /* Get the old setting */
     OldSetting = InbvDisplayDebugStrings;
 
+    /* Do not allow re-enabling string display on screen during bugcheck */
+    if (Enable && KeBugCheckActive)
+    {
+        InbvDisplayDebugStrings = FALSE;
+        return OldSetting;
+    }
+
     /* Update it */
     InbvDisplayDebugStrings = Enable;
 
