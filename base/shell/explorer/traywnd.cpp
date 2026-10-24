@@ -2039,12 +2039,9 @@ ChangePos:
     VOID AlignControls(IN PRECT prcClient OPTIONAL)
     {
         RECT rcClient;
-        SIZE TraySize, StartSize;
-        POINT ptTrayNotify = { 0, 0 };
         BOOL Horizontal;
         HDWP dwp;
 
-        m_StartButton.UpdateSize();
         if (prcClient != NULL)
         {
             rcClient = *prcClient;
@@ -2060,92 +2057,25 @@ ChangePos:
 
         Horizontal = IsPosHorizontal();
 
-        /* We're about to resize/move the start button, the rebar control and
-           the tray notification control */
-        dwp = BeginDeferWindowPos(4);
+        /* Taskbar at top ONLY displays open apps - start button and notification area are hidden */
+        if (m_StartButton.m_hWnd != NULL)
+        {
+            m_StartButton.ShowWindow(SW_HIDE);
+        }
+
+        if (m_TrayNotify != NULL)
+        {
+            ::ShowWindow(m_TrayNotify, SW_HIDE);
+        }
+
+        dwp = BeginDeferWindowPos(1);
         if (dwp == NULL)
         {
             ERR("BeginDeferWindowPos failed. lastErr=%d\n", GetLastError());
             return;
         }
 
-        /* Limit the Start button width to the client width, if necessary */
-        StartSize = m_StartButton.GetSize();
-        if (StartSize.cx > rcClient.right)
-            StartSize.cx = rcClient.right;
-
-        HWND hwndTaskToolbar = ::GetWindow(m_TaskSwitch, GW_CHILD);
-        if (hwndTaskToolbar)
-        {
-            DWORD size = SendMessageW(hwndTaskToolbar, TB_GETBUTTONSIZE, 0, 0);
-
-            /* Themed button covers Edge area as well */
-            StartSize.cy = HIWORD(size) + (m_Theme ? GetSystemMetrics(SM_CYEDGE) : 0);
-        }
-
-        if (m_StartButton.IsModernTaskbar() && Horizontal)
-        {
-            StartSize.cy = rcClient.bottom;
-            StartSize.cx = MulDiv(StartSize.cy, 6, 5);
-        }
-
-        if (m_StartButton.m_hWnd != NULL)
-        {
-            /* Resize and reposition the button */
-            dwp = m_StartButton.DeferWindowPos(dwp,
-                                               NULL,
-                                               0,
-                                               0,
-                                               StartSize.cx,
-                                               StartSize.cy,
-                                               SWP_NOZORDER | SWP_NOACTIVATE);
-            if (dwp == NULL)
-            {
-                ERR("DeferWindowPos for start button failed. lastErr=%d\n", GetLastError());
-                return;
-            }
-        }
-
-        /* Determine the size that the tray notification window needs */
-        if (Horizontal)
-        {
-            TraySize.cx = 0;
-            TraySize.cy = rcClient.bottom;
-        }
-        else
-        {
-            TraySize.cx = rcClient.right;
-            TraySize.cy = 0;
-        }
-
-        if (m_TrayNotify != NULL &&
-            SendMessage(m_TrayNotify,
-                        TNWM_GETMINIMUMSIZE,
-                        (WPARAM)Horizontal,
-                        (LPARAM)&TraySize))
-        {
-            /* Move the tray notification window to the desired location */
-            if (Horizontal)
-                ptTrayNotify.x = rcClient.right - TraySize.cx;
-            else
-                ptTrayNotify.y = rcClient.bottom - TraySize.cy;
-
-            dwp = ::DeferWindowPos(dwp,
-                                   m_TrayNotify,
-                                   NULL,
-                                   ptTrayNotify.x,
-                                   ptTrayNotify.y,
-                                   TraySize.cx,
-                                   TraySize.cy,
-                                   SWP_NOZORDER | SWP_NOACTIVATE);
-            if (dwp == NULL)
-            {
-                ERR("DeferWindowPos for notification area failed. lastErr=%d\n", GetLastError());
-                return;
-            }
-        }
-
-        /* Resize/Move the rebar control */
+        /* Resize/Move the rebar control to occupy full top taskbar area */
         if (m_Rebar != NULL)
         {
             POINT ptRebar = { 0, 0 };
@@ -2153,18 +2083,8 @@ ChangePos:
 
             SetWindowStyle(m_Rebar, CCS_VERT, Horizontal ? 0 : CCS_VERT);
 
-            if (Horizontal)
-            {
-                ptRebar.x = StartSize.cx + GetSystemMetrics(SM_CXSIZEFRAME);
-                szRebar.cx = ptTrayNotify.x - ptRebar.x;
-                szRebar.cy = rcClient.bottom;
-            }
-            else
-            {
-                ptRebar.y = StartSize.cy + GetSystemMetrics(SM_CYSIZEFRAME);
-                szRebar.cx = rcClient.right;
-                szRebar.cy = ptTrayNotify.y - ptRebar.y;
-            }
+            szRebar.cx = rcClient.right;
+            szRebar.cy = rcClient.bottom;
 
             dwp = ::DeferWindowPos(dwp,
                                    m_Rebar,
@@ -2501,7 +2421,6 @@ ChangePos:
         FillRect(hdc, &rect, hbrBG);
         DeleteObject(hbrBG);
 
-        DrawRecommendedAppsBar(hdc, rect);
         return 0;
     }
 
@@ -3334,61 +3253,6 @@ ChangePos:
      */
     LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
-        POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        RECT rcClient;
-        GetClientRect(&rcClient);
-
-        // Check Intent Badge click (leftmost button)
-        RECT rcBadge = { rcClient.left + ShellScaleForDpi(12), rcClient.top + ShellScaleForDpi(10), rcClient.left + ShellScaleForDpi(150), rcClient.bottom - ShellScaleForDpi(10) };
-        if (PtInRect(&rcBadge, pt))
-        {
-            KIBA_INTENT_MODE activeMode = IntentWM_GetActiveMode();
-            KIBA_INTENT_MODE nextMode = (KIBA_INTENT_MODE)((((int)activeMode) % IntentWM_GetTotalModes()) + 1);
-            IntentWM_SetActiveMode(nextMode);
-            InvalidateRect(NULL, TRUE);
-            bHandled = TRUE;
-            return 0;
-        }
-
-        struct RECOMMENDED_APP {
-            LPCWSTR Title;
-            LPCWSTR ExePath;
-            UINT_PTR TargetId;
-        };
-        static const RECOMMENDED_APP g_RecApps[] = {
-            { L"Kiba Center", L"kibacenter", 102 },
-            { L"Explorer", L"explorer.exe", 103 },
-            { L"Settings", L"systemsettings.exe", 104 },
-            { L"Terminal", L"cmd.exe", 105 },
-            { L"Notepad", L"notepad.exe", 106 }
-        };
-
-        INT xPos = rcClient.left + ShellScaleForDpi(160);
-        INT btnWidth = ShellScaleForDpi(90);
-        INT btnHeight = rcClient.bottom - rcClient.top - ShellScaleForDpi(20);
-
-        for (size_t i = 0; i < _countof(g_RecApps); i++)
-        {
-            RECT rcBtn = { xPos, rcClient.top + ShellScaleForDpi(10), xPos + btnWidth, rcClient.top + ShellScaleForDpi(10) + btnHeight };
-            if (PtInRect(&rcBtn, pt))
-            {
-                g_PredictiveEngine.OnPointerDown(pt, g_RecApps[i].TargetId);
-                g_PredictiveEngine.OnTargetSelected(g_RecApps[i].TargetId);
-
-                if (i == 0)
-                {
-                    TrayKibaCenter_Toggle(m_hWnd, NULL);
-                }
-                else
-                {
-                    ShellExecuteW(m_hWnd, L"open", g_RecApps[i].ExePath, NULL, NULL, SW_SHOWNORMAL);
-                }
-                bHandled = TRUE;
-                return 0;
-            }
-            xPos += btnWidth + ShellScaleForDpi(8);
-        }
-
         bHandled = FALSE;
         return 0;
     }
