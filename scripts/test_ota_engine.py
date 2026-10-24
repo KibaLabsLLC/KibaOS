@@ -141,7 +141,7 @@ def test_generated_ota_dist():
     with open(manifest_path, "r") as f:
         manifest_json = f.read()
 
-    engine = OTAEngine(current_build_number=1)
+    engine = OTAEngine(current_build_number=0)
     dummy_url = "https://downloads.sourceforge.net/project/kibaos/amd64-nt/ota/ota_manifest.json"
     manifest = engine.verify_manifest(manifest_json, dummy_url)
 
