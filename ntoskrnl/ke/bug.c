@@ -1367,6 +1367,9 @@ KiDisplayBlueScreen(IN ULONG MessageId,
         InbvRenderBsodMascotScreen(BugCheckCode, DriverName);
     }
 
+    /* Disable screen text output permanently so no text overlays or scrolls the BSOD mascot image */
+    InbvEnableDisplayString(FALSE);
+
     /* Check if this is a hard error */
     if (IsHardError)
     {
