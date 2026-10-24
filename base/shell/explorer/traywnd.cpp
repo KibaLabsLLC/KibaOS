@@ -1522,6 +1522,18 @@ GetPrimaryRect:
 
         *pRect = *pScreen;
 
+        /* Floating rounded panel layout at top of screen */
+        if (Position == ABE_TOP)
+        {
+            INT panelWidth = min((INT)(pScreen->right - pScreen->left - 40), ShellScaleForDpi(720));
+            INT panelHeight = ShellScaleForDpi(52);
+            pRect->top = pScreen->top + ShellScaleForDpi(10);
+            pRect->bottom = pRect->top + panelHeight;
+            pRect->left = pScreen->left + ((pScreen->right - pScreen->left) - panelWidth) / 2;
+            pRect->right = pRect->left + panelWidth;
+            return;
+        }
+
         if(!m_Theme)
         {
             /* Move the border outside of the screen */
@@ -1810,38 +1822,15 @@ ChangePos:
 
     VOID ApplyClipping(IN BOOL Clip)
     {
-        RECT rcClip, rcWindow;
-        HRGN hClipRgn;
+        RECT rcWindow;
 
         if (GetWindowRect(&rcWindow))
         {
-            /* Disable clipping on systems with only one monitor */
-            if (GetSystemMetrics(SM_CMONITORS) <= 1)
-                Clip = FALSE;
-
-            if (Clip)
-            {
-                rcClip = rcWindow;
-
-                GetScreenRect(m_Monitor, &rcClip);
-
-                if (!IntersectRect(&rcClip, &rcClip, &rcWindow))
-                {
-                    rcClip = rcWindow;
-                }
-
-                OffsetRect(&rcClip,
-                           -rcWindow.left,
-                           -rcWindow.top);
-
-                hClipRgn = CreateRectRgnIndirect(&rcClip);
-            }
-            else
-                hClipRgn = NULL;
-
-            /* Set the clipping region or make sure the window isn't clipped
-               by disabling it explicitly. */
-            SetWindowRgn(hClipRgn, TRUE);
+            /* Apply rounded floating top panel region */
+            INT width = rcWindow.right - rcWindow.left;
+            INT height = rcWindow.bottom - rcWindow.top;
+            HRGN hRgn = CreateRoundRectRgn(0, 0, width + 1, height + 1, 24, 24);
+            SetWindowRgn(hRgn, TRUE);
         }
     }
 
@@ -1983,7 +1972,7 @@ ChangePos:
         DlgFrameSize.cx = GetSystemMetrics(SM_CXDLGFRAME);
         DlgFrameSize.cy = GetSystemMetrics(SM_CYDLGFRAME);
 
-        m_Position = g_TaskbarSettings.sr.Position;
+        m_Position = ABE_TOP; // Top floating panel position
         rcScreen = g_TaskbarSettings.sr.Rect;
         GetScreenRectFromRect(&rcScreen, MONITOR_DEFAULTTONEAREST);
 
@@ -2453,39 +2442,66 @@ ChangePos:
      *    ##### taskbar drawing #####
      */
 
+    VOID DrawRecommendedAppsBar(HDC hdc, const RECT &rect)
+    {
+        KIBA_INTENT_MODE activeMode = IntentWM_GetActiveMode();
+        KIBA_INTENT_INFO modeInfo = { INTENT_DEV_TRIPANE, L"Developer Tri-Pane", L"", NULL };
+        IntentWM_GetInfo(activeMode, &modeInfo);
+
+        SetBkMode(hdc, TRANSPARENT);
+
+        // Draw Intent Badge
+        RECT rcBadge = { rect.left + ShellScaleForDpi(12), rect.top + ShellScaleForDpi(10), rect.left + ShellScaleForDpi(150), rect.bottom - ShellScaleForDpi(10) };
+        HBRUSH hbrBadge = CreateSolidBrush(RGB(220, 230, 245));
+        FillRect(hdc, &rcBadge, hbrBadge);
+        DeleteObject(hbrBadge);
+
+        SetTextColor(hdc, RGB(20, 40, 80));
+        DrawTextW(hdc, modeInfo.Name, -1, &rcBadge, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+        // Draw Recommended App items integrated with Intent Engine
+        struct RECOMMENDED_APP {
+            LPCWSTR Title;
+            LPCWSTR ExePath;
+            UINT_PTR TargetId;
+        };
+        static const RECOMMENDED_APP g_RecApps[] = {
+            { L"Kiba Center", L"kibacenter", 102 },
+            { L"Explorer", L"explorer.exe", 103 },
+            { L"Settings", L"systemsettings.exe", 104 },
+            { L"Terminal", L"cmd.exe", 105 },
+            { L"Notepad", L"notepad.exe", 106 }
+        };
+
+        INT xPos = rect.left + ShellScaleForDpi(160);
+        INT btnWidth = ShellScaleForDpi(90);
+        INT btnHeight = rect.bottom - rect.top - ShellScaleForDpi(20);
+
+        for (size_t i = 0; i < _countof(g_RecApps); i++)
+        {
+            RECT rcBtn = { xPos, rect.top + ShellScaleForDpi(10), xPos + btnWidth, rect.top + ShellScaleForDpi(10) + btnHeight };
+            HBRUSH hbrBtn = CreateSolidBrush(RGB(240, 243, 248));
+            FillRect(hdc, &rcBtn, hbrBtn);
+            DeleteObject(hbrBtn);
+
+            SetTextColor(hdc, RGB(30, 30, 30));
+            DrawTextW(hdc, g_RecApps[i].Title, -1, &rcBtn, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+
+            g_PredictiveEngine.RegisterTarget(g_RecApps[i].TargetId, PREDICTIVE_TARGET_TASK_BUTTON, m_hWnd, rcBtn);
+            xPos += btnWidth + ShellScaleForDpi(8);
+        }
+    }
+
     LRESULT EraseBackgroundWithTheme(HDC hdc)
     {
         RECT rect;
-        int iSBkgndPart[4] = {TBP_BACKGROUNDLEFT, TBP_BACKGROUNDTOP, TBP_BACKGROUNDRIGHT, TBP_BACKGROUNDBOTTOM};
+        GetClientRect(&rect);
 
-        ASSERT(m_Position <= ABE_BOTTOM);
+        HBRUSH hbrBG = CreateSolidBrush(RGB(250, 252, 255));
+        FillRect(hdc, &rect, hbrBG);
+        DeleteObject(hbrBG);
 
-        if (m_Theme)
-        {
-            COLORREF crMaterial;
-
-            GetClientRect(&rect);
-            if (ShellGetTaskbarMaterial(&crMaterial) && ShellColorIsLight(crMaterial))
-            {
-                HBRUSH hbr = CreateSolidBrush(crMaterial);
-
-                FillRect(hdc, &rect, hbr);
-                DeleteObject(hbr);
-                if (m_Position == ABE_BOTTOM || m_Position == ABE_TOP)
-                {
-                    RECT rcEdge = { rect.left, rect.top, rect.right, rect.top + 1 };
-
-                    hbr = CreateSolidBrush(RGB(190, 190, 190));
-                    FillRect(hdc, &rcEdge, hbr);
-                    DeleteObject(hbr);
-                }
-            }
-            else
-            {
-                DrawThemeBackground(m_Theme, hdc, iSBkgndPart[m_Position], 0, &rect, 0);
-            }
-        }
-
+        DrawRecommendedAppsBar(hdc, rect);
         return 0;
     }
 
@@ -3318,6 +3334,61 @@ ChangePos:
      */
     LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
+        POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        RECT rcClient;
+        GetClientRect(&rcClient);
+
+        // Check Intent Badge click (leftmost button)
+        RECT rcBadge = { rcClient.left + ShellScaleForDpi(12), rcClient.top + ShellScaleForDpi(10), rcClient.left + ShellScaleForDpi(150), rcClient.bottom - ShellScaleForDpi(10) };
+        if (PtInRect(&rcBadge, pt))
+        {
+            KIBA_INTENT_MODE activeMode = IntentWM_GetActiveMode();
+            KIBA_INTENT_MODE nextMode = (KIBA_INTENT_MODE)((((int)activeMode) % IntentWM_GetTotalModes()) + 1);
+            IntentWM_SetActiveMode(nextMode);
+            InvalidateRect(m_hWnd, NULL, TRUE);
+            bHandled = TRUE;
+            return 0;
+        }
+
+        struct RECOMMENDED_APP {
+            LPCWSTR Title;
+            LPCWSTR ExePath;
+            UINT_PTR TargetId;
+        };
+        static const RECOMMENDED_APP g_RecApps[] = {
+            { L"Kiba Center", L"kibacenter", 102 },
+            { L"Explorer", L"explorer.exe", 103 },
+            { L"Settings", L"systemsettings.exe", 104 },
+            { L"Terminal", L"cmd.exe", 105 },
+            { L"Notepad", L"notepad.exe", 106 }
+        };
+
+        INT xPos = rcClient.left + ShellScaleForDpi(160);
+        INT btnWidth = ShellScaleForDpi(90);
+        INT btnHeight = rcClient.bottom - rcClient.top - ShellScaleForDpi(20);
+
+        for (size_t i = 0; i < _countof(g_RecApps); i++)
+        {
+            RECT rcBtn = { xPos, rcClient.top + ShellScaleForDpi(10), xPos + btnWidth, rcClient.top + ShellScaleForDpi(10) + btnHeight };
+            if (PtInRect(&rcBtn, pt))
+            {
+                g_PredictiveEngine.OnPointerDown(pt, g_RecApps[i].TargetId);
+                g_PredictiveEngine.OnTargetSelected(g_RecApps[i].TargetId);
+
+                if (i == 0)
+                {
+                    TrayKibaCenter_Toggle(m_hWnd, NULL);
+                }
+                else
+                {
+                    ShellExecuteW(m_hWnd, L"open", g_RecApps[i].ExePath, NULL, NULL, SW_SHOWNORMAL);
+                }
+                bHandled = TRUE;
+                return 0;
+            }
+            xPos += btnWidth + ShellScaleForDpi(8);
+        }
+
         bHandled = FALSE;
         return 0;
     }
@@ -3495,25 +3566,9 @@ HandleTrayContextMenu:
 
     LRESULT OnOpenStartMenu(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
-        if (m_StartMenuPopup == NULL)
-        {
-            if (StartMenu2_IsVisible())
-                HideStartMenu();
-            else
-                PopupStartMenu();
-            return TRUE;
-        }
-
-        HWND hwndStartMenu;
-        HRESULT hr = IUnknown_GetWindow(m_StartMenuPopup, &hwndStartMenu);
-        if (FAILED_UNEXPECTEDLY(hr))
-            return FALSE;
-
-        if (::IsWindowVisible(hwndStartMenu))
-            HideStartMenu();
-        else
-            PopupStartMenu();
-
+        /* Pressing the Windows key toggles Kiba Center directly */
+        HideStartMenu();
+        TrayKibaCenter_Toggle(m_hWnd, NULL);
         return TRUE;
     }
 

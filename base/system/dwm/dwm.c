@@ -3983,7 +3983,7 @@ DwmComposeLoop(HANDLE hStopEvent)
     HANDLE hWake;
     HANDLE hConnection;
     HWND SettingsWindow;
-    DWM_SETTINGS Settings = {DWM_EFFECT_ALL, FALSE, DwmGpuComposeIsActive};
+    DWM_SETTINGS Settings = {DWM_EFFECT_ALL & ~(DWM_EFFECT_ACRYLIC | DWM_EFFECT_BLUR), FALSE, DwmGpuComposeIsActive};
     BOOL forceFull = TRUE;
     BOOL gpuDeferred = FALSE;
     DWORD gpuLastOutputCheck = 0;

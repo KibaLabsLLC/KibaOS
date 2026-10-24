@@ -50,7 +50,7 @@ public:
     BOOL m_bFixExecuted;
 
     CKibaCompanionTest()
-        : m_bEnabled(FALSE)
+        : m_bEnabled(TRUE)
         , m_State(TEST_KIBA_STATE_IDLE)
         , m_FrameIndex(0)
         , m_bShowBubble(FALSE)
@@ -120,10 +120,12 @@ int main(void)
 {
     printf("[Test 1] Initializing Kiba Companion Test Suite...\n");
     CKibaCompanionTest kiba;
-    assert(kiba.m_bEnabled == FALSE); // Off by default
+    assert(kiba.m_bEnabled == TRUE); // On by default
     assert(kiba.m_State == TEST_KIBA_STATE_IDLE);
 
     printf("[Test 2] Verifying Kiba enable/disable toggle persistence...\n");
+    kiba.SetEnabled(FALSE);
+    assert(kiba.m_bEnabled == FALSE);
     kiba.ShowSpeechBubble(L"Test", L"Hello", NULL);
     assert(kiba.m_bShowBubble == FALSE); // Should remain hidden when disabled
 

@@ -1005,8 +1005,8 @@ InbvRenderBsodMascotScreen(
     }
 
     /*
-     * Overlay dynamic QR code:
-     * In reference image (1586x992), QR box inside area is centered around X=120..380, Y=500..780
+     * Overlay dynamic QR code on top of base image existing QR code (relative to 512x320):
+     * Existing QR code square location in unnamed.png: X=34, Y=185, size=35x35
      */
     {
         CHAR QrUrl[128];
@@ -1019,9 +1019,9 @@ InbvRenderBsodMascotScreen(
         QrSize = KiGenerateQrCode(QrUrl, Matrix);
         if (QrSize > 0)
         {
-            QrX = (118 * ScreenWidth) / SrcWidth;
-            QrY = (500 * ScreenHeight) / SrcHeight;
-            QrBoxWidth = (260 * ScreenWidth) / SrcWidth;
+            QrX = (34 * ScreenWidth) / SrcWidth;
+            QrY = (185 * ScreenHeight) / SrcHeight;
+            QrBoxWidth = (35 * ScreenWidth) / SrcWidth;
             ModuleSize = max(1UL, QrBoxWidth / QrSize);
 
             for (ULONG r = 0; r < QrSize; r++)
@@ -1040,13 +1040,13 @@ InbvRenderBsodMascotScreen(
     }
 
     /*
-     * Overlay dynamic STOP code string:
-     * In reference image (1586x992), STOP code string location is at relative X=430, Y=674
+     * Overlay dynamic STOP code string on top of base image existing STOP code:
+     * In base image unnamed.png (512x320), "KIBAOS_CRITICAL_ERROR" is located at relative X=124, Y=218
      */
     {
         CHAR StopText[128];
-        ULONG StopX = (430 * ScreenWidth) / SrcWidth;
-        ULONG StopY = (674 * ScreenHeight) / SrcHeight;
+        ULONG StopX = (124 * ScreenWidth) / SrcWidth;
+        ULONG StopY = (218 * ScreenHeight) / SrcHeight;
 
         if (BugCheckName && BugCheckName[0] != '\0')
         {

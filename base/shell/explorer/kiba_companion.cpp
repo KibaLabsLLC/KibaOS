@@ -100,8 +100,11 @@ private:
     DWORD m_dwBubbleExpireTick;
     DEVINST m_PendingFixDevInst;
 
-    // Window position / dragging
+    // Window position / dragging & screen wandering
     POINT m_ptPosition;
+    POINT m_ptTargetPos;
+    DWORD m_dwNextWanderTick;
+    DWORD m_dwFrameTickCount;
     SIZE m_WndSize;
     BOOL m_bDragging;
     POINT m_ptDragStart;
@@ -115,9 +118,11 @@ public:
         , m_hParentTray(NULL)
         , m_hWinEventHook(NULL)
         , m_gdiplusToken(0)
-        , m_bEnabled(FALSE)
+        , m_bEnabled(TRUE)
         , m_CurrentState(KIBA_STATE_IDLE)
         , m_CurrentFrameIndex(0)
+        , m_dwNextWanderTick(0)
+        , m_dwFrameTickCount(0)
         , m_bShowBubble(FALSE)
         , m_dwBubbleExpireTick(0)
         , m_PendingFixDevInst(0)
@@ -170,6 +175,9 @@ public:
         SystemParametersInfoW(SPI_GETWORKAREA, 0, &rcWork, 0);
         m_ptPosition.x = rcWork.right - m_WndSize.cx - 20;
         m_ptPosition.y = rcWork.bottom - m_WndSize.cy - 10;
+        m_ptTargetPos = m_ptPosition;
+        m_dwNextWanderTick = GetTickCount() + 2000;
+        m_dwFrameTickCount = 0;
 
         // Create Normal Window (non-layered to eliminate overlay flickering)
         m_hWnd = CreateWindowExW(
@@ -193,8 +201,8 @@ public:
             EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
             NULL, s_WinEventProc, 0, 0, WINEVENT_OUTOFCONTEXT);
 
-        // Set animation timer (300ms tick for smooth pace)
-        SetTimer(m_hWnd, IDT_ANIMATION_TIMER, 300, NULL);
+        // Set animation/movement timer (150ms tick for smooth wandering)
+        SetTimer(m_hWnd, IDT_ANIMATION_TIMER, 150, NULL);
 
         if (m_bEnabled)
         {
@@ -530,15 +538,50 @@ private:
     {
         if (nIDEvent == IDT_ANIMATION_TIMER)
         {
-            const SPRITE_SET& set = g_SpriteSets[m_CurrentState];
-            m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % (set.Count > 0 ? set.Count : 1);
-
-            // Transition from temporary states back to idle
-            if (m_CurrentFrameIndex == 0 &&
-                (m_CurrentState == KIBA_STATE_REACTING || m_CurrentState == KIBA_STATE_ALERT))
+            // Handle smooth screen wandering behavior
+            if (!m_bDragging && m_bEnabled)
             {
-                if (!m_bShowBubble)
-                    m_CurrentState = KIBA_STATE_IDLE;
+                RECT rcWork;
+                SystemParametersInfoW(SPI_GETWORKAREA, 0, &rcWork, 0);
+
+                if (abs(m_ptPosition.x - m_ptTargetPos.x) <= 4 &&
+                    abs(m_ptPosition.y - m_ptTargetPos.y) <= 4 &&
+                    GetTickCount() >= m_dwNextWanderTick)
+                {
+                    LONG maxW = max(1L, (rcWork.right - rcWork.left - m_WndSize.cx));
+                    LONG maxH = max(1L, (rcWork.bottom - rcWork.top - m_WndSize.cy));
+                    m_ptTargetPos.x = rcWork.left + (rand() % maxW);
+                    m_ptTargetPos.y = rcWork.top + (rand() % maxH);
+                    m_dwNextWanderTick = GetTickCount() + 4000 + (rand() % 5000);
+                }
+
+                if (m_ptPosition.x < m_ptTargetPos.x)
+                    m_ptPosition.x += min((LONG)3, m_ptTargetPos.x - m_ptPosition.x);
+                else if (m_ptPosition.x > m_ptTargetPos.x)
+                    m_ptPosition.x -= min((LONG)3, m_ptPosition.x - m_ptTargetPos.x);
+
+                if (m_ptPosition.y < m_ptTargetPos.y)
+                    m_ptPosition.y += min((LONG)3, m_ptTargetPos.y - m_ptPosition.y);
+                else if (m_ptPosition.y > m_ptTargetPos.y)
+                    m_ptPosition.y -= min((LONG)3, m_ptPosition.y - m_ptTargetPos.y);
+
+                SetWindowPos(m_hWnd, NULL, m_ptPosition.x, m_ptPosition.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+
+            // Slow the pace of animation frame changes significantly (frame advances every 8 ticks / ~1200ms)
+            m_dwFrameTickCount++;
+            if (m_dwFrameTickCount % 8 == 0)
+            {
+                const SPRITE_SET& set = g_SpriteSets[m_CurrentState];
+                m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % (set.Count > 0 ? set.Count : 1);
+
+                // Transition from temporary states back to idle
+                if (m_CurrentFrameIndex == 0 &&
+                    (m_CurrentState == KIBA_STATE_REACTING || m_CurrentState == KIBA_STATE_ALERT))
+                {
+                    if (!m_bShowBubble)
+                        m_CurrentState = KIBA_STATE_IDLE;
+                }
             }
 
             Render();
@@ -693,7 +736,7 @@ extern "C" {
 BOOL KibaCompanion_IsEnabled(VOID)
 {
     HKEY hKey;
-    DWORD dwEnabled = 0; // Default to OFF
+    DWORD dwEnabled = 1; // Default to ON
     DWORD dwSize = sizeof(dwEnabled);
 
     if (RegOpenKeyExW(HKEY_CURRENT_USER, KIBA_REG_KEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS)

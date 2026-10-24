@@ -59,7 +59,7 @@ void
 BuildPersonalization(PageBuilder &page)
 {
     std::vector<std::wstring> modes;
-    DWORD effects = DWM_EFFECT_ALL;
+    DWORD effects = DWM_EFFECT_ALL & ~(DWM_EFFECT_ACRYLIC | DWM_EFFECT_BLUR);
     bool dark = ReadDword(HKEY_CURRENT_USER, PERSONALIZE_KEY, L"AppsUseLightTheme",
                           DwmSettingsReadColorScheme() == DWM_COLOR_SCHEME_LIGHT) == 0;
 
@@ -81,7 +81,7 @@ BuildPersonalization(PageBuilder &page)
     page.Toggle(Str(IDS_CONTENT_BLUR), Str(IDS_CONTENT_BLUR_DESC), L"window_apps_20_regular",
                 (effects & DWM_EFFECT_CONTENT_BLUR) != 0, [](int on) { SetEffect(DWM_EFFECT_CONTENT_BLUR, on != 0); });
 
-    DWORD kibaEnabled = ReadDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", 0);
+    DWORD kibaEnabled = ReadDword(HKEY_CURRENT_USER, KIBA_KEY, L"Enabled", 1);
     page.Group(Str(IDS_KIBA_COMPANION));
     page.Toggle(Str(IDS_KIBA_COMPANION), Str(IDS_KIBA_COMPANION_DESC), L"bot_20_regular",
                 kibaEnabled != 0,
