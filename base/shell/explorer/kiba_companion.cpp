@@ -179,9 +179,9 @@ public:
         m_dwNextWanderTick = GetTickCount() + 2000;
         m_dwFrameTickCount = 0;
 
-        // Create Normal Window (non-layered to eliminate overlay flickering)
+        // Create Masked Background Overlay Window (WS_EX_LAYERED with COLORKEY for transparency)
         m_hWnd = CreateWindowExW(
-            WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+            WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_LAYERED,
             L"KibaCompanionWindowClass",
             L"Kiba Desktop Companion",
             WS_POPUP,
@@ -191,6 +191,9 @@ public:
 
         if (!m_hWnd)
             return FALSE;
+
+        // Set transparent color key (RGB(255, 0, 128)) for background mask
+        SetLayeredWindowAttributes(m_hWnd, RGB(255, 0, 128), 0, LWA_COLORKEY);
 
         // Apply rounded window region
         HRGN hRgn = CreateRoundRectRgn(0, 0, m_WndSize.cx + 1, m_WndSize.cy + 1, 16, 16);
@@ -481,7 +484,8 @@ private:
         Graphics graphics(hdcMem);
         graphics.SetSmoothingMode(SmoothingModeAntiAlias);
         graphics.SetTextRenderingHint(TextRenderingHintAntiAliasGridFit);
-        graphics.Clear(Color(255, 245, 248, 252)); // Solid surface background for normal window
+        // Clear background with colorkey RGB(255, 0, 128) for masked transparent background
+        graphics.Clear(Color(255, 255, 0, 128));
 
         // Draw card border
         Pen framePen(Color(255, 200, 210, 225), 1.0f);
