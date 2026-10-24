@@ -171,9 +171,9 @@ public:
         m_ptPosition.x = rcWork.right - m_WndSize.cx - 20;
         m_ptPosition.y = rcWork.bottom - m_WndSize.cy - 10;
 
-        // Create Layered Window
+        // Create Normal Window (non-layered to eliminate overlay flickering)
         m_hWnd = CreateWindowExW(
-            WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+            WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
             L"KibaCompanionWindowClass",
             L"Kiba Desktop Companion",
             WS_POPUP,
@@ -183,6 +183,10 @@ public:
 
         if (!m_hWnd)
             return FALSE;
+
+        // Apply rounded window region
+        HRGN hRgn = CreateRoundRectRgn(0, 0, m_WndSize.cx + 1, m_WndSize.cy + 1, 16, 16);
+        SetWindowRgn(m_hWnd, hRgn, TRUE);
 
         // Hook system foreground window changes for OS awareness
         m_hWinEventHook = SetWinEventHook(
@@ -455,28 +459,25 @@ private:
     VOID Render()
     {
         if (!m_hWnd || !m_bEnabled) return;
+        InvalidateRect(m_hWnd, NULL, FALSE);
+    }
 
-        HDC hdcScreen = GetDC(NULL);
-        HDC hdcMem = CreateCompatibleDC(hdcScreen);
+    VOID OnPaint(HDC hdc)
+    {
+        if (!m_hWnd || !m_bEnabled) return;
 
-        BITMAPINFO bmi = {};
-        bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bmi.bmiHeader.biWidth = m_WndSize.cx;
-        bmi.bmiHeader.biHeight = -m_WndSize.cy; // top-down
-        bmi.bmiHeader.biPlanes = 1;
-        bmi.bmiHeader.biBitCount = 32;
-        bmi.bmiHeader.biCompression = BI_RGB;
+        HDC hdcMem = CreateCompatibleDC(hdc);
+        HBITMAP hBitmap = CreateCompatibleBitmap(hdc, m_WndSize.cx, m_WndSize.cy);
+        HGDIOBJ hOldBitmap = SelectObject(hdcMem, hBitmap);
 
-        VOID* pBits = NULL;
-        HBITMAP hBitmap = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS, &pBits, NULL, 0);
-        HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
-
-        // Render using GDI+ Bitmap with PixelFormat32bppARGB so Graphics constructor succeeds
-        Bitmap bmp(m_WndSize.cx, m_WndSize.cy, PixelFormat32bppARGB);
-        Graphics graphics(&bmp);
+        Graphics graphics(hdcMem);
         graphics.SetSmoothingMode(SmoothingModeAntiAlias);
         graphics.SetTextRenderingHint(TextRenderingHintAntiAliasGridFit);
-        graphics.Clear(Color(0, 0, 0, 0)); // Fully transparent base
+        graphics.Clear(Color(255, 245, 248, 252)); // Solid surface background for normal window
+
+        // Draw card border
+        Pen framePen(Color(255, 200, 210, 225), 1.0f);
+        graphics.DrawRectangle(&framePen, 0, 0, m_WndSize.cx - 1, m_WndSize.cy - 1);
 
         // Draw current sprite frame from cache (scaled down to 100x100)
         Bitmap* pSpriteBmp = GetSpriteBitmap(m_CurrentState, m_CurrentFrameIndex);
@@ -518,52 +519,11 @@ private:
             }
         }
 
-        // Premultiply alpha while copying pixels into DIB section pBits for UpdateLayeredWindow
-        BitmapData bmpData;
-        Rect rect(0, 0, m_WndSize.cx, m_WndSize.cy);
-        if (bmp.LockBits(&rect, ImageLockModeRead, PixelFormat32bppARGB, &bmpData) == Ok)
-        {
-            BYTE* pDst = (BYTE*)pBits;
-            BYTE* pSrc = (BYTE*)bmpData.Scan0;
-
-            for (INT y = 0; y < m_WndSize.cy; y++)
-            {
-                DWORD* pSrcRow = (DWORD*)(pSrc + (y * bmpData.Stride));
-                DWORD* pDstRow = (DWORD*)(pDst + (y * m_WndSize.cx * 4));
-
-                for (INT x = 0; x < m_WndSize.cx; x++)
-                {
-                    DWORD argb = pSrcRow[x];
-                    BYTE a = (BYTE)(argb >> 24);
-                    BYTE r = (BYTE)(argb >> 16);
-                    BYTE g = (BYTE)(argb >> 8);
-                    BYTE b = (BYTE)(argb);
-
-                    if (a == 0)
-                    {
-                        pDstRow[x] = 0;
-                    }
-                    else
-                    {
-                        BYTE pr = (BYTE)((UINT)r * a / 255);
-                        BYTE pg = (BYTE)((UINT)g * a / 255);
-                        BYTE pb = (BYTE)((UINT)b * a / 255);
-                        pDstRow[x] = ((DWORD)a << 24) | ((DWORD)pr << 16) | ((DWORD)pg << 8) | pb;
-                    }
-                }
-            }
-            bmp.UnlockBits(&bmpData);
-        }
-
-        // Apply Layered Window update
-        POINT ptSrc = { 0, 0 };
-        BLENDFUNCTION blend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
-        UpdateLayeredWindow(m_hWnd, hdcScreen, &m_ptPosition, &m_WndSize, hdcMem, &ptSrc, 0, &blend, ULW_ALPHA);
+        BitBlt(hdc, 0, 0, m_WndSize.cx, m_WndSize.cy, hdcMem, 0, 0, SRCCOPY);
 
         SelectObject(hdcMem, hOldBitmap);
         DeleteObject(hBitmap);
         DeleteDC(hdcMem);
-        ReleaseDC(NULL, hdcScreen);
     }
 
     VOID OnTimer(UINT_PTR nIDEvent)
@@ -636,6 +596,18 @@ private:
         {
             switch (uMsg)
             {
+                case WM_ERASEBKGND:
+                    return 1;
+
+                case WM_PAINT:
+                {
+                    PAINTSTRUCT ps;
+                    HDC hdc = BeginPaint(hWnd, &ps);
+                    pThis->OnPaint(hdc);
+                    EndPaint(hWnd, &ps);
+                    return 0;
+                }
+
                 case WM_TIMER:
                     pThis->OnTimer(wParam);
                     return 0;
@@ -661,6 +633,7 @@ private:
                         pThis->m_ptPosition.x += (ptCurr.x - pThis->m_ptDragStart.x);
                         pThis->m_ptPosition.y += (ptCurr.y - pThis->m_ptDragStart.y);
                         pThis->m_ptDragStart = ptCurr;
+                        SetWindowPos(hWnd, NULL, pThis->m_ptPosition.x, pThis->m_ptPosition.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
                         pThis->Render();
                     }
                     return 0;
