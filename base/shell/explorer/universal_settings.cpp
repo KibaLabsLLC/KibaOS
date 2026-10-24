@@ -5,7 +5,12 @@
  * COPYRIGHT:   Copyright 2026 Ahmed ARIF <arif193@gmail.com>
  */
 
+#if defined(__has_include) && __has_include("precomp.h")
 #include "precomp.h"
+#else
+#include <windows.h>
+#include <strsafe.h>
+#endif
 #include <reactos/universal_settings.h>
 
 #define KIBA_SETTINGS_BASE_KEY L"Software\\KibaOS\\UniversalSettings"
