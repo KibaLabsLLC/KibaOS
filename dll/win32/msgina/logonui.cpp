@@ -386,7 +386,7 @@ ShadeLockScreen(UINT32 *Bits, int Width, int Height)
     for (y = 0; y < Height; y++)
     {
         float t = (float)y / Height;
-        float Shade = t < 0.5f ? 0.30f - 0.40f * t : 0.10f + 0.70f * (t - 0.5f);
+        float Shade = t < 0.5f ? 0.22f - 0.30f * t : 0.08f + 0.50f * (t - 0.5f);
         UINT32 Keep = (UINT32)((1.0f - Shade) * 256.0f);
 
         for (x = 0; x < Width; x++)

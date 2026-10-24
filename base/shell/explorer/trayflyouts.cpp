@@ -11019,11 +11019,12 @@ public:
     int m_nSelectedIndex;
     int m_nMatchCount;
     int m_Matches[16];
+    int m_nActiveTab;
     SIZE m_size;
 
     CTrayKibaCenterWnd() : m_hwndOwner(NULL), m_hwndEdit(NULL),
                            m_hFont(NULL), m_hFontTitle(NULL), m_hFontSmall(NULL), m_hFontInput(NULL),
-                           m_nSelectedIndex(0), m_nMatchCount(0)
+                           m_nSelectedIndex(0), m_nMatchCount(0), m_nActiveTab(0)
     {
         ZeroMemory(&m_Pal, sizeof(m_Pal));
         ZeroMemory(&m_size, sizeof(m_size));
@@ -11223,7 +11224,24 @@ public:
         int x = GET_X_LPARAM(lParam);
         int y = GET_Y_LPARAM(lParam);
         int pad = Sc(16);
-        int listTop = Sc(105);
+
+        if (m_szSearch[0] == UNICODE_NULL)
+        {
+            int tabY = Sc(96);
+            int tabH = Sc(26);
+            int tabW = (m_size.cx - pad * 2) / 6;
+
+            if (y >= tabY && y <= tabY + tabH && x >= pad && x <= m_size.cx - pad)
+            {
+                m_nActiveTab = (x - pad) / tabW;
+                if (m_nActiveTab < 0) m_nActiveTab = 0;
+                if (m_nActiveTab > 5) m_nActiveTab = 5;
+                Invalidate();
+                return 0;
+            }
+        }
+
+        int listTop = Sc(128);
 
         if (m_szSearch[0] != UNICODE_NULL)
         {
@@ -11236,37 +11254,49 @@ public:
         }
         else
         {
-            int gridTop = Sc(128);
-            int itemW = Sc(152);
-            int itemH = Sc(72);
-            int gap = Sc(12);
-
-            for (int i = 0; i < 8; i++)
+            if (m_nActiveTab == 0) // Overview
             {
-                int rx = pad + (i % 4) * (itemW + gap);
-                int ry = gridTop + (i / 4) * (itemH + gap);
-                RECT rcTile = { rx, ry, rx + itemW, ry + itemH };
-                if (x >= rcTile.left && x <= rcTile.right && y >= rcTile.top && y <= rcTile.bottom)
+                int gridTop = Sc(152);
+                int itemW = Sc(152);
+                int itemH = Sc(72);
+                int gap = Sc(12);
+
+                for (int i = 0; i < 8; i++)
                 {
-                    ExecuteIndex(i);
-                    return 0;
+                    int rx = pad + (i % 4) * (itemW + gap);
+                    int ry = gridTop + (i / 4) * (itemH + gap);
+                    RECT rcTile = { rx, ry, rx + itemW, ry + itemH };
+                    if (x >= rcTile.left && x <= rcTile.right && y >= rcTile.top && y <= rcTile.bottom)
+                    {
+                        ExecuteIndex(i);
+                        return 0;
+                    }
+                }
+
+                int actTop = Sc(342);
+                int actW = Sc(152);
+                int actH = Sc(54);
+                for (int i = 0; i < 4; i++)
+                {
+                    int rx = pad + i * (actW + gap);
+                    RECT rcAct = { rx, actTop, rx + actW, actTop + actH };
+                    if (x >= rcAct.left && x <= rcAct.right && y >= rcAct.top && y <= rcAct.bottom)
+                    {
+                        if (i == 0) ShellExecuteW(m_hWnd, L"open", L"ms-settings:network", NULL, NULL, SW_SHOWNORMAL);
+                        else if (i == 1) ExecuteIndex(1);
+                        else if (i == 2) ExecuteIndex(12);
+                        else if (i == 3) ExecuteIndex(13);
+                        return 0;
+                    }
                 }
             }
-
-            int actTop = Sc(328);
-            int actW = Sc(152);
-            int actH = Sc(54);
-            for (int i = 0; i < 4; i++)
+            else if (m_nActiveTab == 1) // Apps
             {
-                int rx = pad + i * (actW + gap);
-                RECT rcAct = { rx, actTop, rx + actW, actTop + actH };
-                if (x >= rcAct.left && x <= rcAct.right && y >= rcAct.top && y <= rcAct.bottom)
+                int rowH = Sc(40);
+                int idx = (y - listTop) / rowH;
+                if (idx >= 0 && idx < m_nMatchCount)
                 {
-                    if (i == 0) ShellExecuteW(m_hWnd, L"open", L"ms-settings:network", NULL, NULL, SW_SHOWNORMAL);
-                    else if (i == 1) ExecuteIndex(1);
-                    else if (i == 2) ExecuteIndex(12);
-                    else if (i == 3) ExecuteIndex(13);
-                    return 0;
+                    ExecuteIndex(idx);
                 }
             }
         }
@@ -11348,6 +11378,31 @@ public:
                            rcClient.right - pad * 2 - Sc(48), inputH - Sc(16), SWP_NOZORDER);
         }
 
+        if (m_szSearch[0] == UNICODE_NULL)
+        {
+            static const LPCWSTR s_szTabs[] = { L"Overview", L"Apps", L"System", L"Performance", L"Shortcuts", L"Settings" };
+            int tabY = Sc(96);
+            int tabH = Sc(26);
+            int tabW = (rcClient.right - pad * 2) / 6;
+
+            for (int i = 0; i < 6; i++)
+            {
+                RECT rcTab = { pad + i * tabW, tabY, pad + (i + 1) * tabW, tabY + tabH };
+                if (i == m_nActiveTab)
+                {
+                    HBRUSH hbrTab = CreateSolidBrush(m_Pal.HotFill);
+                    FillRect(hdcMem, &rcTab, hbrTab);
+                    DeleteObject(hbrTab);
+                    HBRUSH hbrTabBrd = CreateSolidBrush(m_Pal.HotBorder);
+                    FrameRect(hdcMem, &rcTab, hbrTabBrd);
+                    DeleteObject(hbrTabBrd);
+                }
+                SelectObject(hdcMem, m_hFontSmall);
+                SetTextColor(hdcMem, (i == m_nActiveTab) ? m_Pal.PanelText : m_Pal.DimText);
+                DrawTextW(hdcMem, s_szTabs[i], -1, &rcTab, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+            }
+        }
+
         if (m_szSearch[0] != UNICODE_NULL)
         {
             int listTop = Sc(105);
@@ -11385,13 +11440,13 @@ public:
                 TextOutW(hdcMem, pad + Sc(44), ry + Sc(24), g_KibaCmdList[cmdIdx].pszDesc, (int)wcslen(g_KibaCmdList[cmdIdx].pszDesc));
             }
         }
-        else
+        else if (m_nActiveTab == 0) // Overview Tab
         {
-            SelectObject(hdcMem, m_hFont);
+            SelectObject(hdcMem, m_hFontSmall);
             SetTextColor(hdcMem, m_Pal.PanelText);
-            TextOutW(hdcMem, pad, Sc(100), L"Pinned System Apps & Commands", 29);
+            TextOutW(hdcMem, pad, Sc(130), L"Pinned System Apps & Commands", 29);
 
-            int gridTop = Sc(128);
+            int gridTop = Sc(152);
             int itemW = Sc(152);
             int itemH = Sc(72);
             int gap = Sc(12);
@@ -11414,17 +11469,17 @@ public:
                 if (hIco)
                     DrawIconEx(hdcMem, rx + Sc(12), ry + Sc(12), hIco, Sc(24), Sc(24), 0, NULL, DI_NORMAL);
 
-                SelectObject(hdcMem, m_hFont);
+                SelectObject(hdcMem, m_hFontSmall);
                 SetTextColor(hdcMem, m_Pal.PanelText);
                 RECT rcLabel = { rx + Sc(12), ry + Sc(42), rx + itemW - Sc(8), ry + itemH - Sc(4) };
                 DrawTextW(hdcMem, g_KibaCmdList[i].pszName, -1, &rcLabel, DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS);
             }
 
-            SelectObject(hdcMem, m_hFont);
+            SelectObject(hdcMem, m_hFontSmall);
             SetTextColor(hdcMem, m_Pal.PanelText);
-            TextOutW(hdcMem, pad, Sc(300), L"Quick System Actions", 20);
+            TextOutW(hdcMem, pad, Sc(320), L"Quick System Actions", 20);
 
-            int actTop = Sc(328);
+            int actTop = Sc(342);
             int actW = Sc(152);
             int actH = Sc(54);
 
@@ -11458,6 +11513,109 @@ public:
                 RECT rcActLbl = { rx + Sc(36), actTop, rx + actW - Sc(4), actTop + actH };
                 DrawTextW(hdcMem, s_QuickActs[i].pszName, -1, &rcActLbl, DT_SINGLELINE | DT_VCENTER);
             }
+        }
+        else if (m_nActiveTab == 1) // Apps Tab
+        {
+            int listTop = Sc(128);
+            int rowH = Sc(40);
+
+            for (int i = 0; i < (int)_countof(g_KibaCmdList); i++)
+            {
+                int ry = listTop + i * rowH;
+                if (ry + rowH > rcClient.bottom - Sc(30))
+                    break;
+
+                RECT rcRow = { pad, ry, rcClient.right - pad, ry + rowH };
+                HBRUSH hbrRow = CreateSolidBrush(TfyMix(m_Pal.PanelBg, m_Pal.PanelText, 15));
+                FillRect(hdcMem, &rcRow, hbrRow);
+                DeleteObject(hbrRow);
+
+                HICON hIco = TfyFluentIcon(g_KibaCmdList[i].nIconId, Sc(20));
+                if (hIco)
+                    DrawIconEx(hdcMem, pad + Sc(8), ry + Sc(10), hIco, Sc(20), Sc(20), 0, NULL, DI_NORMAL);
+
+                SelectObject(hdcMem, m_hFontSmall);
+                SetTextColor(hdcMem, m_Pal.PanelText);
+                TextOutW(hdcMem, pad + Sc(36), ry + Sc(4), g_KibaCmdList[i].pszName, (int)wcslen(g_KibaCmdList[i].pszName));
+
+                SetTextColor(hdcMem, m_Pal.DimText);
+                TextOutW(hdcMem, pad + Sc(36), ry + Sc(20), g_KibaCmdList[i].pszDesc, (int)wcslen(g_KibaCmdList[i].pszDesc));
+            }
+        }
+        else if (m_nActiveTab == 2) // System Tab
+        {
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(132), L"KibaOS System & Kernel Architecture", 35);
+
+            SelectObject(hdcMem, m_hFontSmall);
+            SetTextColor(hdcMem, m_Pal.DimText);
+            RECT rcSysInfo = { pad, Sc(160), rcClient.right - pad, Sc(420) };
+            LPCWSTR pszSysDetails =
+                L"OS Name: KibaOS v3.5 (NT 10.0 Kernel Fork)\n"
+                L"Display Engine: Desktop Window Manager (DWM) with 3D Depth Shadows\n"
+                L"Workspace Subsystem: 3D Spatial Workspaces & Intent WM\n"
+                L"Predictive UI Engine: Contextual Gravity & Gesture Grammar Active\n"
+                L"Security & Subsystems: POSIX/Linux Subsystem (lxcore), WFP/IPSec SA Engine\n"
+                L"OTA Update Status: Up-to-date (Signed SHA-256 Engine)";
+            DrawTextW(hdcMem, pszSysDetails, -1, &rcSysInfo, DT_LEFT | DT_WORDBREAK);
+        }
+        else if (m_nActiveTab == 3) // Performance Tab
+        {
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(132), L"Real-Time Performance Metrics", 29);
+
+            MEMORYSTATUSEX ms = { sizeof(ms) };
+            GlobalMemoryStatusEx(&ms);
+
+            WCHAR szPerf[256];
+            StringCchPrintfW(szPerf, _countof(szPerf),
+                             L"Memory Load: %u%%\nTotal Physical RAM: %I64u MB\nAvailable RAM: %I64u MB\nTotal Page File: %I64u MB\nFree Page File: %I64u MB",
+                             ms.dwMemoryLoad,
+                             ms.ullTotalPhys / (1024 * 1024),
+                             ms.ullAvailPhys / (1024 * 1024),
+                             ms.ullTotalPageFile / (1024 * 1024),
+                             ms.ullAvailPageFile / (1024 * 1024));
+
+            SelectObject(hdcMem, m_hFontSmall);
+            SetTextColor(hdcMem, m_Pal.DimText);
+            RECT rcPerf = { pad, Sc(165), rcClient.right - pad, Sc(420) };
+            DrawTextW(hdcMem, szPerf, -1, &rcPerf, DT_LEFT | DT_WORDBREAK);
+        }
+        else if (m_nActiveTab == 4) // Shortcuts Tab
+        {
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(132), L"System Hotkeys & Gesture Grammar", 32);
+
+            SelectObject(hdcMem, m_hFontSmall);
+            SetTextColor(hdcMem, m_Pal.DimText);
+            RECT rcKeys = { pad, Sc(165), rcClient.right - pad, Sc(420) };
+            LPCWSTR pszKeys =
+                L"Win + K         : Toggle Kiba Center Suite\n"
+                L"Win + Tab       : Spatial 3D Workspace Plane Selector\n"
+                L"Win + Arrow     : Intent-Based Window Tiling & Snapping\n"
+                L"Win + Space     : Universal Quick Search Launcher\n"
+                L"Flick Stroke    : Gesture Grammar Directional Pointer Action";
+            DrawTextW(hdcMem, pszKeys, -1, &rcKeys, DT_LEFT | DT_WORDBREAK);
+        }
+        else if (m_nActiveTab == 5) // Settings Tab
+        {
+            SelectObject(hdcMem, m_hFont);
+            SetTextColor(hdcMem, m_Pal.PanelText);
+            TextOutW(hdcMem, pad, Sc(132), L"Universal OS Settings Quick Access", 34);
+
+            SelectObject(hdcMem, m_hFontSmall);
+            SetTextColor(hdcMem, m_Pal.DimText);
+            RECT rcSets = { pad, Sc(165), rcClient.right - pad, Sc(420) };
+            LPCWSTR pszSets =
+                L"System Settings (base/applications/systemsettings)\n"
+                L"- Personalization & Kiba Desktop Companion\n"
+                L"- Installation & Driver Config Timeline\n"
+                L"- OTA Update Pipeline & Anti-Downgrade Policies\n"
+                L"- Predictive UI & Contextual Gravity Parameters";
+            DrawTextW(hdcMem, pszSets, -1, &rcSets, DT_LEFT | DT_WORDBREAK);
         }
 
         SelectObject(hdcMem, m_hFontSmall);

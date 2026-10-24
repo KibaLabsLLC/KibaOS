@@ -362,8 +362,13 @@ VOID CPredictiveUIEngine::EvaluatePredictions()
         DWORD elapsedMs = (currentTick >= cand.LastSelectedTick) ? (currentTick - cand.LastSelectedTick) : 0;
         FLOAT recencyFactor = max(0.0f, 1.0f - ((FLOAT)elapsedMs / (1000.0f * 3600.0f))); // 1 hr decay
 
+        // Contextual Gravity calculation
+        POINT gravVector = CalculateContextualGravityVector(m_LastPointerPt, 1.0f);
+        FLOAT gravMag = sqrtf((FLOAT)(gravVector.x * gravVector.x + gravVector.y * gravVector.y));
+        FLOAT gravBonus = min(0.15f, gravMag / 100.0f);
+
         // Score formulation
-        FLOAT score = (traj.Directness * 0.40f) + (distanceFactor * 0.30f) + (freqFactor * 0.20f) + (recencyFactor * 0.10f);
+        FLOAT score = (traj.Directness * 0.35f) + (distanceFactor * 0.25f) + (freqFactor * 0.20f) + (recencyFactor * 0.10f) + gravBonus;
         cand.PredictionScore = max(0.0f, min(1.0f, score));
 
         // Assign Confidence Level
@@ -411,6 +416,83 @@ VOID CPredictiveUIEngine::EvaluatePredictions()
             cand.AdaptiveOffset.y = 0;
         }
     }
+}
+
+POINT CPredictiveUIEngine::CalculateContextualGravityVector(POINT Pt, FLOAT GravityStrength) const
+{
+    POINT gravity = { 0, 0 };
+    if (m_CandidateCount == 0 || GravityStrength <= 0.0f)
+        return gravity;
+
+    FLOAT sumX = 0.0f;
+    FLOAT sumY = 0.0f;
+
+    for (INT i = 0; i < m_CandidateCount; ++i)
+    {
+        const PREDICTIVE_TARGET_CANDIDATE& cand = m_Candidates[i];
+        LONG targetCenterX = (cand.OriginalBounds.left + cand.OriginalBounds.right) / 2;
+        LONG targetCenterY = (cand.OriginalBounds.top + cand.OriginalBounds.bottom) / 2;
+
+        FLOAT dx = (FLOAT)(targetCenterX - Pt.x);
+        FLOAT dy = (FLOAT)(targetCenterY - Pt.y);
+        FLOAT dist = sqrtf(dx * dx + dy * dy);
+
+        if (dist > 0.1f && dist < 400.0f)
+        {
+            FLOAT pull = (cand.PredictionScore + 0.1f) * GravityStrength / (dist * 0.05f + 1.0f);
+            sumX += (dx / dist) * pull * 10.0f;
+            sumY += (dy / dist) * pull * 10.0f;
+        }
+    }
+
+    gravity.x = (LONG)sumX;
+    gravity.y = (LONG)sumY;
+    return gravity;
+}
+
+INT CPredictiveUIEngine::RecognizePointerGesture() const
+{
+    if (m_SampleCount < 4)
+        return 0; // Gesture Grammar: None
+
+    INT oldestIdx = (m_SampleHead - m_SampleCount + MAX_POINTER_SAMPLES) % MAX_POINTER_SAMPLES;
+    INT newestIdx = (m_SampleHead - 1 + MAX_POINTER_SAMPLES) % MAX_POINTER_SAMPLES;
+
+    const PREDICTIVE_POINTER_SAMPLE& startSample = m_PointerSamples[oldestIdx];
+    const PREDICTIVE_POINTER_SAMPLE& endSample = m_PointerSamples[newestIdx];
+
+    LONG totalDx = endSample.Pt.x - startSample.Pt.x;
+    LONG totalDy = endSample.Pt.y - startSample.Pt.y;
+    FLOAT totalDist = sqrtf((FLOAT)(totalDx * totalDx + totalDy * totalDy));
+
+    if (totalDist < 30.0f)
+        return 0; // Insufficient stroke distance
+
+    DWORD dt = (endSample.TimeMs >= startSample.TimeMs) ? (endSample.TimeMs - startSample.TimeMs) : 1;
+    FLOAT speed = totalDist / (FLOAT)(dt ? dt : 1);
+
+    if (speed < 0.2f)
+        return 0; // Stroke too slow
+
+    FLOAT angleRad = atan2f((FLOAT)totalDy, (FLOAT)totalDx);
+    FLOAT angleDeg = angleRad * (180.0f / 3.14159265f);
+
+    if (angleDeg < 0.0f)
+        angleDeg += 360.0f;
+
+    // Gesture Grammar classification:
+    // 1: Flick Right (315° - 45°)
+    // 2: Flick Down  (45° - 135°)
+    // 3: Flick Left  (135° - 225°)
+    // 4: Flick Up    (225° - 315°)
+    if (angleDeg >= 315.0f || angleDeg < 45.0f)
+        return 1; // Swipe/Flick Right
+    else if (angleDeg >= 45.0f && angleDeg < 135.0f)
+        return 2; // Swipe/Flick Down
+    else if (angleDeg >= 135.0f && angleDeg < 225.0f)
+        return 3; // Swipe/Flick Left
+    else
+        return 4; // Swipe/Flick Up
 }
 
 BOOL CPredictiveUIEngine::HitTestTarget(UINT_PTR TargetId, POINT Pt, OUT RECT* pOutHitArea)
@@ -503,6 +585,16 @@ BOOL PredictiveUI_IsEnabled(void)
 void PredictiveUI_ResetProfile(void)
 {
     g_PredictiveEngine.ResetProfileData();
+}
+
+POINT PredictiveUI_GetContextualGravityVector(POINT Pt, FLOAT GravityStrength)
+{
+    return g_PredictiveEngine.CalculateContextualGravityVector(Pt, GravityStrength);
+}
+
+INT PredictiveUI_RecognizeGesture(void)
+{
+    return g_PredictiveEngine.RecognizePointerGesture();
 }
 
 }
