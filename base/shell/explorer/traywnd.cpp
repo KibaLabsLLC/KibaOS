@@ -3318,16 +3318,6 @@ ChangePos:
      */
     LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
-        POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        if (!IsRectEmpty(&m_rcIntentBar) && PtInRect(&m_rcIntentBar, pt))
-        {
-            KIBA_INTENT_MODE mode = IntentWM_GetActiveMode();
-            mode = (KIBA_INTENT_MODE)((mode % 6) + 1);
-            IntentWM_SetActiveMode(mode);
-            InvalidateRect(NULL, TRUE);
-            bHandled = TRUE;
-            return 0;
-        }
         bHandled = FALSE;
         return 0;
     }
