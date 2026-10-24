@@ -3345,7 +3345,7 @@ ChangePos:
             KIBA_INTENT_MODE activeMode = IntentWM_GetActiveMode();
             KIBA_INTENT_MODE nextMode = (KIBA_INTENT_MODE)((((int)activeMode) % IntentWM_GetTotalModes()) + 1);
             IntentWM_SetActiveMode(nextMode);
-            InvalidateRect(m_hWnd, NULL, TRUE);
+            InvalidateRect(NULL, TRUE);
             bHandled = TRUE;
             return 0;
         }
