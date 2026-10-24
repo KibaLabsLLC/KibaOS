@@ -14,7 +14,8 @@ list(APPEND SOURCE
     page_misc.cpp
     pointer.cpp
     bootloader.cpp
-    ${REACTOS_SOURCE_DIR}/base/system/dwm/settings.c)
+    ${REACTOS_SOURCE_DIR}/base/system/dwm/settings.c
+    ${REACTOS_SOURCE_DIR}/base/shell/explorer/universal_settings.cpp)
 
 file(GLOB systemsettings_rc_deps res/*.* lang/*.rc)
 add_rc_deps(systemsettings.rc ${systemsettings_rc_deps})
