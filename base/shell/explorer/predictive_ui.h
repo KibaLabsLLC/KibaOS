@@ -65,6 +65,10 @@ public:
     PREDICTIVE_TRAJECTORY CalculateTrajectory(const RECT& TargetBounds) const;
     VOID EvaluatePredictions();
 
+    // Contextual Gravity & Gesture Grammar Calculations
+    POINT CalculateContextualGravityVector(POINT Pt, FLOAT GravityStrength) const;
+    INT RecognizePointerGesture() const;
+
     // Query Hit Testing & Adaptive Offsets
     BOOL HitTestTarget(UINT_PTR TargetId, POINT Pt, OUT RECT* pOutHitArea);
     POINT GetAdaptiveOffset(UINT_PTR TargetId);
@@ -92,6 +96,8 @@ BOOL PredictiveUI_HitTest(UINT_PTR TargetId, POINT Pt, RECT* pOutHitArea);
 POINT PredictiveUI_GetAdaptiveOffset(UINT_PTR TargetId);
 BOOL PredictiveUI_IsEnabled(void);
 void PredictiveUI_ResetProfile(void);
+POINT PredictiveUI_GetContextualGravityVector(POINT Pt, FLOAT GravityStrength);
+INT PredictiveUI_RecognizeGesture(void);
 
 #ifdef __cplusplus
 }
