@@ -305,16 +305,14 @@ jobs:
           sshpass -e rsync -avP --progress dist/* \
             "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
 
-          # Upload OTA CABs first, manifest last if on release branch or tag
-          if [[ "${{ github.ref }}" == refs/heads/release/* || "${{ github.ref }}" == refs/tags/* ]]; then
-            printf '%s\n' "cd ${REMOTE_DIR}" "mkdir ota" "bye" \
-              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
-                  "$SF_USER@frs.sourceforge.net" >/dev/null 2>&1 || true
-            # Upload CAB files first
-            sshpass -e rsync -avP ota_dist/*.cab "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
-            # Upload manifest last
-            sshpass -e rsync -avP ota_dist/ota_manifest.json "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
-          fi
+          # Upload OTA CABs first, manifest last
+          printf '%s\n' "cd ${REMOTE_DIR}" "mkdir ota" "bye" \
+            | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no \
+                "$SF_USER@frs.sourceforge.net" >/dev/null 2>&1 || true
+          # Upload CAB files first
+          sshpass -e rsync -avP ota_dist/*.cab "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
+          # Upload manifest last
+          sshpass -e rsync -avP ota_dist/ota_manifest.json "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/ota/"
 
           # Record this run's number for next time.
           echo "${{ github.run_number }}" > "${MARKER}"
