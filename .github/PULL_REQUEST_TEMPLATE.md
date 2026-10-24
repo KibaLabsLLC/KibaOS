@@ -22,5 +22,5 @@ _Use a TODO when your pull request is Work in Progress._
 
 _Say what you booted or ran, and on which architecture. Tell us which parts AI tools helped with, if any._
 
-- [ ] Builds on amd64, i386 and arm64
+- [ ] Builds on amd64 and i386
 - [ ] Boot or test run:

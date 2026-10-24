@@ -16,14 +16,6 @@ jobs:
             compiler: clang
             config: Debug
             ntver: '0xA00'
-          - arch: arm64
-            compiler: clang
-            config: Debug
-            ntver: '0xA00'
-            profile: profile_raspberry
-    # Both architectures build on x86_64: the RosBE toolchain cross-compiles
-    # amd64 and arm64 targets, so there is no native-arm64 runner or Docker
-    # layer any more.
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -81,7 +73,7 @@ jobs:
 
       - name: Cache Mesa LLVM
         id: cache_llvm
-        if: ${{ matrix.compiler == 'clang' && (matrix.arch == 'amd64' || matrix.arch == 'arm64') }}
+        if: ${{ matrix.compiler == 'clang' && matrix.arch == 'amd64' }}
         uses: actions/cache@v5
         with:
           path: ~/mesa-llvm
@@ -96,10 +88,9 @@ jobs:
           [ "${{ matrix.compiler }}" = "gcc" ] && FLAGS="$FLAGS --gcc"
           [ "${{ matrix.config }}" = "Release" ] && FLAGS="$FLAGS -r"
           [ -n "${{ matrix.profile }}" ] && FLAGS="$FLAGS -DROSCONFIG_PROFILE=${{ matrix.profile }}"
-          [ "${{ matrix.compiler }}" = "clang" ] && case "${{ matrix.arch }}" in amd64|arm64) FLAGS="$FLAGS -DENABLE_MESA_LLVMPIPE=ON" ;; esac
+          [ "${{ matrix.compiler }}" = "clang" ] && case "${{ matrix.arch }}" in amd64) FLAGS="$FLAGS -DENABLE_MESA_LLVMPIPE=ON" ;; esac
           if [ "${{ steps.cache_llvm.outputs.cache-hit }}" = "true" ]; then
             FLAGS="$FLAGS -DMESA_LLVM_ROOT=$HOME/mesa-llvm/native -DMESA_LLVM_LICENSE_FILE=$HOME/mesa-llvm/LICENSE.TXT"
-            [ -d "$HOME/mesa-llvm/arm64ec" ] && FLAGS="$FLAGS -DMESA_ARM64EC_LLVM_ROOT=$HOME/mesa-llvm/arm64ec -DMESA_ARM64EC_LLVM_LICENSE_FILE=$HOME/mesa-llvm/LICENSE.TXT"
           fi
           ./configure.sh $FLAGS -a ${{ matrix.arch }} \
             -DREACTOS_TARGET_NT=${{ matrix.ntver }} \
@@ -121,9 +112,6 @@ jobs:
           mkdir -p ~/mesa-llvm
           cp -R "$OUT/submodules/mesa-llvmpipe/llvm-install" ~/mesa-llvm/native
           cp "$OUT/submodules/mesa-llvmpipe/llvm-source/llvm/LICENSE.TXT" ~/mesa-llvm/LICENSE.TXT
-          if [ -d "$OUT/_fex_arm64ec/submodules/mesa-llvmpipe/llvm-install" ]; then
-            cp -R "$OUT/_fex_arm64ec/submodules/mesa-llvmpipe/llvm-install" ~/mesa-llvm/arm64ec
-          fi
 
       # bootcd.iso, KibaOS.img and KibaOS.vhd -- the same three targets the
       # install guide documents.
