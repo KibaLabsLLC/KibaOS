@@ -3316,6 +3316,22 @@ ChangePos:
      * This handler implements the trick that makes the start button to
      * get pressed when the user clicked left or below the button.
      */
+    LRESULT OnLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+    {
+        POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        if (!IsRectEmpty(&m_rcIntentBar) && PtInRect(&m_rcIntentBar, pt))
+        {
+            KIBA_INTENT_MODE mode = IntentWM_GetActiveMode();
+            mode = (KIBA_INTENT_MODE)((mode % 6) + 1);
+            IntentWM_SetActiveMode(mode);
+            InvalidateRect(NULL, TRUE);
+            bHandled = TRUE;
+            return 0;
+        }
+        bHandled = FALSE;
+        return 0;
+    }
+
     LRESULT OnNcLButtonDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
         POINT pt = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
@@ -3975,6 +3991,7 @@ HandleTrayContextMenu:
         MESSAGE_HANDLER(WM_WINDOWPOSCHANGING, OnWindowPosChanging)
         MESSAGE_HANDLER(WM_ENTERSIZEMOVE, OnEnterSizeMove)
         MESSAGE_HANDLER(WM_EXITSIZEMOVE, OnExitSizeMove)
+        MESSAGE_HANDLER(WM_LBUTTONDOWN, OnLButtonDown)
         MESSAGE_HANDLER(WM_NCLBUTTONDOWN, OnNcLButtonDown)
         MESSAGE_HANDLER(WM_SYSCHAR, OnSysChar)
         MESSAGE_HANDLER(WM_NCRBUTTONUP, OnNcRButtonUp)

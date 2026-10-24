@@ -534,6 +534,17 @@ FinishThread(
         DPRINT1("Setup account disabled with result %lu\n", Error);
     }
 
+    if (pSetupData->bInstalled)
+    {
+        HKEY hKeyRunOnce;
+        if (RegCreateKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce",
+                            0, NULL, 0, KEY_SET_VALUE, NULL, &hKeyRunOnce, NULL) == ERROR_SUCCESS)
+        {
+            SetStringValue(hKeyRunOnce, L"KibaGuide", L"kibaguide.exe");
+            RegCloseKey(hKeyRunOnce);
+        }
+    }
+
 Components:
     PostMessageW(Context->hwndDlg, PM_APPLY_DONE, 0, 0);
     hrCom = CoInitializeEx(NULL, COINIT_MULTITHREADED);
