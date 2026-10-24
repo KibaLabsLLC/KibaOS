@@ -142,7 +142,7 @@ static VOID DrawSlide(HDC hdc, const RECT& rcClient)
     FillRect(hdcMem, &rcHeader, hbrHeader);
     DeleteObject(hbrHeader);
 
-    HBRUSH hbrBorder = CreateSolidBrush(UX_TOKEN_COLOR_BORDER);
+    HBRUSH hbrBorder = CreateSolidBrush(UX_TOKEN_COLOR_BORDER_LIGHT);
     RECT rcBorderLine = { 0, 89, rcClient.right, 90 };
     FillRect(hdcMem, &rcBorderLine, hbrBorder);
     DeleteObject(hbrBorder);
@@ -151,7 +151,7 @@ static VOID DrawSlide(HDC hdc, const RECT& rcClient)
 
     // Header title
     HGDIOBJ hFontOld = SelectObject(hdcMem, g_hFontTitle);
-    SetTextColor(hdcMem, UX_TOKEN_COLOR_TEXT_PRIMARY);
+    SetTextColor(hdcMem, UX_TOKEN_COLOR_TEXT_PRIMARY_LIGHT);
     RECT rcTitle = { 30, 18, rcClient.right - 30, 48 };
     DrawTextW(hdcMem, g_Slides[g_CurrentSlide].szTitle, -1, &rcTitle, DT_SINGLELINE | DT_LEFT | DT_VCENTER);
 
@@ -167,12 +167,12 @@ static VOID DrawSlide(HDC hdc, const RECT& rcClient)
     FillRect(hdcMem, &rcCard, hbrCard);
     DeleteObject(hbrCard);
 
-    HBRUSH hbrCardBrd = CreateSolidBrush(MixColor(UX_TOKEN_COLOR_BORDER, UX_TOKEN_COLOR_SURFACE_LIGHT, 128));
+    HBRUSH hbrCardBrd = CreateSolidBrush(MixColor(UX_TOKEN_COLOR_BORDER_LIGHT, UX_TOKEN_COLOR_SURFACE_LIGHT, 128));
     FrameRect(hdcMem, &rcCard, hbrCardBrd);
     DeleteObject(hbrCardBrd);
 
     SelectObject(hdcMem, g_hFontBody);
-    SetTextColor(hdcMem, UX_TOKEN_COLOR_TEXT_PRIMARY);
+    SetTextColor(hdcMem, UX_TOKEN_COLOR_TEXT_PRIMARY_LIGHT);
     RECT rcText = { rcCard.left + 24, rcCard.top + 24, rcCard.right - 24, rcCard.bottom - 24 };
     DrawTextW(hdcMem, g_Slides[g_CurrentSlide].szContent, -1, &rcText, DT_LEFT | DT_WORDBREAK);
 
@@ -186,7 +186,7 @@ static VOID DrawSlide(HDC hdc, const RECT& rcClient)
 
     for (int i = 0; i < dotCount; i++)
     {
-        COLORREF dotColor = (i == g_CurrentSlide) ? UX_TOKEN_COLOR_ACCENT_PRIMARY : UX_TOKEN_COLOR_BORDER;
+        COLORREF dotColor = (i == g_CurrentSlide) ? UX_TOKEN_COLOR_ACCENT_PRIMARY : UX_TOKEN_COLOR_BORDER_LIGHT;
         HBRUSH hbrDot = CreateSolidBrush(dotColor);
         RECT rcDot = { startX + i * (dotW + gap), dotY, startX + i * (dotW + gap) + dotW, dotY + dotW };
         FillRect(hdcMem, &rcDot, hbrDot);
