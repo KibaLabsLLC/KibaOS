@@ -468,7 +468,7 @@ static HRESULT WINAPI uisettings4_get_AdvancedEffectsEnabled( IUISettings4 *ifac
     SystemParametersInfoW( SPI_GETDISABLEOVERLAPPEDCONTENT, 0, &disabled, 0 );
     *value = !(contrast.dwFlags & HCF_HIGHCONTRASTON) && !disabled &&
         !!get_user_dword( L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-                          L"EnableTransparency", 1 );
+                          L"EnableTransparency", 0 );
     return S_OK;
 }
 

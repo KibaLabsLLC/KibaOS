@@ -44,7 +44,7 @@ DwmSettingsRead(DWORD *Effects)
     LONG Error;
     UINT Index;
 
-    *Effects = DWM_EFFECT_ALL;
+    *Effects = DWM_EFFECT_ALL & ~(DWM_EFFECT_ACRYLIC | DWM_EFFECT_BLUR);
     if (!SystemParametersInfoW(SPI_GETANIMATION, sizeof(Animation), &Animation, 0))
         return ERROR_READ_FAULT;
     if (!Animation.iMinAnimate)
