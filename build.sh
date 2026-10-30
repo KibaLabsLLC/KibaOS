@@ -2689,7 +2689,6 @@ cd goget
 make 
 make install
 set -euo pipefail
-git clone https://aur.archlinux.org/ulauncher.git && cd ulauncher && makepkg -is
 git clone --depth 1 https://github.com/KibaLabsLLC/Okami.git
 cd Okami
 pacman -Syu --noconfirm --needed \
