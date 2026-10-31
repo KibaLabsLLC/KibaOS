@@ -33,7 +33,7 @@ else
   pacman -S --noconfirm --needed \
     base-devel git squashfs-tools libisoburn mtools dosfstools \
     cmake ninja meson \
-    grub \
+    grub syslinux \
     arch-install-scripts \
     openssl curl imagemagick jq \
     python-docutils
@@ -2590,7 +2590,7 @@ iso_application="KibaOS — A friendly OS"
 iso_version="$(date +%Y.%m)"
 install_dir="arch"
 buildmodes=('iso')
-bootmodes=('uefi.grub')
+bootmodes=('bios.syslinux' 'uefi.grub')
 arch="x86_64"
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
@@ -2605,7 +2605,7 @@ PROFILEDEF
 chmod +x "${PROFILE}/profiledef.sh"
 
 if [ "${KIBA_ARCH}" = "aarch64" ]; then
-  sed -i "s/bootmodes=('uefi.grub')/bootmodes=('uefi-aarch64.systemd-boot.esp' 'uefi-aarch64.systemd-boot.eltorito')/" "${PROFILE}/profiledef.sh"
+  sed -i "s/bootmodes=('bios.syslinux' 'uefi.grub')/bootmodes=('uefi-aarch64.systemd-boot.esp' 'uefi-aarch64.systemd-boot.eltorito')/" "${PROFILE}/profiledef.sh"
   sed -i 's/arch="x86_64"/arch="aarch64"/' "${PROFILE}/profiledef.sh"
   sed -i "s/'-Xbcj' 'x86'/'-Xbcj' 'arm64'/" "${PROFILE}/profiledef.sh"
 fi
@@ -2877,6 +2877,31 @@ if [ "${grub_platform}" == "efi" ]; then
     }
 fi
 GRUBCFG
+
+  # BIOS side of the hybrid ISO: mkarchiso's bios.syslinux mode copies every
+  # *.cfg in here to boot/syslinux/ (substituting the %...% placeholders) and
+  # drops isolinux.bin, ldlinux.c32, menu.c32, ... next to them.
+  mkdir -p "${PROFILE}/syslinux"
+  cat > "${PROFILE}/syslinux/syslinux.cfg" << 'SYSLINUXCFG'
+DEFAULT kibaos
+PROMPT 0
+UI menu.c32
+MENU TITLE KibaOS
+MENU HIDDEN
+TIMEOUT 10
+
+LABEL kibaos
+    MENU LABEL KibaOS
+    LINUX /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux
+    INITRD /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
+    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0 plymouth.use-simpledrm=1
+
+LABEL kibaos-safe
+    MENU LABEL KibaOS (safe mode)
+    LINUX /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux
+    INITRD /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
+    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G nomodeset systemd.unit=multi-user.target systemd.log_level=info
+SYSLINUXCFG
 else
   mkdir -p "${PROFILE}/efiboot/loader/entries"
   cat > "${PROFILE}/efiboot/loader/loader.conf" << 'LOADERCONF'
@@ -6715,14 +6740,46 @@ fi
 
 mkarchiso -v -w work -o out "${PROFILE}/"
 
-if ls out/*.iso 1>/dev/null 2>&1; then
-  mv out/*.iso "${ISO}.iso"
+# ── BIOS/UEFI hybrid ISO, assembled by hand ────────────────────────────────
+# mkarchiso has now produced the complete ISO tree in work/iso (arch/ with the
+# squashfs + kernel + initramfs, boot/syslinux/ from bios.syslinux, and
+# EFI/BOOT/BOOTx64.EFI + boot/grub/ from uefi.grub) plus the FAT ESP image in
+# work/efiboot.img. Re-pack that tree with the explicit xorriso command.
+cd "${WORKDIR}"
+rm -rf iso_root kibaos.iso
+mv work/iso iso_root
+rm -f out/*.iso   # mkarchiso's own (differently-laid-out) ISO is not needed
+
+for _f in iso_root/boot/syslinux/isolinux.bin \
+          iso_root/boot/syslinux/ldlinux.c32 \
+          iso_root/boot/syslinux/syslinux.cfg \
+          iso_root/EFI/BOOT/BOOTx64.EFI \
+          work/efiboot.img \
+          /usr/lib/syslinux/bios/isohdpfx.bin; do
+  [ -f "${_f}" ] || { echo "ERROR: ${_f} is missing -- cannot build the hybrid ISO" >&2; exit 1; }
+done
+
+# the El Torito UEFI image has to live inside the tree it is booted from
+cp -f work/efiboot.img iso_root/EFI/BOOT/efiboot.img
+
+xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -volid KIBAOS \
+  -eltorito-boot boot/syslinux/isolinux.bin \
+  -eltorito-catalog boot/syslinux/boot.cat \
+  -no-emul-boot -boot-load-size 4 -boot-info-table \
+  -isohybrid-mbr /usr/lib/syslinux/bios/isohdpfx.bin \
+  -eltorito-alt-boot -e EFI/BOOT/efiboot.img -no-emul-boot \
+  -isohybrid-gpt-basdat -o kibaos.iso iso_root/
+
+if [ -f kibaos.iso ]; then
+  mv kibaos.iso "${ISO}.iso"
+  # log both boot entries (BIOS + UEFI) and the hybrid MBR/GPT for the build record
+  xorriso -indev "${ISO}.iso" -report_el_torito plain -report_system_area plain 2>&1 | tail -n 40 || true
   sha256sum "${ISO}.iso" > "${ISO}.iso.sha256"
   echo "╔══════════════════════════════════════╗"
   echo "║  KibaOS build complete!       ║"
   echo "║  ${ISO}.iso            ║"
   echo "╚══════════════════════════════════════╝"
 else
-  echo "ERROR: ISO file not found after mkarchiso!"
+  echo "ERROR: kibaos.iso not found after xorriso!"
   exit 1
 fi
