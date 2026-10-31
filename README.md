@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/50147cf737fb6db65bf0d036521f13ecaddf9470/branding/6D4D87BD-2999-42DF-A592-57A5543F9E78.png" width="1024" alt="KibaOS Banner">
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/0260d549cdaf9facf7a736db8a26718d9bfb18c5/branding/README/FBC6E58A-983A-49B6-B3DF-93B8D4F648EA.png" width="1024" alt="KibaOS Banner">
 </p>
 
 > [!IMPORTANT]
@@ -7,7 +7,7 @@
 
 <div align="center">
 
-# [KibaOS](https://kibaos.com)
+# KibaOS
 ### An OS by Kiba Labs, LLC
 
 <p align="center">
