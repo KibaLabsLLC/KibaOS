@@ -33,7 +33,7 @@ else
   pacman -S --noconfirm --needed \
     base-devel git squashfs-tools libisoburn mtools dosfstools \
     cmake ninja meson \
-    grub \
+    grub syslinux \
     arch-install-scripts \
     openssl curl imagemagick jq \
     python-docutils
@@ -2590,7 +2590,7 @@ iso_application="KibaOS — A friendly OS"
 iso_version="$(date +%Y.%m)"
 install_dir="arch"
 buildmodes=('iso')
-bootmodes=('uefi.grub')
+bootmodes=('bios.syslinux')
 arch="x86_64"
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
@@ -2605,7 +2605,7 @@ PROFILEDEF
 chmod +x "${PROFILE}/profiledef.sh"
 
 if [ "${KIBA_ARCH}" = "aarch64" ]; then
-  sed -i "s/bootmodes=('uefi.grub')/bootmodes=('uefi-aarch64.systemd-boot.esp' 'uefi-aarch64.systemd-boot.eltorito')/" "${PROFILE}/profiledef.sh"
+  sed -i "s/bootmodes=('bios.syslinux')/bootmodes=('uefi-aarch64.systemd-boot.esp' 'uefi-aarch64.systemd-boot.eltorito')/" "${PROFILE}/profiledef.sh"
   sed -i 's/arch="x86_64"/arch="aarch64"/' "${PROFILE}/profiledef.sh"
   sed -i "s/'-Xbcj' 'x86'/'-Xbcj' 'arm64'/" "${PROFILE}/profiledef.sh"
 fi
@@ -2877,6 +2877,31 @@ if [ "${grub_platform}" == "efi" ]; then
     }
 fi
 GRUBCFG
+
+  # BIOS side of the hybrid ISO: mkarchiso's bios.syslinux mode copies every
+  # *.cfg in here to boot/syslinux/ (substituting the %...% placeholders) and
+  # drops isolinux.bin, ldlinux.c32, menu.c32, ... next to them.
+  mkdir -p "${PROFILE}/syslinux"
+  cat > "${PROFILE}/syslinux/syslinux.cfg" << 'SYSLINUXCFG'
+DEFAULT kibaos
+PROMPT 0
+UI menu.c32
+MENU TITLE KibaOS
+MENU HIDDEN
+TIMEOUT 10
+
+LABEL kibaos
+    MENU LABEL KibaOS
+    LINUX /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux
+    INITRD /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
+    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0 plymouth.use-simpledrm=1
+
+LABEL kibaos-safe
+    MENU LABEL KibaOS (safe mode)
+    LINUX /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux
+    INITRD /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
+    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G nomodeset systemd.unit=multi-user.target systemd.log_level=info
+SYSLINUXCFG
 else
   mkdir -p "${PROFILE}/efiboot/loader/entries"
   cat > "${PROFILE}/efiboot/loader/loader.conf" << 'LOADERCONF'
@@ -6715,36 +6740,61 @@ fi
 
 mkarchiso -v -w work -o out "${PROFILE}/"
 
-# ── UEFI-only ISO, assembled by hand ───────────────────────────────────────
-# mkarchiso leaves the full ISO tree in work/iso and the FAT ESP image
-# (containing EFI/BOOT/BOOTx64.EFI + grub) in work/efiboot.img. Re-pack them
-# with the explicit xorriso command; same layout mkarchiso uses for uefi.grub:
-# efiboot.img is the El Torito UEFI image and also an appended GPT ESP, so the
-# ISO boots as a CD and when written to a USB stick.
+# ── BIOS/UEFI hybrid ISO, syslinux for both, assembled by hand ─────────────
+# mkarchiso (bootmodes=bios.syslinux) has produced the ISO tree in work/iso:
+# arch/ (squashfs, kernel, initramfs) and boot/syslinux/ (isolinux + config).
+# BIOS boots isolinux from the ISO; UEFI boots syslinux.efi from a FAT ESP
+# image that is built below and used as the El Torito UEFI image.
 cd "${WORKDIR}"
 rm -rf iso_root kibaos.iso
 mv work/iso iso_root
-rm -f out/*.iso   # mkarchiso's own ISO is replaced by the one below
+rm -f out/*.iso   # mkarchiso's own (differently-laid-out) ISO is not needed
 
-for _f in iso_root/EFI/BOOT/BOOTx64.EFI \
-          iso_root/boot/grub/grub.cfg \
-          work/efiboot.img; do
-  [ -f "${_f}" ] || { echo "ERROR: ${_f} is missing -- cannot build the ISO" >&2; exit 1; }
+for _f in iso_root/boot/syslinux/isolinux.bin \
+          iso_root/boot/syslinux/ldlinux.c32 \
+          iso_root/boot/syslinux/syslinux.cfg \
+          iso_root/arch/boot/x86_64/vmlinuz-linux \
+          iso_root/arch/boot/x86_64/initramfs-linux.img \
+          /usr/lib/syslinux/bios/isohdpfx.bin \
+          /usr/lib/syslinux/efi64/syslinux.efi \
+          /usr/lib/syslinux/efi64/ldlinux.e64 \
+          /usr/lib/syslinux/efi64/menu.c32 \
+          /usr/lib/syslinux/efi64/libutil.c32; do
+  [ -f "${_f}" ] || { echo "ERROR: ${_f} is missing -- cannot build the hybrid ISO" >&2; exit 1; }
 done
 
-xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -joliet -joliet-long -rational-rock \
-  -volid KIBAOS \
-  -partition_offset 16 \
-  -append_partition 2 C12A7328-F81F-11D2-BA4B-00A0C93EC93B work/efiboot.img \
-  -appended_part_as_gpt \
-  -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot \
-  -eltorito-catalog EFI/boot.cat \
-  -no-pad -o kibaos.iso iso_root/
+# ── UEFI side: syslinux.efi in a FAT ESP image ─────────────────────────────
+# syslinux.efi can only read the FAT volume it was started from, not ISO 9660,
+# so the ESP image has to carry its config, modules, kernel and initramfs.
+# The config is the one mkarchiso already generated for BIOS; its paths
+# (/arch/boot/x86_64/...) resolve the same way from the root of the ESP.
+rm -rf esp_root efiboot.img
+mkdir -p esp_root/EFI/BOOT esp_root/arch/boot/x86_64
+cp /usr/lib/syslinux/efi64/syslinux.efi esp_root/EFI/BOOT/BOOTX64.EFI
+cp /usr/lib/syslinux/efi64/ldlinux.e64 /usr/lib/syslinux/efi64/menu.c32 \
+   /usr/lib/syslinux/efi64/libutil.c32 esp_root/EFI/BOOT/
+cp iso_root/boot/syslinux/syslinux.cfg esp_root/EFI/BOOT/syslinux.cfg
+cp iso_root/arch/boot/x86_64/vmlinuz-linux iso_root/arch/boot/x86_64/initramfs-linux.img \
+   esp_root/arch/boot/x86_64/
+_used_kib=$(du -sk esp_root | cut -f1)
+mkfs.fat -C -n ARCHISO_EFI efiboot.img "$(( _used_kib + _used_kib / 10 + 4096 ))"
+mcopy -s -i efiboot.img esp_root/* ::/
+mkdir -p iso_root/EFI/BOOT
+mv efiboot.img iso_root/EFI/BOOT/efiboot.img
+rm -rf esp_root
+
+xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -volid KIBAOS \
+  -eltorito-boot boot/syslinux/isolinux.bin \
+  -eltorito-catalog boot/syslinux/boot.cat \
+  -no-emul-boot -boot-load-size 4 -boot-info-table \
+  -isohybrid-mbr /usr/lib/syslinux/bios/isohdpfx.bin \
+  -eltorito-alt-boot -e EFI/BOOT/efiboot.img -no-emul-boot \
+  -isohybrid-gpt-basdat -o kibaos.iso iso_root/
 
 if [ -f kibaos.iso ]; then
   mv kibaos.iso "${ISO}.iso"
-  # sizes for the build log: the ISO should be a bit larger than the squashfs
-  ls -l iso_root/arch/x86_64/airootfs.sfs "${ISO}.iso"
+  # log both boot entries (BIOS + UEFI) and the hybrid MBR/GPT for the build record
+  xorriso -indev "${ISO}.iso" -report_el_torito plain -report_system_area plain 2>&1 | tail -n 40 || true
   sha256sum "${ISO}.iso" > "${ISO}.iso.sha256"
   echo "╔══════════════════════════════════════╗"
   echo "║  KibaOS build complete!       ║"
