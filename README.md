@@ -9,7 +9,7 @@
 
 # KibaOS
 ### An OS by Kiba Labs, LLC
-
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/25v2C5mvuv)
 <p align="center">
   <img src="https://raw.githubusercontent.com/KibaLabsLLC/Kiba/main/branding/oin-member-2-0-horiz-1.png" alt="OIN Member" width="200">
 </p>
