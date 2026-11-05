@@ -2571,7 +2571,7 @@ KIBAKERNELBUILD
   if KIBA_KERNEL_DIR="${KIBA_KERNEL_DIR}" KIBA_KERNEL_REPO="${KIBA_KERNEL_REPO}" \
      KIBA_PANIC_PATCH_NAME="${KIBA_PANIC_PATCH_NAME}" \
      bash "${KIBA_KERNEL_DIR}/build-kernel.sh"; then
-    KIBA_CUSTOM_KERNEL=1
+    KIBA_CUSTOM_KERNEL=0
     # local repo ahead of [core] so mkarchiso picks our linux / linux-headers
     sed -i '/^\[core\]/i [kiba-local]\nSigLevel = Optional TrustAll\nServer = file://'"${KIBA_KERNEL_REPO}"'\n' \
       "${PROFILE}/pacman.conf"
