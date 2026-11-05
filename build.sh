@@ -166,7 +166,7 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/wallpapers/2C6001BA-2AB5-4B2D-A75D-6224E92E20AC.png?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/wallpapers/assets/wallpapers/1B0D4966-CE4D-465A-B443-31408D79E94D.png?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
