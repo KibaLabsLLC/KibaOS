@@ -2,6 +2,11 @@
   <img src="https://github.com/KibaLabsLLC/KibaOS/blob/a03c02be13838cfc835c67fb6d79b12389203593/assets/wallpapers/1B0D4966-CE4D-465A-B443-31408D79E94D.png?raw=true” width="1024" alt="KibaOS Banner">
 </p>
 
+> [!TIP]
+> Our mascot is named Kiba! He’s a silly racoon.
+
+
+
 > [!IMPORTANT]
 > KibaOS only supports UEFI-based systems. The mobile version only supports Android devices that support TrebleDroid and have TWRP. It cannot be above or below Android 9 or compatibility will fail.
 
