@@ -166,7 +166,7 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/wallpapers/assets/wallpapers/1B0D4966-CE4D-465A-B443-31408D79E94D.png?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/wallpapers/1B0D4966-CE4D-465A-B443-31408D79E94D.png?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
@@ -2020,24 +2020,6 @@ noto-fonts-cjk
 ttf-nunito
 bluez-utils
 go
-switchboard-plug-desktop
-switchboard-plug-display
-switchboard-plug-network
-switchboard-plug-bluetooth
-switchboard-plug-power
-switchboard-plug-datetime
-switchboard-plug-keyboard
-switchboard-plug-mouse-touchpad
-switchboard-plug-sound
-switchboard-plug-about
-switchboard-plug-applications
-switchboard-plug-locale
-switchboard-plug-notifications
-switchboard
-switchboard-plug-printers
-switchboard-plug-security-privacy
-switchboard-plug-sharing
-switchboard-plug-user-accounts
 sof-firmware
 thermald
 xorg-xwayland
