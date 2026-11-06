@@ -166,13 +166,13 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/wallpapers/1B0D4966-CE4D-465A-B443-31408D79E94D.png?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/21f9cbdcd8657ee8c6a02685b7a93507c3dc1ac2/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
-  curl -fL --retry 5 --retry-delay 3 -o "${_root}/usr/share/kibaos/wallpaper.jpg" \
+  curl -fL --retry 5 --retry-delay 3 -o "${_root}/usr/share/kibaos/wallpaper.webp" \
     "${KIBA_WALLPAPER_URL}" || \
-    magick -size 1080x2400 gradient:"#003f5c-#0099cc" "${_root}/usr/share/kibaos/wallpaper.jpg"
+    magick -size 1080x2400 gradient:"#003f5c-#0099cc" "${_root}/usr/share/kibaos/wallpaper.webp"
 
   curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-boot-splash-raw.png "${KIBA_BOOT_SPLASH_URL}" || true
   if [ -f /tmp/kiba-boot-splash-raw.png ] && file /tmp/kiba-boot-splash-raw.png | grep -qi image; then
