@@ -166,13 +166,19 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/21f9cbdcd8657ee8c6a02685b7a93507c3dc1ac2/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b86af713bd0b996349c441d3d75e90addf1e9561/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
-  curl -fL --retry 5 --retry-delay 3 -o "${_root}/usr/share/kibaos/wallpaper.webp" \
-    "${KIBA_WALLPAPER_URL}" || \
-    magick -size 1080x2400 gradient:"#003f5c-#0099cc" "${_root}/usr/share/kibaos/wallpaper.webp"
+  # Source is a WebP; convert to a real JPEG (cover-crop to phone aspect).
+  if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${KIBA_WALLPAPER_URL}" && \
+     magick /tmp/kiba-wallpaper-src -resize 1080x2400^ -gravity center -extent 1080x2400 -quality 92 \
+       "${_root}/usr/share/kibaos/wallpaper.jpg"; then
+    :
+  else
+    magick -size 1080x2400 gradient:"#003f5c-#0099cc" "${_root}/usr/share/kibaos/wallpaper.jpg"
+  fi
+  rm -f /tmp/kiba-wallpaper-src
 
   curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-boot-splash-raw.png "${KIBA_BOOT_SPLASH_URL}" || true
   if [ -f /tmp/kiba-boot-splash-raw.png ] && file /tmp/kiba-boot-splash-raw.png | grep -qi image; then
@@ -2012,7 +2018,6 @@ curl
 wget
 git
 mesa
-webp-pixbuf-loader
 power-profiles-daemon
 xdg-user-dirs
 noto-fonts
@@ -2395,9 +2400,9 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
-WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/c11612bb0a634b1997f7a1f94a5ba79b45d561ea/assets/wallpapers/FAF8064B-B17D-4331-9EF8-06E325EEAE4F.png?raw=true"
+WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b86af713bd0b996349c441d3d75e90addf1e9561/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
 BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
-WALLPAPER_DEST="/usr/share/kibaos/wallpaper.webp"
+WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
 LOGO_256="/usr/share/kibaos/logo-256.png"
 LOGO_96="/usr/share/kibaos/logo-96.png"
@@ -2418,8 +2423,15 @@ if [ -f "${BOOT_SPLASH_RAW}" ] && file "${BOOT_SPLASH_RAW}" | grep -qi 'image'; 
   rm -f "${BOOT_SPLASH_RAW}"
 fi
 
-curl -fL --retry 5 --retry-delay 3 -o "${WALLPAPER_DEST}" "${WALLPAPER_URL}" || \
+# Source is a WebP; convert to a real JPEG so every consumer (GDM, gsettings,
+# pcmanfm-qt, SDDM) can read it without a webp loader.
+if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${WALLPAPER_URL}" && \
+   magick /tmp/kiba-wallpaper-src -quality 92 "${WALLPAPER_DEST}"; then
+  :
+else
   magick -size 1920x1080 gradient:"#003f5c-#0099cc" "${WALLPAPER_DEST}"
+fi
+rm -f /tmp/kiba-wallpaper-src
 
 if [ -f "${LOGO_SRC}" ] && file "${LOGO_SRC}" | grep -qi 'image'; then
   magick "${LOGO_SRC}" -filter Lanczos -resize 256x256 "${LOGO_256}"
@@ -4447,7 +4459,7 @@ cat > /usr/local/bin/kibaos-desktop-icons << 'DESKTOPICONSWRAP'
 pcmanfm-qt --desktop &
 PID=$!
 sleep 2
-pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.webp
+pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.jpg
 wait "$PID"
 DESKTOPICONSWRAP
 chmod +x /usr/local/bin/kibaos-desktop-icons
