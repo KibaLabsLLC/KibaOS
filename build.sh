@@ -166,7 +166,7 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b86af713bd0b996349c441d3d75e90addf1e9561/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/https://github.com/KibaLabsLLC/KibaOS/blob/b217549f809a67c8163e1504c23c735321bd102c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
