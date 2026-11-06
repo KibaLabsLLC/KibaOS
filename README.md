@@ -229,7 +229,7 @@ KibaOS includes **Windows Workspace** — the reverse of what its name implies: 
 
 The first time you open **"Run Windows Workspace"** from the app menu, KibaOS downloads and installs Windows automatically in the background — no product key or install disc needed. This takes 15-20 minutes and requires about 30 GB of free disk space.
 
-After that, opening **"Run Windows Workspace"** brings up the full Windows desktop, full-screen. Press `Super+K` at any time to switch back to your KibaOS desktop without closing Windows — everything stays running in the background, ready when you switch back.
+After that, opening **"Run Windows Workspace"** brings up the full Windows desktop, full-screen. Everything stays running in the background, ready when you switch back.
 
 > [!TIP]
 > Not every Windows program will work perfectly — this depends on the program itself, not on KibaOS. Windows Workspace works best with at least 4 GB of RAM allocated to the Windows environment on top of what KibaOS itself is using.
