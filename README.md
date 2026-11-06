@@ -25,7 +25,7 @@
 **A friendly, ready-to-use Linux desktop, built for people switching to simple.**
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/KibaLabsLLC/Kiba/build.yml?branch=main&label=Build&style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/KibaLabsLLC/Kiba/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-3DDC97?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#license)
+[![License: GPL3.0](https://img.shields.io/badge/License-GPL3.0-3DDC97?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#license)
 [![SourceForge](https://img.shields.io/sourceforge/dt/kibaos?style=for-the-badge&color=orange&logo=sourceforge&logoColor=white)](https://sourceforge.net/projects/kibaos/)
 
 <img src="https://img.shields.io/github/repo-size/KibaLabsLLC/Kiba?style=flat-square&color=blue" alt="Repo Size">
