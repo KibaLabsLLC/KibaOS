@@ -2012,6 +2012,7 @@ curl
 wget
 git
 mesa
+webp-pixbuf-loader
 power-profiles-daemon
 xdg-user-dirs
 noto-fonts
@@ -2396,7 +2397,7 @@ systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target 
 
 WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/c11612bb0a634b1997f7a1f94a5ba79b45d561ea/assets/wallpapers/FAF8064B-B17D-4331-9EF8-06E325EEAE4F.png?raw=true"
 BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
-WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
+WALLPAPER_DEST="/usr/share/kibaos/wallpaper.webp"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
 LOGO_256="/usr/share/kibaos/logo-256.png"
 LOGO_96="/usr/share/kibaos/logo-96.png"
@@ -4446,7 +4447,7 @@ cat > /usr/local/bin/kibaos-desktop-icons << 'DESKTOPICONSWRAP'
 pcmanfm-qt --desktop &
 PID=$!
 sleep 2
-pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.jpg
+pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.webp
 wait "$PID"
 DESKTOPICONSWRAP
 chmod +x /usr/local/bin/kibaos-desktop-icons
