@@ -2209,7 +2209,7 @@ menuentry "KibaOS" --class kibaos {
 }
 
 menuentry "KibaOS (safe mode)" --class kibaos {
-    linux /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G nomodeset systemd.unit=multi-user.target systemd.log_level=info
+    linux /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G systemd.unit=multi-user.target systemd.log_level=info
     initrd /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
 }
 
@@ -2242,7 +2242,7 @@ LABEL kibaos-safe
     MENU LABEL KibaOS (safe mode)
     LINUX /%INSTALL_DIR%/boot/%ARCH%/vmlinuz-linux
     INITRD /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
-    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G nomodeset systemd.unit=multi-user.target systemd.log_level=info
+    APPEND archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G systemd.unit=multi-user.target systemd.log_level=info
 SYSLINUXCFG
 else
   mkdir -p "${PROFILE}/efiboot/loader/entries"
@@ -2260,7 +2260,7 @@ ENTRYCONF
 title   KibaOS (safe mode)
 linux   /%INSTALL_DIR%/boot/%ARCH%/Image
 initrd  /%INSTALL_DIR%/boot/%ARCH%/initramfs-linux.img
-options archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G nomodeset systemd.unit=multi-user.target systemd.log_level=info
+options archisobasedir=%INSTALL_DIR% archisolabel=%ARCHISO_LABEL% cow_spacesize=4G systemd.unit=multi-user.target systemd.log_level=info
 ENTRYCONF
 fi
 
@@ -3812,11 +3812,42 @@ DEAD_SDDM_THEME_BLOCK
 
 mkdir -p /usr/share/wayland-sessions
 rm -rf /usr/share/wayland-sessions/budgie-desktop.desktop
+cat > /usr/local/bin/kibaos-session << 'KIBASESSION'
+#!/bin/bash
+# Runs labwc + budgie and restarts it if it crashes shortly after starting,
+# so a crash loop does not bounce GDM back to the greeter (autologin is
+# only attempted once per boot). A clean exit (logout) ends the session.
+MAX_QUICK_CRASHES=5     # give up after this many crashes in a row
+QUICK_SECS=15           # a run shorter than this counts as a crash
+crashes=0
+while :; do
+  start=$(date +%s)
+  /usr/bin/labwc --session=/usr/bin/budgie-desktop
+  rc=$?
+  run=$(( $(date +%s) - start ))
+  # clean exit or terminated by logout/shutdown
+  [ "$rc" -eq 0 ] && exit 0
+  [ "$rc" -eq 143 ] && exit 0
+  logger -t kibaos-session "labwc exited rc=${rc} after ${run}s"
+  if [ "$run" -lt "$QUICK_SECS" ]; then
+    crashes=$((crashes + 1))
+  else
+    crashes=0
+  fi
+  if [ "$crashes" -ge "$MAX_QUICK_CRASHES" ]; then
+    logger -t kibaos-session "labwc crash loop (${crashes}x), giving up"
+    exit "$rc"
+  fi
+  sleep 1
+done
+KIBASESSION
+chmod +x /usr/local/bin/kibaos-session
+
 cat > /usr/share/wayland-sessions/budgie-desktop.desktop << 'WFSESSION'
 [Desktop Entry]
 Name=Budgie Desktop on labwc
 Comment=This session logs you into the Budgie Desktop
-Exec=/usr/bin/labwc --session=/usr/bin/budgie-desktop
+Exec=/usr/local/bin/kibaos-session
 Icon=
 Type=Application
 DesktopNames=Budgie;GNOME
