@@ -6,7 +6,7 @@
 </p>
 
 > [!TIP]
-> Our mascot is named Kiba! He’s a silly racoon.
+> Our mascot is named Kiba! He’s a silly racoon. He **loves** Blueberries.
 
 
 
