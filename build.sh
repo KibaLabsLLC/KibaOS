@@ -3911,6 +3911,14 @@ grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
     echo 'session    optional     pam_gnome_keyring.so auto_start'
 } > /etc/pam.d/gdm-autologin
 
+# 1b. GDM's udev rule (61-gdm.rules) runs /usr/lib/gdm-disable-wayland on
+#     NVIDIA / virtual GPUs, which writes WaylandEnable=false to
+#     /run/gdm/custom.conf (overrides /etc/gdm/custom.conf). KibaOS only has a
+#     Wayland session (labwc), so GDM then cannot find the autologin session
+#     and falls back to the greeter. Mask the rule (ArchWiki GDM page).
+mkdir -p /etc/udev/rules.d
+ln -sf /dev/null /etc/udev/rules.d/61-gdm.rules
+
 # 2. liveuser must not be locked or expired, or PAM account stage rejects it.
 passwd -u liveuser 2>/dev/null || true
 chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
@@ -3922,6 +3930,8 @@ cat > /usr/local/bin/kibaos-live-autologin << 'LIVEAUTOLOGIN'
 # Only act on the live ISO (archiso mounts /run/archiso) and only while the
 # live user exists.
 [ -d /run/archiso ] || exit 0
+# Drop any runtime override that disabled Wayland (see gdm-disable-wayland).
+rm -f /run/gdm/custom.conf
 id liveuser >/dev/null 2>&1 || exit 0
 if ! grep -qs '^AutomaticLogin=liveuser' /etc/gdm/custom.conf; then
   mkdir -p /etc/gdm
