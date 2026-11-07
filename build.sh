@@ -3095,42 +3095,38 @@ cat > /etc/gtk-3.0/gtk.css << 'GTK3PANEL'
  * superseded by that native motion. Verify visually.
  * ════════════════════════════════════════════════════════════════════════ */
 
-/* === KibaOS: Floating rounded-rectangle panel === */
+/* === KibaOS: Floating white squircle panel ===
+ * GTK3 CSS can't draw a true superellipse, so the "squircle" is a
+ * rounded rectangle with a radius of ~38% of the 42px panel height (16px) --
+ * the same 38% VibePanel's top bar uses, so both bars match. White fill with
+ * dark text/icons; the soft shadow keeps it readable on light wallpapers. */
 .budgie-panel {
     margin: 0 120px 8px 120px;
-    /* Square corners -- no rounding at all. */
-    border-radius: 0;
-    /* Frosted glass, dark: semi-transparent navy with a faint top-down
-     * light gradient and a bright hairline border for the "glass edge".
-     * GTK3 CSS has NO backdrop-filter, so the actual blur-behind can't be
-     * done from here -- it needs compositor support (KWin's Blur effect).
-     * Under labwc this renders as translucent tinted glass, not blurred. */
-    background-image: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-    background-color: rgba(20, 28, 44, 0.55);
-    color: #e8eef5;
-    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 16px;
+    background-image: none;
+    background-color: #ffffff;
+    color: #1b1f27;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.22),
-        0 8px 32px rgba(0, 0, 0, 0.35),
-        0 2px 8px  rgba(0, 0, 0, 0.20);
+        0 8px 28px rgba(0, 0, 0, 0.22),
+        0 2px 6px  rgba(0, 0, 0, 0.12);
     padding: 0 10px;
 }
 .budgie-panel .budgie-applet-button,
 .budgie-panel button.flat {
-    border-radius: 0;
+    border-radius: 12px;
     background: transparent;
-    color: #e8eef5;
+    color: #1b1f27;
     transition: background-color 220ms cubic-bezier(0.5, 0, 0.75, 0); /* fade out */
 }
 .budgie-panel .budgie-applet-button:hover,
 .budgie-panel button.flat:hover {
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(0, 0, 0, 0.07);
     transition: background-color 150ms cubic-bezier(0.22, 1, 0.36, 1); /* settle in */
 }
 .budgie-panel .budgie-applet-button:active,
 .budgie-panel button.flat:active {
-    background-color: rgba(0, 153, 204, 0.35);
+    background-color: rgba(0, 153, 204, 0.25);
     transition: background-color 90ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .budgie-panel .launcher:checked,
@@ -5297,15 +5293,24 @@ KANDODESKTOP
   cat > /usr/share/kibaos/vibepanel-config.toml << 'VPCONFIG'
 [bar]
 position = "top"
-size = 32
-border_radius = 0
-background_opacity = 0.55
+size = 36
+# Floating white squircle: border_radius is a % of bar height, so 38% matches
+# the bottom Budgie panel (16px radius on a 42px bar). Full pill would be 50.
+screen_margin = 8
+border_radius = 38
+background_color = "#ffffff"
+background_opacity = 1.0
 
 [widgets]
 left = ["cpu"]
 right = ["tray", "quick_settings", "battery"]
-border_radius = 0
+border_radius = 38
 background_opacity = 0.0
+
+[theme]
+# Light mode so text/icons are dark on the white bar.
+mode = "light"
+accent = "#0099cc"
 
 [osd]
 enabled = false
