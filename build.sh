@@ -166,7 +166,7 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/https://github.com/KibaLabsLLC/KibaOS/blob/b217549f809a67c8163e1504c23c735321bd102c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/784ae57c6b8cc0dced3bad2421dcff997935b01c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
@@ -2400,7 +2400,7 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
-WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b86af713bd0b996349c441d3d75e90addf1e9561/assets/wallpapers/889977183_1571228974774321_3743391989302666542_n.webp?raw=true"
+WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/784ae57c6b8cc0dced3bad2421dcff997935b01c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
 BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
@@ -3891,6 +3891,73 @@ Session=budgie-desktop
 XSession=budgie-desktop
 SystemAccount=false
 LIVEUSERACCOUNTS
+chmod 644 /etc/gdm/custom.conf
+chmod 600 /var/lib/AccountsService/users/liveuser
+chown root:root /var/lib/AccountsService/users/liveuser
+
+# ── Autologin hardening ─────────────────────────────────────────────────────
+# 1. Known-good PAM stack for GDM autologin (pam_shells needs bash in
+#    /etc/shells, pam_nologin must not trip, no password prompt).
+grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
+{
+  echo '#%PAM-1.0'
+  echo 'auth       required     pam_shells.so'
+  echo 'auth       requisite    pam_nologin.so'
+  echo 'auth       required     pam_permit.so'
+  echo 'account    include      system-local-login'
+  echo 'password   required     pam_deny.so'
+  echo 'session    include      system-local-login'
+  [ -e /usr/lib/security/pam_gnome_keyring.so ] && \
+    echo 'session    optional     pam_gnome_keyring.so auto_start'
+} > /etc/pam.d/gdm-autologin
+
+# 2. liveuser must not be locked or expired, or PAM account stage rejects it.
+passwd -u liveuser 2>/dev/null || true
+chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
+
+# 3. Re-assert the config on every boot before GDM starts, in case anything
+#    (package update, OEM leftovers) removed or replaced custom.conf.
+cat > /usr/local/bin/kibaos-live-autologin << 'LIVEAUTOLOGIN'
+#!/bin/bash
+# Only act on the live ISO (archiso mounts /run/archiso) and only while the
+# live user exists.
+[ -d /run/archiso ] || exit 0
+id liveuser >/dev/null 2>&1 || exit 0
+if ! grep -qs '^AutomaticLogin=liveuser' /etc/gdm/custom.conf; then
+  mkdir -p /etc/gdm
+  printf '[daemon]\nAutomaticLoginEnable=true\nAutomaticLogin=liveuser\nWaylandEnable=true\n' > /etc/gdm/custom.conf
+  chmod 644 /etc/gdm/custom.conf
+  logger -t kibaos-live-autologin "custom.conf was missing autologin; rewrote it"
+fi
+mkdir -p /var/lib/AccountsService/users
+if ! grep -qs '^Session=budgie-desktop' /var/lib/AccountsService/users/liveuser; then
+  printf '[User]\nSession=budgie-desktop\nXSession=budgie-desktop\nSystemAccount=false\n' > /var/lib/AccountsService/users/liveuser
+  chmod 600 /var/lib/AccountsService/users/liveuser
+fi
+passwd -u liveuser >/dev/null 2>&1 || true
+exit 0
+LIVEAUTOLOGIN
+chmod +x /usr/local/bin/kibaos-live-autologin
+cat > /etc/systemd/system/kibaos-live-autologin.service << 'LIVEAUTOLOGINSVC'
+[Unit]
+Description=Ensure GDM autologin for the KibaOS live user
+Before=gdm.service display-manager.service
+After=local-fs.target systemd-sysusers.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kibaos-live-autologin
+
+[Install]
+WantedBy=graphical.target
+LIVEAUTOLOGINSVC
+systemctl enable kibaos-live-autologin.service
+
+# 4. Fail the build loudly if the pieces autologin depends on are missing.
+for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/gdm.service /etc/pam.d/gdm-autologin; do
+  [ -e "$_f" ] || { echo "ERROR: autologin prerequisite missing: $_f" >&2; exit 1; }
+done
+id gdm >/dev/null 2>&1 || echo "WARNING: gdm user missing at build time (created by sysusers at boot)" >&2
 mkdir -p /var/lib/gdm /var/log/gdm
 chown gdm:gdm /var/lib/gdm /var/log/gdm 2>/dev/null || true
 chmod 750 /var/lib/gdm
