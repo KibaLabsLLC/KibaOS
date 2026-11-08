@@ -205,7 +205,7 @@ Copyright=2026, Kiba Labs, LLC
 License=GPLv3
 Type=sddm-theme
 Version=1.0
-Website=https://github.com/WolfTech-Innovations/Kiba
+Website=https://kibaos.com
 MainScript=Main.qml
 Font=Nunito
 QuickVersion=6
@@ -1984,10 +1984,8 @@ ID=kibaos
 BUILD_ID=rolling
 VENDOR_NAME="Kiba Labs"
 ANSI_COLOR="1;36"
-HOME_URL="https://github.com/WolfTech-Innovations/Kiba"
-DOCUMENTATION_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/WIKI.md"
-SUPPORT_URL="https://github.com/WolfTech-Innovations/Kiba/issues"
-BUG_REPORT_URL="https://github.com/WolfTech-Innovations/Kiba/issues"
+HOME_URL="https://kibaos.com"
+DOCUMENTATION_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/WIKI.md"
 LOGO=kibaos
 OSRELEASE
 
@@ -2401,7 +2399,7 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
 WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/784ae57c6b8cc0dced3bad2421dcff997935b01c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
-BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
+BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
 LOGO_256="/usr/share/kibaos/logo-256.png"
@@ -5239,45 +5237,6 @@ JOPLINDESKTOP
   rm -rf "${JOPLIN_TMP}"
 ) && echo "=== Joplin installed ===" \
   || echo "!! Joplin install failed -- continuing without it" >&2
-
-(
-  set -e
-  KANDO_TAG=$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/kando-menu/kando/releases/latest)
-  KANDO_TAG="${KANDO_TAG##*/}"
-  KANDO_URL="https://github.com/kando-menu/kando/releases/download/${KANDO_TAG}/Kando-${KANDO_TAG#v}-x86_64.AppImage"
-  KANDO_TMP="/tmp/kando-appimage"
-  rm -rf "${KANDO_TMP}" && mkdir -p "${KANDO_TMP}" && cd "${KANDO_TMP}"
-  curl -fL --retry 3 -o Kando.AppImage "${KANDO_URL}"
-  chmod +x Kando.AppImage
-  ./Kando.AppImage --appimage-extract >/dev/null
-  rm -rf /opt/kando && mv squashfs-root /opt/kando
-  chmod -R a+rX /opt/kando
-  for _sz in 512 256 128 64 48; do
-    _ic="/opt/kando/usr/share/icons/hicolor/${_sz}x${_sz}/apps/kando.png"
-    [ -f "${_ic}" ] && install -Dm644 "${_ic}" "/usr/share/icons/hicolor/${_sz}x${_sz}/apps/kando.png"
-  done
-  cat > /usr/bin/kando << 'KANDOLAUNCH'
-#!/bin/sh
-exec /opt/kando/AppRun --no-sandbox "$@"
-KANDOLAUNCH
-  chmod 755 /usr/bin/kando
-  cat > /usr/share/applications/kando.desktop << 'KANDODESKTOP'
-[Desktop Entry]
-Type=Application
-Name=Kando
-Comment=The Cross-Platform Pie Menu
-Exec=kando %U
-Icon=kando
-Terminal=false
-Categories=Utility;
-StartupWMClass=Kando
-KANDODESKTOP
-  mkdir -p /etc/xdg/autostart
-  cp /usr/share/applications/kando.desktop /etc/xdg/autostart/kando.desktop
-  rm -rf "${KANDO_TMP}"
-) && echo "=== Kando installed ===" \
-  || echo "!! Kando install failed -- continuing without it" >&2
-
 (
   set -e
   VP_TAG=$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/prankstr/vibepanel/releases/latest)
