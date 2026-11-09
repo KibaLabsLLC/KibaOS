@@ -2139,9 +2139,7 @@ gst-plugins-bad
 plymouth
 squashfs-tools
 
-freerdp
-docker
-docker-compose
+virtiofsd
 dialog
 iproute2
 openbsd-netcat
@@ -2601,8 +2599,8 @@ public class KibaWinAppsSetup : Adw.Application {
     // pointed at kibaos-winapps-setup instead of kibaos-oobe-backend/
     // kibaos-oem-finish.sh, and spawned WITHOUT a sudo/pkexec prefix --
     // unlike those two, this backend has to run as the actual invoking
-    // user (it writes under $HOME/.config/winapps) and elevates only the
-    // specific docker/systemd calls it needs, itself, inline, via its
+    // user (LSW keeps its VM in the user's libvirt session) and elevates only the
+    // one privileged read it needs (the stashed account password), itself, via its
     // own pkexec calls. Wrapping the whole thing in sudo here would hand
     // it root's $HOME instead and break that.
     // ══════════════════════════════════════════════════════════════════
@@ -2795,7 +2793,7 @@ echo "${HOSTNAME_VAL}" > /etc/hostname
 sed -i "s/127.0.1.1.*/127.0.1.1\t${HOSTNAME_VAL}.localdomain ${HOSTNAME_VAL}/" /etc/hosts 2>/dev/null || true
 
 progress 65 "Creating your account..."
-useradd -m -G wheel,audio,video,input,network,storage,power,docker -s /bin/bash "${USERNAME_VAL}" \
+useradd -m -G wheel,audio,video,input,network,storage,power -s /bin/bash "${USERNAME_VAL}" \
   || fail "useradd failed"
 echo "${USERNAME_VAL}:${PASSWORD_VAL}" | chpasswd || fail "chpasswd failed"
 
@@ -2830,7 +2828,7 @@ set -e
 mkdir -p /etc/kibaos
 touch /etc/kibaos/oem-pending
 
-id oem &>/dev/null || useradd -m -G wheel,audio,video,input,network,storage,power,docker -s /bin/bash oem
+id oem &>/dev/null || useradd -m -G wheel,audio,video,input,network,storage,power -s /bin/bash oem
 passwd -d oem 2>/dev/null || true
 
 mkdir -p /etc/gdm
@@ -2964,19 +2962,45 @@ gtk-update-icon-cache -f /usr/share/icons/Numix-Circle-Light 2>/dev/null || true
 rm -rf "${NUMIX_ICONS_BUILD}"
 echo "=== Icon theme: Numix Circle installed ==="
 
-WINAPPS_SRC="/opt/kibaos/winapps-src"
-rm -rf "${WINAPPS_SRC}"
-mkdir -p "$(dirname "${WINAPPS_SRC}")"
-git clone --depth 1 https://github.com/winapps-org/winapps.git "${WINAPPS_SRC}"
-chmod +x "${WINAPPS_SRC}/setup.sh" "${WINAPPS_SRC}/bin/"* 2>/dev/null || true
-echo "=== WinApps: vendored $(git -C "${WINAPPS_SRC}" rev-parse --short HEAD) ==="
+# ── Windows Workspace: LSW (Linux Subsystem for Windows) ──────────────
+# https://github.com/acceleration3/linux-subsystem-windows
+# Installed from the upstream release tarball (same payload as the AUR
+# lsw-bin package -- makepkg can't run as root in this chroot). Pinned and
+# checksummed; to bump, take pkgver/sha256sums from
+# packaging/aur/PKGBUILD at the new tag. x86-64 only (upstream limitation).
+LSW_VERSION="0.2.3"
+LSW_SHA256="e091f5ece29fb100a3a4cf95f620e18dbb7116a267dffcbc481eeed7dce24e8e"
+if [ "$(uname -m)" = "x86_64" ]; then
+  # Runtime deps from lsw-bin's PKGBUILD (version constraints dropped;
+  # vulkan-driver is virtual, so name the AMD/Intel ICDs explicitly --
+  # NVIDIA users get theirs from nvidia-utils).
+  pacman -S --noconfirm --needed \
+    qt6-base libvirt libisofs libvncserver wimlib hivex \
+    spdlog fmt zlib wayland libxkbcommon libdrm \
+    vulkan-icd-loader ocl-icd libglvnd libpipewire \
+    glib2 pixman gnutls libpng libjpeg-turbo libsasl snappy lzo \
+    zstd numactl keyutils libslirp libbpf \
+    libelf libcbor systemd-libs libseccomp dtc pam fuse3 \
+    libaio liburing capstone libusb \
+    edk2-ovmf qemu-img 7zip curl hicolor-icon-theme sdl3 \
+    vulkan-radeon vulkan-intel \
+    virtiofsd
 
-mkdir -p /etc/modules-load.d
-cat > /etc/modules-load.d/kibaos-winapps.conf << 'IPTABLESMODS'
-ip_tables
-iptable_nat
-IPTABLESMODS
-echo "=== WinApps: ip_tables/iptable_nat set to load at boot ==="
+  LSW_TARBALL="/tmp/lsw-${LSW_VERSION}-x86_64.tar.zst"
+  curl -fL --retry 5 --retry-delay 5 -o "${LSW_TARBALL}" \
+    "https://github.com/acceleration3/linux-subsystem-windows/releases/download/v${LSW_VERSION}/lsw-${LSW_VERSION}-x86_64.tar.zst"
+  echo "${LSW_SHA256}  ${LSW_TARBALL}" | sha256sum -c -
+  tar --zstd -xf "${LSW_TARBALL}" -C / --no-same-owner usr
+  rm -f "${LSW_TARBALL}"
+  # Same rename lsw-bin's package() does, so license files don't collide.
+  [ -d /usr/share/licenses/lsw ] && mv /usr/share/licenses/lsw /usr/share/licenses/lsw-bin
+  gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
+  update-desktop-database /usr/share/applications 2>/dev/null || true
+  test -x /usr/bin/lsw-manager
+  echo "=== LSW: installed v${LSW_VERSION} ($(/usr/bin/lsw-manager --help >/dev/null 2>&1 && echo ok || echo 'help check skipped')) ==="
+else
+  echo "=== LSW: skipped -- upstream is x86-64 only, Windows Workspace unavailable on $(uname -m) ==="
+fi
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
@@ -4498,7 +4522,7 @@ chmod +x /usr/local/bin/kibaos-firstboot-groups
 
 cat > /etc/systemd/system/kibaos-firstboot-groups.service << 'FIRSTBOOTSVC'
 [Unit]
-Description=KibaOS first-boot group catch-up (docker, etc.)
+Description=KibaOS first-boot group catch-up
 After=systemd-sysusers.service
 Wants=systemd-sysusers.service
 ConditionPathExists=/etc/kibaos/pending-user-groups
@@ -4728,21 +4752,28 @@ NoDisplay=false
 X-GNOME-Autostart-enabled=true
 OEMAUTOCFG
 
-install -Dm644 "${WINAPPS_SRC}/install/windows.svg" \
+install -Dm644 /usr/share/icons/hicolor/scalable/apps/lsw-manager.svg \
   /usr/share/icons/hicolor/scalable/apps/kibaos-winapps.svg 2>/dev/null || true
 gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
 
 cat > /usr/local/bin/kibaos-winapps-workspace << 'WORKSPACE'
 #!/bin/bash
-CONF_DIR="${HOME}/.config/winapps"
-COMPOSE_FILE="${CONF_DIR}/compose.yaml"
-KWIN_SCRIPT_NAME="kibaos-winapps-workspace-tempbind"
-KWIN_SCRIPT_FILE="/tmp/${KWIN_SCRIPT_NAME}.js"
-KWIN_SCRIPT_ID_FILE="/tmp/${KWIN_SCRIPT_NAME}.id"
-HINT_MARKER="${HOME}/.config/kibaos/.winapps-workspace-hint-shown"
-WIN_URL="http://localhost:8006"
+# Windows Workspace launcher (LSW). Each Windows app gets its own native
+# window, so there's no kiosk window or minimize hotkey any more -- this
+# just makes sure a VM exists, then opens the LSW manager (which forwards
+# to the running instance over D-Bus if one is already up).
 
-if [ ! -f "${COMPOSE_FILE}" ]; then
+vm_defined() {
+  virsh -c qemu:///session list --all --name 2>/dev/null | grep -q '[^[:space:]]'
+}
+
+if ! command -v lsw-manager >/dev/null 2>&1; then
+  zenity --error --title="Windows Workspace" --width=420 \
+    --text="Windows Workspace isn't available on this system. It needs a 64-bit (x86-64) PC with hardware virtualization." 2>/dev/null
+  exit 1
+fi
+
+if ! vm_defined; then
   zenity --question --title="Set Up Windows Workspace?" \
     --text="Windows Workspace lets you run Windows programs -- like Word, Excel, or other apps that don't have a Linux version -- right alongside everything else in KibaOS.\n\nWant to set it up now? It takes about 15–20 minutes, and you won't need to do anything but wait." \
     --ok-label="Yes, Let's Do It" --cancel-label="Maybe Later" 2>/dev/null
@@ -4752,92 +4783,7 @@ if [ ! -f "${COMPOSE_FILE}" ]; then
   exit 1
 fi
 
-EXISTING_WIN="$(xdotool search --class "^chromium.*8006$|^Chromium.*8006$" 2>/dev/null | head -n1)"
-if [ -z "${EXISTING_WIN}" ]; then
-  EXISTING_WIN="$(xdotool search --name "localhost:8006" 2>/dev/null | head -n1)"
-fi
-if [ -n "${EXISTING_WIN}" ]; then
-  xdotool windowactivate "${EXISTING_WIN}" 2>/dev/null
-  exit 0
-fi
-
-KEYBIND_ADDED=0
-add_keybind() {
-  if [ ! -f "${KWIN_SCRIPT_ID_FILE}" ]; then
-    cat > "${KWIN_SCRIPT_FILE}" << 'KWINTEMPBIND'
-registerShortcut("KibaWinAppsWorkspaceMinimize", "Minimize Windows Workspace", "Meta+K", function() {
-  if (workspace.activeWindow) {
-    workspace.activeWindow.minimized = true;
-  }
-});
-KWINTEMPBIND
-    SCRIPT_ID="$(qdbus org.kde.KWin /Scripting loadScript "${KWIN_SCRIPT_FILE}" "${KWIN_SCRIPT_NAME}" 2>/dev/null)"
-    if [ -n "${SCRIPT_ID}" ]; then
-      qdbus "org.kde.KWin" "/Scripting/Script${SCRIPT_ID}" run 2>/dev/null || \
-        qdbus "org.kde.KWin" "/${SCRIPT_ID}" run 2>/dev/null || true
-      echo "${SCRIPT_ID}" > "${KWIN_SCRIPT_ID_FILE}"
-      KEYBIND_ADDED=1
-    fi
-  fi
-}
-
-cleanup() {
-  if [ "${KEYBIND_ADDED}" -eq 1 ] && [ -f "${KWIN_SCRIPT_ID_FILE}" ]; then
-    SCRIPT_ID="$(cat "${KWIN_SCRIPT_ID_FILE}" 2>/dev/null)"
-    if [ -n "${SCRIPT_ID}" ]; then
-      qdbus "org.kde.KWin" /Scripting unloadScript "${KWIN_SCRIPT_NAME}" 2>/dev/null || true
-    fi
-    rm -f "${KWIN_SCRIPT_ID_FILE}" "${KWIN_SCRIPT_FILE}"
-  fi
-}
-trap cleanup EXIT
-
-ALREADY_UP=0
-if curl -fsS -o /dev/null --max-time 2 "${WIN_URL}" 2>/dev/null; then
-  ALREADY_UP=1
-fi
-
-if [ "${ALREADY_UP}" -eq 0 ]; then
-  ( cd "${CONF_DIR}" && pkexec docker compose up -d ) >/dev/null 2>&1 &
-  COMPOSE_PID=$!
-
-  (
-    for i in $(seq 1 60); do
-      curl -fsS -o /dev/null --max-time 1 "${WIN_URL}" 2>/dev/null && break
-      sleep 1
-      echo "$((i * 100 / 60))"
-    done
-    echo "100"
-  ) | zenity --progress --title="Windows Workspace" --text="Just a moment, opening your Windows Workspace…" \
-      --pulsate --auto-close --no-cancel --width=360 2>/dev/null
-
-  wait "${COMPOSE_PID}"
-  COMPOSE_STATUS=$?
-
-  if ! curl -fsS -o /dev/null --max-time 2 "${WIN_URL}" 2>/dev/null; then
-    if [ "${COMPOSE_STATUS}" -ne 0 ]; then
-      zenity --error --title="Windows Workspace" --width=420 \
-        --text="Hmm, your Windows Workspace didn't start. Give it another try -- if it keeps happening, open 'Set Up Windows Workspace' from the app menu and we'll get it sorted." 2>/dev/null
-    else
-      zenity --error --title="Windows Workspace" --width=420 \
-        --text="Your Windows Workspace is taking a little longer than usual to wake up. Nothing's broken -- just give it another moment, then try 'Open Windows Workspace' again." 2>/dev/null
-    fi
-    exit 1
-  fi
-fi
-
-add_keybind
-
-if [ "${KEYBIND_ADDED}" -eq 1 ] && [ ! -f "${HINT_MARKER}" ]; then
-  mkdir -p "$(dirname "${HINT_MARKER}")"
-  touch "${HINT_MARKER}"
-  notify-send -i kibaos-winapps "Windows Workspace" \
-    "Tip: press Super+K any time to duck back to your KibaOS desktop. Windows Workspace stays right where you left it." 2>/dev/null || \
-    zenity --info --title="Windows Workspace" --width=380 \
-      --text="Tip: press Super+K any time to duck back to your KibaOS desktop. Windows Workspace stays right where you left it." 2>/dev/null
-fi
-
-chromium --kiosk --app="${WIN_URL}" 2>/dev/null
+exec lsw-manager "$@"
 WORKSPACE
 chmod +x /usr/local/bin/kibaos-winapps-workspace
 
@@ -4859,204 +4805,107 @@ cp /usr/share/applications/kibaos-winapps-workspace.desktop \
 chmod +x "${SKEL}/Desktop/kibaos-winapps-workspace.desktop"
 
 cat > /usr/local/bin/kibaos-winapps-setup << 'WINAPPSSETUP'
-WINAPPS_SRC="/opt/kibaos/winapps-src"
-CONF_DIR="${HOME}/.config/winapps"
-COMPOSE_FILE="${CONF_DIR}/compose.yaml"
+#!/bin/bash
+# Windows Workspace first-run setup, driven by LSW's headless installer.
+# Speaks the PROGRESS/FATAL protocol io.kibaos.winapps-setup reads.
 MARKER="/etc/kibaos/winapps-pending"
+STASH="/etc/kibaos/winapps-userpass"
+NOTE_DIR="${HOME}/.config/kibaos"
+NOTE="${NOTE_DIR}/windows-workspace-password"
 MANUAL_LAUNCH="${1:-}"
 
 progress() { echo "PROGRESS $1 $2"; }
 fail()     { progress 100 "Setup failed: $1"; echo "FATAL: $1" >&2; exit 1; }
 
-if [ -z "${WINAPPS_REGROUPED:-}" ] \
-   && id -nG "${USER:-$(id -un)}" 2>/dev/null | tr ' ' '\n' | grep -qx docker \
-   && ! groups 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
-  export WINAPPS_REGROUPED=1
-  exec newgrp docker <<NEWGRPCMD
-"$0" ${MANUAL_LAUNCH}
-NEWGRPCMD
-fi
+vm_defined() {
+  virsh -c qemu:///session list --all --name 2>/dev/null | grep -q '[^[:space:]]'
+}
 
 progress 1 "Checking Windows Workspace status..."
 
-if command -v winapps >/dev/null 2>&1 && [ -f "${CONF_DIR}/winapps.conf" ]; then
-  rm -f "${MARKER}"
-  progress 100 "Windows Workspace is already set up and running."
+[ "$(uname -m)" = "x86_64" ] \
+  || fail "Windows Workspace needs a 64-bit (x86-64) PC."
+command -v lsw-manager >/dev/null 2>&1 \
+  || fail "Windows Workspace isn't installed on this system."
+[ -r /dev/kvm ] && [ -w /dev/kvm ] \
+  || fail "Hardware virtualization (KVM) isn't available -- turn on VT-x/AMD-V in your BIOS/UEFI settings, then retry."
+
+if vm_defined; then
+  rm -f "${MARKER}" 2>/dev/null || true
+  progress 100 "Windows Workspace is already set up."
   exit 0
 fi
 
-RESUMING=0
-if command -v docker >/dev/null 2>&1 && [ -f "${COMPOSE_FILE}" ]; then
-  RESUMING=1
+progress 5 "Setting up Windows Workspace..."
+
+# Size the VM from the machine: half the cores and half the RAM, within sane bounds.
+CORES="$(nproc 2>/dev/null || echo 4)"
+VM_CPU=$(( CORES / 2 )); [ "${VM_CPU}" -lt 2 ] && VM_CPU=2; [ "${VM_CPU}" -gt 8 ] && VM_CPU=8
+MEM_MIB="$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null)"
+VM_MEM=$(( ${MEM_MIB:-8192} / 2 )); [ "${VM_MEM}" -lt 4096 ] && VM_MEM=4096; [ "${VM_MEM}" -gt 16384 ] && VM_MEM=16384
+VM_DISK=64
+FREE_GIB="$(df -BG --output=avail "${HOME}" 2>/dev/null | tail -n1 | tr -dc '0-9')"
+if [ -n "${FREE_GIB}" ] && [ "${FREE_GIB}" -lt 70 ]; then
+  fail "Windows Workspace needs about 70 GB of free space and only ${FREE_GIB} GB is available -- free some up, then retry from the app menu."
 fi
 
-if [ "${RESUMING}" -eq 1 ]; then
-  progress 5 "Resuming Windows Workspace setup..."
-else
-  progress 5 "Setting up Windows Workspace..."
-fi
-
-progress 10 "Starting Docker..."
-mkdir -p "${CONF_DIR}"
-
-NVIDIA_HW=0
-lspci -nnk 2>/dev/null | grep -qi 'nvidia' && NVIDIA_HW=1
-ORIG_USER="$(id -un)"
-GPU_FLAG_FILE="$(mktemp)"
-PRIV_SCRIPT="$(mktemp)"
-
-cat > "${PRIV_SCRIPT}" << 'PRIVILEGED'
-#!/usr/bin/env bash
-set -u
-CONF_DIR="$1"; COMPOSE_FILE="$2"; NVIDIA_HW="$3"; ORIG_USER="$4"; GPU_FLAG_FILE="$5"
-WINAPPS_SRC="/opt/kibaos/winapps-src"
-
-echo "PROGRESS 10 Starting Docker..."
-systemctl enable --now docker >/dev/null 2>&1
-if ! systemctl is-active --quiet docker; then
-  logger -t kibaos-winapps-setup "docker failed to start; see systemctl status docker"
-  echo "PROGRESS 100 Setup failed: Docker couldn't be started -- check 'systemctl status docker'."
-  echo "FATAL: Docker couldn't be started -- check 'systemctl status docker'." >&2
-  exit 1
-fi
-
-if [ ! -f "${COMPOSE_FILE}" ]; then
-  echo "PROGRESS 15 Preparing Windows Workspace configuration..."
-  cp "${WINAPPS_SRC}/compose.yaml" "${COMPOSE_FILE}"
-  cp -r "${WINAPPS_SRC}/oem" "${CONF_DIR}/oem"
-  if [ "$(uname -m)" = "aarch64" ]; then
-    sed -i -E 's#image: dockurr/windows(:[^[:space:]]*)?$#image: dockurr/windows-arm\1#' "${COMPOSE_FILE}"
-  fi
-
-  echo "PROGRESS 20 Setting your Windows account password..."
-  WIN_USER="KibaUser"
-  WIN_PASS=""
-  STASH="/etc/kibaos/winapps-userpass"
-  if [ -f "${STASH}" ]; then
-    WIN_PASS="$(cat "${STASH}" 2>/dev/null)"
-    rm -f "${STASH}" 2>/dev/null || true
-  fi
-  if [ -z "${WIN_PASS}" ] || [ "${#WIN_PASS}" -lt 8 ]; then
-    WIN_PASS="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)"
-    NOTE="/etc/kibaos/winapps-password-note"
-    ( umask 077; printf '%s\n' "${WIN_PASS}" > "${NOTE}" ) 2>/dev/null || true
-    logger -t kibaos-winapps-setup "no reusable KibaOS password found -- generated a new Windows password, stashed root-only at ${NOTE}"
-  fi
-  COMPOSE_TMP="$(mktemp)"
-  while IFS= read -r line; do
-    if [[ "${line}" =~ ^([[:space:]]*)USERNAME:[[:space:]]* ]]; then
-      printf '%sUSERNAME: "%s"\n' "${BASH_REMATCH[1]}" "${WIN_USER}"
-    elif [[ "${line}" =~ ^([[:space:]]*)PASSWORD:[[:space:]]* ]]; then
-      printf '%sPASSWORD: "%s"\n' "${BASH_REMATCH[1]}" "${WIN_PASS}"
-    else
-      printf '%s\n' "${line}"
-    fi
-  done < "${COMPOSE_FILE}" > "${COMPOSE_TMP}"
-  mv "${COMPOSE_TMP}" "${COMPOSE_FILE}"
-  sed -i "s/^\([[:space:]]*VERSION:[[:space:]]*\).*/\1\"tiny11\"/" "${COMPOSE_FILE}"
-  chmod 600 "${COMPOSE_FILE}"
-fi
-
-echo "PROGRESS 30 Checking for GPU passthrough..."
-COMPOSE_ARGS=(--file "${COMPOSE_FILE}")
-GPU_DETECTED=0
-if [ "${NVIDIA_HW}" -eq 1 ] && docker info 2>/dev/null | grep -qi 'nvidia'; then
-  OVERRIDE_FILE="${CONF_DIR}/compose.override.yaml"
-  cat > "${OVERRIDE_FILE}" << 'GPUOVERRIDE'
-services:
-  windows:
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: ["gpu"]
-GPUOVERRIDE
-  COMPOSE_ARGS+=(--file "${OVERRIDE_FILE}")
-  GPU_DETECTED=1
-fi
-echo "${GPU_DETECTED}" > "${GPU_FLAG_FILE}"
-
-echo "PROGRESS 35 Starting the Windows virtual machine..."
-COMPOSE_LOG="$(mktemp)"
-if ! ( cd "${CONF_DIR}" && docker compose "${COMPOSE_ARGS[@]}" up -d ) > "${COMPOSE_LOG}" 2>&1; then
-  logger -t kibaos-winapps-setup "docker compose up -d failed: $(cat "${COMPOSE_LOG}")"
-  rm -f "${COMPOSE_LOG}"
-  echo "PROGRESS 100 Setup failed: Windows Workspace couldn't start -- nothing was changed permanently, retry from the app menu."
-  echo "FATAL: Windows Workspace couldn't start -- nothing was changed permanently, retry from the app menu." >&2
-  chown -R "${ORIG_USER}:${ORIG_USER}" "${CONF_DIR}" 2>/dev/null || true
-  exit 1
-fi
-rm -f "${COMPOSE_LOG}"
-
-chown -R "${ORIG_USER}:${ORIG_USER}" "${CONF_DIR}" 2>/dev/null || true
-PRIVILEGED
-chmod +x "${PRIV_SCRIPT}"
-
-pkexec bash "${PRIV_SCRIPT}" "${CONF_DIR}" "${COMPOSE_FILE}" "${NVIDIA_HW}" "${ORIG_USER}" "${GPU_FLAG_FILE}"
-PRIV_STATUS=$?
-rm -f "${PRIV_SCRIPT}"
-if [ "${PRIV_STATUS}" -eq 126 ] || [ "${PRIV_STATUS}" -eq 127 ]; then
-  rm -f "${GPU_FLAG_FILE}"
+progress 10 "Preparing your Windows account..."
+WIN_USER="KibaUser"
+WIN_PASS=""
+# The OOBE stashes the user's chosen password root-only; read it once (and
+# clear the first-run marker with it) in a single elevated call.
+WIN_PASS="$(pkexec sh -c 'f=/etc/kibaos/winapps-userpass; [ -f "$f" ] && { cat "$f"; rm -f "$f"; }; rm -f /etc/kibaos/winapps-pending; exit 0' 2>/dev/null)"
+PK_STATUS=$?
+if [ "${PK_STATUS}" -eq 126 ] || [ "${PK_STATUS}" -eq 127 ]; then
   fail "Windows Workspace setup needs administrator access to continue -- retry from the app menu when you're ready to authenticate."
-elif [ "${PRIV_STATUS}" -ne 0 ]; then
-  rm -f "${GPU_FLAG_FILE}"
-  exit "${PRIV_STATUS}"
 fi
-GPU_DETECTED="$(cat "${GPU_FLAG_FILE}" 2>/dev/null || echo 0)"
-rm -f "${GPU_FLAG_FILE}"
-
-
-progress 40 "Reading Windows account details..."
-WIN_USER=$(grep -oP '^\s*USERNAME:\s*"\K[^"]+' "${COMPOSE_FILE}")
-WIN_PASS=$(grep -oP '^\s*PASSWORD:\s*"\K[^"]+' "${COMPOSE_FILE}")
-
-if [ -z "${WIN_USER}" ] || [ -z "${WIN_PASS}" ]; then
-  fail "Couldn't read the Windows account details back out of compose.yaml."
+if [ -z "${WIN_PASS}" ] || [ "${#WIN_PASS}" -lt 8 ]; then
+  WIN_PASS="$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)"
+  mkdir -p "${NOTE_DIR}"
+  ( umask 077; printf '%s\n' "${WIN_PASS}" > "${NOTE}" ) 2>/dev/null || true
+  logger -t kibaos-winapps-setup "no reusable KibaOS password found -- generated a new Windows password, stashed at ${NOTE}"
 fi
 
-progress 45 "Writing Windows Workspace configuration..."
-cat > "${CONF_DIR}/winapps.conf" << CONF
-RDP_USER="${WIN_USER}"
-RDP_PASS="${WIN_PASS}"
-RDP_IP="127.0.0.1"
-RDP_PORT="3389"
-WAFLAVOR="docker"
-DEBUG="true"
-RDP_FLAGS="/gfx:AVC444 /network:lan"
-CONF
-chmod 600 "${CONF_DIR}/winapps.conf"
+progress 15 "Starting Windows setup (this can take 15-35 minutes)..."
+LOG="$(mktemp)"
+LAST=""
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
 
-progress 50 "Waiting for Windows to finish installing (this can take up to 35 minutes)..."
-RDP_UP=0
-for i in $(seq 1 420); do
-  nc -z 127.0.0.1 3389 >/dev/null 2>&1 && { RDP_UP=1; break; }
-  sleep 5
-  if [ $((i % 6)) -eq 0 ]; then
-    progress "$((50 + i * 35 / 420))" "Still waiting for Windows to finish installing..."
-  fi
-done
+lsw-manager \
+  --accept-license \
+  --edition "Windows 11" --language "English" \
+  --user "${WIN_USER}" --password "${WIN_PASS}" \
+  --cpu "${VM_CPU}" --memory "${VM_MEM}" --disk "${VM_DISK}" \
+  2>&1 | while IFS= read -r line; do
+    printf '%s\n' "${line}" >> "${LOG}"
+    case "${line}" in
+      "[download-iso]"*)                 pct=20; msg="Downloading Windows..." ;;
+      "[trim-image]"*)                   pct=40; msg="Preparing the Windows image..." ;;
+      "[build-payload]"*)                pct=45; msg="Preparing the installer..." ;;
+      "[create-disk]"*)                  pct=48; msg="Creating the virtual disk..." ;;
+      "[start-vm]"*)                     pct=52; msg="Starting the Windows virtual machine..." ;;
+      "[wait-for-agent]"*)               pct=60; msg="Waiting for Windows to finish installing..." ;;
+      "[setup]"*)                        pct=75; msg="Setting up Windows..." ;;
+      "[shutdown]"*)                     pct=85; msg="Finishing up Windows..." ;;
+      "[start-vm-virtio]"*)              pct=90; msg="Restarting Windows with graphics acceleration..." ;;
+      "[wait-for-agent-after-swap]"*)    pct=95; msg="Almost there..." ;;
+      "[done]"*)                         pct=99; msg="Windows is ready." ;;
+      *) continue ;;
+    esac
+    [ "${msg}" = "${LAST}" ] && continue
+    LAST="${msg}"
+    progress "${pct}" "${msg}"
+  done
+LSW_STATUS="${PIPESTATUS[0]}"
 
-if [ "${RDP_UP}" -ne 1 ]; then
-  fail "Windows is taking longer than expected to finish installing -- nothing's broken, just re-run this to pick up where it left off."
+if [ "${LSW_STATUS}" -ne 0 ]; then
+  logger -t kibaos-winapps-setup "lsw-manager install failed (${LSW_STATUS}): $(tail -n 40 "${LOG}")"
+  rm -f "${LOG}"
+  fail "Windows itself hit a snag while installing -- nothing's broken, just retry from the app menu."
 fi
+rm -f "${LOG}"
 
-progress 85 "Setting up your Windows app shortcuts..."
-SETUP_LOG="$(mktemp)"
-if ! "${WINAPPS_SRC}/setup.sh" --user --setupAllOfficiallySupportedApps > "${SETUP_LOG}" 2>&1; then
-  logger -t kibaos-winapps-setup "app shortcut setup failed: $(cat "${SETUP_LOG}")"
-  rm -f "${SETUP_LOG}"
-  fail "Windows itself is all set up and ready to go, but hooking up the individual app shortcuts hit a snag -- re-run this to retry just that step."
-fi
-rm -f "${SETUP_LOG}"
-
-rm -f "${MARKER}"
-if [ "${GPU_DETECTED}" -eq 1 ]; then
-  progress 100 "All set! An NVIDIA GPU was detected and passed through to Windows for faster, hardware-accelerated apps."
-else
-  progress 100 "All set!"
-fi
+progress 100 "All set!"
 exit 0
 WINAPPSSETUP
 chmod +x /usr/local/bin/kibaos-winapps-setup
