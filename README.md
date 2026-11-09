@@ -104,7 +104,7 @@ KibaOS aims to work well right out of the box, so there's no need to spend an af
 | **`kiba`, a friendly app manager** | Install, remove, and update software with plain-language commands instead of memorizing package-manager flags. See [Managing Apps with pacman](#managing-apps-with-pacman). |
 | **A guided setup experience** | KibaOS's own built-in installer (the OOBE app, short for "Out-Of-Box Experience") asks you one simple question at a time. |
 | **A calm, uncluttered live session** | The trial/install session never dims, locks, or falls asleep on you mid-setup, and stays free of raw system dialogs, developer tools, and other things you'd never need to see. |
-| **Windows Workspace** | A real Windows environment runs alongside KibaOS and opens full-screen with one click — Office, Photoshop, and most other Windows programs work as they normally would. |
+| **Windows Workspace** | Run supported Windows applications from the KibaOS desktop. Apps execute inside a Windows virtual machine, while their individual windows are overlaid onto the KibaOS desktop for a seamless, integrated experience — without switching to a separate Windows desktop. |
 | **Automatic background updates** | Small fixes download and apply on their own, without interrupting what you're doing. |
 
 > [!TIP]
@@ -226,17 +226,17 @@ search <term>   # Search for packages
 
 ### Windows Workspace (Optional Feature)
 
-KibaOS includes **Windows Workspace** — the reverse of what its name implies: instead of Windows running a Linux environment inside it, KibaOS can run a real Windows environment inside itself. This lets you use Windows-only programs like Microsoft Office or Photoshop without leaving KibaOS or setting up a separate computer.
+**Windows Workspace** brings Windows application compatibility directly to the KibaOS desktop. Instead of presenting a separate, full-screen Windows desktop, it runs Windows applications inside a Windows virtual machine and overlays their individual application windows onto the KibaOS desktop.
 
-The first time you open **"Run Windows Workspace"** from the app menu, KibaOS downloads and installs Windows automatically in the background — no product key or install disc needed. This takes 15-20 minutes and requires about 30 GB of free disk space.
+From the user's perspective, Windows applications can sit alongside native KibaOS applications like ordinary desktop windows. The Windows environment runs in the background, while Windows Workspace integrates the applications' windows into the KibaOS desktop — so you can work across both environments without constantly switching desktops.
 
-After that, opening **"Run Windows Workspace"** brings up the full Windows desktop, full-screen. Everything stays running in the background, ready when you switch back.
-
-> [!TIP]
-> Not every Windows program will work perfectly — this depends on the program itself, not on KibaOS. Windows Workspace works best with at least 4 GB of RAM allocated to the Windows environment on top of what KibaOS itself is using.
+The first time you open **"Run Windows Workspace"** from the app menu, KibaOS downloads and sets up the Windows environment in the background. This takes approximately 15–20 minutes and requires about 30 GB of free disk space.
 
 > [!NOTE]
-> Windows Workspace is an optional feature that must be manually enabled and configured after installation.
+> Windows Workspace is an optional feature that must be manually enabled and configured after installation. Windows applications are still running in a virtual machine; the desktop integration presents their windows on KibaOS rather than running Windows software natively on Linux.
+
+> [!TIP]
+> Compatibility and performance depend on the application, the virtual machine configuration, and the available system resources. Windows Workspace works best with sufficient memory allocated to the Windows environment in addition to the RAM used by KibaOS.
 
 ### Automatic Updates
 
