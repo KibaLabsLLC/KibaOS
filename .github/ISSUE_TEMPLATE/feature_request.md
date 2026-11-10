@@ -1,6 +1,6 @@
 ---
 name: Feature request
-description: Suggest an idea for KibaOS
+about: Feature request template
 title: "[Feature] "
 labels: enhancement
 assignees: ''
@@ -49,7 +49,7 @@ If you have technical knowledge and want to help with implementation:
 > Before submitting, please check:
 > 1. This feature hasn't already been requested (search existing issues)
 > 2. This isn't already possible through existing configuration
-> 3. You've discussed this in [GitHub Discussions](https://github.com/WolfTech-Innovations/Kiba/discussions) if it's a significant change
+> 3. You've discussed this in [GitHub Discussions](https://github.com/KibaLabsLLC/KibaOS/discussions) if it's a significant change
 
 > [!TIP]
 > For major features, we recommend opening a discussion first to gather community feedback before submitting a formal feature request.

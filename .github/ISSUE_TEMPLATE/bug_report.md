@@ -1,6 +1,6 @@
 ---
 name: Bug report
-description: Create a report to help us improve KibaOS
+about: Bug report template
 title: "[Bug] "
 labels: bug
 assignees: ''
@@ -33,7 +33,7 @@ Please provide the following information:
 - **KibaOS Version:** [e.g., 1.0, latest ISO from SourceForge]
 - **Installation Type:** [Live session / Installed to disk]
 - **Hardware:** [Laptop/Desktop, CPU, RAM, Storage type]
-- **Boot Mode:** [BIOS/Legacy or UEFI]
+- **Boot Mode:** [UEFI]
 - **Graphics:** [Integrated/Dedicated, GPU model if known]
 
 ## Additional Context
@@ -44,8 +44,5 @@ Add any other context about the problem here. This could include:
 
 ---
 
-> [!TIP]
-> For installation issues, please include a screenshot of the error message and check the installer logs at `/var/log/calamares.log`
-
 > [!NOTE]
-> If you're reporting a bug in a specific application (e.g., KibaStore, terminal), please also note the application version if available.
+> If you're reporting a bug in a specific application (e.g., Okami, terminal), please also note the application version if available.
