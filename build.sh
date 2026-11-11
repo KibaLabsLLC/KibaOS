@@ -2140,6 +2140,7 @@ plymouth
 squashfs-tools
 
 virtiofsd
+breeze-icons
 dialog
 iproute2
 openbsd-netcat
@@ -2953,14 +2954,39 @@ for _theme_dir in bgrt spinner; do
   fi
 done
 
-NUMIX_ICONS_BUILD="/tmp/numix-icon-theme-circle"
-rm -rf "${NUMIX_ICONS_BUILD}"
-git clone --depth 1 https://github.com/numixproject/numix-icon-theme-circle.git "${NUMIX_ICONS_BUILD}"
-cp -r "${NUMIX_ICONS_BUILD}/Numix-Circle" "${NUMIX_ICONS_BUILD}/Numix-Circle-Light" /usr/share/icons/
-gtk-update-icon-cache -f /usr/share/icons/Numix-Circle 2>/dev/null || true
-gtk-update-icon-cache -f /usr/share/icons/Numix-Circle-Light 2>/dev/null || true
-rm -rf "${NUMIX_ICONS_BUILD}"
-echo "=== Icon theme: Numix Circle installed ==="
+# Cutefish icon theme (https://github.com/cutefishos/icons, Colloid-based).
+# Its index.theme inherits hicolor,breeze, so breeze-icons covers anything it
+# lacks (it's added to the package list). Installs as /usr/share/icons/Cutefish.
+CUTEFISH_ICONS_BUILD="/tmp/cutefish-icons"
+rm -rf "${CUTEFISH_ICONS_BUILD}"
+git clone --depth 1 https://github.com/cutefishos/icons.git "${CUTEFISH_ICONS_BUILD}"
+CMAKE_WAS_PRESENT=1; command -v cmake >/dev/null 2>&1 || { CMAKE_WAS_PRESENT=0; pacman -S --noconfirm --needed cmake; }
+cmake -S "${CUTEFISH_ICONS_BUILD}" -B "${CUTEFISH_ICONS_BUILD}/build" -DCMAKE_INSTALL_PREFIX=/usr
+cmake --install "${CUTEFISH_ICONS_BUILD}/build"
+[ "${CMAKE_WAS_PRESENT}" -eq 0 ] && pacman -Rns --noconfirm cmake || true
+test -f /usr/share/icons/Cutefish/index.theme
+gtk-update-icon-cache -f /usr/share/icons/Cutefish 2>/dev/null || true
+rm -rf "${CUTEFISH_ICONS_BUILD}"
+echo "=== Icon theme: Cutefish installed ==="
+
+# Cutefish dock (Arch [extra]; pulls fishui + qt5-svg). It's a Qt5/X11 app, so
+# on the labwc (Wayland) session it runs through Xwayland (QT_QPA_PLATFORM=xcb)
+# and will only see X11 clients -- native Wayland windows may not show up as
+# running apps in it. Non-fatal if the package isn't available for this arch.
+if pacman -S --noconfirm --needed cutefish-dock; then
+  mkdir -p /etc/xdg/autostart
+  cat > /etc/xdg/autostart/cutefish-dock.desktop << 'CFDOCKAUTO'
+[Desktop Entry]
+Type=Application
+Name=Cutefish Dock
+Exec=env QT_QPA_PLATFORM=xcb cutefish-dock
+OnlyShowIn=Budgie;GNOME;
+X-GNOME-Autostart-Delay=2
+CFDOCKAUTO
+  echo "=== Cutefish dock installed ==="
+else
+  echo "!! cutefish-dock not available -- continuing without it" >&2
+fi
 
 # ── Windows Workspace: LSW (Linux Subsystem for Windows) ──────────────
 # https://github.com/acceleration3/linux-subsystem-windows
@@ -3044,7 +3070,7 @@ cat > /etc/gtk-3.0/settings.ini << 'GTK3RC'
 [Settings]
 gtk-theme-name=Adwaita-dark
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Numix-Circle
+gtk-icon-theme-name=Cutefish
 gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
@@ -3057,7 +3083,7 @@ mkdir -p /etc/gtk-4.0
 cat > /etc/gtk-4.0/settings.ini << 'GTK4RC'
 [Settings]
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Numix-Circle
+gtk-icon-theme-name=Cutefish
 GTK4RC
 
 mkdir -p /usr/share/Kvantum/KibaOS/config
@@ -3117,13 +3143,13 @@ cat > /etc/gtk-3.0/gtk.css << 'GTK3PANEL'
  * superseded by that native motion. Verify visually.
  * ════════════════════════════════════════════════════════════════════════ */
 
-/* === KibaOS: Floating white squircle panel ===
+/* === KibaOS: Floating white squircle panel (top; Cutefish dock sits at the bottom) ===
  * GTK3 CSS can't draw a true superellipse, so the "squircle" is a
  * rounded rectangle with a radius of ~38% of the 42px panel height (16px) --
- * the same 38% VibePanel's top bar uses, so both bars match. White fill with
+ * (the old top bar is gone, so this is the only bar). White fill with
  * dark text/icons; the soft shadow keeps it readable on light wallpapers. */
 .budgie-panel {
-    margin: 0 120px 8px 120px;
+    margin: 8px 120px 0 120px;
     border-radius: 16px;
     background-image: none;
     background-color: #ffffff;
@@ -4573,7 +4599,7 @@ DESKTOPVIEW
 cat > "${SKEL}/.config/gtk-3.0/settings.ini" << 'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=Numix-Circle
+gtk-icon-theme-name=Cutefish
 gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
@@ -4601,7 +4627,7 @@ STAMP="${HOME}/.config/.kibaos-configured"
 [ -f "${STAMP}" ] && exit 0
 
 gsettings set org.gnome.desktop.interface gtk-theme               'Adwaita-dark'
-gsettings set org.gnome.desktop.interface icon-theme              'Numix-Circle'
+gsettings set org.gnome.desktop.interface icon-theme              'Cutefish'
 gsettings set org.gnome.desktop.interface cursor-theme            'Adwaita'
 gsettings set org.gnome.desktop.interface cursor-size             24
 gsettings set org.gnome.desktop.interface font-name               'Nunito 11'
@@ -4638,89 +4664,44 @@ touch "${STAMP}"
 FIRSTLOGIN
 chmod +x /usr/local/bin/kibaos-first-login
 
-cat > /usr/local/bin/kibaos-panel-guard << 'PANELGUARD'
+# ── No Budgie panel ──────────────────────────────────────────────────────
+# budgie-panel rebuilds a default panel whenever its `panels` list is empty
+# ("No panels to load" -> create_system_default()). That reads, in order,
+# /etc/budgie-desktop/panel.ini, /usr/share/budgie-desktop/panel.ini, then its
+# built-in layout. An existing [Panels] section with an empty Panels= list
+# creates zero panels, so shipping one here stops the rebuild.
+mkdir -p /etc/budgie-desktop
+cat > /etc/budgie-desktop/panel.ini << 'EMPTYPANELINI'
+[Panels]
+Panels=
+EMPTYPANELINI
+
+# Backup in case that layout is ignored: shortly after login, if a panel
+# showed up anyway, clear the list so budgie-panel drops it. (A bar may flash
+# for a few seconds when this fires.)
+cat > /usr/local/bin/kibaos-no-panel << 'NOPANEL'
 #!/usr/bin/env bash
-PANEL_SCHEMA="com.solus-project.budgie-panel"
-PANEL_INSTANCE_SCHEMA="com.solus-project.budgie-panel.panel"
-PANEL_BASE="/com/solus-project/budgie-panel/panels/"
-
-EXISTING_UUIDS=$(gsettings get "${PANEL_SCHEMA}" panels 2>/dev/null | tr -d "[]'" | tr ',' ' ')
-for uuid in ${EXISTING_UUIDS}; do
-  loc=$(gsettings get "${PANEL_INSTANCE_SCHEMA}:${PANEL_BASE}{${uuid}}/" location 2>/dev/null)
-  [ "${loc}" = "'bottom'" ] && exit 0
+sleep 6
+for _ in 1 2 3; do
+  cur="$(gsettings get com.solus-project.budgie-panel panels 2>/dev/null)"
+  case "${cur}" in
+    "@as []"|"[]") ;;
+    *) gsettings set com.solus-project.budgie-panel panels "@as []" ;;
+  esac
+  sleep 4
 done
+NOPANEL
+chmod +x /usr/local/bin/kibaos-no-panel
 
-PANEL_UUID=$(uuidgen)
-gsettings set "${PANEL_SCHEMA}" panels "['${PANEL_UUID}']"
-PANEL_PATH="${PANEL_BASE}{${PANEL_UUID}}/"
-
-gsettings set "${PANEL_INSTANCE_SCHEMA}:${PANEL_PATH}" location bottom
-gsettings set "${PANEL_INSTANCE_SCHEMA}:${PANEL_PATH}" size 42
-gsettings set "${PANEL_INSTANCE_SCHEMA}:${PANEL_PATH}" transparency none
-gsettings set "${PANEL_INSTANCE_SCHEMA}:${PANEL_PATH}" enable-shadow true
-
-find_desktop_id() {
-  for candidate in "$@"; do
-    [ -f "/usr/share/applications/${candidate}" ] && {
-      echo "${candidate}"
-      return 0
-    }
-  done
-  return 1
-}
-
-DOCK_LAUNCHERS=()
-for ids in \
-  "kibaos-files.desktop nemo.desktop" \
-  "org.gnome.Calendar.desktop gnome-calendar.desktop" \
-  "org.gnome.Notes.desktop bijiben.desktop gnome-notes.desktop" \
-  "org.gnome.eog.desktop eog.desktop" \
-  "org.gnome.Geary.desktop geary.desktop" \
-  "org.gnome.Music.desktop gnome-music.desktop" \
-  "org.gnome.Todo.desktop gnome-todo.desktop" \
-  "gnome-control-center.desktop org.gnome.Settings.desktop"
-do
-  FOUND=$(find_desktop_id ${ids}) && DOCK_LAUNCHERS+=("${FOUND}")
-done
-
-add_applet() {
-  local plugin_name="$1"
-  local uuid
-  uuid=$(uuidgen)
-  gsettings set \
-    "com.solus-project.budgie-panel.applet:/com/solus-project/budgie-panel/applets/{${uuid}}/" \
-    name \
-    "${plugin_name}"
-  echo "${uuid}"
-}
-
-MENU_UUID=$(add_applet "budgie-menu")
-TASKLIST_UUID=$(add_applet "icon-tasklist")
-CLOCK_UUID=$(add_applet "clock")
-
-RAVEN_UUID=$(add_applet "raventriggerapplet")
-APPLET_LIST="'${MENU_UUID}', '${TASKLIST_UUID}'"
-if ls /usr/lib/budgie-desktop/plugins/visualspace/visualspace.so \
-      /usr/lib/budgie-desktop/plugins/visualspace.so >/dev/null 2>&1; then
-  VSPACE_UUID=$(add_applet "visualspace")
-  APPLET_LIST="${APPLET_LIST}, '${VSPACE_UUID}'"
-fi
-APPLET_LIST="${APPLET_LIST}, '${RAVEN_UUID}', '${CLOCK_UUID}'"
-
-gsettings set \
-  "${PANEL_INSTANCE_SCHEMA}:${PANEL_PATH}" \
-  applets \
-  "[${APPLET_LIST}]"
-
-if [ "${#DOCK_LAUNCHERS[@]}" -gt 0 ]; then
-  LAUNCHERS_GVARIANT=$(printf "'%s', " "${DOCK_LAUNCHERS[@]}")
-  gsettings set \
-    "com.solus-project.budgie-panel.icon-tasklist:/com/solus-project/budgie-panel/instance/icon-tasklist/{${TASKLIST_UUID}}/" \
-    pinned-launchers \
-    "[${LAUNCHERS_GVARIANT%, }]"
-fi
-PANELGUARD
-chmod +x /usr/local/bin/kibaos-panel-guard
+cat > "${SKEL}/.config/autostart/kibaos-no-panel.desktop" << 'NOPANELDESK'
+[Desktop Entry]
+Type=Application
+Name=KibaOS No Panel
+Exec=/usr/local/bin/kibaos-no-panel
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+NOPANELDESK
 
 cat > "${SKEL}/.config/autostart/kibaos-configure.desktop" << 'AUTOCFG'
 [Desktop Entry]
@@ -4731,16 +4712,6 @@ Hidden=false
 NoDisplay=true
 X-GNOME-Autostart-enabled=true
 AUTOCFG
-
-cat > "${SKEL}/.config/autostart/kibaos-panel-guard.desktop" << 'PANELGUARDDESK'
-[Desktop Entry]
-Type=Application
-Name=KibaOS Panel Guard
-Exec=/usr/local/bin/kibaos-panel-guard
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-PANELGUARDDESK
 
 cat > "${SKEL}/.config/autostart/kibaos-oem-finish.desktop" << 'OEMAUTOCFG'
 [Desktop Entry]
@@ -5086,77 +5057,6 @@ JOPLINDESKTOP
   rm -rf "${JOPLIN_TMP}"
 ) && echo "=== Joplin installed ===" \
   || echo "!! Joplin install failed -- continuing without it" >&2
-(
-  set -e
-  VP_TAG=$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/prankstr/vibepanel/releases/latest)
-  VP_TAG="${VP_TAG##*/}"
-  VP_BASE="https://github.com/prankstr/vibepanel/releases/download/${VP_TAG}"
-  VP_TMP="/tmp/vibepanel-dl"
-  rm -rf "${VP_TMP}" && mkdir -p "${VP_TMP}" && cd "${VP_TMP}"
-  curl -fL --retry 3 -o vibepanel "${VP_BASE}/vibepanel-x86_64-unknown-linux-gnu"
-  curl -fL --retry 3 -o vibepanel.sha256 "${VP_BASE}/vibepanel-x86_64-unknown-linux-gnu.sha256"
-  [ "$(awk '{print $1}' vibepanel.sha256)" = "$(sha256sum vibepanel | awk '{print $1}')" ]
-  install -Dm755 vibepanel /usr/bin/vibepanel
-  mkdir -p /usr/share/kibaos
-  cat > /usr/share/kibaos/vibepanel-config.toml << 'VPCONFIG'
-[bar]
-position = "top"
-size = 36
-# Floating white squircle: border_radius is a % of bar height, so 38% matches
-# the bottom Budgie panel (16px radius on a 42px bar). Full pill would be 50.
-screen_margin = 8
-border_radius = 38
-background_color = "#ffffff"
-background_opacity = 1.0
-
-[widgets]
-left = ["cpu"]
-right = ["tray", "quick_settings", "battery"]
-border_radius = 38
-background_opacity = 0.0
-
-[theme]
-# Light mode so text/icons are dark on the white bar.
-mode = "light"
-accent = "#0099cc"
-
-[osd]
-enabled = false
-VPCONFIG
-  cat > /usr/bin/vibepanel-session << 'VPWRAP'
-#!/bin/sh
-CFG="${XDG_CONFIG_HOME:-$HOME/.config}/vibepanel/config.toml"
-if [ ! -f "$CFG" ]; then
-  mkdir -p "$(dirname "$CFG")"
-  cp /usr/share/kibaos/vibepanel-config.toml "$CFG"
-fi
-exec /usr/bin/vibepanel "$@"
-VPWRAP
-  chmod 755 /usr/bin/vibepanel-session
-  cat > /usr/share/applications/vibepanel.desktop << 'VPDESKTOP'
-[Desktop Entry]
-Type=Application
-Name=VibePanel
-Comment=Top panel with quick settings
-Exec=vibepanel-session
-Icon=preferences-system
-Terminal=false
-Categories=Utility;Settings;
-NoDisplay=true
-VPDESKTOP
-  mkdir -p /etc/xdg/autostart
-  cat > /etc/xdg/autostart/vibepanel.desktop << 'VPAUTO'
-[Desktop Entry]
-Type=Application
-Name=VibePanel
-Exec=vibepanel-session
-OnlyShowIn=Budgie;GNOME;
-X-GNOME-Autostart-Delay=2
-VPAUTO
-  rm -rf "${VP_TMP}"
-) && echo "=== VibePanel installed ===" \
-  || echo "!! VibePanel install failed -- continuing without it" >&2
-
 sed -i 's/GTK_THEME=Adwaita-dark/GTK_THEME=KibaOS/' /etc/environment
 
 (
