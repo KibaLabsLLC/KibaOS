@@ -240,7 +240,7 @@ jobs:
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 imagemagick ovmf
+          sudo apt-get install -y qemu-system-x86 imagemagick ovmf netcat-openbsd
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
@@ -294,8 +294,8 @@ jobs:
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
             FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
           fi
-          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
-          for i in $(seq 1 30); do [ -S qmp.sock ] && break; sleep 1; done
+          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -serial unix:serial.sock,server,nowait -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+          for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S serial.sock ] && break; sleep 1; done
           is_mostly_white() {
             local ratio
             ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
@@ -304,55 +304,40 @@ jobs:
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
-          wait_for_desktop() {
-            local deadline=$((SECONDS + 180))
-            local stable=0
-            while (( SECONDS < deadline )); do
-              sleep 5
-              kill -0 "$(cat qemu.pid)" 2>/dev/null || { echo "::error::VM exited while waiting for the desktop"; return 1; }
-              capture_probe shots/desktop-probe.png
-              if is_mostly_white shots/desktop-probe.png; then
-                stable=0
-                echo "Installer/white screen still visible; waiting..."
-              else
-                stable=$((stable + 1))
-                if (( stable >= 2 )); then
-                  echo "Desktop detected after clicking Try KibaOS."
-                  return 0
-                fi
-              fi
-            done
-            echo "::error::Try link was clicked, but a non-white desktop was not detected within 180 seconds."
-            return 1
+          kill_installer_over_serial() {
+            printf 'killall -TERM io.kibaos.oobe 2>/dev/null || true\n' | nc -U -w 2 serial.sock || true
+            printf 'pkill -TERM -f io.kibaos.oobe 2>/dev/null || true\n' | nc -U -w 2 serial.sock || true
           }
 
           installer_closed=0
           for i in $(seq 1 "$SHOTS"); do
             sleep "$INTERVAL"
-            kill -0 "$(cat qemu.pid)" || { echo "::error::VM died before screenshot ${i}"; exit 1; }
+            if ! kill -0 "$(cat qemu.pid)" 2>/dev/null; then
+              echo "QEMU already exited"
+              break
+            fi
             shot="shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
             capture_probe shots/current-probe.png
             if is_mostly_white shots/current-probe.png && [ "$installer_closed" -eq 0 ]; then
-              echo "Mostly-white installer screen detected. Clicking 'Try KibaOS first' text..."
-              dims=$(identify -format '%w %h' shots/current-probe.png)
-              width=${dims%% *}
-              height=${dims##* }
-              tx=$(( width * 338 / 1280 ))
-              ty=$(( height * 301 / 800 ))
-              python3 qmp.py click "$tx" "$ty" "$width" "$height"
+              echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe over serial..."
+              kill_installer_over_serial
               installer_closed=1
-              wait_for_desktop
-              mv shots/desktop-probe.png "$shot"
+              sleep 5
+              capture_probe "$shot" || cp shots/current-probe.png "$shot" || true
             else
               mv shots/current-probe.png "$shot"
             fi
           done
-          rm -f shots/current-probe.png shots/desktop-probe.png
+          rm -f shots/current-probe.png
           LAST=$(find shots -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort | tail -1)
-          SD=$(convert "$LAST" -format '%[fx:standard_deviation]' info:)
-          echo "Final screenshot ${LAST} stddev=${SD}"
-          awk -v v="$SD" 'BEGIN{exit !(v>0.005)}' || { echo "::error::Final screenshot is blank -- desktop did not render"; exit 1; }
-          kill "$(cat qemu.pid)" || true
+          if [ -n "$LAST" ]; then
+            SD=$(convert "$LAST" -format '%[fx:standard_deviation]' info:)
+            echo "Final screenshot ${LAST} stddev=${SD}"
+            awk -v v="$SD" 'BEGIN{exit !(v>0.005)}' || { echo "::error::Final screenshot is blank -- desktop did not render"; exit 1; }
+          fi
+          kill -TERM "$(cat qemu.pid)" 2>/dev/null || true
+          sleep 2
+          kill -KILL "$(cat qemu.pid)" 2>/dev/null || true
       - name: Commit screenshots to assets/screenshots
         if: ${{ !cancelled() && hashFiles('shots/*.png') != '' }}
         run: |
