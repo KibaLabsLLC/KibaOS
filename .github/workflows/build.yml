@@ -1,8 +1,25 @@
 name: "Build KibaOS"
 on:
   workflow_dispatch:
+    inputs:
+      skip_build:
+        description: 'Skip building both architectures'
+        required: false
+        type: boolean
+        default: false
+      skip_ota:
+        description: 'Skip OTA generation and publishing'
+        required: false
+        type: boolean
+        default: false
+      run_vmtest:
+        description: 'Run BIOS and UEFI VM tests using the latest SourceForge ISO'
+        required: false
+        type: boolean
+        default: false
 jobs:
   build:
+    if: ${{ !inputs.skip_build }}
     strategy:
       fail-fast: false
       matrix:
@@ -113,7 +130,7 @@ jobs:
             out/
           retention-days: 1
   vmtest:
-    needs: build
+    if: ${{ inputs.run_vmtest }}
     strategy:
       fail-fast: false
       matrix:
@@ -128,10 +145,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Download ISO
-        uses: actions/download-artifact@v4
-        with:
-          name: kibaos-build-x86_64
+      - name: Download latest ISO from SourceForge
+        run: |
+          curl --fail --location --retry 5 --retry-delay 5 \
+            "https://sourceforge.net/projects/kibaos/files/x86_64/latest/download" \
+            --output kibaos-vmtest.iso
+          test -s kibaos-vmtest.iso || { echo "::error::SourceForge returned an empty ISO"; exit 1; }
       - name: Boot ISO in QEMU and capture desktop screenshots
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
@@ -158,7 +177,7 @@ jobs:
               sys.exit(1)
           EOF
           mkdir -p shots
-          ISO=$(ls *.iso | head -1)
+          ISO="kibaos-vmtest.iso"
           FW=()
           if [ "${{ matrix.fw }}" = "uefi" ]; then
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
@@ -193,6 +212,7 @@ jobs:
           exit 1
   ota:
     needs: build
+    if: ${{ !inputs.skip_ota && !inputs.skip_build }}
     strategy:
       fail-fast: false
       matrix:
