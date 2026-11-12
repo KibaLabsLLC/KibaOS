@@ -250,6 +250,8 @@ jobs:
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
+          ABS_MAX = 0x7fff
+
           def command(payload):
               sock = socket.socket(socket.AF_UNIX)
               sock.connect("qmp.sock")
@@ -271,21 +273,26 @@ jobs:
                   raise RuntimeError(result["error"])
               return result
 
+          def click(px, py, width, height):
+              ax = int(px * ABS_MAX / max(width - 1, 1))
+              ay = int(py * ABS_MAX / max(height - 1, 1))
+              events = [
+                  {"type": "abs", "data": {"axis": "x", "value": ax}},
+                  {"type": "abs", "data": {"axis": "y", "value": ay}},
+                  {"type": "btn", "data": {"button": "left", "down": True}},
+                  {"type": "btn", "data": {"button": "left", "down": False}},
+              ]
+              command({"execute": "input-send-event", "arguments": {"events": events}})
+
           if sys.argv[1] == "screendump":
               command({"execute": "screendump", "arguments": {
                   "filename": os.path.abspath(sys.argv[2]), "format": "png"
               }})
-          elif sys.argv[1] == "close-installer":
-              # Send Alt+F4 to close the foreground installer window.
-              command({"execute": "send-key", "arguments": {
-                  "keys": [
-                      {"type": "qcode", "data": "alt"},
-                      {"type": "qcode", "data": "f4"}
-                  ],
-                  "hold-time": 150
-              }})
+          elif sys.argv[1] == "click":
+              # usage: python3 qmp.py click X Y WIDTH HEIGHT
+              click(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
           else:
-              raise SystemExit("Usage: qmp.py screendump FILE | close-installer")
+              raise SystemExit("Usage: qmp.py screendump FILE | click X Y WIDTH HEIGHT")
           PYQMP
           mkdir -p shots
           ISO="$ISO_PATH"
@@ -294,11 +301,11 @@ jobs:
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
             FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
           fi
-          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device usb-tablet -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
           for i in $(seq 1 30); do [ -S qmp.sock ] && break; sleep 1; done
           # A screen is considered installer-like when at least 85% of its
-          # pixels are brighter than 90% grayscale. Close it once with Alt+F4,
-          # then wait for two consecutive non-white frames before capturing.
+          # pixels are brighter than 90% grayscale. Click the "Try KibaOS first"
+          # text once, then wait for two consecutive non-white frames before capturing.
           is_mostly_white() {
             local ratio
             ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
@@ -320,12 +327,12 @@ jobs:
               else
                 stable=$((stable + 1))
                 if (( stable >= 2 )); then
-                  echo "Desktop detected after closing installer."
+                  echo "Desktop detected after clicking Try KibaOS."
                   return 0
                 fi
               fi
             done
-            echo "::error::Installer was closed, but a non-white desktop was not detected within 180 seconds."
+            echo "::error::Try link was clicked, but a non-white desktop was not detected within 180 seconds."
             return 1
           }
 
@@ -336,8 +343,14 @@ jobs:
             shot="shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
             capture_probe shots/current-probe.png
             if is_mostly_white shots/current-probe.png && [ "$installer_closed" -eq 0 ]; then
-              echo "Mostly-white screen detected; assuming the installer is open. Sending Alt+F4..."
-              python3 qmp.py close-installer
+              echo "Mostly-white installer screen detected. Clicking 'Try KibaOS first' text..."
+              dims=$(identify -format '%w %h' shots/current-probe.png)
+              width=${dims%% *}
+              height=${dims##* }
+              # Relative position tuned from 1280x800 reference screenshot
+              tx=$(( width * 338 / 1280 ))
+              ty=$(( height * 301 / 800 ))
+              python3 qmp.py click "$tx" "$ty" "$width" "$height"
               installer_closed=1
               wait_for_desktop
               mv shots/desktop-probe.png "$shot"
