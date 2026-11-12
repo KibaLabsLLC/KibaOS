@@ -287,6 +287,38 @@ jobs:
           else:
               raise SystemExit("Usage: qmp.py screendump FILE | click X Y WIDTH HEIGHT")
           PYQMP
+          cat > qga.py <<'PYQGA'
+          import json, socket, sys, time
+
+          def run(path, args, tries=20):
+              for _ in range(tries):
+                  s = socket.socket(socket.AF_UNIX)
+                  s.settimeout(3)
+                  try:
+                      s.connect("qga.sock")
+                      f = s.makefile("rw")
+                      def rpc(cmd):
+                          f.write(json.dumps(cmd) + "\n"); f.flush()
+                          return json.loads(f.readline())
+                      sid = int(time.time() * 1000) & 0x7fffffff
+                      if rpc({"execute": "guest-sync", "arguments": {"id": sid}}).get("return") != sid:
+                          continue
+                      pid = rpc({"execute": "guest-exec", "arguments": {
+                          "path": path, "arg": args, "capture-output": True}})["return"]["pid"]
+                      while True:
+                          st = rpc({"execute": "guest-exec-status", "arguments": {"pid": pid}})["return"]
+                          if st["exited"]:
+                              return st.get("exitcode")
+                          time.sleep(0.2)
+                  except (OSError, ValueError, KeyError):
+                      time.sleep(3)
+                  finally:
+                      s.close()
+              raise SystemExit("guest agent never answered")
+
+          rc = run("/usr/bin/pkill", ["-TERM", "-f", "io.kibaos.oobe"])
+          print("pkill exit code:", rc, "(1 = installer already gone)")
+          PYQGA
           mkdir -p shots
           ISO="$ISO_PATH"
           FW=()
@@ -294,8 +326,8 @@ jobs:
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
             FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
           fi
-          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -serial unix:serial.sock,server,nowait -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
-          for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S serial.sock ] && break; sleep 1; done
+          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -device virtio-serial-pci -chardev socket,id=qga0,path=qga.sock,server=on,wait=off -device virtserialport,chardev=qga0,name=org.qemu.guest_agent.0 -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+          for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S qga.sock ] && break; sleep 1; done
           is_mostly_white() {
             local ratio
             ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
@@ -304,10 +336,7 @@ jobs:
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
-          kill_installer_over_serial() {
-            printf 'killall -TERM io.kibaos.oobe 2>/dev/null || true\n' | nc -U -w 2 serial.sock || true
-            printf 'pkill -TERM -f io.kibaos.oobe 2>/dev/null || true\n' | nc -U -w 2 serial.sock || true
-          }
+          kill_installer() { python3 qga.py || true; }
 
           installer_closed=0
           for i in $(seq 1 "$SHOTS"); do
@@ -319,8 +348,8 @@ jobs:
             shot="shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
             capture_probe shots/current-probe.png
             if is_mostly_white shots/current-probe.png && [ "$installer_closed" -eq 0 ]; then
-              echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe over serial..."
-              kill_installer_over_serial
+              echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe via QEMU guest agent..."
+              kill_installer
               installer_closed=1
               sleep 5
               capture_probe "$shot" || cp shots/current-probe.png "$shot" || true
