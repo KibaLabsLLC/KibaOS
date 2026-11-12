@@ -2113,6 +2113,7 @@ polkit
 udisks2
 upower
 scrot
+xterm
 fastfetch
 flatpak
 xdg-desktop-portal
@@ -3105,6 +3106,26 @@ else
   echo "!! look-bin AUR build failed -- continuing without it" >&2
 fi
 rm -rf /tmp/look-bin
+
+# Lost Island (https://github.com/MarcoZorn/lost-island): GTK4 + layer-shell
+# "Dynamic Island" pill (clock, MPRIS media, volume OSD, notification peeks).
+# Upstream's Arch install is `git clone ... && cd lost-island/packaging &&
+# makepkg -si`; same throwaway build user as look-bin. Tracks upstream main (not
+# pinned). Non-fatal if it fails.
+LI_OK=0
+for _try in 1 2 3 4 5; do
+  if su - kibabuild -c 'cd /tmp && rm -rf lost-island && git clone https://github.com/MarcoZorn/lost-island && cd lost-island/packaging && makepkg -si --noconfirm --needed'; then
+    LI_OK=1; break
+  fi
+  echo "!! lost-island build attempt ${_try}/5 failed -- retrying in 10s" >&2
+  sleep 10
+done
+if [ "${LI_OK}" -eq 1 ] && command -v lost-island >/dev/null 2>&1; then
+  echo "=== lost-island installed ==="
+else
+  echo "!! lost-island build failed -- continuing without it" >&2
+fi
+rm -rf /tmp/lost-island
 rm -f /etc/sudoers.d/kibabuild
 userdel -r kibabuild 2>/dev/null || true
 
@@ -3152,6 +3173,13 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 flatpak install --system --noninteractive flathub re.sonny.Junction
 echo "=== Junction: installed via flatpak (re.sonny.Junction) ==="
+
+# Planify (task manager, Todoist/Nextcloud sync). Non-fatal if Flathub is unreachable.
+if flatpak install --system --noninteractive flathub io.github.alainm23.planify; then
+  echo "=== Planify: installed via flatpak (io.github.alainm23.planify) ==="
+else
+  echo "!! Planify flatpak install failed -- continuing without it" >&2
+fi
 
 ADWAITA_ICONS="/usr/share/icons/Adwaita"
 LAUNCHER_MASTER="/tmp/kibaos-launcher-icon.png"
@@ -5268,6 +5296,20 @@ X-GNOME-Autostart-enabled=true
 X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LOOKAUTO
+
+# Lost Island: XDG autostart (upstream also ships a systemd user unit, but the
+# session here is labwc+budgie, so autostart is the simpler hook). It exits
+# quietly if it isn't installed.
+cat > "${SKEL}/.config/autostart/lost-island.desktop" << 'LIAUTO'
+[Desktop Entry]
+Type=Application
+Name=Lost Island
+Exec=lost-island
+TryExec=lost-island
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
+NoDisplay=true
+LIAUTO
 
 cp -aT "${SKEL}/" /home/liveuser/
 chown -R 1000:1000 /home/liveuser
