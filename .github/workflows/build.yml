@@ -166,8 +166,6 @@ jobs:
               ? context.ref.replace(/^refs\/heads\//, '')
               : undefined;
 
-            // Check this run first. This covers normal builds and partial matrix
-            // success where x86_64 uploaded its artifact but another matrix leg failed.
             const currentArtifacts = await github.paginate(
               github.rest.actions.listWorkflowRunArtifacts,
               { owner, repo, run_id: context.runId, per_page: 100 }
@@ -183,8 +181,6 @@ jobs:
             }
 
             core.info(`No ${artifactName} in current run ${context.runId}; searching older runs newest-first.`);
-            // Page through runs newest-first and stop immediately when an
-            // unexpired artifact is found; don't enumerate the entire history.
             for (let page = 1; ; page++) {
               const response = await github.rest.actions.listWorkflowRuns({
                 owner,
@@ -240,8 +236,6 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-          # Ubuntu 24.04 GitHub runners may point APT at a stale Azure mirror.
-          # Remove that mirror before refreshing indexes and installing QEMU.
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
@@ -289,7 +283,6 @@ jobs:
                   "filename": os.path.abspath(sys.argv[2]), "format": "png"
               }})
           elif sys.argv[1] == "click":
-              # usage: python3 qmp.py click X Y WIDTH HEIGHT
               click(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
           else:
               raise SystemExit("Usage: qmp.py screendump FILE | click X Y WIDTH HEIGHT")
@@ -301,11 +294,8 @@ jobs:
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
             FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
           fi
-          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device usb-tablet -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
           for i in $(seq 1 30); do [ -S qmp.sock ] && break; sleep 1; done
-          # A screen is considered installer-like when at least 85% of its
-          # pixels are brighter than 90% grayscale. Click the "Try KibaOS first"
-          # text once, then wait for two consecutive non-white frames before capturing.
           is_mostly_white() {
             local ratio
             ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
@@ -347,7 +337,6 @@ jobs:
               dims=$(identify -format '%w %h' shots/current-probe.png)
               width=${dims%% *}
               height=${dims##* }
-              # Relative position tuned from 1280x800 reference screenshot
               tx=$(( width * 338 / 1280 ))
               ty=$(( height * 301 / 800 ))
               python3 qmp.py click "$tx" "$ty" "$width" "$height"
