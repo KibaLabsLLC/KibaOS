@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       run_vmtest:
-        description: 'Run BIOS and UEFI VM tests using the latest SourceForge ISO'
+        description: 'Run BIOS and UEFI VM tests using the newest available GitHub build artifact'
         required: false
         type: boolean
         default: false
@@ -120,7 +120,7 @@ jobs:
           name: kibaos-build-${{ matrix.arch }}
           path: |
             *.iso
-          retention-days: 1
+          retention-days: 7
       - name: Upload mobile build artifact for OTA job
         if: matrix.arch == 'mobile'
         uses: actions/upload-artifact@v4
@@ -130,7 +130,8 @@ jobs:
             out/
           retention-days: 1
   vmtest:
-    if: ${{ inputs.run_vmtest }}
+    needs: build
+    if: ${{ always() && inputs.run_vmtest }}
     strategy:
       fail-fast: false
       matrix:
@@ -138,6 +139,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
+      actions: read
       contents: write
     env:
       SHOTS: 10
@@ -145,27 +147,94 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Resolve latest ISO build number from SourceForge
+      - name: Find newest run containing the x86_64 build artifact
+        id: find-build-artifact
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const artifactName = 'kibaos-build-x86_64';
+            const workflowRef = process.env.GITHUB_WORKFLOW_REF;
+            const workflowFile = workflowRef.split('/.github/workflows/')[1]?.split('@')[0];
+            if (!workflowFile) {
+              core.setFailed(`Could not determine workflow file from GITHUB_WORKFLOW_REF: ${workflowRef}`);
+              return;
+            }
+
+            const branch = context.ref.startsWith('refs/heads/')
+              ? context.ref.replace(/^refs\/heads\//, '')
+              : undefined;
+
+            // Check this run first. This covers normal builds and partial matrix
+            // success where x86_64 uploaded its artifact but another matrix leg failed.
+            const currentArtifacts = await github.paginate(
+              github.rest.actions.listWorkflowRunArtifacts,
+              { owner, repo, run_id: context.runId, per_page: 100 }
+            );
+            const currentArtifact = currentArtifacts.find(
+              artifact => artifact.name === artifactName && !artifact.expired
+            );
+            if (currentArtifact) {
+              core.info(`Using ${artifactName} from the current run ${context.runId}.`);
+              core.setOutput('run_id', String(context.runId));
+              core.setOutput('artifact_id', String(currentArtifact.id));
+              return;
+            }
+
+            core.info(`No ${artifactName} in current run ${context.runId}; searching older runs newest-first.`);
+            // Page through runs newest-first and stop immediately when an
+            // unexpired artifact is found; don't enumerate the entire history.
+            for (let page = 1; ; page++) {
+              const response = await github.rest.actions.listWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: workflowFile,
+                ...(branch ? { branch } : {}),
+                per_page: 100,
+                page
+              });
+              const runs = response.data.workflow_runs;
+              if (runs.length === 0) break;
+
+              for (const run of runs) {
+                if (run.id === context.runId) continue;
+                const artifacts = await github.paginate(
+                  github.rest.actions.listWorkflowRunArtifacts,
+                  { owner, repo, run_id: run.id, per_page: 100 }
+                );
+                const match = artifacts.find(
+                  artifact => artifact.name === artifactName && !artifact.expired
+                );
+                if (match) {
+                  core.info(`Found ${artifactName} in run ${run.id} (${run.html_url}).`);
+                  core.setOutput('run_id', String(run.id));
+                  core.setOutput('artifact_id', String(match.id));
+                  return;
+                }
+                core.info(`Run ${run.id} has no usable ${artifactName}; checking the next older run.`);
+              }
+            }
+
+            core.setFailed(`No unexpired ${artifactName} artifact was found in this run or any previous run of ${workflowFile}${branch ? ` on branch ${branch}` : ''}.`);
+      - name: Download selected build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kibaos-build-x86_64
+          run-id: ${{ steps.find-build-artifact.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./vmtest-artifact
+      - name: Locate extracted ISO
         run: |
-          MARKER_URL="https://sourceforge.net/projects/kibaos/files/x86_64/last-iso-build-number-x86_64.txt/download"
-          curl --fail --location --retry 5 --retry-delay 5 \
-            "$MARKER_URL" --output build-number.txt
-          BUILD_NUM="$(tr -d '[:space:]' < build-number.txt)"
-          if ! [[ "$BUILD_NUM" =~ ^[0-9]+$ ]]; then
-            echo "::error::Invalid SourceForge build marker: '$BUILD_NUM'"
+          ISO_PATH="$(find ./vmtest-artifact -type f -name '*.iso' -print -quit)"
+          if [ -z "$ISO_PATH" ]; then
+            echo "::error::The downloaded ZIP artifact did not contain an ISO file."
+            find ./vmtest-artifact -maxdepth 4 -type f -print || true
             exit 1
           fi
-          echo "Resolved latest KibaOS build: v${BUILD_NUM}"
-          echo "BUILD_NUM=${BUILD_NUM}" >> "$GITHUB_ENV"
-      - name: Download latest ISO from SourceForge
-        run: |
-          ISO_NAME="kibaos-v${BUILD_NUM}.iso"
-          ISO_URL="https://sourceforge.net/projects/kibaos/files/x86_64/${ISO_NAME}/download"
-          echo "Downloading ${ISO_URL}"
-          curl --fail --location --retry 5 --retry-delay 5 \
-            "$ISO_URL" --output kibaos-vmtest.iso
-          test -s kibaos-vmtest.iso || { echo "::error::SourceForge returned an empty ISO"; exit 1; }
-          echo "Downloaded ${ISO_NAME} ($(du -h kibaos-vmtest.iso | cut -f1))"
+          test -s "$ISO_PATH" || { echo "::error::Downloaded ISO is empty: $ISO_PATH"; exit 1; }
+          echo "ISO_PATH=$ISO_PATH" >> "$GITHUB_ENV"
+          echo "Using ISO from artifact: $ISO_PATH ($(du -h "$ISO_PATH" | cut -f1))"
       - name: Boot ISO in QEMU and capture desktop screenshots
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
@@ -192,7 +261,7 @@ jobs:
               sys.exit(1)
           EOF
           mkdir -p shots
-          ISO="kibaos-vmtest.iso"
+          ISO="$ISO_PATH"
           FW=()
           if [ "${{ matrix.fw }}" = "uefi" ]; then
             cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
