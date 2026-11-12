@@ -376,6 +376,13 @@ jobs:
           git config user.name "KibaOS OTA Bot"
           git config user.email "ota@kibaos.wolftech.tech"
           git add "$D"
+          if [ "${{ matrix.fw }}" = "uefi" ]; then
+            LATEST=$(find shots -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort | tail -1)
+            if [ -n "$LATEST" ]; then
+              cp "$LATEST" assets/screenshots/desktop.png
+              git add assets/screenshots/desktop.png
+            fi
+          fi
           git commit -m "Add ${{ matrix.fw }} VM screenshots for build v${{ github.run_number }}"
           for i in 1 2 3 4 5; do
             git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && exit 0
