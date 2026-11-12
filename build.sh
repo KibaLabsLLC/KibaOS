@@ -2929,6 +2929,98 @@ else
   echo "=== LSW: skipped -- upstream is x86-64 only, Windows Workspace unavailable on $(uname -m) ==="
 fi
 
+# ── LSW auto-install: provision the Windows VM on the installed system's first login ──
+# No UI: a background job started from XDG autostart that runs LSW's headless
+# installer and reports start/finish/failure as desktop notifications. It does
+# nothing on the live ISO or the OEM account (the autostart is in /etc/skel, so
+# the user created at install time inherits it), when KVM/disk space aren't
+# there, or once a Windows VM already exists. The Windows account password is a
+# fresh random string -- the user's KibaOS login password is never stored or
+# reused -- kept 0600 in the user's home in case Windows ever asks for it.
+if [ -x /usr/bin/lsw-manager ]; then
+  cat > /usr/local/bin/kibaos-lsw-autoinstall << 'LSWAUTO'
+#!/bin/bash
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/kibaos"
+DONE="${STATE_DIR}/lsw-installed"
+TRIES="${STATE_DIR}/lsw-attempts"
+LOG="${STATE_DIR}/lsw-install.log"
+PASSFILE="${HOME}/.config/kibaos/windows-password"
+MAX_TRIES=3
+
+# Not on the live ISO, not in the OEM staging account, not on non-x86-64.
+[ -d /run/archiso ] && exit 0
+case "$(id -un)" in liveuser|oem|root) exit 0 ;; esac
+[ "$(uname -m)" = "x86_64" ] || exit 0
+command -v lsw-manager >/dev/null 2>&1 || exit 0
+
+mkdir -p "${STATE_DIR}"
+[ -f "${DONE}" ] && exit 0
+
+note() { command -v notify-send >/dev/null 2>&1 && notify-send -a "Windows" "$1" "$2" 2>/dev/null; logger -t kibaos-lsw-autoinstall "$1: $2"; }
+
+# A VM from an earlier/manual run counts as done.
+if command -v virsh >/dev/null 2>&1 \
+   && virsh -c qemu:///session list --all --name 2>/dev/null | grep -q '[^[:space:]]'; then
+  touch "${DONE}"; exit 0
+fi
+
+n=$(cat "${TRIES}" 2>/dev/null || echo 0)
+if [ "${n}" -ge "${MAX_TRIES}" ]; then exit 0; fi
+
+# Preconditions that are the machine's fault, not the installer's: don't burn a try.
+[ -r /dev/kvm ] && [ -w /dev/kvm ] || { logger -t kibaos-lsw-autoinstall "KVM not available, skipping"; exit 0; }
+FREE_GIB="$(df -BG --output=avail "${HOME}" 2>/dev/null | tail -n1 | tr -dc '0-9')"
+if [ -n "${FREE_GIB}" ] && [ "${FREE_GIB}" -lt 70 ]; then
+  logger -t kibaos-lsw-autoinstall "only ${FREE_GIB} GB free (need ~70), skipping"; exit 0
+fi
+
+echo $(( n + 1 )) > "${TRIES}"
+
+# Size the VM from the machine: half the cores and RAM, within sane bounds.
+CORES="$(nproc 2>/dev/null || echo 4)"
+VM_CPU=$(( CORES / 2 )); [ "${VM_CPU}" -lt 2 ] && VM_CPU=2; [ "${VM_CPU}" -gt 8 ] && VM_CPU=8
+MEM_MIB="$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null)"
+VM_MEM=$(( ${MEM_MIB:-8192} / 2 )); [ "${VM_MEM}" -lt 4096 ] && VM_MEM=4096; [ "${VM_MEM}" -gt 16384 ] && VM_MEM=16384
+
+if [ ! -s "${PASSFILE}" ]; then
+  mkdir -p "$(dirname "${PASSFILE}")"
+  ( umask 077; tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20 > "${PASSFILE}" )
+fi
+WIN_PASS="$(cat "${PASSFILE}")"
+
+note "Setting up Windows" "Installing in the background -- this can take 15-35 minutes. You can keep using your PC."
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
+nice -n 10 ionice -c3 lsw-manager \
+  --accept-license \
+  --edition "Windows 11" --language "English" \
+  --user "KibaUser" --password "${WIN_PASS}" \
+  --cpu "${VM_CPU}" --memory "${VM_MEM}" --disk 64 \
+  >> "${LOG}" 2>&1
+rc=$?
+
+if [ "${rc}" -eq 0 ]; then
+  touch "${DONE}"
+  note "Windows is ready" "Your Windows apps are available from the app menu."
+else
+  note "Windows setup hit a snag" "It will retry next time you log in. Details: ${LOG}"
+fi
+exit "${rc}"
+LSWAUTO
+  chmod +x /usr/local/bin/kibaos-lsw-autoinstall
+
+  mkdir -p /etc/skel/.config/autostart
+  cat > /etc/skel/.config/autostart/kibaos-lsw-autoinstall.desktop << 'LSWAUTODESK'
+[Desktop Entry]
+Type=Application
+Name=Windows auto-setup
+Exec=/usr/local/bin/kibaos-lsw-autoinstall
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=30
+LSWAUTODESK
+  echo "=== LSW: first-login auto-install armed ==="
+fi
+
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak install --system --noninteractive flathub re.sonny.Junction
