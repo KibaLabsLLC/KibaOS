@@ -35,6 +35,12 @@
 > [!IMPORTANT]
 > **Before you download:** KibaOS supports **UEFI-based systems only**. The mobile edition supports Android devices that support TrebleDroid and have TWRP, and requires **Android 9 exactly**. Earlier and later versions are not compatible.
 
+<p align="center">
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/cd80900a3f2c6f319a5733c01f25b3f5e0f5e20e/assets/splash/FCE6EED9-BA57-45CF-AF90-5AA056A069F2.gif?raw=true"
+       width="240"
+       alt="Kiba, the KibaOS mascot, peeking in and waving">
+</p>
+
 > [!TIP]
 > **Meet Kiba, our mascot.** He's a silly raccoon who enjoys blueberries and napping in the sun.
 
@@ -275,7 +281,9 @@ Issues and pull requests are welcome at [KibaLabsLLC/Kiba](https://github.com/Ki
 
 ## License
 
-KibaOS is a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, Budgie, Docker and more), each under its own license. The build scripts and configuration files in this repository are released under the **MIT License**.
+KibaOS is released under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+KibaOS is also a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, Budgie and more), each under its own license.
 
 ---
 
