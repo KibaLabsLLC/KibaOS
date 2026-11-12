@@ -3871,29 +3871,47 @@ mkdir -p /usr/share/wayland-sessions
 rm -rf /usr/share/wayland-sessions/budgie-desktop.desktop
 cat > /usr/local/bin/kibaos-session << 'KIBASESSION'
 #!/bin/bash
-# Runs labwc + budgie and restarts it if it crashes shortly after starting,
-# so a crash loop does not bounce GDM back to the greeter (autologin is
-# only attempted once per boot). A clean exit (logout) ends the session.
-MAX_QUICK_CRASHES=5     # give up after this many crashes in a row
-QUICK_SECS=15           # a run shorter than this counts as a crash
+# Runs labwc + budgie and restarts it if it dies shortly after starting, so a
+# crash does not bounce GDM back to the greeter (autologin is only attempted
+# once per boot). labwc is started with --session=budgie-desktop, which tells
+# labwc to exit when budgie-desktop exits -- and budgie-desktop can exit with
+# status 0 even on failure (e.g. the compositor-ready wait fails, or a required
+# component such as budgie-panel goes away). So an exit code of 0 only counts as
+# a real logout if the session had been up for a while.
+# Everything labwc/budgie print goes to the journal under kibaos-labwc.
+MAX_QUICK_CRASHES=5     # give up after this many quick exits in a row
+QUICK_SECS=20           # a run shorter than this counts as a crash, even rc=0
 crashes=0
 while :; do
   start=$(date +%s)
-  /usr/bin/labwc --session=/usr/bin/budgie-desktop
+  systemd-cat -t kibaos-labwc /usr/bin/labwc --session=/usr/bin/budgie-desktop
   rc=$?
   run=$(( $(date +%s) - start ))
-  # clean exit or terminated by logout/shutdown
-  [ "$rc" -eq 0 ] && exit 0
-  [ "$rc" -eq 143 ] && exit 0
   logger -t kibaos-session "labwc exited rc=${rc} after ${run}s"
   if [ "$run" -lt "$QUICK_SECS" ]; then
-    crashes=$((crashes + 1))
-  else
+    # Keep evidence of why the session died where it survives the greeter:
+    # budgie-session logs "Unrecoverable failure in required component ..."
+    # when budgie-panel/budgie-daemon crash, which ends the whole session.
+    mkdir -p "$HOME/.cache" 2>/dev/null
+    {
+      echo "=== $(date -Is) labwc rc=${rc} after ${run}s ==="
+      journalctl --user -b --no-pager -n 400 2>/dev/null \
+        | grep -i -E 'unrecoverable|killed by signal|dumped core|segfault|abort|budgie-session|kibaos-labwc|labwc' \
+        | tail -n 60
+    } >> "$HOME/.cache/kibaos-session-crash.log" 2>/dev/null
+  fi
+  # terminated by logout/shutdown signal
+  [ "$rc" -eq 143 ] && exit 0
+  if [ "$run" -ge "$QUICK_SECS" ]; then
+    # a long-running session ending cleanly is a normal logout
+    [ "$rc" -eq 0 ] && exit 0
     crashes=0
+  else
+    crashes=$((crashes + 1))
   fi
   if [ "$crashes" -ge "$MAX_QUICK_CRASHES" ]; then
-    logger -t kibaos-session "labwc crash loop (${crashes}x), giving up"
-    exit "$rc"
+    logger -t kibaos-session "session exited ${crashes}x in under ${QUICK_SECS}s, giving up"
+    exit 1
   fi
   sleep 1
 done
@@ -4006,6 +4024,37 @@ ExecStart=/usr/local/bin/kibaos-live-autologin
 WantedBy=graphical.target
 LIVEAUTOLOGINSVC
 systemctl enable kibaos-live-autologin.service
+
+# 3b. Make GDM wait for the real GPU driver. Since kernel 6.9 GDM can start its
+#     greeter/autologin session on the simpledrm framebuffer before amdgpu/i915/
+#     nouveau has loaded; the GPU then appears mid-start and the session dies
+#     or hangs, so autologin falls back to the greeter (Ubuntu LP #2115451;
+#     Ubuntu patched gdm3 to wait for the real DRM driver). Gate GDM ourselves:
+#     wait up to 20s for a DRM card that isn't simpledrm, then go ahead anyway
+#     so headless or GPU-less machines still boot.
+cat > /usr/local/bin/kibaos-wait-drm << 'WAITDRM'
+#!/bin/bash
+for _ in $(seq 1 40); do
+  for c in /sys/class/drm/card[0-9]*; do
+    [ -e "$c/device/driver" ] || continue
+    drv="$(basename "$(readlink -f "$c/device/driver")")"
+    case "$drv" in
+      simpledrm|simple-framebuffer|simplefb|efifb|vesafb) ;;
+      *) exit 0 ;;
+    esac
+  done
+  sleep 0.5
+done
+logger -t kibaos-wait-drm "no non-simpledrm GPU driver after 20s, starting GDM anyway"
+exit 0
+WAITDRM
+chmod +x /usr/local/bin/kibaos-wait-drm
+mkdir -p /etc/systemd/system/gdm.service.d
+cat > /etc/systemd/system/gdm.service.d/10-kibaos-wait-drm.conf << 'GDMWAITDRM'
+[Service]
+ExecStartPre=/usr/local/bin/kibaos-wait-drm
+TimeoutStartSec=90
+GDMWAITDRM
 
 # 4. Fail the build loudly if the pieces autologin depends on are missing.
 for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/gdm.service /etc/pam.d/gdm-autologin; do
