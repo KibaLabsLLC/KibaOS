@@ -2152,6 +2152,25 @@ lvm2
 
 tuned
 PACKAGES
+
+# ── NVIDIA open kernel modules (Turing / GTX 16xx / RTX 20-series and newer) ──
+# nvidia-open is the prebuilt module package for the stock `linux` kernel
+# (no DKMS compile in the chroot); it pins the exact linux version from the
+# same repo snapshot. nvidia-utils ships the GSP firmware, the nouveau
+# blacklist, nvidia_drm modeset/fbdev defaults and the Vulkan/GL ICDs.
+# Pascal/Maxwell and older are NOT supported by the open modules; they fall
+# back to nouveau/NVK via kibaos-gpu-select (see the GDM section below).
+# x86_64 only: Arch ships prebuilt nvidia-open for x86_64 alone.
+if [ "${KIBA_ARCH}" = "x86_64" ]; then
+  cat >> "${PROFILE}/packages.x86_64" << 'NVIDIAPKGS'
+nvidia-open
+nvidia-utils
+lib32-nvidia-utils
+nvidia-settings
+egl-wayland
+libva-nvidia-driver
+NVIDIAPKGS
+fi
 if [ "${KIBA_ARCH}" = "aarch64" ]; then
   sed -i '/^linux-firmware-intel$/d' "${PROFILE}/packages.x86_64"
   sed -i '/^# linux-firmware split the Intel GuC\/HuC blobs/,/^# fails and KWin can never get a working renderer/d' \
@@ -2873,6 +2892,23 @@ else
   cp /usr/share/kibaos/logo-256.png "${KIBA_PLYMOUTH_DIR}/splash.png" 2>/dev/null || true
 fi
 
+# 8px anti-aliased white dot for the spinner (supersampled 5x, then Lanczos down).
+magick -size 40x40 xc:none -fill white -draw "circle 20,20 20,2" \
+  -filter Lanczos -resize 8x8 "${KIBA_PLYMOUTH_DIR}/dot.png"
+test -s "${KIBA_PLYMOUTH_DIR}/dot.png" || { echo "ERROR: failed to render Plymouth spinner dot" >&2; exit 1; }
+
+# Peeking Kiba mascot (animated, bottom-right of the splash). Fetched from the
+# repo and exploded into per-frame PNGs because Plymouth's script module can't
+# play GIFs directly.
+KIBA_PEEK_URL="https://github.com/KibaLabsLLC/KibaOS/blob/cd80900a3f2c6f319a5733c01f25b3f5e0f5e20e/assets/splash/FCE6EED9-BA57-45CF-AF90-5AA056A069F2.gif?raw=true"
+curl -fL --retry 5 --retry-delay 3 -o "${KIBA_PLYMOUTH_DIR}/peek.gif" "${KIBA_PEEK_URL}" || true
+file "${KIBA_PLYMOUTH_DIR}/peek.gif" | grep -qi 'GIF image' \
+  || { echo "ERROR: failed to download Plymouth mascot GIF (${KIBA_PEEK_URL})" >&2; exit 1; }
+magick "${KIBA_PLYMOUTH_DIR}/peek.gif" -coalesce -background none -strip \
+  -filter Lanczos -resize 240x "${KIBA_PLYMOUTH_DIR}/peek-%d.png"
+rm -f "${KIBA_PLYMOUTH_DIR}/peek.gif"
+test -s "${KIBA_PLYMOUTH_DIR}/peek-8.png" || { echo "ERROR: failed to extract mascot frames for Plymouth" >&2; exit 1; }
+
 cat > "${KIBA_PLYMOUTH_DIR}/kibaos.plymouth" << 'PLYMOUTHDESC'
 [Plymouth Theme]
 Name=KibaOS
@@ -2886,8 +2922,8 @@ PLYMOUTHDESC
 
 cat > "${KIBA_PLYMOUTH_DIR}/kibaos.script" << 'PLYMOUTHSCRIPT'
 // KibaOS boot splash — Plymouth script theme.
-// Centered brand image on a dark background, with a small three-dot
-// progress pulse underneath and a minimal password prompt for
+// Centered brand image on a dark background, with a minimal Windows 11-style
+// orbiting-dot spinner underneath and a minimal password prompt for
 // full-disk-encryption unlocks.
 
 Window.SetBackgroundTopColor(0.043, 0.055, 0.078);
@@ -2900,26 +2936,67 @@ logo.sprite.SetX(Window.GetWidth() / 2 - logo.image.GetWidth() / 2);
 logo.sprite.SetY(Window.GetHeight() / 2 - logo.image.GetHeight() / 2);
 logo.sprite.SetOpacity(1);
 
-dot_count = 3;
-dot_spacing = 26;
-dots = [];
-for (i = 0; i < dot_count; i++) {
-  dots[i].image = Image.Text("•", 1, 1, 1, 1, "Sans 28");
-  dots[i].sprite = Sprite(dots[i].image);
-  dots[i].sprite.SetX(Window.GetWidth() / 2 - (dot_count * dot_spacing) / 2 + i * dot_spacing);
-  dots[i].sprite.SetY(logo.sprite.GetY() + logo.image.GetHeight() + 36);
-  dots[i].sprite.SetOpacity(0.25);
+// Peeking mascot: bottom-right corner, flush with the bottom edge so it looks
+// like it is peeking up over the screen. Frames are peek-0.png .. peek-8.png
+// (extracted from the source GIF at build time), cycled from refresh_callback.
+peek_scale = Window.GetHeight() / 1080;
+if (peek_scale < 0.6) peek_scale = 0.6;
+peek_count = 9;
+peek_ticks = 8;      // ticks (~50/s) per frame, matches the GIF's 0.16s delay
+peek_margin = Math.Int(40 * peek_scale);
+peek_frames = [];
+for (peek_i = 0; peek_i < peek_count; peek_i++) {
+  peek_img = Image("peek-" + peek_i + ".png");
+  peek_frames[peek_i] = peek_img.Scale(Math.Int(peek_img.GetWidth() * peek_scale),
+                                       Math.Int(peek_img.GetHeight() * peek_scale));
+}
+peek_sprite = Sprite(peek_frames[0]);
+peek_sprite.SetX(Window.GetWidth() - peek_frames[0].GetWidth() - peek_margin);
+peek_sprite.SetY(Window.GetHeight() - peek_frames[0].GetHeight());
+peek_sprite.SetZ(10);
+
+// Windows 11-style spinner: five small dots enter one after another, sweep
+// around a circle with an ease-in-out (slow, fast, slow, so they bunch up and
+// spread out), then fade. Positions come from Math.Sin/Cos; dot.png is a
+// pre-rendered anti-aliased circle (see the magick call in the build script).
+pi = 3.14159265;
+spin_count = 5;
+spin_radius = 20;
+spin_period = 110;   // ticks (~50/s) for one full cycle
+spin_run = 72;       // ticks each dot spends travelling
+spin_stagger = 7;    // ticks between consecutive dots
+spin_cx = Window.GetWidth() / 2;
+spin_cy = logo.sprite.GetY() + logo.image.GetHeight() + 56;
+
+spin_image = Image("dot.png");
+spin = [];
+for (i = 0; i < spin_count; i++) {
+  spin[i] = Sprite(spin_image);
+  spin[i].SetOpacity(0);
 }
 
 progress_tick = 0;
 fun refresh_callback() {
   progress_tick++;
-  active = Math.Int(progress_tick / 8) % dot_count;
-  for (i = 0; i < dot_count; i++) {
-    if (i == active)
-      dots[i].sprite.SetOpacity(1);
-    else
-      dots[i].sprite.SetOpacity(0.25);
+  peek_n = Math.Int(progress_tick / peek_ticks);
+  peek_n = peek_n - Math.Int(peek_n / peek_count) * peek_count;
+  peek_sprite.SetImage(peek_frames[peek_n]);
+  tm = progress_tick - Math.Int(progress_tick / spin_period) * spin_period;
+  for (i = 0; i < spin_count; i++) {
+    t = tm - i * spin_stagger;
+    if (t < 0 || t > spin_run) {
+      spin[i].SetOpacity(0);
+    } else {
+      u = t / spin_run;
+      e = u * u * (3 - 2 * u);
+      a = 2 * pi * e;
+      spin[i].SetX(spin_cx + spin_radius * Math.Sin(a) - spin_image.GetWidth() / 2);
+      spin[i].SetY(spin_cy - spin_radius * Math.Cos(a) - spin_image.GetHeight() / 2);
+      o = 1;
+      if (u < 0.12) o = u / 0.12;
+      if (u > 0.88) o = (1 - u) / 0.12;
+      spin[i].SetOpacity(o);
+    }
   }
 }
 Plymouth.SetRefreshFunction(refresh_callback);
@@ -2930,7 +3007,7 @@ fun display_password_callback(prompt, bullets) {
   prompt_text.image = Image.Text(prompt, 1, 1, 1, 1);
   prompt_text.sprite = Sprite(prompt_text.image);
   prompt_text.sprite.SetX(Window.GetWidth() / 2 - prompt_text.image.GetWidth() / 2);
-  prompt_text.sprite.SetY(dots[0].sprite.GetY() + 50);
+  prompt_text.sprite.SetY(spin_cy + spin_radius + 36);
 }
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 PLYMOUTHSCRIPT
@@ -4055,6 +4132,41 @@ cat > /etc/systemd/system/gdm.service.d/10-kibaos-wait-drm.conf << 'GDMWAITDRM'
 ExecStartPre=/usr/local/bin/kibaos-wait-drm
 TimeoutStartSec=90
 GDMWAITDRM
+
+# 3c. NVIDIA: open modules only drive Turing (device ID 0x1e00) and newer.
+#     nvidia-utils blacklists nouveau, so a Pascal/Maxwell/Kepler card would
+#     be left with no real DRM driver. For those, explicitly modprobe nouveau
+#     (blacklist only blocks alias autoload, not an explicit modprobe) before
+#     GDM starts. Supported cards are untouched: udev autoloads nvidia.
+cat > /usr/local/bin/kibaos-gpu-select << 'GPUSELECT'
+#!/bin/bash
+for d in /sys/bus/pci/devices/*; do
+  [ "$(cat "$d/vendor" 2>/dev/null)" = "0x10de" ] || continue
+  case "$(cat "$d/class" 2>/dev/null)" in 0x0300*|0x0302*) ;; *) continue ;; esac
+  id=$(( $(cat "$d/device") ))
+  if [ "$id" -lt $((0x1e00)) ]; then
+    logger -t kibaos-gpu-select "pre-Turing NVIDIA GPU $(cat "$d/device"): using nouveau"
+    modprobe nouveau || true
+    exit 0
+  fi
+done
+exit 0
+GPUSELECT
+chmod +x /usr/local/bin/kibaos-gpu-select
+cat > /etc/systemd/system/kibaos-gpu-select.service << 'GPUSELECTSVC'
+[Unit]
+Description=Use nouveau for NVIDIA GPUs the open kernel modules do not support
+After=systemd-udev-trigger.service
+Before=gdm.service display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kibaos-gpu-select
+
+[Install]
+WantedBy=graphical.target
+GPUSELECTSVC
+systemctl enable kibaos-gpu-select.service
 
 # 4. Fail the build loudly if the pieces autologin depends on are missing.
 for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/gdm.service /etc/pam.d/gdm-autologin; do
@@ -5855,7 +5967,7 @@ rm -rf /var/cache/pacman/pkg/*
 rm -rf /usr/share/man/* /usr/share/info/* /usr/share/doc/*
 find /usr/lib/firmware -mindepth 1 -maxdepth 1 \
   ! -name 'i915'    ! -name 'amdgpu'   ! -name 'radeon'  \
-  ! -name 'nouveau' ! -name 'iwlwifi*' ! -name 'ath*'    \
+  ! -name 'nouveau' ! -name 'nvidia'  ! -name 'iwlwifi*' ! -name 'ath*' \
   ! -name 'ath10k'  ! -name 'ath11k'   ! -name 'rtl_nic' \
   ! -name 'rtlwifi' ! -name 'rtw88'    ! -name 'rtw89'   \
   ! -name 'sof'     ! -name 'sof-tplg' ! -name 'intel'   \
