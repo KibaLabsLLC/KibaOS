@@ -145,12 +145,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Resolve latest ISO build number from SourceForge
+        run: |
+          MARKER_URL="https://sourceforge.net/projects/kibaos/files/x86_64/last-iso-build-number-x86_64.txt/download"
+          curl --fail --location --retry 5 --retry-delay 5 \
+            "$MARKER_URL" --output build-number.txt
+          BUILD_NUM="$(tr -d '[:space:]' < build-number.txt)"
+          if ! [[ "$BUILD_NUM" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid SourceForge build marker: '$BUILD_NUM'"
+            exit 1
+          fi
+          echo "Resolved latest KibaOS build: v${BUILD_NUM}"
+          echo "BUILD_NUM=${BUILD_NUM}" >> "$GITHUB_ENV"
       - name: Download latest ISO from SourceForge
         run: |
+          ISO_NAME="kibaos-v${BUILD_NUM}.iso"
+          ISO_URL="https://sourceforge.net/projects/kibaos/files/x86_64/${ISO_NAME}/download"
+          echo "Downloading ${ISO_URL}"
           curl --fail --location --retry 5 --retry-delay 5 \
-            "https://sourceforge.net/projects/kibaos/files/x86_64/latest/download" \
-            --output kibaos-vmtest.iso
+            "$ISO_URL" --output kibaos-vmtest.iso
           test -s kibaos-vmtest.iso || { echo "::error::SourceForge returned an empty ISO"; exit 1; }
+          echo "Downloaded ${ISO_NAME} ($(du -h kibaos-vmtest.iso | cut -f1))"
       - name: Boot ISO in QEMU and capture desktop screenshots
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules >/dev/null
