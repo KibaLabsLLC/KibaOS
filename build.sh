@@ -2141,6 +2141,7 @@ plymouth
 squashfs-tools
 
 virtiofsd
+qemu-guest-agent
 breeze-icons
 dialog
 iproute2
