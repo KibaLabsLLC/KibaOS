@@ -247,25 +247,46 @@ jobs:
           fi
           sudo apt-get update
           sudo apt-get install -y qemu-system-x86 imagemagick ovmf
-          cat > shot.py <<'EOF'
-          import socket, json, sys, os
-          s = socket.socket(socket.AF_UNIX)
-          s.connect("qmp.sock")
-          f = s.makefile("rw")
-          f.readline()
-          def q(c):
-              f.write(json.dumps(c) + "\n")
-              f.flush()
-              while True:
-                  r = json.loads(f.readline())
-                  if "return" in r or "error" in r:
-                      return r
-          q({"execute": "qmp_capabilities"})
-          r = q({"execute": "screendump", "arguments": {"filename": os.path.abspath(sys.argv[1]), "format": "png"}})
-          if "error" in r:
-              print(r)
-              sys.exit(1)
-          EOF
+          cat > qmp.py <<'PYQMP'
+          import json, os, socket, sys
+
+          def command(payload):
+              sock = socket.socket(socket.AF_UNIX)
+              sock.connect("qmp.sock")
+              stream = sock.makefile("rw")
+              stream.readline()  # QMP greeting
+              def send(cmd):
+                  stream.write(json.dumps(cmd) + "\n")
+                  stream.flush()
+                  while True:
+                      response = json.loads(stream.readline())
+                      if "return" in response or "error" in response:
+                          return response
+              result = send({"execute": "qmp_capabilities"})
+              if "error" in result:
+                  raise RuntimeError(result["error"])
+              result = send(payload)
+              sock.close()
+              if "error" in result:
+                  raise RuntimeError(result["error"])
+              return result
+
+          if sys.argv[1] == "screendump":
+              command({"execute": "screendump", "arguments": {
+                  "filename": os.path.abspath(sys.argv[2]), "format": "png"
+              }})
+          elif sys.argv[1] == "close-installer":
+              # Send Alt+F4 to close the foreground installer window.
+              command({"execute": "send-key", "arguments": {
+                  "keys": [
+                      {"type": "qcode", "data": "alt"},
+                      {"type": "qcode", "data": "f4"}
+                  ],
+                  "hold-time": 150
+              }})
+          else:
+              raise SystemExit("Usage: qmp.py screendump FILE | close-installer")
+          PYQMP
           mkdir -p shots
           ISO="$ISO_PATH"
           FW=()
@@ -275,12 +296,57 @@ jobs:
           fi
           qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
           for i in $(seq 1 30); do [ -S qmp.sock ] && break; sleep 1; done
+          # A screen is considered installer-like when at least 85% of its
+          # pixels are brighter than 90% grayscale. Close it once with Alt+F4,
+          # then wait for two consecutive non-white frames before capturing.
+          is_mostly_white() {
+            local ratio
+            ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
+            awk -v value="$ratio" 'BEGIN { exit !(value >= 0.85) }'
+          }
+          capture_probe() {
+            python3 qmp.py screendump "$1"
+          }
+          wait_for_desktop() {
+            local deadline=$((SECONDS + 180))
+            local stable=0
+            while (( SECONDS < deadline )); do
+              sleep 5
+              kill -0 "$(cat qemu.pid)" 2>/dev/null || { echo "::error::VM exited while waiting for the desktop"; return 1; }
+              capture_probe shots/desktop-probe.png
+              if is_mostly_white shots/desktop-probe.png; then
+                stable=0
+                echo "Installer/white screen still visible; waiting..."
+              else
+                stable=$((stable + 1))
+                if (( stable >= 2 )); then
+                  echo "Desktop detected after closing installer."
+                  return 0
+                fi
+              fi
+            done
+            echo "::error::Installer was closed, but a non-white desktop was not detected within 180 seconds."
+            return 1
+          }
+
+          installer_closed=0
           for i in $(seq 1 "$SHOTS"); do
             sleep "$INTERVAL"
             kill -0 "$(cat qemu.pid)" || { echo "::error::VM died before screenshot ${i}"; exit 1; }
-            python3 shot.py "shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
+            shot="shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
+            capture_probe shots/current-probe.png
+            if is_mostly_white shots/current-probe.png && [ "$installer_closed" -eq 0 ]; then
+              echo "Mostly-white screen detected; assuming the installer is open. Sending Alt+F4..."
+              python3 qmp.py close-installer
+              installer_closed=1
+              wait_for_desktop
+              mv shots/desktop-probe.png "$shot"
+            else
+              mv shots/current-probe.png "$shot"
+            fi
           done
-          LAST=$(ls shots/*.png | tail -1)
+          rm -f shots/current-probe.png shots/desktop-probe.png
+          LAST=$(find shots -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort | tail -1)
           SD=$(convert "$LAST" -format '%[fx:standard_deviation]' info:)
           echo "Final screenshot ${LAST} stddev=${SD}"
           awk -v v="$SD" 'BEGIN{exit !(v>0.005)}' || { echo "::error::Final screenshot is blank -- desktop did not render"; exit 1; }
