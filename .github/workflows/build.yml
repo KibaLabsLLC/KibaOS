@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       run_vmtest:
-        description: 'Run BIOS and UEFI VM tests using the newest available GitHub build artifact'
+        description: 'Run UEFI VM test using the newest available GitHub build artifact'
         required: false
         type: boolean
         default: false
@@ -27,9 +27,19 @@ jobs:
           - arch: x86_64
             runner: ubuntu-latest
             docker_image: archlinux:latest
+            build_flags: ""
+            free_disk: true
+            retention_days: 7
+            artifact_path: |
+              *.iso
+              *.iso.sha256
           - arch: mobile
             runner: ubuntu-24.04-arm
             docker_image: menci/archlinuxarm:base-devel
+            build_flags: "--mobile"
+            free_disk: false
+            retention_days: 1
+            artifact_path: out/
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 180
     outputs:
@@ -38,7 +48,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Free disk space
-        if: matrix.arch == 'x86_64'
+        if: ${{ matrix.free_disk }}
         uses: endersonmenezes/free-disk-space@v3
         with:
           remove_android: true
@@ -58,33 +68,7 @@ jobs:
             -e RUN_NUM="${{ github.run_number }}" \
             -e KIBA_ARCH="${{ matrix.arch }}" \
             "${{ matrix.docker_image }}" \
-            /bin/bash /w/build.sh ${{ matrix.arch == 'mobile' && '--mobile' || '' }}
-      - name: Upload ISO to SourceForge
-        if: matrix.arch == 'x86_64'
-        env:
-          SF_USER: ${{ secrets.SF_USER }}
-          SSHPASS: ${{ secrets.SF_PASS }}
-        run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then echo "SourceForge credentials not configured. Skipping."; exit 0; fi
-          sudo apt-get install -y sshpass rsync
-          mkdir -p ~/.ssh
-          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          ARCH="${{ matrix.arch }}"
-          REMOTE_DIR="/home/frs/project/kibaos/${ARCH}"
-          MARKER="last-iso-build-number-${ARCH}.txt"
-          rm -f "${MARKER}"
-          sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}" "${MARKER}" 2>/dev/null || true
-          if [ -s "${MARKER}" ]; then
-            PREV_ISO="kibaos-v$(cat "${MARKER}").iso"
-            echo "Removing previous ${ARCH} build: ${PREV_ISO} (+ .sha256)"
-            printf '%s\n' "cd ${REMOTE_DIR}" "rm ${PREV_ISO}" "rm ${PREV_ISO}.sha256" "bye" \
-              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
-          else
-            echo "No previous build marker for ${ARCH} -- nothing to delete."
-          fi
-          sshpass -e rsync -avP --progress *.iso *.iso.sha256 "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
-          echo "${{ github.run_number }}" > "${MARKER}"
-          sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
+            /bin/bash /w/build.sh ${{ matrix.build_flags }}
       - name: Verify mobile installer zip is self-contained
         if: matrix.arch == 'mobile'
         run: |
@@ -101,52 +85,99 @@ jobs:
           done
           if [ "$missing" -eq 1 ]; then echo "::error::Refusing to publish an installer zip that requires a manual GSI push -- see build.sh's KIBA_MOBILE_GSI_URL / KIBA_SKIP_GSI_FETCH handling."; exit 1; fi
           echo "Zip is self-contained: rootfs + GSI + boot-repack ingredients all present."
-      - name: Upload mobile artifacts to SourceForge
-        if: matrix.arch == 'mobile'
-        env:
-          SF_USER: ${{ secrets.SF_USER }}
-          SSHPASS: ${{ secrets.SF_PASS }}
-        run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then echo "SourceForge credentials not configured. Skipping."; exit 0; fi
-          if [ ! -f out/kibaos-mobile-installer.zip ] || [ ! -f out/kibaos-mobile-installer.zip.sha256 ]; then echo "out/kibaos-mobile-installer.zip(.sha256) not found -- build.sh didn't produce it?" >&2; exit 1; fi
-          sudo apt-get install -y sshpass rsync
-          mkdir -p ~/.ssh
-          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          sshpass -e rsync -avP --progress out/kibaos-mobile-installer.zip out/kibaos-mobile-installer.zip.sha256 "$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/mobile/"
-      - name: Upload build artifact for OTA job
-        if: matrix.arch == 'x86_64'
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: kibaos-build-${{ matrix.arch }}
-          path: |
-            *.iso
-          retention-days: 7
-      - name: Upload mobile build artifact for OTA job
-        if: matrix.arch == 'mobile'
-        uses: actions/upload-artifact@v4
-        with:
-          name: kibaos-build-${{ matrix.arch }}
-          path: |
-            out/
-          retention-days: 1
-  vmtest:
+          path: ${{ matrix.artifact_path }}
+          retention-days: ${{ matrix.retention_days }}
+  publish:
     needs: build
-    if: ${{ always() && inputs.run_vmtest }}
+    if: ${{ !inputs.skip_build }}
     strategy:
       fail-fast: false
       matrix:
-        fw: [bios, uefi]
+        include:
+          - arch: x86_64
+            sf_dir: x86_64
+            payload: "*.iso,*.iso.sha256"
+            prune_previous: true
+          - arch: mobile
+            sf_dir: mobile
+            payload: "kibaos-mobile-installer.zip,kibaos-mobile-installer.zip.sha256"
+            prune_previous: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SF_USER: ${{ secrets.SF_USER }}
+      SSHPASS: ${{ secrets.SF_PASS }}
+      REMOTE_DIR: /home/frs/project/kibaos/${{ matrix.sf_dir }}
+      MARKER: last-iso-build-number-${{ matrix.arch }}.txt
+    steps:
+      - name: Check SourceForge credentials
+        id: creds
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
+            echo "SourceForge credentials not configured. Skipping."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download build artifact
+        if: steps.creds.outputs.ok == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: kibaos-build-${{ matrix.arch }}
+          path: dist
+      - name: Prepare SSH
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          sudo apt-get install -y sshpass rsync
+          mkdir -p ~/.ssh
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+      - name: Remove previous build from SourceForge
+        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
+        run: |
+          rm -f "${MARKER}"
+          sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}" "${MARKER}" 2>/dev/null || true
+          if [ -s "${MARKER}" ]; then
+            PREV_ISO="kibaos-v$(cat "${MARKER}").iso"
+            echo "Removing previous ${{ matrix.arch }} build: ${PREV_ISO} (+ .sha256)"
+            printf '%s\n' "cd ${REMOTE_DIR}" "rm ${PREV_ISO}" "rm ${PREV_ISO}.sha256" "bye" \
+              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
+          else
+            echo "No previous build marker for ${{ matrix.arch }} -- nothing to delete."
+          fi
+      - name: Upload to SourceForge
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          FILES=()
+          IFS=',' read -ra PATS <<< "${{ matrix.payload }}"
+          for pat in "${PATS[@]}"; do
+            mapfile -t FOUND < <(find dist -type f -name "$pat")
+            if [ "${#FOUND[@]}" -eq 0 ]; then
+              echo "::error::No file matching ${pat} in the ${{ matrix.arch }} build artifact" >&2
+              exit 1
+            fi
+            FILES+=("${FOUND[@]}")
+          done
+          printf 'Uploading: %s\n' "${FILES[@]}"
+          sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
+      - name: Record build marker on SourceForge
+        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
+        run: |
+          echo "${{ github.run_number }}" > "${MARKER}"
+          sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
+  vmtest_find:
+    needs: build
+    if: ${{ always() && inputs.run_vmtest }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 10
     permissions:
       actions: read
-      contents: write
-    env:
-      SHOTS: 10
-      INTERVAL: 30
+    outputs:
+      run_id: ${{ steps.find-build-artifact.outputs.run_id }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
       - name: Find newest run containing the x86_64 build artifact
         id: find-build-artifact
         uses: actions/github-script@v7
@@ -213,11 +244,26 @@ jobs:
             }
 
             core.setFailed(`No unexpired ${artifactName} artifact was found in this run or any previous run of ${workflowFile}${branch ? ` on branch ${branch}` : ''}.`);
+  vmtest:
+    needs: vmtest_find
+    if: ${{ !cancelled() && needs.vmtest_find.result == 'success' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        fw: [uefi]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+    env:
+      SHOTS: 10
+      INTERVAL: 30
+    steps:
       - name: Download selected build artifact
         uses: actions/download-artifact@v4
         with:
           name: kibaos-build-x86_64
-          run-id: ${{ steps.find-build-artifact.outputs.run_id }}
+          run-id: ${{ needs.vmtest_find.outputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./vmtest-artifact
       - name: Locate extracted ISO
@@ -367,25 +413,69 @@ jobs:
           kill -TERM "$(cat qemu.pid)" 2>/dev/null || true
           sleep 2
           kill -KILL "$(cat qemu.pid)" 2>/dev/null || true
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vmtest-shots-${{ matrix.fw }}
+          path: shots/
+          if-no-files-found: ignore
+          retention-days: 7
+  vmtest_commit:
+    needs: vmtest
+    if: ${{ !cancelled() && needs.vmtest.result != 'skipped' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: screenshot-commit
+      cancel-in-progress: false
+    env:
+      DESKTOP_FW: uefi
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Download screenshots
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vmtest-shots-*
+          path: shots-in
       - name: Commit screenshots to assets/screenshots
-        if: ${{ !cancelled() && hashFiles('shots/*.png') != '' }}
         run: |
-          D="assets/screenshots/v${{ github.run_number }}/${{ matrix.fw }}"
-          mkdir -p "$D"
-          cp shots/*.png "$D/"
+          if ! compgen -G 'shots-in/*/*.png' >/dev/null; then
+            echo "No screenshots to commit."
+            exit 0
+          fi
+          # Stage everything outside the repo tree so it survives a hard reset.
+          STAGE="$RUNNER_TEMP/screens-stage"
+          rm -rf "$STAGE"; mkdir -p "$STAGE"
+          for d in shots-in/vmtest-shots-*; do
+            FW="${d##*vmtest-shots-}"
+            mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
+            cp "$d"/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
+          done
+          LATEST=$(find "shots-in/vmtest-shots-${DESKTOP_FW}" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' 2>/dev/null | sort | tail -1)
+          [ -n "$LATEST" ] && cp "$LATEST" "$STAGE/desktop.png"
+
           git config user.name "KibaOS OTA Bot"
           git config user.email "ota@kibaos.wolftech.tech"
-          git add "$D"
-          if [ "${{ matrix.fw }}" = "uefi" ]; then
-            LATEST=$(find shots -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort | tail -1)
-            if [ -n "$LATEST" ]; then
-              cp "$LATEST" assets/screenshots/desktop.png
-              git add assets/screenshots/desktop.png
-            fi
-          fi
-          git commit -m "Add ${{ matrix.fw }} VM screenshots for build v${{ github.run_number }}"
-          for i in 1 2 3 4 5; do
-            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin "HEAD:$GITHUB_REF_NAME" && exit 0
+          # No rebase/merge: binary files can't be merged and a failed rebase wedges
+          # every retry. Each attempt resets to the latest remote tip and re-applies
+          # the staged files on top, so the newest run always wins desktop.png and
+          # the per-run v<N>/ folders never collide.
+          for i in 1 2 3 4 5 6; do
+            git rebase --abort 2>/dev/null || true
+            git fetch --no-tags origin "$GITHUB_REF_NAME"
+            git reset --hard "origin/$GITHUB_REF_NAME"
+            mkdir -p assets/screenshots
+            cp -r "$STAGE"/. assets/screenshots/
+            git add assets/screenshots
+            if git diff --cached --quiet; then echo "Nothing new to commit."; exit 0; fi
+            git commit -m "Add VM screenshots for build v${{ github.run_number }}"
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then exit 0; fi
+            echo "Push raced with another commit (attempt $i); retrying on the new tip..."
             sleep $((i * 5))
           done
           exit 1
