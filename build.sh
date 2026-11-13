@@ -4937,8 +4937,28 @@ FFCONF
 # launcher. lookapp must already be running for --toggle to work, hence the
 # autostart. The default labwc keybinds are kept via <default />.
 mkdir -p "${SKEL}/.look" "${SKEL}/.config/labwc"
+# White theme: Look's only light preset is "kindle" (cream paper, serif), so
+# it's used as the base for its light panel/control palette and overridden to
+# pure white with near-black text, a thin light-grey border and the system sans
+# font (Adwaita Sans, Look's Linux default) instead of Noto Serif. Individual
+# ui_* keys win over the preset's values. Colour channels are 0..1.
 cat > "${SKEL}/.look/config" << 'LOOKCONF'
 launcher_hotkey=none
+ui_theme=kindle
+ui_tint_red=1.0
+ui_tint_green=1.0
+ui_tint_blue=1.0
+ui_tint_opacity=1.0
+ui_font_red=0.11
+ui_font_green=0.11
+ui_font_blue=0.12
+ui_font_opacity=1.0
+ui_font_name=Adwaita Sans
+ui_border_red=0.85
+ui_border_green=0.85
+ui_border_blue=0.87
+ui_border_opacity=0.8
+ui_border_thickness=1.0
 LOOKCONF
 
 cat > "${SKEL}/.config/labwc/rc.xml" << 'LABWCRC'
@@ -4994,13 +5014,13 @@ X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LIAUTO
 
-# ── VibePanel: rounded glass-rectangle dock (bottom, taskbar only) ──────
+# ── VibePanel: plain rounded-rectangle dock (bottom, taskbar only) ──────
 # No launcher/pinned apps (look on Super does that). The bar surface itself is
 # fully transparent; the only visible thing is the taskbar "island" in the
-# centre, styled as a frosted-glass rounded rectangle. Hot-reloads on edit.
-# GTK CSS has no backdrop-filter, so the glass is a translucent white tint +
-# gradient + 1px light rim; theme.blur additionally asks the compositor for real
-# blur through ext-background-effect-v1 and is ignored where unsupported.
+# centre: a solid, opaque rectangle with lightly rounded corners, no glass,
+# blur, outline or shadow. A standalone widget's default floor is square
+# (min-width = bar height), so style.css raises min-width to keep it a wide
+# rectangle even with one window open; it still grows if more windows open.
 # The OSD is off so Budgie's own OSD isn't doubled; the notification daemon
 # only claims org.freedesktop.Notifications if nothing else already owns it.
 mkdir -p "${SKEL}/.config/vibepanel"
@@ -5018,10 +5038,10 @@ auto_hide = "never"
 left = []
 center = ["taskbar"]
 right = []
-border_radius = 30         # % of height: rounded rectangle, not a pill
+border_radius = 30         # % of height: lightly rounded rectangle
 background_color = "#ffffff"
-background_opacity = 0.18  # frosted tint; style.css adds the gloss
-popover_background_opacity = 0.85
+background_opacity = 1.0   # solid, no translucency
+popover_background_opacity = 1.0
 
 [widgets.taskbar]
 show_icon = true
@@ -5031,15 +5051,12 @@ show_workspace_separator = false
 show_active = true
 
 [theme]
-mode = "dark"
+mode = "light"
 animations = true
 ripple = false
-shadows = true
-blur = true
-outline = true
-outline_width = 1
-outline_color = "#ffffff"
-outline_opacity = 0.35
+shadows = false
+blur = false
+outline = false
 
 [osd]
 enabled = false
@@ -5049,23 +5066,16 @@ enabled = false
 VIBEPANELCONF
 
 cat > "${SKEL}/.config/vibepanel/style.css" << 'VIBEPANELCSS'
-/* Glass dock: soft top-lit gradient over the translucent tint, bright inner
-   top edge, faint dark inner bottom edge, small drop shadow. */
+/* Plain dock: a wide rectangle by default (not a square) that grows with the
+   number of open windows. */
 .widget.taskbar {
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.30) 0%,
-    rgba(255, 255, 255, 0.10) 55%,
-    rgba(255, 255, 255, 0.16) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.50),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
-    0 2px 10px rgba(0, 0, 0, 0.28);
+  min-width: 480px;
+  background-image: none;
+  box-shadow: none;
 }
 
 .taskbar-button {
-  border-radius: 14px;
+  border-radius: 10px;
 }
 VIBEPANELCSS
 
