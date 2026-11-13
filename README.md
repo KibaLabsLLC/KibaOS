@@ -1,11 +1,3 @@
-<p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/47b6609f986c97d66e0dee8a0560c0c1f3a84b91/assets/wallpapers/DEFC1CA8-F1B1-417E-9612-380D234006C3.png?raw=true"
-       width="1024"
-       alt="KibaOS Banner">
-</p>
-
-<div align="center">
-
 # KibaOS
 ### A ready-to-use Linux desktop from Kiba Labs, LLC
 
