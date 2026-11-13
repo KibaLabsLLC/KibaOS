@@ -4942,13 +4942,14 @@ mkdir -p "${SKEL}/.look" "${SKEL}/.config/labwc"
 # pure white with near-black text, a thin light-grey border and the system sans
 # font (Adwaita Sans, Look's Linux default) instead of Noto Serif. Individual
 # ui_* keys win over the preset's values. Colour channels are 0..1.
+# ui_tint_opacity=0.15 below = 85% transparency glass (0.85 would be 85% opaque)
 cat > "${SKEL}/.look/config" << 'LOOKCONF'
 launcher_hotkey=none
 ui_theme=kindle
 ui_tint_red=1.0
 ui_tint_green=1.0
 ui_tint_blue=1.0
-ui_tint_opacity=1.0
+ui_tint_opacity=0.15
 ui_font_red=0.11
 ui_font_green=0.11
 ui_font_blue=0.12
@@ -5014,13 +5015,14 @@ X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LIAUTO
 
-# ── VibePanel: plain rounded-rectangle dock (bottom, taskbar only) ──────
-# No launcher/pinned apps (look on Super does that). The bar surface itself is
-# fully transparent; the only visible thing is the taskbar "island" in the
-# centre: a solid, opaque rectangle with lightly rounded corners, no glass,
-# blur, outline or shadow. A standalone widget's default floor is square
-# (min-width = bar height), so style.css raises min-width to keep it a wide
-# rectangle even with one window open; it still grows if more windows open.
+# ── VibePanel: glass dock (bottom): pinned apps + taskbar ───────────────
+# Pinned apps: Browser (chromium), Files (nemo via kibaos-files) and Text
+# Editor (gnome-text-editor). VibePanel's taskbar widget has no pinning at the
+# pinned commit above, so each pin is a `custom-<name>` button widget (image +
+# on_click) grouped with the taskbar in ONE island, so pins and open windows
+# share a single pill. The bar surface itself is fully transparent; the island
+# is 85% transparent (background_opacity = 0.15) with a hairline glass edge.
+# The OSD is off so Budgie's own OSD isn't doubled.
 # The OSD is off so Budgie's own OSD isn't doubled; the notification daemon
 # only claims org.freedesktop.Notifications if nothing else already owns it.
 mkdir -p "${SKEL}/.config/vibepanel"
@@ -5036,12 +5038,12 @@ auto_hide = "never"
 
 [widgets]
 left = []
-center = ["taskbar"]
+center = [{ group = ["custom-browser", "custom-files", "custom-editor", "taskbar"] }]
 right = []
 border_radius = 30         # % of height: lightly rounded rectangle
 background_color = "#ffffff"
-background_opacity = 1.0   # solid, no translucency
-popover_background_opacity = 1.0
+background_opacity = 0.15  # 85% transparency glass
+popover_background_opacity = 0.15
 
 [widgets.taskbar]
 show_icon = true
@@ -5055,7 +5057,7 @@ mode = "light"
 animations = true
 ripple = false
 shadows = false
-blur = false
+blur = true            # real blur where the compositor supports ext-background-effect-v1
 outline = false
 
 [osd]
@@ -5065,13 +5067,47 @@ enabled = false
 enabled = false
 VIBEPANELCONF
 
+# Resolve icon files at build time ([widgets.custom-*].image needs an absolute
+# path). Prefers scalable SVGs, then the largest PNG; first name that exists wins.
+_kiba_find_icon() {
+  local _n _d _f
+  for _n in "$@"; do
+    for _d in /usr/share/icons/Cutefish /usr/share/icons/Papirus /usr/share/icons/Adwaita \
+              /usr/share/icons/hicolor /usr/share/pixmaps; do
+      [ -d "${_d}" ] || continue
+      _f=$(find "${_d}" -name "${_n}.svg" 2>/dev/null | head -n1)
+      [ -n "${_f}" ] || _f=$(find "${_d}" -name "${_n}.png" 2>/dev/null | sort -V | tail -n1)
+      [ -n "${_f}" ] && { echo "${_f}"; return 0; }
+    done
+  done
+  return 1
+}
+_kiba_pin() {   # name  tooltip  fallback-glyph  desktop-file  icon-names...
+  local _name="$1" _tip="$2" _glyph="$3" _desk="$4"; shift 4
+  local _img; _img=$(_kiba_find_icon "$@") || _img=""
+  {
+    echo ""
+    echo "[widgets.custom-${_name}]"
+    if [ -n "${_img}" ]; then echo "image = \"${_img}\""; else echo "label = \"${_glyph}\""; fi
+    echo "tooltip = \"${_tip}\""
+    echo "on_click = \"gio launch ${_desk}\""
+  } >> "${SKEL}/.config/vibepanel/config.toml"
+}
+_kiba_pin browser "Browser"     "🌐" /usr/share/applications/chromium.desktop            kibaos-browser chromium web-browser
+_kiba_pin files   "Files"       "📁" /usr/share/applications/kibaos-files.desktop        nemo system-file-manager folder
+_kiba_pin editor  "Text Editor" "📝" /usr/share/applications/org.gnome.TextEditor.desktop org.gnome.TextEditor accessories-text-editor text-editor
+
 cat > "${SKEL}/.config/vibepanel/style.css" << 'VIBEPANELCSS'
-/* Plain dock: a wide rectangle by default (not a square) that grows with the
-   number of open windows. */
-.widget.taskbar {
-  min-width: 480px;
+/* Glass dock: pinned apps + open windows in one translucent island. The
+   pins already make it wide, so no min-width floor is needed. */
+.widget.taskbar,
+.widget[class*="custom-"] {
   background-image: none;
   box-shadow: none;
+}
+
+.widget.taskbar {
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .taskbar-button {
