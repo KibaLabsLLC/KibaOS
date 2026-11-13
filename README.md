@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/01d78c3ba0102821011398a948becae271591fde/branding/README/902985159_2404324433708884_5909771899389672951_n.webp?raw=true" alt="KibaOS" width="800" />
+</p>
+
 # KibaOS
 ### A ready-to-use Linux desktop from Kiba Labs, LLC
 
