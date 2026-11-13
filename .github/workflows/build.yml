@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       run_vmtest:
-        description: 'Run UEFI VM test using the newest available GitHub build artifact'
+        description: 'Run BIOS VM test using the newest available GitHub build artifact'
         required: false
         type: boolean
         default: false
@@ -250,7 +250,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fw: [uefi]
+        fw: [bios]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -286,7 +286,7 @@ jobs:
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 imagemagick ovmf netcat-openbsd
+          sudo apt-get install -y qemu-system-x86 seabios imagemagick netcat-openbsd
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
@@ -367,11 +367,8 @@ jobs:
           PYQGA
           mkdir -p shots
           ISO="$ISO_PATH"
-          FW=()
-          if [ "${{ matrix.fw }}" = "uefi" ]; then
-            cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
-            FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
-          fi
+          # Legacy BIOS boot: QEMU's default firmware is SeaBIOS, so no pflash/OVMF drives are needed.
+          FW=(-boot order=d)
           qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -device virtio-serial-pci -chardev socket,id=qga0,path=qga.sock,server=on,wait=off -device virtserialport,chardev=qga0,name=org.qemu.guest_agent.0 -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
           for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S qga.sock ] && break; sleep 1; done
           is_mostly_white() {
@@ -432,7 +429,7 @@ jobs:
       group: screenshot-commit
       cancel-in-progress: false
     env:
-      DESKTOP_FW: uefi
+      DESKTOP_FW: bios
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
