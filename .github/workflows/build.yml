@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       run_vmtest:
-        description: 'Run BIOS VM test using the newest available GitHub build artifact'
+        description: 'Run UEFI + BIOS VM tests using the newest available GitHub build artifact'
         required: false
         type: boolean
         default: false
@@ -250,15 +250,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fw: [bios]
+        fw: [uefi, bios]
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # 26 attempts (1 + 25 retries) x ~5.5 min worst case
+    timeout-minutes: 180
     permissions:
       actions: read
     env:
       SHOTS: 10
       INTERVAL: 30
+      MAX_RETRIES: 25
+      # Normalized RMSE (0..1) vs assets/reference/login-screen.png below which a
+      # screenshot is considered "still the login screen".
+      LOGIN_THRESHOLD: 0.03
     steps:
+      - name: Checkout login-screen reference image
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: assets/reference
       - name: Download selected build artifact
         uses: actions/download-artifact@v4
         with:
@@ -286,7 +295,7 @@ jobs:
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 seabios imagemagick netcat-openbsd
+          sudo apt-get install -y qemu-system-x86 ovmf seabios imagemagick netcat-openbsd
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
@@ -330,8 +339,10 @@ jobs:
               }})
           elif sys.argv[1] == "click":
               click(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), int(sys.argv[5]))
+          elif sys.argv[1] == "reset":
+              command({"execute": "system_reset"})
           else:
-              raise SystemExit("Usage: qmp.py screendump FILE | click X Y WIDTH HEIGHT")
+              raise SystemExit("Usage: qmp.py screendump FILE | click X Y WIDTH HEIGHT | reset")
           PYQMP
           cat > qga.py <<'PYQGA'
           import json, socket, sys, time
@@ -365,12 +376,29 @@ jobs:
           rc = run("/usr/bin/pkill", ["-TERM", "-f", "io.kibaos.oobe"])
           print("pkill exit code:", rc, "(1 = installer already gone)")
           PYQGA
-          mkdir -p shots
+          mkdir -p attempts
           ISO="$ISO_PATH"
-          # Legacy BIOS boot: QEMU's default firmware is SeaBIOS, so no pflash/OVMF drives are needed.
           FW=(-boot order=d)
-          qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -device virtio-serial-pci -chardev socket,id=qga0,path=qga.sock,server=on,wait=off -device virtserialport,chardev=qga0,name=org.qemu.guest_agent.0 -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
-          for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S qga.sock ] && break; sleep 1; done
+          if [ "${{ matrix.fw }}" = "uefi" ]; then
+            cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
+            FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
+          fi
+          # BIOS runs use QEMU's default firmware (SeaBIOS); UEFI runs use OVMF pflash.
+
+          vm_alive() { [ -f qemu.pid ] && kill -0 "$(cat qemu.pid)" 2>/dev/null; }
+          start_vm() {
+            rm -f qmp.sock qga.sock qemu.pid
+            qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -device virtio-serial-pci -chardev socket,id=qga0,path=qga.sock,server=on,wait=off -device virtserialport,chardev=qga0,name=org.qemu.guest_agent.0 -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+            for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S qga.sock ] && break; sleep 1; done
+          }
+          stop_vm() {
+            if vm_alive; then
+              kill -TERM "$(cat qemu.pid)" 2>/dev/null || true
+              sleep 2
+              kill -KILL "$(cat qemu.pid)" 2>/dev/null || true
+            fi
+            rm -f qemu.pid
+          }
           is_mostly_white() {
             local ratio
             ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
@@ -381,35 +409,87 @@ jobs:
           }
           kill_installer() { python3 qga.py || true; }
 
-          installer_closed=0
-          for i in $(seq 1 "$SHOTS"); do
-            sleep "$INTERVAL"
-            if ! kill -0 "$(cat qemu.pid)" 2>/dev/null; then
-              echo "QEMU already exited"
+          # --- login-screen detection -------------------------------------------
+          REF=assets/reference/login-screen.png
+          if [ ! -f "$REF" ]; then
+            echo "::error::Missing $REF -- commit a screenshot of the KibaOS login screen there."
+            exit 1
+          fi
+          thumb() { convert "$1" -alpha off -colorspace sRGB -resize 80x50! -blur 0x1 "$2"; }
+          thumb "$REF" ref-thumb.png
+          login_distance() {
+            thumb "$1" cur-thumb.png
+            compare -metric RMSE ref-thumb.png cur-thumb.png null: 2>&1 | sed -n 's/.*(\(.*\)).*/\1/p'
+          }
+          # A candidate is a screenshot that is not blank, not the white installer,
+          # and does not look like the login screen.
+          is_candidate() {
+            local f="$1" sd dist
+            if is_mostly_white "$f"; then echo "  $f: mostly white (installer)"; return 1; fi
+            sd=$(convert "$f" -format '%[fx:standard_deviation]' info:)
+            if ! awk -v v="$sd" 'BEGIN{exit !(v>0.005)}'; then echo "  $f: blank (stddev=$sd)"; return 1; fi
+            dist=$(login_distance "$f"); dist=${dist:-1}
+            if awk -v d="$dist" -v t="$LOGIN_THRESHOLD" 'BEGIN{exit !(d<t)}'; then
+              echo "  $f: looks like the login screen (distance=$dist < $LOGIN_THRESHOLD)"; return 1
+            fi
+            echo "  $f: CANDIDATE (distance from login screen=$dist)"
+            return 0
+          }
+
+          SELECTED=""
+          dir=""
+          for attempt in $(seq 0 "$MAX_RETRIES"); do
+            echo "=== ${{ matrix.fw }}: attempt $((attempt + 1))/$((MAX_RETRIES + 1)) ==="
+            if [ "$attempt" -eq 0 ] || ! vm_alive; then
+              stop_vm
+              start_vm
+            else
+              echo "No usable desktop yet -- rebooting VM (QMP system_reset)"
+              python3 qmp.py reset || { stop_vm; start_vm; }
+            fi
+
+            dir="attempts/$(printf '%02d' "$((attempt + 1))")"
+            mkdir -p "$dir"
+            installer_closed=0
+            for i in $(seq 1 "$SHOTS"); do
+              sleep "$INTERVAL"
+              if ! vm_alive; then
+                echo "QEMU already exited"
+                break
+              fi
+              shot="$dir/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
+              capture_probe "$dir/probe.png" || { echo "screendump failed"; continue; }
+              if is_mostly_white "$dir/probe.png" && [ "$installer_closed" -eq 0 ]; then
+                echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe via QEMU guest agent..."
+                kill_installer
+                installer_closed=1
+                sleep 5
+                capture_probe "$shot" || cp "$dir/probe.png" "$shot" || true
+              else
+                mv "$dir/probe.png" "$shot"
+              fi
+            done
+            rm -f "$dir/probe.png"
+
+            SELECTED=""
+            while IFS= read -r f; do
+              if is_candidate "$f"; then SELECTED="$f"; fi
+            done < <(find "$dir" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort)
+            if [ -n "$SELECTED" ]; then
+              echo "Attempt $((attempt + 1)): selected $SELECTED"
               break
             fi
-            shot="shots/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
-            capture_probe shots/current-probe.png
-            if is_mostly_white shots/current-probe.png && [ "$installer_closed" -eq 0 ]; then
-              echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe via QEMU guest agent..."
-              kill_installer
-              installer_closed=1
-              sleep 5
-              capture_probe "$shot" || cp shots/current-probe.png "$shot" || true
-            else
-              mv shots/current-probe.png "$shot"
-            fi
+            echo "Attempt $((attempt + 1)): no screenshot that differs from the login screen."
           done
-          rm -f shots/current-probe.png
-          LAST=$(find shots -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort | tail -1)
-          if [ -n "$LAST" ]; then
-            SD=$(convert "$LAST" -format '%[fx:standard_deviation]' info:)
-            echo "Final screenshot ${LAST} stddev=${SD}"
-            awk -v v="$SD" 'BEGIN{exit !(v>0.005)}' || { echo "::error::Final screenshot is blank -- desktop did not render"; exit 1; }
+          stop_vm
+
+          mkdir -p shots
+          cp "$dir"/*.png shots/ 2>/dev/null || true
+          if [ -z "$SELECTED" ]; then
+            echo "::error::${{ matrix.fw }}: no non-login desktop screenshot after $((MAX_RETRIES + 1)) attempts"
+            exit 1
           fi
-          kill -TERM "$(cat qemu.pid)" 2>/dev/null || true
-          sleep 2
-          kill -KILL "$(cat qemu.pid)" 2>/dev/null || true
+          basename "$SELECTED" > shots/selected.txt
       - name: Upload screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -418,6 +498,14 @@ jobs:
           path: shots/
           if-no-files-found: ignore
           retention-days: 7
+      - name: Upload all attempts (debugging)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vmtest-attempts-${{ matrix.fw }}
+          path: attempts/
+          if-no-files-found: ignore
+          retention-days: 3
   vmtest_commit:
     needs: vmtest
     if: ${{ !cancelled() && needs.vmtest.result != 'skipped' }}
@@ -429,7 +517,8 @@ jobs:
       group: screenshot-commit
       cancel-in-progress: false
     env:
-      DESKTOP_FW: bios
+      # Preference order for desktop.png; first firmware with a selected non-login screenshot wins.
+      DESKTOP_FW_ORDER: "uefi bios"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -453,8 +542,16 @@ jobs:
             mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
             cp "$d"/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
           done
-          LATEST=$(find "shots-in/vmtest-shots-${DESKTOP_FW}" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' 2>/dev/null | sort | tail -1)
-          [ -n "$LATEST" ] && cp "$LATEST" "$STAGE/desktop.png"
+          for FWN in $DESKTOP_FW_ORDER; do
+            d="shots-in/vmtest-shots-${FWN}"
+            [ -f "$d/selected.txt" ] || { echo "${FWN}: no selected screenshot (test failed or never reached desktop)."; continue; }
+            f="$d/$(cat "$d/selected.txt")"
+            if [ -f "$f" ]; then
+              echo "Using ${FWN} screenshot for desktop.png: $f"
+              cp "$f" "$STAGE/desktop.png"
+              break
+            fi
+          done
 
           git config user.name "KibaOS OTA Bot"
           git config user.email "ota@kibaos.wolftech.tech"
