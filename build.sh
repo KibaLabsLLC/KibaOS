@@ -2418,7 +2418,7 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
-WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/784ae57c6b8cc0dced3bad2421dcff997935b01c/assets/wallpapers/894220129_2005734460387115_2005077653475460188_n.webp?raw=true"
+WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/10fe6391083a26716f270b4e664bfb8f75424541/assets/wallpapers/DEFC1CA8-F1B1-417E-9612-380D234006C3.png?raw=true"
 BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
@@ -2808,42 +2808,50 @@ gtk-update-icon-cache -f /usr/share/icons/Cutefish 2>/dev/null || true
 rm -rf "${CUTEFISH_ICONS_BUILD}"
 echo "=== Icon theme: Cutefish installed ==="
 
-# wl-dock (https://github.com/liudng/wl-dock) replaces the old Cutefish dock.
-# It's a native Qt6/Wayland taskbar for wlroots compositors: it talks
-# wlr-layer-shell + wlr-foreign-toplevel-management, so it sees native Wayland
-# windows on labwc (the Qt5/Xwayland Cutefish dock could not) and doubles as the
-# StatusNotifierItem tray host. Not packaged for Arch, so it is built from a
-# pinned upstream commit. Non-fatal: the session still boots without a dock.
-WLDOCK_REPO="https://github.com/liudng/wl-dock.git"
-WLDOCK_COMMIT="a02219d4833743209fb7401cf64705ca8785e6fe"
-WLDOCK_BUILD="/tmp/wl-dock"
-rm -f /etc/xdg/autostart/cutefish-dock.desktop
+# VibePanel (https://github.com/prankstr/vibepanel) replaces wl-dock as the
+# bottom dock. It's a GTK4 + wlr-layer-shell panel; on labwc it uses its
+# "generic" backend (wlr-foreign-toplevel) for the taskbar widget. That generic
+# taskbar landed on upstream main after v0.17.2, so this builds a pinned main
+# commit with cargo instead of using a release/AUR binary. Only the taskbar
+# widget is configured (see ~/.config/vibepanel/ below): no launcher, since the
+# look launcher (Super key) does that job. Non-fatal: the session still boots
+# without a dock. Needs GTK >= 4.22 (Arch rolling has it).
+VIBEPANEL_REPO="https://github.com/prankstr/vibepanel.git"
+VIBEPANEL_COMMIT="cd751b15137aa32610ebce2c75644c7be745e35b"
+VIBEPANEL_BUILD="/tmp/vibepanel"
+rm -f /etc/xdg/autostart/cutefish-dock.desktop /etc/xdg/autostart/wl-dock.desktop
 pacman -R --noconfirm cutefish-dock 2>/dev/null || true
-WLDOCK_CMAKE_WAS_PRESENT=1; command -v cmake >/dev/null 2>&1 || WLDOCK_CMAKE_WAS_PRESENT=0
-if pacman -S --noconfirm --needed cmake pkgconf qt6-base qt6-wayland layer-shell-qt wayland \
-   && rm -rf "${WLDOCK_BUILD}" && mkdir -p "${WLDOCK_BUILD}" \
-   && git -C "${WLDOCK_BUILD}" init -q \
-   && git -C "${WLDOCK_BUILD}" fetch -q --depth 1 "${WLDOCK_REPO}" "${WLDOCK_COMMIT}" \
-   && git -C "${WLDOCK_BUILD}" checkout -q FETCH_HEAD \
-   && cmake -S "${WLDOCK_BUILD}" -B "${WLDOCK_BUILD}/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
-   && cmake --build "${WLDOCK_BUILD}/build" -j"$(nproc)" \
-   && cmake --install "${WLDOCK_BUILD}/build" \
-   && test -x /usr/bin/wl-dock; then
+pacman -Rns --noconfirm wl-dock 2>/dev/null || true
+rm -f /usr/bin/wl-dock
+VIBEPANEL_RUST_WAS_PRESENT=1; command -v cargo >/dev/null 2>&1 || VIBEPANEL_RUST_WAS_PRESENT=0
+if pacman -S --noconfirm --needed rust pkgconf gettext git \
+     gtk4 gtk4-layer-shell libpulse systemd-libs dbus wayland \
+   && rm -rf "${VIBEPANEL_BUILD}" && mkdir -p "${VIBEPANEL_BUILD}" \
+   && git -C "${VIBEPANEL_BUILD}" init -q \
+   && git -C "${VIBEPANEL_BUILD}" fetch -q --depth 1 "${VIBEPANEL_REPO}" "${VIBEPANEL_COMMIT}" \
+   && git -C "${VIBEPANEL_BUILD}" checkout -q FETCH_HEAD \
+   && (cd "${VIBEPANEL_BUILD}" \
+       && CARGO_HOME="${VIBEPANEL_BUILD}/.cargo-home" CARGO_TARGET_DIR="${VIBEPANEL_BUILD}/target" \
+          cargo build --release --locked -p vibepanel) \
+   && install -Dm755 "${VIBEPANEL_BUILD}/target/release/vibepanel" /usr/bin/vibepanel \
+   && test -x /usr/bin/vibepanel; then
   mkdir -p /etc/xdg/autostart
-  cat > /etc/xdg/autostart/wl-dock.desktop << 'WLDOCKAUTO'
+  cat > /etc/xdg/autostart/vibepanel.desktop << 'VIBEPANELAUTO'
 [Desktop Entry]
 Type=Application
-Name=wl-dock
-Exec=env QT_QPA_PLATFORM=wayland wl-dock --icon-theme Cutefish
+Name=VibePanel
+Exec=vibepanel
+TryExec=vibepanel
 OnlyShowIn=Budgie;GNOME;
 X-GNOME-Autostart-Delay=2
-WLDOCKAUTO
-  echo "=== wl-dock installed ==="
+NoDisplay=true
+VIBEPANELAUTO
+  echo "=== vibepanel installed ==="
 else
-  echo "!! wl-dock build failed -- continuing without a dock" >&2
+  echo "!! vibepanel build failed -- continuing without a dock" >&2
 fi
-rm -rf "${WLDOCK_BUILD}"
-[ "${WLDOCK_CMAKE_WAS_PRESENT}" -eq 0 ] && pacman -Rns --noconfirm cmake || true
+rm -rf "${VIBEPANEL_BUILD}"
+[ "${VIBEPANEL_RUST_WAS_PRESENT}" -eq 0 ] && pacman -Rns --noconfirm rust || true
 
 # look-bin (AUR): keyboard-first launcher for apps, files, clipboard, commands.
 # Same steps as `git clone https://aur.archlinux.org/look-bin.git && cd look-bin
@@ -3144,7 +3152,7 @@ cat > /etc/gtk-3.0/gtk.css << 'GTK3PANEL'
  * superseded by that native motion. Verify visually.
  * ════════════════════════════════════════════════════════════════════════ */
 
-/* === KibaOS: Floating white squircle panel (top; wl-dock sits at the bottom) ===
+/* === KibaOS: Floating white squircle panel (top; the VibePanel dock sits at the bottom) ===
  * GTK3 CSS can't draw a true superellipse, so the "squircle" is a
  * rounded rectangle with a radius of ~38% of the 42px panel height (16px) --
  * (the old top bar is gone, so this is the only bar). White fill with
@@ -4985,6 +4993,81 @@ X-GNOME-Autostart-enabled=true
 X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LIAUTO
+
+# ── VibePanel: rounded glass-rectangle dock (bottom, taskbar only) ──────
+# No launcher/pinned apps (look on Super does that). The bar surface itself is
+# fully transparent; the only visible thing is the taskbar "island" in the
+# centre, styled as a frosted-glass rounded rectangle. Hot-reloads on edit.
+# GTK CSS has no backdrop-filter, so the glass is a translucent white tint +
+# gradient + 1px light rim; theme.blur additionally asks the compositor for real
+# blur through ext-background-effect-v1 and is ignored where unsupported.
+# The OSD is off so Budgie's own OSD isn't doubled; the notification daemon
+# only claims org.freedesktop.Notifications if nothing else already owns it.
+mkdir -p "${SKEL}/.config/vibepanel"
+cat > "${SKEL}/.config/vibepanel/config.toml" << 'VIBEPANELCONF'
+[bar]
+position = "bottom"
+size = 56
+padding = 6
+screen_margin = 12
+border_radius = 30
+background_opacity = 0.0   # transparent bar: only the dock island is drawn
+auto_hide = "never"
+
+[widgets]
+left = []
+center = ["taskbar"]
+right = []
+border_radius = 30         # % of height: rounded rectangle, not a pill
+background_color = "#ffffff"
+background_opacity = 0.18  # frosted tint; style.css adds the gloss
+popover_background_opacity = 0.85
+
+[widgets.taskbar]
+show_icon = true
+show_title = false
+icon_size = 36
+show_workspace_separator = false
+show_active = true
+
+[theme]
+mode = "dark"
+animations = true
+ripple = false
+shadows = true
+blur = true
+outline = true
+outline_width = 1
+outline_color = "#ffffff"
+outline_opacity = 0.35
+
+[osd]
+enabled = false
+
+[polkit]
+enabled = false
+VIBEPANELCONF
+
+cat > "${SKEL}/.config/vibepanel/style.css" << 'VIBEPANELCSS'
+/* Glass dock: soft top-lit gradient over the translucent tint, bright inner
+   top edge, faint dark inner bottom edge, small drop shadow. */
+.widget.taskbar {
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(255, 255, 255, 0.10) 55%,
+    rgba(255, 255, 255, 0.16) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.50),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    0 2px 10px rgba(0, 0, 0, 0.28);
+}
+
+.taskbar-button {
+  border-radius: 14px;
+}
+VIBEPANELCSS
 
 cp -aT "${SKEL}/" /home/liveuser/
 chown -R 1000:1000 /home/liveuser
