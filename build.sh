@@ -2553,6 +2553,83 @@ mkdir -p /usr/share/icons/hicolor/scalable/actions
 cp /usr/share/kibaos/logo-256.png /usr/share/icons/hicolor/scalable/actions/kibaos-watermark-symbolic.png 2>/dev/null || true
 gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null || true
 
+# ── kAI / kibavoice: local offline voice assistant ───────────────────────────
+# https://github.com/KibaLabsLLC/kAI  (llama.cpp + whisper.cpp + Piper, Qt6 UI)
+# Build deps are installed here; llama.cpp and whisper.cpp are fetched by the
+# project's own CMake at configure time. Models (~500 MB) are NOT baked into
+# the ISO: kibavoice downloads them to ~/.local/share/kibavoice on first use.
+# Runs as its own script so `set -e` is honoured (errexit is ignored inside an
+# `if` condition) and so cwd changes cannot leak into the surrounding build.
+echo "=== Building kAI (kibavoice) ==="
+cat > /tmp/kai-build.sh << 'KAIBUILD'
+#!/usr/bin/env bash
+set -euo pipefail
+
+pacman -S --noconfirm --needed \
+  base-devel git cmake ninja curl pkgconf \
+  qt6-base \
+  alsa-utils libpulse
+
+KAI_SRC=/tmp/kai-src
+rm -rf "${KAI_SRC}"
+git clone --depth 1 https://github.com/KibaLabsLLC/kAI.git "${KAI_SRC}"
+cd "${KAI_SRC}"
+
+# Never bake -march=native of the build machine into a distributable ISO.
+# llama.cpp is in-tree (FetchContent) so -DGGML_NATIVE=OFF below reaches it, but
+# whisper.cpp is an ExternalProject with hard-coded CMAKE_ARGS, so patch it in.
+if grep -q -- '-DBUILD_SHARED_LIBS=OFF' CMakeLists.txt; then
+  sed -i 's/-DBUILD_SHARED_LIBS=OFF/-DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF/' CMakeLists.txt
+else
+  echo "!! kAI: could not patch whisper.cpp args (CMakeLists.txt changed upstream?)" >&2
+fi
+
+cmake -S . -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr \
+  -DGGML_NATIVE=OFF \
+  -DKIBAVOICE_BUILD_UI=ON
+cmake --build build -j"$(nproc)"
+cmake --install build
+
+command -v kibavoice    >/dev/null || { echo "kAI: kibavoice was not installed" >&2; exit 1; }
+command -v kibavoice-ui >/dev/null || { echo "kAI: kibavoice-ui missing (Qt6 not found at configure time?)" >&2; exit 1; }
+[ -x /usr/libexec/kibavoice/whisper-cli ] || { echo "kAI: whisper-cli was not installed" >&2; exit 1; }
+
+# System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
+cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
+[Desktop Entry]
+Type=Application
+Name=Kiba Voice
+GenericName=Voice Assistant
+Comment=Local, offline voice assistant
+Exec=kibavoice-ui
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;AudioVideo;
+Actions=Listen;
+
+[Desktop Action Listen]
+Name=Talk to Kiba
+Exec=kibavoice-ui --listen
+KAIDESKTOP
+
+rm -rf "${KAI_SRC}"
+KAIBUILD
+
+_kai_ok=0
+for _try in 1 2 3; do
+  if bash /tmp/kai-build.sh; then _kai_ok=1; break; fi
+  echo "!! kAI build attempt ${_try}/3 failed -- retrying in 10s (usually a transient GitHub fetch blip)" >&2
+  sleep 10
+done
+rm -f /tmp/kai-build.sh
+if [ "${_kai_ok}" -eq 1 ]; then
+  echo "=== kAI installed ==="
+else
+  echo "!! kAI build failed after 3 attempts -- continuing without it (check the log above)" >&2
+fi
+
 echo "=== Building libkibadisk (disk/install backend library) ==="
 mkdir -p /usr/share/kibaos-oobe/src/disk
 cd /usr/share/kibaos-oobe/src/disk
