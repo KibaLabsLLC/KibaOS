@@ -2556,8 +2556,8 @@ gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null || true
 # ── kAI / kibavoice: local offline voice assistant ───────────────────────────
 # https://github.com/KibaLabsLLC/kAI  (llama.cpp + whisper.cpp + Piper, Qt6 UI)
 # Build deps are installed here; llama.cpp and whisper.cpp are fetched by the
-# project's own CMake at configure time. Models (~500 MB) are NOT baked into
-# the ISO: kibavoice downloads them to ~/.local/share/kibavoice on first use.
+# project's own CMake at configure time. Models (~550 MB) ARE baked into the ISO
+# (see below), so the assistant works offline from first boot.
 # Runs as its own script so `set -e` is honoured (errexit is ignored inside an
 # `if` condition) and so cwd changes cannot leak into the surrounding build.
 echo "=== Building kAI (kibavoice) ==="
@@ -2574,16 +2574,41 @@ KAI_SRC=/tmp/kai-src
 rm -rf "${KAI_SRC}"
 git clone --depth 1 https://github.com/KibaLabsLLC/kAI.git "${KAI_SRC}"
 cd "${KAI_SRC}"
+# TEMPORARY guard: kAI commit 55e3b95 (2026-11-14) ends kSystemPrompt's first literal with
+# `;` and follows it with a second literal, which does not compile. This joins them and
+# is a no-op once that is fixed upstream, so it can be deleted then.
+sed -i -z 's/no emoji\."; *\n *"Your name/no emoji. "\n    "Your name/' src/main.cpp
 # System-wide (/usr), not install.sh's default of $HOME/.local: that would land in
 # root's home inside this chroot, where liveuser can't reach it (so the menu entry
-# and the dock pin would launch nothing). --no-models keeps the ~550 MB of models out
-# of the ISO (they download to ~/.local/share/kibavoice on first use, as noted above);
+# and the dock pin would launch nothing). --no-models because install.sh would download
+# them into root's home; they are fetched into a system-wide location below instead.
 # --no-service because the daemon is a per-user systemd unit.
 bash ./install.sh --prefix /usr --no-models --no-service
 test -x /usr/bin/kibavoice-ui
 # Icon for the menu entry and the dock pin.
 install -Dm644 /usr/share/kibavoice/kibavoice.png /usr/share/icons/hicolor/256x256/apps/kibavoice.png
 gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
+
+# Bake the models (LLM + speech-to-text + Piper voice, ~550 MB) into the ISO.
+# kibavoice only looks in $XDG_DATA_HOME/kibavoice (per user, no system-wide fallback),
+# so they are fetched once into /usr/share/kibavoice-data and each user's data dir gets
+# symlinks to them through /etc/skel. That avoids a 550 MB copy per user, which on the
+# live session would be eaten out of RAM. If the download fails the build carries on and
+# the app simply downloads on first use instead.
+KAI_DATA=/usr/share/kibavoice-data
+install -d -m 755 "${KAI_DATA}"
+if XDG_DATA_HOME="${KAI_DATA}" /usr/bin/kibavoice fetch; then
+  rm -rf "${KAI_DATA}/kibavoice/downloads" "${KAI_DATA}/kibavoice/fetch.lock"
+  chmod -R a+rX "${KAI_DATA}"
+  install -d -m 755 /etc/skel/.local/share/kibavoice
+  for _d in models voices piper; do
+    test -e "${KAI_DATA}/kibavoice/${_d}"
+    ln -sfn "${KAI_DATA}/kibavoice/${_d}" "/etc/skel/.local/share/kibavoice/${_d}"
+  done
+else
+  echo "WARNING: kAI model download failed; the ISO will ship without models and kAI will download them on first use." >&2
+  rm -rf "${KAI_DATA}"
+fi
 # System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
@@ -2722,7 +2747,7 @@ else
 fi
 
 # Boot animation: kAI's gradient wave (KibaLabsLLC/kAI, ui/widgets.cpp,
-# WaveWidget::paintEvent) centered on pure black (OLED-off). Plymouth's script
+# WaveWidget::paintEvent) centered on white, kAI's card colour. Plymouth's script
 # module can't draw polygons, so the wave is pre-rendered at build time into
 # looping frames. See the generator's docstring for how the pieces combine; it
 # was checked pixel-for-pixel against the real QPainter code.
@@ -2736,21 +2761,23 @@ cat > /tmp/kiba-wave-gen.py << 'KIBAWAVEGEN'
 #!/usr/bin/env python3
 """
 Generates the assets for KibaOS's boot animation: kAI's gradient wave (see
-KibaLabsLLC/kAI ui/widgets.cpp, WaveWidget::paintEvent) on pure black.
+KibaLabsLLC/kAI ui/widgets.cpp, WaveWidget::paintEvent) on white, the colour of
+kAI's card.
 
 Why two kinds of asset instead of full-colour frames
 ----------------------------------------------------
 All four wave layers are filled with the *same* gradient colour G(x) at
-different opacities a_i, so over a black background
+different opacities a_i, so over a background colour BG
 
-    pixel = G(x) * C(x, y),   C = 1 - prod_i(1 - a_i * m_i(x, y))
+    pixel = G(x) * C(x, y) + BG * (1 - C(x, y)),
+    C = 1 - prod_i(1 - a_i * m_i(x, y))
 
 where m_i is each layer's antialiased coverage. Plymouth's script module
 cannot draw polygons, but it can stack sprites, so the theme shows:
 
     1. gradient strip   (wave-gradient.png)    scrolled with SetX -> exact drift
-    2. black alpha mask (wave-NNN.png), alpha = 1 - C, one per loop frame
-    3. black side covers (wave-cover.png) hiding the part of the strip that
+    2. BG-coloured alpha mask (wave-N.png), alpha = 1 - C, one per loop frame
+    3. BG-coloured side covers (wave-cover.png) hiding the part of the strip that
        sticks out past the wave region
 
 The mask frames loop seamlessly: every sine's angular rate is rounded to a whole
@@ -2770,11 +2797,12 @@ from PIL import Image, ImageDraw
 # kAI's wave widget is 320x120. This is the same widget at 2x.
 W, H = 640, 240
 SS = 8                      # supersampling for antialiasing
+BG = (255, 255, 255)         # background; also the colour of the masks and covers
 FPS = 25                    # Plymouth refreshes at ~50 Hz, so 2 ticks per frame
 LOOP_S = 6                  # seconds per seamless loop
 NFRAMES = FPS * LOOP_S
 
-# Soft edges so the wave floats on black instead of being cut off like it is by
+# Soft edges so the wave floats on the background instead of being cut off like it is by
 # the card. Fractions of W / H. Set both to 0 for the card's hard edges.
 FEATHER_X = 0.14
 FEATHER_Y = 0.30
@@ -2858,9 +2886,9 @@ def main(outdir):
         t = f / FPS
         amp = AMP_BASE + AMP_SWING * math.sin(amp_rate * t)
         c = coverage([r * t for r in rates1], [r * t for r in rates2], amp) * fe
-        masks.append(1.0 - c)                          # black overlay's alpha
+        masks.append(1.0 - c)                          # BG overlay's alpha
 
-    # Crop the rows that are black in every frame (peaks never reach the top).
+    # Crop the rows that are plain background in every frame (peaks never reach the top).
     lit = np.min(np.stack(masks), axis=0) < 0.999
     rows = np.where(lit.any(axis=1))[0]
     top = max(0, int(rows[0]) - 2)
@@ -2868,6 +2896,7 @@ def main(outdir):
 
     for f, a in enumerate(masks):
         rgba = np.zeros((hc, W, 4), dtype=np.uint8)
+        rgba[..., :3] = BG
         rgba[..., 3] = np.round(a[top:] * 255).astype(np.uint8)
         Image.fromarray(rgba, "RGBA").save(os.path.join(outdir, "wave-%d.png" % f), optimize=True)
 
@@ -2876,7 +2905,7 @@ def main(outdir):
     Image.fromarray(strip, "RGB").save(os.path.join(outdir, "wave-gradient.png"), optimize=True)
 
     cover_w = int(math.ceil(GRAD_PERIOD))
-    Image.new("RGB", (cover_w, hc), (0, 0, 0)).save(os.path.join(outdir, "wave-cover.png"), optimize=True)
+    Image.new("RGB", (cover_w, hc), BG).save(os.path.join(outdir, "wave-cover.png"), optimize=True)
 
     # Constants the Plymouth script needs, written in its own syntax.
     with open(os.path.join(outdir, "wave-params.script"), "w") as fh:
@@ -2915,18 +2944,19 @@ PLYMOUTHDESC
 # The generator emits the wave_* constants; they go in front of the theme script.
 cat "${KIBA_PLYMOUTH_DIR}/wave-params.script" - > "${KIBA_PLYMOUTH_DIR}/kibaos.script" << 'PLYMOUTHSCRIPT'
 // KibaOS boot splash -- Plymouth script theme.
-// kAI's gradient wave, centered on OLED black. Nothing else is drawn.
+// kAI's gradient wave, centered on white (kAI's card colour). Nothing else is drawn.
 // wave_* constants are prepended by the build (generated alongside the frames).
 //
 // Compositing, bottom to top:
 //   z=1  wave-gradient.png  kAI's reflecting gradient, scrolled sideways (exact drift)
-//   z=2  wave-N.png         black alpha mask whose holes are the wave (looping frames)
-//   z=3  wave-cover.png     black blocks hiding the strip outside the wave region
+//   z=2  wave-N.png         white alpha mask whose holes are the wave (looping frames)
+//   z=3  wave-cover.png     white blocks hiding the strip outside the wave region
 // Because every layer of kAI's wave is the same gradient colour at a different
-// opacity, gradient * coverage over black is pixel-identical to painting them.
+// opacity, gradient under a white overlay of alpha (1 - coverage) is
+// pixel-identical to painting the layers on white.
 
-Window.SetBackgroundTopColor(0, 0, 0);
-Window.SetBackgroundBottomColor(0, 0, 0);
+Window.SetBackgroundTopColor(1, 1, 1);
+Window.SetBackgroundBottomColor(1, 1, 1);
 
 wave_x = Math.Int((Window.GetWidth() - wave_w) / 2);
 wave_y = Math.Int((Window.GetHeight() - wave_h) / 2);
@@ -2978,7 +3008,7 @@ pw_y = wave_y + wave_h + 24;
 fun display_password_callback(prompt, bullets) {
   if (prompt == "")
     prompt = "Enter your password to unlock the disk:";
-  pw_prompt_image = Image.Text(prompt, 1, 1, 1, 1);
+  pw_prompt_image = Image.Text(prompt, 0.482, 0.510, 0.722, 1);   // kAI "muted" 7B82B8
   pw_prompt_sprite.SetImage(pw_prompt_image);
   pw_prompt_sprite.SetOpacity(1);
   pw_prompt_sprite.SetX(Window.GetWidth() / 2 - pw_prompt_image.GetWidth() / 2);
@@ -2988,7 +3018,7 @@ fun display_password_callback(prompt, bullets) {
   for (pw_i = 0; pw_i < bullets; pw_i++)
     pw_text = pw_text + "*";
   if (pw_text == "") pw_text = " ";
-  pw_bullets_image = Image.Text(pw_text, 1, 1, 1, 1);
+  pw_bullets_image = Image.Text(pw_text, 0.078, 0.118, 0.310, 1); // kAI "navy" 141E4F
   pw_bullets_sprite.SetImage(pw_bullets_image);
   pw_bullets_sprite.SetOpacity(1);
   pw_bullets_sprite.SetX(Window.GetWidth() / 2 - pw_bullets_image.GetWidth() / 2);
