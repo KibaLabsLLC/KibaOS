@@ -2609,8 +2609,38 @@ else
   echo "WARNING: kAI model download failed; the ISO will ship without models and kAI will download them on first use." >&2
   rm -rf "${KAI_DATA}"
 fi
-kibavoice install-service
-systemctl enable kibavoice
+# Always-on daemon, installed system-wide instead of via `kibavoice install-service`:
+# that command writes the unit to $HOME/.config (root's home in this chroot), so the
+# later `systemctl enable kibavoice` could not find it. The unit goes in the global user
+# unit directory and is enabled for every user (--global); it starts with each graphical
+# session, which on this ISO is boot (the live user autologs in).
+mkdir -p /usr/lib/systemd/user
+cat > /usr/lib/systemd/user/kibavoice.service << 'KAIUNIT'
+[Unit]
+Description=Kiba voice companion (listens for "Hey Kiba")
+After=graphical-session.target pipewire.service pipewire-pulse.service sound.target
+PartOf=graphical-session.target
+StartLimitIntervalSec=120
+StartLimitBurst=8
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kibavoice-ui --background
+# Restart after crashes and kills. A clean exit (tray Quit, `kibavoice-ui --quit`) stays stopped.
+Restart=on-failure
+RestartSec=3
+Nice=5
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=graphical-session.target
+KAIUNIT
+chmod 644 /usr/lib/systemd/user/kibavoice.service
+# daemon-reload needs a running systemd, which a build chroot/container does not have;
+# on a real boot systemd reads the unit fresh, so a failure here is harmless.
+systemctl daemon-reload 2>/dev/null || true
+systemctl --global enable kibavoice.service
+test -L /etc/systemd/user/graphical-session.target.wants/kibavoice.service
 # System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
