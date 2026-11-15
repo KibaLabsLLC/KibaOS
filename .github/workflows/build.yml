@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       run_vmtest:
-        description: 'Run UEFI + BIOS VM tests using the newest available GitHub build artifact'
+        description: 'Run UEFI VM test using the newest available GitHub build artifact'
         required: false
         type: boolean
         default: false
@@ -250,7 +250,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fw: [uefi, bios]
+        fw: [uefi]
     runs-on: ubuntu-24.04
     # 26 attempts (1 + 25 retries) x ~5.5 min worst case
     timeout-minutes: 180
@@ -288,7 +288,7 @@ jobs:
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 ovmf seabios imagemagick netcat-openbsd
+          sudo apt-get install -y qemu-system-x86 ovmf imagemagick netcat-openbsd
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
@@ -372,12 +372,9 @@ jobs:
           PYQGA
           mkdir -p attempts
           ISO="$ISO_PATH"
-          FW=(-boot order=d)
-          if [ "${{ matrix.fw }}" = "uefi" ]; then
-            cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
-            FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
-          fi
-          # BIOS runs use QEMU's default firmware (SeaBIOS); UEFI runs use OVMF pflash.
+          # UEFI only: OVMF via pflash.
+          cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
+          FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
 
           vm_alive() { [ -f qemu.pid ] && kill -0 "$(cat qemu.pid)" 2>/dev/null; }
           start_vm() {
@@ -498,14 +495,14 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
   vmtest_commit:
-    # One independent commit job per firmware, so UEFI and BIOS screenshots are
+    # One commit job per firmware (UEFI only for now), so screenshots are
     # uploaded separately and one failing never blocks the other.
     needs: vmtest
     if: ${{ !cancelled() && needs.vmtest.result != 'skipped' }}
     strategy:
       fail-fast: false
       matrix:
-        fw: [uefi, bios]
+        fw: [uefi]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -547,7 +544,7 @@ jobs:
           # No rebase/merge: binary files can't be merged and a failed rebase wedges
           # every retry. Each attempt resets to the latest remote tip and re-applies
           # the staged files on top, so the newest run always wins desktop-<fw>.png and
-          # the per-run v<N>/<fw>/ folders never collide (UEFI and BIOS touch disjoint paths).
+          # the per-run v<N>/<fw>/ folders never collide (each firmware touches its own paths).
           for i in 1 2 3 4 5 6; do
             git rebase --abort 2>/dev/null || true
             git fetch --no-tags origin "$GITHUB_REF_NAME"
