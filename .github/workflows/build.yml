@@ -260,9 +260,13 @@ jobs:
       SHOTS: 10
       INTERVAL: 30
       MAX_RETRIES: 25
-      # Normalized RMSE (0..1) vs assets/reference/login-screen.png below which a
-      # screenshot is considered "still the login screen".
-      LOGIN_THRESHOLD: 0.03
+      # A screenshot is rejected as "the login screen" ONLY when BOTH checks against
+      # assets/reference/login-screen.png are (near-)exact matches (normalized RMSE, 0..1):
+      #   whole screen  < LOGIN_THRESHOLD   (tolerates the clock changing)
+      #   centre panel  < LOGIN_CENTER_THRESHOLD (user card + logo)
+      # Anything less certain is kept as a valid screenshot.
+      LOGIN_THRESHOLD: 0.006
+      LOGIN_CENTER_THRESHOLD: 0.01
     steps:
       - name: Checkout login-screen reference image
         uses: actions/checkout@v4
@@ -416,23 +420,31 @@ jobs:
             exit 1
           fi
           thumb() { convert "$1" -alpha off -colorspace sRGB -resize 80x50! -blur 0x1 "$2"; }
+          center() { convert "$1" -alpha off -colorspace sRGB -resize 1280x800! -crop 384x440+448+296 +repage -resize 96x110! -blur 0x1 "$2"; }
+          rmse() { compare -metric RMSE "$1" "$2" null: 2>&1 | sed -n 's/.*(\(.*\)).*/\1/p'; }
           thumb "$REF" ref-thumb.png
-          login_distance() {
-            thumb "$1" cur-thumb.png
-            compare -metric RMSE ref-thumb.png cur-thumb.png null: 2>&1 | sed -n 's/.*(\(.*\)).*/\1/p'
+          center "$REF" ref-center.png
+          # Succeeds (returns 0) only with full confidence that $1 is the login screen.
+          is_login_screen() {
+            local g c
+            thumb "$1" cur-thumb.png;   g=$(rmse ref-thumb.png cur-thumb.png)
+            center "$1" cur-center.png; c=$(rmse ref-center.png cur-center.png)
+            # Unparseable comparison => not confident => not login.
+            if [ -z "$g" ] || [ -z "$c" ]; then echo "  $1: login comparison failed -> treating as NOT login"; return 1; fi
+            if awk -v g="$g" -v c="$c" -v tg="$LOGIN_THRESHOLD" -v tc="$LOGIN_CENTER_THRESHOLD" 'BEGIN{exit !(g<tg && c<tc)}'; then
+              echo "  $1: login screen (global=$g, centre=$c)"; return 0
+            fi
+            echo "  $1: not confidently login (global=$g, centre=$c)"; return 1
           }
           # A candidate is a screenshot that is not blank, not the white installer,
-          # and does not look like the login screen.
+          # and is not confidently the login screen.
           is_candidate() {
-            local f="$1" sd dist
+            local f="$1" sd
             if is_mostly_white "$f"; then echo "  $f: mostly white (installer)"; return 1; fi
             sd=$(convert "$f" -format '%[fx:standard_deviation]' info:)
             if ! awk -v v="$sd" 'BEGIN{exit !(v>0.005)}'; then echo "  $f: blank (stddev=$sd)"; return 1; fi
-            dist=$(login_distance "$f"); dist=${dist:-1}
-            if awk -v d="$dist" -v t="$LOGIN_THRESHOLD" 'BEGIN{exit !(d<t)}'; then
-              echo "  $f: looks like the login screen (distance=$dist < $LOGIN_THRESHOLD)"; return 1
-            fi
-            echo "  $f: CANDIDATE (distance from login screen=$dist)"
+            if is_login_screen "$f"; then return 1; fi
+            echo "  $f: CANDIDATE"
             return 0
           }
 
@@ -507,58 +519,56 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
   vmtest_commit:
+    # One independent commit job per firmware, so UEFI and BIOS screenshots are
+    # uploaded separately and one failing never blocks the other.
     needs: vmtest
     if: ${{ !cancelled() && needs.vmtest.result != 'skipped' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        fw: [uefi, bios]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write
     concurrency:
-      group: screenshot-commit
+      group: screenshot-commit-${{ matrix.fw }}
       cancel-in-progress: false
-    env:
-      # Preference order for desktop.png; first firmware with a selected non-login screenshot wins.
-      DESKTOP_FW_ORDER: "uefi bios"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Download screenshots
+      - name: Download ${{ matrix.fw }} screenshots
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
-          pattern: vmtest-shots-*
+          name: vmtest-shots-${{ matrix.fw }}
           path: shots-in
-      - name: Commit screenshots to assets/screenshots
+      - name: Commit ${{ matrix.fw }} screenshots to assets/screenshots
         run: |
-          if ! compgen -G 'shots-in/*/*.png' >/dev/null; then
-            echo "No screenshots to commit."
+          FW="${{ matrix.fw }}"
+          if ! compgen -G 'shots-in/*.png' >/dev/null; then
+            echo "No ${FW} screenshots to commit."
             exit 0
           fi
           # Stage everything outside the repo tree so it survives a hard reset.
           STAGE="$RUNNER_TEMP/screens-stage"
-          rm -rf "$STAGE"; mkdir -p "$STAGE"
-          for d in shots-in/vmtest-shots-*; do
-            FW="${d##*vmtest-shots-}"
-            mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
-            cp "$d"/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
-          done
-          for FWN in $DESKTOP_FW_ORDER; do
-            d="shots-in/vmtest-shots-${FWN}"
-            [ -f "$d/selected.txt" ] || { echo "${FWN}: no selected screenshot (test failed or never reached desktop)."; continue; }
-            f="$d/$(cat "$d/selected.txt")"
-            if [ -f "$f" ]; then
-              echo "Using ${FWN} screenshot for desktop.png: $f"
-              cp "$f" "$STAGE/desktop.png"
-              break
-            fi
-          done
+          rm -rf "$STAGE"; mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
+          cp shots-in/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
+          # Only a screenshot the VM test selected (not the login screen) becomes desktop-<fw>.png.
+          if [ -f shots-in/selected.txt ] && [ -f "shots-in/$(cat shots-in/selected.txt)" ]; then
+            cp "shots-in/$(cat shots-in/selected.txt)" "$STAGE/desktop-${FW}.png"
+            # Back-compat: desktop.png keeps tracking the UEFI desktop.
+            [ "$FW" = "uefi" ] && cp "$STAGE/desktop-${FW}.png" "$STAGE/desktop.png"
+          else
+            echo "${FW}: no selected desktop screenshot -- not updating desktop-${FW}.png."
+          fi
 
           git config user.name "KibaOS OTA Bot"
           git config user.email "ota@kibaos.wolftech.tech"
           # No rebase/merge: binary files can't be merged and a failed rebase wedges
           # every retry. Each attempt resets to the latest remote tip and re-applies
-          # the staged files on top, so the newest run always wins desktop.png and
-          # the per-run v<N>/ folders never collide.
+          # the staged files on top, so the newest run always wins desktop-<fw>.png and
+          # the per-run v<N>/<fw>/ folders never collide (UEFI and BIOS touch disjoint paths).
           for i in 1 2 3 4 5 6; do
             git rebase --abort 2>/dev/null || true
             git fetch --no-tags origin "$GITHUB_REF_NAME"
@@ -567,7 +577,7 @@ jobs:
             cp -r "$STAGE"/. assets/screenshots/
             git add assets/screenshots
             if git diff --cached --quiet; then echo "Nothing new to commit."; exit 0; fi
-            git commit -m "Add VM screenshots for build v${{ github.run_number }}"
+            git commit -m "Add ${FW} VM screenshots for build v${{ github.run_number }}"
             if git push origin "HEAD:$GITHUB_REF_NAME"; then exit 0; fi
             echo "Push raced with another commit (attempt $i); retrying on the new tip..."
             sleep $((i * 5))
