@@ -2574,7 +2574,16 @@ KAI_SRC=/tmp/kai-src
 rm -rf "${KAI_SRC}"
 git clone --depth 1 https://github.com/KibaLabsLLC/kAI.git "${KAI_SRC}"
 cd "${KAI_SRC}"
-bash ./install.sh
+# System-wide (/usr), not install.sh's default of $HOME/.local: that would land in
+# root's home inside this chroot, where liveuser can't reach it (so the menu entry
+# and the dock pin would launch nothing). --no-models keeps the ~550 MB of models out
+# of the ISO (they download to ~/.local/share/kibavoice on first use, as noted above);
+# --no-service because the daemon is a per-user systemd unit.
+bash ./install.sh --prefix /usr --no-models --no-service
+test -x /usr/bin/kibavoice-ui
+# Icon for the menu entry and the dock pin.
+install -Dm644 /usr/share/kibavoice/kibavoice.png /usr/share/icons/hicolor/256x256/apps/kibavoice.png
+gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
 # System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
@@ -2583,7 +2592,7 @@ Name=Kiba Voice
 GenericName=Voice Assistant
 Comment=Local, offline voice assistant
 Exec=kibavoice-ui
-Icon=audio-input-microphone
+Icon=kibavoice
 Terminal=false
 Categories=Utility;AudioVideo;
 Actions=Listen;
@@ -2704,33 +2713,198 @@ rm -f /etc/sudoers.d/builduser
 KIBA_PLYMOUTH_DIR="/usr/share/plymouth/themes/kibaos"
 mkdir -p "${KIBA_PLYMOUTH_DIR}"
 
+# The theme itself no longer draws a logo, but splash.png is still reused below as
+# the bgrt/spinner watermark and arch-logo.png, so keep staging it.
 if [ -f "${BOOT_SPLASH}" ]; then
   cp "${BOOT_SPLASH}" "${KIBA_PLYMOUTH_DIR}/splash.png"
 else
   cp /usr/share/kibaos/logo-256.png "${KIBA_PLYMOUTH_DIR}/splash.png" 2>/dev/null || true
 fi
 
-# 8px anti-aliased white dot for the spinner (supersampled 5x, then Lanczos down).
-magick -size 40x40 xc:none -fill white -draw "circle 20,20 20,2" \
-  -filter Lanczos -resize 8x8 "${KIBA_PLYMOUTH_DIR}/dot.png"
-test -s "${KIBA_PLYMOUTH_DIR}/dot.png" || { echo "ERROR: failed to render Plymouth spinner dot" >&2; exit 1; }
+# Boot animation: kAI's gradient wave (KibaLabsLLC/kAI, ui/widgets.cpp,
+# WaveWidget::paintEvent) centered on pure black (OLED-off). Plymouth's script
+# module can't draw polygons, so the wave is pre-rendered at build time into
+# looping frames. See the generator's docstring for how the pieces combine; it
+# was checked pixel-for-pixel against the real QPainter code.
+KIBA_WAVE_DEPS=""
+for _p in python-numpy python-pillow; do
+  pacman -Q "${_p}" >/dev/null 2>&1 || KIBA_WAVE_DEPS="${KIBA_WAVE_DEPS} ${_p}"
+done
+pacman -S --noconfirm --needed python-numpy python-pillow
 
-# Peeking Kiba mascot (animated, bottom-right of the splash). Fetched from the
-# repo and exploded into per-frame PNGs because Plymouth's script module can't
-# play GIFs directly.
-KIBA_PEEK_URL="https://github.com/KibaLabsLLC/KibaOS/blob/cd80900a3f2c6f319a5733c01f25b3f5e0f5e20e/assets/splash/FCE6EED9-BA57-45CF-AF90-5AA056A069F2.gif?raw=true"
-curl -fL --retry 5 --retry-delay 3 -o "${KIBA_PLYMOUTH_DIR}/peek.gif" "${KIBA_PEEK_URL}" || true
-file "${KIBA_PLYMOUTH_DIR}/peek.gif" | grep -qi 'GIF image' \
-  || { echo "ERROR: failed to download Plymouth mascot GIF (${KIBA_PEEK_URL})" >&2; exit 1; }
-magick "${KIBA_PLYMOUTH_DIR}/peek.gif" -coalesce -background none -strip \
-  -filter Lanczos -resize 240x "${KIBA_PLYMOUTH_DIR}/peek-%d.png"
-rm -f "${KIBA_PLYMOUTH_DIR}/peek.gif"
-test -s "${KIBA_PLYMOUTH_DIR}/peek-8.png" || { echo "ERROR: failed to extract mascot frames for Plymouth" >&2; exit 1; }
+cat > /tmp/kiba-wave-gen.py << 'KIBAWAVEGEN'
+#!/usr/bin/env python3
+"""
+Generates the assets for KibaOS's boot animation: kAI's gradient wave (see
+KibaLabsLLC/kAI ui/widgets.cpp, WaveWidget::paintEvent) on pure black.
+
+Why two kinds of asset instead of full-colour frames
+----------------------------------------------------
+All four wave layers are filled with the *same* gradient colour G(x) at
+different opacities a_i, so over a black background
+
+    pixel = G(x) * C(x, y),   C = 1 - prod_i(1 - a_i * m_i(x, y))
+
+where m_i is each layer's antialiased coverage. Plymouth's script module
+cannot draw polygons, but it can stack sprites, so the theme shows:
+
+    1. gradient strip   (wave-gradient.png)    scrolled with SetX -> exact drift
+    2. black alpha mask (wave-NNN.png), alpha = 1 - C, one per loop frame
+    3. black side covers (wave-cover.png) hiding the part of the strip that
+       sticks out past the wave region
+
+The mask frames loop seamlessly: every sine's angular rate is rounded to a whole
+number of cycles per loop (LOOP_S), staying within a few percent of kAI's rates.
+
+Usage: kiba-wave-gen.py OUTDIR
+Needs: python-numpy, python-pillow
+"""
+import math
+import os
+import sys
+
+import numpy as np
+from PIL import Image, ImageDraw
+
+# ---- layout -----------------------------------------------------------------
+# kAI's wave widget is 320x120. This is the same widget at 2x.
+W, H = 640, 240
+SS = 8                      # supersampling for antialiasing
+FPS = 25                    # Plymouth refreshes at ~50 Hz, so 2 ticks per frame
+LOOP_S = 6                  # seconds per seamless loop
+NFRAMES = FPS * LOOP_S
+
+# Soft edges so the wave floats on black instead of being cut off like it is by
+# the card. Fractions of W / H. Set both to 0 for the card's hard edges.
+FEATHER_X = 0.14
+FEATHER_Y = 0.30
+
+# ---- kAI constants (ui/theme.h, ui/widgets.cpp) -----------------------------
+CYAN, BLUE = (0x6A, 0xD8, 0xFD), (0x3E, 0x64, 0xEB)
+VIOLET, PINK = (0x7E, 0x63, 0xFA), (0xF2, 0x9E, 0xF5)
+STOPS = [(0.00, CYAN), (0.33, BLUE), (0.66, VIOLET), (1.00, PINK)]
+GRAD_LEN = 1.15 * W                 # gradient runs 0 .. 1.15*w, ReflectSpread
+GRAD_PERIOD = 2 * GRAD_LEN          # reflect pattern repeats every 2 lengths
+DRIFT_PX_PER_S = 36.0 * (W / 320)   # kAI: 36 px/s at its 320 px width
+
+# (wavelength, speedMul, alpha, offset) per layer, painted back to front
+LAYERS = [(1.15, 0.55, 70, 0.0), (0.80, 0.90, 105, 1.7),
+          (0.55, 1.25, 150, 3.1), (0.95, 0.75, 255, 4.6)]
+
+# The "Thinking" mode: calm, steady, reads as "working on it".
+SPEED = 3.4                  # phase rate, rad/s (kAI Thinking)
+AMP_BASE, AMP_SWING, AMP_RATE = 0.30, 0.12, 3.2
+
+
+def cycles_per_loop(rate):
+    return max(1, round(rate * LOOP_S / (2 * math.pi)))
+
+
+def coverage(angle1, angle2, amp):
+    """C(x, y) in 0..1, shape (H, W): union of the four translucent layers."""
+    xs = np.arange(0, W + 4 + 1, 3.0)
+    u = xs / W
+    env = np.power(np.sin(math.pi * np.clip(u, 0, 1)), 0.9) * 0.65 + 0.35
+    A = H * 0.40 * amp
+    base_y = H * 0.60
+    keep = np.ones((H, W), dtype=np.float64)          # prod(1 - a_i * m_i)
+    for (wl, _sm, alpha, off), a1, a2 in zip(LAYERS, angle1, angle2):
+        y = base_y - A * env * (np.sin(u * 2 * math.pi / wl * 1.6 + a1 + off)
+                                + 0.35 * np.sin(u * 2 * math.pi * 2.3 - a2 + off * 2))
+        # Pillow addresses pixel centres, so shift by half a supersample to match continuous coords.
+        o = 0.5
+        pts = ([(0.0 * SS - o, H * SS - o)] + [(x * SS - o, yy * SS - o) for x, yy in zip(xs, y)]
+               + [((W + 4) * SS - o, H * SS - o)])
+        im = Image.new("L", (W * SS, H * SS), 0)
+        ImageDraw.Draw(im).polygon(pts, fill=255)
+        m = np.asarray(im, dtype=np.float64).reshape(H, SS, W, SS).mean(axis=(1, 3)) / 255.0
+        keep *= 1.0 - (alpha / 255.0) * m
+    return 1.0 - keep
+
+
+def feather():
+    def ramp(d, span):
+        if span <= 0:
+            return np.ones_like(d)
+        t = np.clip(d / span, 0, 1)
+        return t * t * (3 - 2 * t)
+    x = np.arange(W) + 0.5
+    y = np.arange(H) + 0.5
+    fx = ramp(np.minimum(x, W - x), FEATHER_X * W)
+    fy = ramp(H - y, FEATHER_Y * H)
+    return np.outer(fy, fx)
+
+
+def gradient_strip(width, height):
+    """kAI's reflecting 4-stop gradient, sampled over `width` px."""
+    t = (np.arange(width) + 0.5) / GRAD_LEN
+    t = np.mod(t, 2.0)
+    t = np.where(t > 1.0, 2.0 - t, t)
+    pos = [s[0] for s in STOPS]
+    chans = [np.interp(t, pos, [s[1][c] for s in STOPS]) for c in range(3)]
+    row = np.stack(chans, axis=-1)
+    return np.repeat(row[None, :, :], height, axis=0)
+
+
+def main(outdir):
+    os.makedirs(outdir, exist_ok=True)
+    rates1 = [cycles_per_loop(SPEED * sm) * 2 * math.pi / LOOP_S for (_, sm, _, _) in LAYERS]
+    rates2 = [cycles_per_loop(SPEED * 0.7 * sm) * 2 * math.pi / LOOP_S for (_, sm, _, _) in LAYERS]
+    amp_rate = cycles_per_loop(AMP_RATE) * 2 * math.pi / LOOP_S
+    fe = feather()
+
+    masks = []
+    for f in range(NFRAMES):
+        t = f / FPS
+        amp = AMP_BASE + AMP_SWING * math.sin(amp_rate * t)
+        c = coverage([r * t for r in rates1], [r * t for r in rates2], amp) * fe
+        masks.append(1.0 - c)                          # black overlay's alpha
+
+    # Crop the rows that are black in every frame (peaks never reach the top).
+    lit = np.min(np.stack(masks), axis=0) < 0.999
+    rows = np.where(lit.any(axis=1))[0]
+    top = max(0, int(rows[0]) - 2)
+    hc = H - top
+
+    for f, a in enumerate(masks):
+        rgba = np.zeros((hc, W, 4), dtype=np.uint8)
+        rgba[..., 3] = np.round(a[top:] * 255).astype(np.uint8)
+        Image.fromarray(rgba, "RGBA").save(os.path.join(outdir, "wave-%d.png" % f), optimize=True)
+
+    strip_w = int(math.ceil(GRAD_PERIOD)) + W
+    strip = gradient_strip(strip_w, hc).round().astype(np.uint8)
+    Image.fromarray(strip, "RGB").save(os.path.join(outdir, "wave-gradient.png"), optimize=True)
+
+    cover_w = int(math.ceil(GRAD_PERIOD))
+    Image.new("RGB", (cover_w, hc), (0, 0, 0)).save(os.path.join(outdir, "wave-cover.png"), optimize=True)
+
+    # Constants the Plymouth script needs, written in its own syntax.
+    with open(os.path.join(outdir, "wave-params.script"), "w") as fh:
+        fh.write("wave_w = %d;\nwave_h = %d;\nwave_frames = %d;\nwave_fps = %d;\n"
+                 % (W, hc, NFRAMES, FPS))
+        fh.write("wave_period = %d;\nwave_drift = %.4f;\nwave_cover_w = %d;\n"
+                 % (math.ceil(GRAD_PERIOD), DRIFT_PX_PER_S, cover_w))
+    print("wave: %d frames, %dx%d, strip %dx%d" % (NFRAMES, W, hc, strip_w, hc))
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit("usage: kiba-wave-gen.py OUTDIR")
+    main(sys.argv[1])
+KIBAWAVEGEN
+
+python3 /tmp/kiba-wave-gen.py "${KIBA_PLYMOUTH_DIR}" \
+  || { echo "ERROR: failed to render the Plymouth wave animation" >&2; exit 1; }
+test -s "${KIBA_PLYMOUTH_DIR}/wave-0.png" -a -s "${KIBA_PLYMOUTH_DIR}/wave-149.png" \
+     -a -s "${KIBA_PLYMOUTH_DIR}/wave-gradient.png" -a -s "${KIBA_PLYMOUTH_DIR}/wave-cover.png" \
+  || { echo "ERROR: Plymouth wave frames are missing" >&2; exit 1; }
+rm -f /tmp/kiba-wave-gen.py
+[ -n "${KIBA_WAVE_DEPS}" ] && pacman -Rns --noconfirm ${KIBA_WAVE_DEPS} || true
 
 cat > "${KIBA_PLYMOUTH_DIR}/kibaos.plymouth" << 'PLYMOUTHDESC'
 [Plymouth Theme]
 Name=KibaOS
-Description=KibaOS boot splash
+Description=KibaOS boot splash (kAI wave)
 ModuleName=script
 
 [script]
@@ -2738,97 +2912,97 @@ ImageDir=/usr/share/plymouth/themes/kibaos
 ScriptFile=/usr/share/plymouth/themes/kibaos/kibaos.script
 PLYMOUTHDESC
 
-cat > "${KIBA_PLYMOUTH_DIR}/kibaos.script" << 'PLYMOUTHSCRIPT'
-// KibaOS boot splash — Plymouth script theme.
-// Centered brand image on a dark background, with a minimal Windows 11-style
-// orbiting-dot spinner underneath and a minimal password prompt for
-// full-disk-encryption unlocks.
+# The generator emits the wave_* constants; they go in front of the theme script.
+cat "${KIBA_PLYMOUTH_DIR}/wave-params.script" - > "${KIBA_PLYMOUTH_DIR}/kibaos.script" << 'PLYMOUTHSCRIPT'
+// KibaOS boot splash -- Plymouth script theme.
+// kAI's gradient wave, centered on OLED black. Nothing else is drawn.
+// wave_* constants are prepended by the build (generated alongside the frames).
+//
+// Compositing, bottom to top:
+//   z=1  wave-gradient.png  kAI's reflecting gradient, scrolled sideways (exact drift)
+//   z=2  wave-N.png         black alpha mask whose holes are the wave (looping frames)
+//   z=3  wave-cover.png     black blocks hiding the strip outside the wave region
+// Because every layer of kAI's wave is the same gradient colour at a different
+// opacity, gradient * coverage over black is pixel-identical to painting them.
 
-Window.SetBackgroundTopColor(0.043, 0.055, 0.078);
-Window.SetBackgroundBottomColor(0.043, 0.055, 0.078);
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
 
-logo.image = Image("splash.png");
-logo.image = logo.image.Scale(logo.image.GetWidth() - 6, logo.image.GetHeight() - 6);
-logo.sprite = Sprite(logo.image);
-logo.sprite.SetX(Window.GetWidth() / 2 - logo.image.GetWidth() / 2);
-logo.sprite.SetY(Window.GetHeight() / 2 - logo.image.GetHeight() / 2);
-logo.sprite.SetOpacity(1);
+wave_x = Math.Int((Window.GetWidth() - wave_w) / 2);
+wave_y = Math.Int((Window.GetHeight() - wave_h) / 2);
 
-// Peeking mascot: bottom-right corner, flush with the bottom edge so it looks
-// like it is peeking up over the screen. Frames are peek-0.png .. peek-8.png
-// (extracted from the source GIF at build time), cycled from refresh_callback.
-peek_scale = Window.GetHeight() / 1080;
-if (peek_scale < 0.6) peek_scale = 0.6;
-peek_count = 9;
-peek_ticks = 8;      // ticks (~50/s) per frame, matches the GIF's 0.16s delay
-peek_margin = Math.Int(40 * peek_scale);
-peek_frames = [];
-for (peek_i = 0; peek_i < peek_count; peek_i++) {
-  peek_img = Image("peek-" + peek_i + ".png");
-  peek_frames[peek_i] = peek_img.Scale(Math.Int(peek_img.GetWidth() * peek_scale),
-                                       Math.Int(peek_img.GetHeight() * peek_scale));
-}
-peek_sprite = Sprite(peek_frames[0]);
-peek_sprite.SetX(Window.GetWidth() - peek_frames[0].GetWidth() - peek_margin);
-peek_sprite.SetY(Window.GetHeight() - peek_frames[0].GetHeight());
-peek_sprite.SetZ(10);
+wave_strip = Sprite(Image("wave-gradient.png"));
+wave_strip.SetZ(1);
+wave_strip.SetX(wave_x);
+wave_strip.SetY(wave_y);
 
-// Windows 11-style spinner: five small dots enter one after another, sweep
-// around a circle with an ease-in-out (slow, fast, slow, so they bunch up and
-// spread out), then fade. Positions come from Math.Sin/Cos; dot.png is a
-// pre-rendered anti-aliased circle (see the magick call in the build script).
-pi = 3.14159265;
-spin_count = 5;
-spin_radius = 20;
-spin_period = 110;   // ticks (~50/s) for one full cycle
-spin_run = 72;       // ticks each dot spends travelling
-spin_stagger = 7;    // ticks between consecutive dots
-spin_cx = Window.GetWidth() / 2;
-spin_cy = logo.sprite.GetY() + logo.image.GetHeight() + 56;
+wave_images = [];
+for (wave_i = 0; wave_i < wave_frames; wave_i++)
+  wave_images[wave_i] = Image("wave-" + wave_i + ".png");
+wave_mask = Sprite(wave_images[0]);
+wave_mask.SetZ(2);
+wave_mask.SetX(wave_x);
+wave_mask.SetY(wave_y);
 
-spin_image = Image("dot.png");
-spin = [];
-for (i = 0; i < spin_count; i++) {
-  spin[i] = Sprite(spin_image);
-  spin[i].SetOpacity(0);
-}
+wave_cover_image = Image("wave-cover.png");
+wave_cover_left = Sprite(wave_cover_image);
+wave_cover_left.SetZ(3);
+wave_cover_left.SetX(wave_x - wave_cover_w);
+wave_cover_left.SetY(wave_y);
+wave_cover_right = Sprite(wave_cover_image);
+wave_cover_right.SetZ(3);
+wave_cover_right.SetX(wave_x + wave_w);
+wave_cover_right.SetY(wave_y);
 
-progress_tick = 0;
+// The refresh callback runs ~50 times per second.
+wave_tick = 0;
 fun refresh_callback() {
-  progress_tick++;
-  peek_n = Math.Int(progress_tick / peek_ticks);
-  peek_n = peek_n - Math.Int(peek_n / peek_count) * peek_count;
-  peek_sprite.SetImage(peek_frames[peek_n]);
-  tm = progress_tick - Math.Int(progress_tick / spin_period) * spin_period;
-  for (i = 0; i < spin_count; i++) {
-    t = tm - i * spin_stagger;
-    if (t < 0 || t > spin_run) {
-      spin[i].SetOpacity(0);
-    } else {
-      u = t / spin_run;
-      e = u * u * (3 - 2 * u);
-      a = 2 * pi * e;
-      spin[i].SetX(spin_cx + spin_radius * Math.Sin(a) - spin_image.GetWidth() / 2);
-      spin[i].SetY(spin_cy - spin_radius * Math.Cos(a) - spin_image.GetHeight() / 2);
-      o = 1;
-      if (u < 0.12) o = u / 0.12;
-      if (u > 0.88) o = (1 - u) / 0.12;
-      spin[i].SetOpacity(o);
-    }
-  }
+  wave_tick++;
+
+  frame = Math.Int(wave_tick * wave_fps / 50);
+  frame = frame - Math.Int(frame / wave_frames) * wave_frames;
+  wave_mask.SetImage(wave_images[frame]);
+
+  drift = wave_tick * wave_drift / 50;
+  drift = drift - Math.Int(drift / wave_period) * wave_period;
+  wave_strip.SetX(wave_x - Math.Int(drift));
 }
 Plymouth.SetRefreshFunction(refresh_callback);
+
+// Full-disk-encryption unlock: the only other thing that is ever drawn, and
+// only while a password is being asked for. Sits just under the wave.
+pw_prompt_sprite = Sprite();
+pw_bullets_sprite = Sprite();
+pw_y = wave_y + wave_h + 24;
 
 fun display_password_callback(prompt, bullets) {
   if (prompt == "")
     prompt = "Enter your password to unlock the disk:";
-  prompt_text.image = Image.Text(prompt, 1, 1, 1, 1);
-  prompt_text.sprite = Sprite(prompt_text.image);
-  prompt_text.sprite.SetX(Window.GetWidth() / 2 - prompt_text.image.GetWidth() / 2);
-  prompt_text.sprite.SetY(spin_cy + spin_radius + 36);
+  pw_prompt_image = Image.Text(prompt, 1, 1, 1, 1);
+  pw_prompt_sprite.SetImage(pw_prompt_image);
+  pw_prompt_sprite.SetOpacity(1);
+  pw_prompt_sprite.SetX(Window.GetWidth() / 2 - pw_prompt_image.GetWidth() / 2);
+  pw_prompt_sprite.SetY(pw_y);
+
+  pw_text = "";
+  for (pw_i = 0; pw_i < bullets; pw_i++)
+    pw_text = pw_text + "*";
+  if (pw_text == "") pw_text = " ";
+  pw_bullets_image = Image.Text(pw_text, 1, 1, 1, 1);
+  pw_bullets_sprite.SetImage(pw_bullets_image);
+  pw_bullets_sprite.SetOpacity(1);
+  pw_bullets_sprite.SetX(Window.GetWidth() / 2 - pw_bullets_image.GetWidth() / 2);
+  pw_bullets_sprite.SetY(pw_y + pw_prompt_image.GetHeight() + 8);
 }
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback() {
+  pw_prompt_sprite.SetOpacity(0);
+  pw_bullets_sprite.SetOpacity(0);
+}
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
 PLYMOUTHSCRIPT
+rm -f "${KIBA_PLYMOUTH_DIR}/wave-params.script"
 
 mkdir -p /etc/plymouth
 cat > /etc/plymouth/plymouthd.conf << 'PLYMOUTHD'
@@ -5072,8 +5246,8 @@ NoDisplay=true
 LIAUTO
 
 # ── VibePanel: glass dock (bottom): pinned apps + taskbar ───────────────
-# Pinned apps: Browser (chromium), Files (nemo via kibaos-files) and Text
-# Editor (gnome-text-editor). VibePanel's taskbar widget has no pinning at the
+# Pinned apps: Browser (chromium), Files (nemo via kibaos-files), Text
+# Editor (gnome-text-editor) and Kiba (kAI voice assistant, if it built). VibePanel's taskbar widget has no pinning at the
 # pinned commit above, so each pin is a `custom-<name>` button widget (image +
 # on_click) grouped with the taskbar in ONE island, so pins and open windows
 # share a single pill. The bar surface itself is fully transparent; the island
@@ -5152,6 +5326,13 @@ _kiba_pin() {   # name  tooltip  fallback-glyph  desktop-file  icon-names...
 _kiba_pin browser "Browser"     "🌐" /usr/share/applications/chromium.desktop            kibaos-browser chromium web-browser
 _kiba_pin files   "Files"       "📁" /usr/share/applications/kibaos-files.desktop        nemo system-file-manager folder
 _kiba_pin editor  "Text Editor" "📝" /usr/share/applications/org.gnome.TextEditor.desktop org.gnome.TextEditor accessories-text-editor text-editor
+# kAI is built non-fatally earlier, so only pin it if it is actually installed
+# (a pin for a missing app would just be a dead icon).
+if command -v kibavoice-ui >/dev/null 2>&1 && [ -f /usr/share/applications/kibavoice.desktop ]; then
+  _kiba_pin kai "Kiba" "🎙" /usr/share/applications/kibavoice.desktop kibavoice audio-input-microphone
+  sed -i 's/"custom-editor", "taskbar"/"custom-editor", "custom-kai", "taskbar"/' "${SKEL}/.config/vibepanel/config.toml"
+  grep -q '"custom-kai"' "${SKEL}/.config/vibepanel/config.toml"
+fi
 
 cat > "${SKEL}/.config/vibepanel/style.css" << 'VIBEPANELCSS'
 /* Glass dock: pinned apps + open windows in one translucent island. The
