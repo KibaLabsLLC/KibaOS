@@ -2609,6 +2609,8 @@ else
   echo "WARNING: kAI model download failed; the ISO will ship without models and kAI will download them on first use." >&2
   rm -rf "${KAI_DATA}"
 fi
+kibavoice install-service
+systemctl enable kibavoice
 # System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
