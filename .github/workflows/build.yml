@@ -401,9 +401,9 @@ jobs:
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
-          # Returns 0 only if the installer was found and killed. Any failure
-          # (no installer process, guest agent unreachable) means we assume the
-          # VM is sitting at the login screen.
+          # Returns 0 only if the installer was found and killed. A failure just
+          # means "not running right now"; if it never succeeds during an attempt
+          # we assume the VM is sitting at the login screen.
           kill_installer() { python3 qga.py; }
 
           # A candidate is a screenshot that is not blank and not the white installer.
@@ -430,7 +430,6 @@ jobs:
 
             dir="attempts/$(printf '%02d' "$((attempt + 1))")"
             mkdir -p "$dir"
-            installer_closed=0
             installer_killed=0
             for i in $(seq 1 "$SHOTS"); do
               sleep "$INTERVAL"
@@ -440,12 +439,19 @@ jobs:
               fi
               shot="$dir/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
               capture_probe "$dir/probe.png" || { echo "screendump failed"; continue; }
-              if is_mostly_white "$dir/probe.png" && [ "$installer_closed" -eq 0 ]; then
-                echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe via QEMU guest agent..."
-                if kill_installer; then installer_killed=1; else echo "Could not kill installer -- assuming the VM is at the login screen."; fi
-                installer_closed=1
-                sleep 5
-                capture_probe "$shot" || cp "$dir/probe.png" "$shot" || true
+              if is_mostly_white "$dir/probe.png" && [ "$installer_killed" -eq 0 ]; then
+                # The white splash stays up ~120s before the installer starts, so a
+                # failed kill here is expected early on. Keep retrying on every white
+                # frame; only an attempt that never manages a kill counts as login.
+                echo "Mostly-white screen. Trying to kill io.kibaos.oobe via QEMU guest agent..."
+                if kill_installer; then
+                  installer_killed=1
+                  sleep 5
+                  capture_probe "$shot" || cp "$dir/probe.png" "$shot" || true
+                else
+                  echo "  Not running yet (splash?) -- will retry on the next white frame."
+                  mv "$dir/probe.png" "$shot"
+                fi
               else
                 mv "$dir/probe.png" "$shot"
               fi
@@ -458,7 +464,7 @@ jobs:
                 if is_candidate "$f"; then SELECTED="$f"; fi
               done < <(find "$dir" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort)
             else
-              echo "Installer was not killed -- treating this attempt as the login screen."
+              echo "Installer was never killed this attempt -- assuming the VM is at the login screen."
             fi
             if [ -n "$SELECTED" ]; then
               echo "Attempt $((attempt + 1)): selected $SELECTED"
