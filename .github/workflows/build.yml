@@ -260,18 +260,7 @@ jobs:
       SHOTS: 10
       INTERVAL: 30
       MAX_RETRIES: 25
-      # A screenshot is rejected as "the login screen" ONLY when BOTH checks against
-      # assets/reference/login-screen.png are (near-)exact matches (normalized RMSE, 0..1):
-      #   whole screen  < LOGIN_THRESHOLD   (tolerates the clock changing)
-      #   centre panel  < LOGIN_CENTER_THRESHOLD (user card + logo)
-      # Anything less certain is kept as a valid screenshot.
-      LOGIN_THRESHOLD: 0.006
-      LOGIN_CENTER_THRESHOLD: 0.01
     steps:
-      - name: Checkout login-screen reference image
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: assets/reference
       - name: Download selected build artifact
         uses: actions/download-artifact@v4
         with:
@@ -378,7 +367,8 @@ jobs:
               raise SystemExit("guest agent never answered")
 
           rc = run("/usr/bin/pkill", ["-TERM", "-f", "io.kibaos.oobe"])
-          print("pkill exit code:", rc, "(1 = installer already gone)")
+          print("pkill exit code:", rc, "(1 = no installer running -> assume login screen)")
+          sys.exit(0 if rc == 0 else 1)
           PYQGA
           mkdir -p attempts
           ISO="$ISO_PATH"
@@ -411,39 +401,17 @@ jobs:
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
-          kill_installer() { python3 qga.py || true; }
+          # Returns 0 only if the installer was found and killed. Any failure
+          # (no installer process, guest agent unreachable) means we assume the
+          # VM is sitting at the login screen.
+          kill_installer() { python3 qga.py; }
 
-          # --- login-screen detection -------------------------------------------
-          REF=assets/reference/login-screen.png
-          if [ ! -f "$REF" ]; then
-            echo "::error::Missing $REF -- commit a screenshot of the KibaOS login screen there."
-            exit 1
-          fi
-          thumb() { convert "$1" -alpha off -colorspace sRGB -resize 80x50! -blur 0x1 "$2"; }
-          center() { convert "$1" -alpha off -colorspace sRGB -resize 1280x800! -crop 384x440+448+296 +repage -resize 96x110! -blur 0x1 "$2"; }
-          rmse() { compare -metric RMSE "$1" "$2" null: 2>&1 | sed -n 's/.*(\(.*\)).*/\1/p'; }
-          thumb "$REF" ref-thumb.png
-          center "$REF" ref-center.png
-          # Succeeds (returns 0) only with full confidence that $1 is the login screen.
-          is_login_screen() {
-            local g c
-            thumb "$1" cur-thumb.png;   g=$(rmse ref-thumb.png cur-thumb.png)
-            center "$1" cur-center.png; c=$(rmse ref-center.png cur-center.png)
-            # Unparseable comparison => not confident => not login.
-            if [ -z "$g" ] || [ -z "$c" ]; then echo "  $1: login comparison failed -> treating as NOT login"; return 1; fi
-            if awk -v g="$g" -v c="$c" -v tg="$LOGIN_THRESHOLD" -v tc="$LOGIN_CENTER_THRESHOLD" 'BEGIN{exit !(g<tg && c<tc)}'; then
-              echo "  $1: login screen (global=$g, centre=$c)"; return 0
-            fi
-            echo "  $1: not confidently login (global=$g, centre=$c)"; return 1
-          }
-          # A candidate is a screenshot that is not blank, not the white installer,
-          # and is not confidently the login screen.
+          # A candidate is a screenshot that is not blank and not the white installer.
           is_candidate() {
             local f="$1" sd
             if is_mostly_white "$f"; then echo "  $f: mostly white (installer)"; return 1; fi
             sd=$(convert "$f" -format '%[fx:standard_deviation]' info:)
             if ! awk -v v="$sd" 'BEGIN{exit !(v>0.005)}'; then echo "  $f: blank (stddev=$sd)"; return 1; fi
-            if is_login_screen "$f"; then return 1; fi
             echo "  $f: CANDIDATE"
             return 0
           }
@@ -463,6 +431,7 @@ jobs:
             dir="attempts/$(printf '%02d' "$((attempt + 1))")"
             mkdir -p "$dir"
             installer_closed=0
+            installer_killed=0
             for i in $(seq 1 "$SHOTS"); do
               sleep "$INTERVAL"
               if ! vm_alive; then
@@ -473,7 +442,7 @@ jobs:
               capture_probe "$dir/probe.png" || { echo "screendump failed"; continue; }
               if is_mostly_white "$dir/probe.png" && [ "$installer_closed" -eq 0 ]; then
                 echo "Mostly-white installer screen detected. Sending SIGTERM to io.kibaos.oobe via QEMU guest agent..."
-                kill_installer
+                if kill_installer; then installer_killed=1; else echo "Could not kill installer -- assuming the VM is at the login screen."; fi
                 installer_closed=1
                 sleep 5
                 capture_probe "$shot" || cp "$dir/probe.png" "$shot" || true
@@ -484,21 +453,25 @@ jobs:
             rm -f "$dir/probe.png"
 
             SELECTED=""
-            while IFS= read -r f; do
-              if is_candidate "$f"; then SELECTED="$f"; fi
-            done < <(find "$dir" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort)
+            if [ "$installer_killed" -eq 1 ]; then
+              while IFS= read -r f; do
+                if is_candidate "$f"; then SELECTED="$f"; fi
+              done < <(find "$dir" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort)
+            else
+              echo "Installer was not killed -- treating this attempt as the login screen."
+            fi
             if [ -n "$SELECTED" ]; then
               echo "Attempt $((attempt + 1)): selected $SELECTED"
               break
             fi
-            echo "Attempt $((attempt + 1)): no screenshot that differs from the login screen."
+            echo "Attempt $((attempt + 1)): no usable desktop screenshot."
           done
           stop_vm
 
           mkdir -p shots
           cp "$dir"/*.png shots/ 2>/dev/null || true
           if [ -z "$SELECTED" ]; then
-            echo "::error::${{ matrix.fw }}: no non-login desktop screenshot after $((MAX_RETRIES + 1)) attempts"
+            echo "::error::${{ matrix.fw }}: no desktop screenshot after $((MAX_RETRIES + 1)) attempts"
             exit 1
           fi
           basename "$SELECTED" > shots/selected.txt
@@ -554,7 +527,7 @@ jobs:
           STAGE="$RUNNER_TEMP/screens-stage"
           rm -rf "$STAGE"; mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
           cp shots-in/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
-          # Only a screenshot the VM test selected (not the login screen) becomes desktop-<fw>.png.
+          # Only a screenshot the VM test selected (installer killed, so not the login screen) becomes desktop-<fw>.png.
           if [ -f shots-in/selected.txt ] && [ -f "shots-in/$(cat shots-in/selected.txt)" ]; then
             cp "shots-in/$(cat shots-in/selected.txt)" "$STAGE/desktop-${FW}.png"
             # Back-compat: desktop.png keeps tracking the UEFI desktop.
