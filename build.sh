@@ -1951,7 +1951,7 @@ cat > "${PROFILE}/profiledef.sh" << 'PROFILEDEF'
 #!/usr/bin/env bash
 iso_name="kibaos"
 iso_label="KIBAOS"
-iso_publisher="Kiba Labs, LLC <https://github.com/WolfTech-Innovations>"
+iso_publisher="Kiba Labs, LLC <https://kibaos.com>"
 iso_application="KibaOS — A friendly OS"
 iso_version="$(date +%Y.%m)"
 install_dir="arch"
@@ -2574,28 +2574,7 @@ KAI_SRC=/tmp/kai-src
 rm -rf "${KAI_SRC}"
 git clone --depth 1 https://github.com/KibaLabsLLC/kAI.git "${KAI_SRC}"
 cd "${KAI_SRC}"
-
-# Never bake -march=native of the build machine into a distributable ISO.
-# llama.cpp is in-tree (FetchContent) so -DGGML_NATIVE=OFF below reaches it, but
-# whisper.cpp is an ExternalProject with hard-coded CMAKE_ARGS, so patch it in.
-if grep -q -- '-DBUILD_SHARED_LIBS=OFF' CMakeLists.txt; then
-  sed -i 's/-DBUILD_SHARED_LIBS=OFF/-DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF/' CMakeLists.txt
-else
-  echo "!! kAI: could not patch whisper.cpp args (CMakeLists.txt changed upstream?)" >&2
-fi
-
-cmake -S . -B build -G Ninja \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=/usr \
-  -DGGML_NATIVE=OFF \
-  -DKIBAVOICE_BUILD_UI=ON
-cmake --build build -j"$(nproc)"
-cmake --install build
-
-command -v kibavoice    >/dev/null || { echo "kAI: kibavoice was not installed" >&2; exit 1; }
-command -v kibavoice-ui >/dev/null || { echo "kAI: kibavoice-ui missing (Qt6 not found at configure time?)" >&2; exit 1; }
-[ -x /usr/libexec/kibavoice/whisper-cli ] || { echo "kAI: whisper-cli was not installed" >&2; exit 1; }
-
+bash ./install.sh
 # System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
