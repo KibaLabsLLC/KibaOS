@@ -1,8 +1,7 @@
 <p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/01d78c3ba0102821011398a948becae271591fde/branding/README/902985159_2404324433708884_5909771899389672951_n.webp?raw=true" alt="KibaOS" width="800" />
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/c94202bfef31468dd04827c93612e22e4044f07b/branding/README/AEC60F5B-2122-4F6E-BC01-5A4993B06D53.png?raw=true" alt="KibaOS" width="800" />
 </p>
 
-# KibaOS
 ### A ready-to-use Linux desktop from Kiba Labs, LLC
 
 **Simple to install. Simple to use. Built for people switching to simple.**
