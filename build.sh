@@ -6235,20 +6235,38 @@ NOLABWCBRIDGE
 install -d -m 755 -o 1000 -g 1000 /home/liveuser/.config/dconf
 chown -R 1000:1000 /home/liveuser/.config
 
-for _desktop_file in /usr/share/applications/*.desktop; do
-  [ -f "${_desktop_file}" ] || continue
-  _basename=$(basename "${_desktop_file}")
-  _name_line=$(grep -m1 '^Name=' "${_desktop_file}" 2>/dev/null || true)
-  [ "${_basename}" = "budgie-welcome.desktop" ] && continue
-  if echo "${_basename}" | grep -qi 'budgie' || echo "${_name_line}" | grep -qi 'budgie'; then
-    if grep -q '^NoDisplay=' "${_desktop_file}"; then
-      sed -i 's/^NoDisplay=.*/NoDisplay=true/' "${_desktop_file}"
-    else
-      echo 'NoDisplay=true' >> "${_desktop_file}"
-    fi
-    echo "=== Hid launcher entry: ${_basename} (matched 'budgie') ==="
-  fi
+# Desktop icons: make executable + mark trusted so they launch without the
+# "Untrusted application launcher" prompt.
+for _icon in /home/liveuser/Desktop/*.desktop; do
+  [ -f "${_icon}" ] || continue
+  chmod 755 "${_icon}" 2>/dev/null || true
+  chown 1000:1000 "${_icon}" 2>/dev/null || true
+  # Best-effort at build time (needs a gvfs metadata daemon, often absent in chroot)
+  runuser -u liveuser -- gio set "${_icon}" metadata::trusted true 2>/dev/null || true
 done
+
+cat > /usr/local/bin/kibaos-trust-desktop-icons << 'TRUSTICONS'
+#!/bin/sh
+# Mark every launcher on the user's Desktop as executable + trusted.
+DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"
+[ -d "$DESKTOP_DIR" ] || exit 0
+for f in "$DESKTOP_DIR"/*.desktop; do
+  [ -f "$f" ] || continue
+  chmod +x "$f" 2>/dev/null || true
+  gio set "$f" metadata::trusted true 2>/dev/null || true
+done
+TRUSTICONS
+chmod 755 /usr/local/bin/kibaos-trust-desktop-icons
+
+cat > /home/liveuser/.config/autostart/kibaos-trust-desktop-icons.desktop << 'TRUSTAUTO'
+[Desktop Entry]
+Type=Application
+Name=Trust Desktop Icons
+Exec=/usr/local/bin/kibaos-trust-desktop-icons
+NoDisplay=true
+X-GNOME-Autostart-Phase=Applications
+TRUSTAUTO
+chown 1000:1000 /home/liveuser/.config/autostart/kibaos-trust-desktop-icons.desktop
 
 cat > /etc/resolv.conf << 'RESOLVCONF'
 nameserver 1.1.1.1
