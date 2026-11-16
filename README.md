@@ -17,10 +17,10 @@
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/25v2C5mvuv)
 ![Matrix](https://img.shields.io/matrix/kibalabs%3Amatrix.org?fetchMode=summary&style=flat&logo=matrix&logoColor=00000&logoSize=large&color=FFFFFF)
 
-<img src="https://img.shields.io/github/repo-size/KibaLabsLLC/Kiba?style=flat-square&color=blue" alt="Repo Size">
-<img src="https://img.shields.io/github/stars/KibaLabsLLC/Kiba?style=flat-square&color=yellow" alt="Stars">
-<img src="https://img.shields.io/github/forks/KibaLabsLLC/Kiba?style=flat-square&color=lightgrey" alt="Forks">
-<img src="https://img.shields.io/github/last-commit/KibaLabsLLC/Kiba?style=flat-square&color=green" alt="Last Commit">
+<img src="https://img.shields.io/github/repo-size/KibaLabsLLC/KibaOS?style=flat-square&color=blue" alt="Repo Size">
+<img src="https://img.shields.io/github/stars/KibaLabsLLC/KibaOS?style=flat-square&color=yellow" alt="Stars">
+<img src="https://img.shields.io/github/forks/KibaLabsLLC/KibaOS?style=flat-square&color=lightgrey" alt="Forks">
+<img src="https://img.shields.io/github/last-commit/KibaLabsLLC/KibaOS?style=flat-square&color=green" alt="Last Commit">
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/KibaLabsLLC/Kiba/main/branding/oin-member-2-0-horiz-1.png" alt="Open Invention Network Member" width="200">
