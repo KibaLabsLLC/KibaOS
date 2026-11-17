@@ -5,11 +5,203 @@ KIBA_ARCH="x86_64"
 for _a in "$@"; do
   case "${_a}" in
     --mobile) KIBA_ARCH="mobile" ;;
+    --shimboot) KIBA_ARCH="shimboot" ;;
   esac
 done
 [ "${KIBA_ARCH}" = "x86_64" ] && [ "${KIBA_MOBILE:-0}" = "1" ] && KIBA_ARCH="mobile"
 export KIBA_ARCH
 echo "=== KibaOS build target: ${KIBA_ARCH} ==="
+
+# ══════════════════════════════════════════════════════════════════════════
+# KibaOS Shimboot (Research)
+# Boots a Debian-based KibaOS userspace from a ChromeOS RMA shim on a
+# Chromebook, using ading2210/shimboot for the shim patching + disk image.
+# Runs on a Debian/Ubuntu host or a privileged ubuntu container (-v /dev:/dev
+# so loop partition nodes show up), NOT the archlinux image.
+#   sudo -E bash build.sh --shimboot
+# Env: KIBA_SHIMBOOT_BOARD (default dedede), KIBA_SHIMBOOT_DESKTOP (xfce),
+#      KIBA_SHIMBOOT_RELEASE (bookworm), KIBA_SHIMBOOT_REF (main),
+#      KIBA_WORKDIR ($PWD), RUN_NUM
+# ══════════════════════════════════════════════════════════════════════════
+build_kibaos_shimboot() {
+  local _board="${KIBA_SHIMBOOT_BOARD:-dedede}"
+  local _desktop="${KIBA_SHIMBOOT_DESKTOP:-xfce}"
+  local _release="${KIBA_SHIMBOOT_RELEASE:-bookworm}"
+  local _ref="${KIBA_SHIMBOOT_REF:-main}"
+  local _work="${KIBA_WORKDIR:-$PWD}"
+  local _out="${_work}/out"
+  local _sb="${_work}/shimboot-src"
+  local _data="${_work}/shimboot-data"
+  local _rootfs="${_data}/rootfs_${_board}"
+  local _name="kibaos-shimboot-${_board}-v${RUN_NUM:-dev}"
+  local _arch="amd64"
+  local _wall_url="https://github.com/KibaLabsLLC/KibaOS/blob/ddb6e80dbc82f354894e884f490618a33df3cc28/assets/wallpapers/015A7AE5-998D-4C49-9FEE-CF86A4984D14.png?raw=true"
+
+  if ! [[ "${_board}" =~ ^[a-z0-9-]+$ ]]; then
+    echo "ERROR: invalid shimboot board name '${_board}'" >&2; exit 1
+  fi
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "ERROR: --shimboot needs root (losetup/chroot). Run: sudo -E bash build.sh --shimboot" >&2; exit 1
+  fi
+  if [ ! -f /etc/debian_version ]; then
+    echo "ERROR: --shimboot must run on a Debian/Ubuntu host, not the Arch container." >&2; exit 1
+  fi
+
+  # Same board list shimboot uses to auto-switch to arm64.
+  case " corsola hana jacuzzi kukui strongbad nyan-big kevin bob veyron-speedy veyron-jerry veyron-minnie scarlet elm peach-pi peach-pit stumpy daisy-spring trogdor " in
+    *" ${_board} "*) _arch="arm64" ;;
+  esac
+  echo "=== Shimboot board: ${_board} | arch: ${_arch} | desktop: ${_desktop} | debian: ${_release} ==="
+
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
+  apt-get install -y \
+    ca-certificates wget curl python3 unzip zip git debootstrap debian-archive-keyring \
+    cpio binwalk pcregrep cgpt kmod pv lz4 cryptsetup \
+    e2fsprogs fdisk util-linux imagemagick xz-utils
+  if [ "${_arch}" = "arm64" ]; then
+    apt-get install -y qemu-user-static binfmt-support
+  fi
+  # Older debootstrap on Ubuntu hosts may not know a newer Debian release yet.
+  if [ ! -e "/usr/share/debootstrap/scripts/${_release}" ]; then
+    ln -s sid "/usr/share/debootstrap/scripts/${_release}"
+  fi
+
+  # Fail fast on a typo'd board (shimboot itself would limp on with an empty URL).
+  if _boards="$(curl -fsSL --retry 3 https://cdn.cros.download/boards.txt)"; then
+    if ! grep -q "/${_board}/" <<< "${_boards}"; then
+      echo "ERROR: board '${_board}' has no shim on cdn.cros.download (see https://cros.download/recovery)" >&2
+      exit 1
+    fi
+  else
+    echo "!! couldn't fetch the shim board list -- continuing, shimboot will complain if it's wrong" >&2
+  fi
+
+  rm -rf "${_sb}" "${_out}"
+  mkdir -p "${_out}" "${_data}"
+  git clone --depth 1 --branch "${_ref}" https://github.com/ading2210/shimboot.git "${_sb}"
+  echo "shimboot @ $(git -C "${_sb}" rev-parse --short HEAD)"
+
+  # ── 1. Base Debian rootfs (shimboot's own builder: zram, shimboot apt repo, etc.)
+  if findmnt -T "${_rootfs}/dev" >/dev/null 2>&1; then
+    umount -l "${_rootfs}"/* 2>/dev/null || true
+  fi
+  rm -rf "${_rootfs}"
+  mkdir -p "${_rootfs}"
+  ( cd "${_sb}" && ./build_rootfs.sh "${_rootfs}" "${_release}" \
+      custom_packages="task-${_desktop}-desktop" \
+      hostname="kibaos-${_board}" \
+      username=liveuser \
+      user_passwd=live \
+      arch="${_arch}" \
+      distro=debian )
+
+  # ── 2. KibaOS branding overlay (before shimboot patches the rootfs)
+  local _osr="${_rootfs}/usr/lib/os-release"
+  if [ -f "${_osr}" ]; then
+    sed -i -e '/^PRETTY_NAME=/d' -e '/^VARIANT=/d' -e '/^VARIANT_ID=/d' \
+           -e '/^BUILD_ID=/d' -e '/^VENDOR_NAME=/d' "${_osr}"
+    cat >> "${_osr}" << OSREL
+PRETTY_NAME="KibaOS Shimboot (Research) — Debian ${_release} base"
+VARIANT="Shimboot (Research)"
+VARIANT_ID=shimboot-research
+BUILD_ID=v${RUN_NUM:-dev}
+VENDOR_NAME="Kiba Labs"
+OSREL
+  fi
+
+  cat > "${_rootfs}/etc/kibaos-release" << KREL
+KibaOS Shimboot (Research) v${RUN_NUM:-dev}
+Board: ${_board}
+Base: Debian ${_release} + ${_desktop}, patched by ading2210/shimboot
+KREL
+
+  cat > "${_rootfs}/etc/motd" << 'MOTD'
+
+  KibaOS Shimboot (Research)
+  Experimental: booted from a ChromeOS shim. Expect rough edges.
+  Login: liveuser / live  --  change it: passwd
+
+MOTD
+
+  # Wallpaper (best effort -- never fail the build over a picture).
+  local _wall_dir="${_rootfs}/usr/share/backgrounds/kibaos"
+  mkdir -p "${_wall_dir}"
+  local _im="convert"; command -v magick >/dev/null 2>&1 && _im="magick"
+  if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wall-src "${_wall_url}" \
+     && "${_im}" /tmp/kiba-wall-src -resize 1920x1080^ -gravity center -extent 1920x1080 \
+          -quality 90 "${_wall_dir}/wallpaper.jpg"; then
+    if [ "${_desktop}" = "xfce" ]; then
+      local _xd="${_rootfs}/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
+      mkdir -p "${_xd}"
+      {
+        echo '<?xml version="1.0" encoding="UTF-8"?>'
+        echo '<channel name="xfce4-desktop" version="1.0">'
+        echo '  <property name="backdrop" type="empty">'
+        echo '    <property name="screen0" type="empty">'
+        for _mon in monitoreDP-1 monitoreDP1 monitorLVDS-1 monitor0 monitorVirtual1; do
+          echo "      <property name=\"${_mon}\" type=\"empty\">"
+          echo '        <property name="workspace0" type="empty">'
+          echo '          <property name="image-style" type="int" value="5"/>'
+          echo '          <property name="last-image" type="string" value="/usr/share/backgrounds/kibaos/wallpaper.jpg"/>'
+          echo '        </property>'
+          echo '      </property>'
+        done
+        echo '    </property>'
+        echo '  </property>'
+        echo '</channel>'
+      } > "${_xd}/xfce4-desktop.xml"
+    fi
+  else
+    echo "!! wallpaper fetch/convert failed -- shipping the stock one" >&2
+  fi
+  rm -f /tmp/kiba-wall-src
+
+  # ── 3. Shim + recovery image download, rootfs patch, disk image, zip
+  ( cd "${_sb}" && ./build_complete.sh "${_board}" \
+      rootfs_dir="${_rootfs}" \
+      data_dir="${_data}" \
+      arch="${_arch}" \
+      distro=debian \
+      compress_img=true \
+      quiet=true )
+
+  # build_complete.sh has no `set -e`, so check the result ourselves.
+  local _zip="${_data}/shimboot_${_board}.zip"
+  if [ ! -s "${_zip}" ]; then
+    echo "ERROR: shimboot produced no image (${_zip} missing/empty) -- check the log above." >&2
+    exit 1
+  fi
+  mv "${_zip}" "${_out}/${_name}.zip"
+  ( cd "${_out}" && sha256sum "${_name}.zip" > "${_name}.zip.sha256" )
+
+  cat > "${_out}/README-shimboot.txt" << README
+KibaOS Shimboot (Research) -- ${_name}
+=====================================
+EXPERIMENTAL. For Chromebooks you own, for experiments.
+
+1. Unzip ${_name}.zip -> shimboot_${_board}.bin
+2. Write it to a USB drive / SD card (8GB+, USB 3 recommended):
+     sudo dd if=shimboot_${_board}.bin of=/dev/sdX bs=4M status=progress conv=fsync
+   (or the Chromebook Recovery Utility's "use local image")
+3. Enable developer mode on the Chromebook, boot the USB from the
+   developer-mode screen (Ctrl+U / Ctrl+L), pick "KibaOS".
+4. Login: liveuser / live
+
+Board: ${_board}   (pick the board matching your Chromebook: cros.download/recovery)
+Base:  Debian ${_release} + ${_desktop}, patched with ading2210/shimboot
+README
+
+  echo "╔══════════════════════════════════════════╗"
+  echo "║  KibaOS Shimboot (Research) build done!  ║"
+  echo "║  ${_out}/${_name}.zip"
+  echo "╚══════════════════════════════════════════╝"
+}
+
+if [ "${KIBA_ARCH}" = "shimboot" ]; then
+  build_kibaos_shimboot
+  exit 0
+fi
 
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 10/' /etc/pacman.conf
 
