@@ -2,40 +2,28 @@
 set -ex
 
 KIBA_ARCH="x86_64"
+KIBA_SHIMBOOT_ROOTFS="${KIBA_SHIMBOOT_ROOTFS:-0}"
 for _a in "$@"; do
   case "${_a}" in
     --mobile) KIBA_ARCH="mobile" ;;
     --shimboot) KIBA_ARCH="shimboot" ;;
+    --shimboot-rootfs) KIBA_SHIMBOOT_ROOTFS=1 ;;
   esac
 done
 [ "${KIBA_ARCH}" = "x86_64" ] && [ "${KIBA_MOBILE:-0}" = "1" ] && KIBA_ARCH="mobile"
-export KIBA_ARCH
+export KIBA_ARCH KIBA_SHIMBOOT_ROOTFS
 echo "=== KibaOS build target: ${KIBA_ARCH} ==="
 
-# ══════════════════════════════════════════════════════════════════════════
-# KibaOS Shimboot (Research)
-# Boots a Debian-based KibaOS userspace from a ChromeOS RMA shim on a
-# Chromebook, using ading2210/shimboot for the shim patching + disk image.
-# Runs on a Debian/Ubuntu host or a privileged ubuntu container (-v /dev:/dev
-# so loop partition nodes show up), NOT the archlinux image.
-#   sudo -E bash build.sh --shimboot
-# Env: KIBA_SHIMBOOT_BOARD (default dedede), KIBA_SHIMBOOT_DESKTOP (xfce),
-#      KIBA_SHIMBOOT_RELEASE (bookworm), KIBA_SHIMBOOT_REF (main),
-#      KIBA_WORKDIR ($PWD), RUN_NUM
-# ══════════════════════════════════════════════════════════════════════════
 build_kibaos_shimboot() {
-  local _board="${KIBA_SHIMBOOT_BOARD:-dedede}"
-  local _desktop="${KIBA_SHIMBOOT_DESKTOP:-xfce}"
-  local _release="${KIBA_SHIMBOOT_RELEASE:-bookworm}"
+  local _board="${KIBA_SHIMBOOT_BOARD:-nissa}"
   local _ref="${KIBA_SHIMBOOT_REF:-main}"
   local _work="${KIBA_WORKDIR:-$PWD}"
+  local _tar="${KIBA_SHIMBOOT_ROOTFS_TAR:-${_work}/shimboot-rootfs.tar.zst}"
   local _out="${_work}/out"
   local _sb="${_work}/shimboot-src"
   local _data="${_work}/shimboot-data"
   local _rootfs="${_data}/rootfs_${_board}"
   local _name="kibaos-shimboot-${_board}-v${RUN_NUM:-dev}"
-  local _arch="amd64"
-  local _wall_url="https://github.com/KibaLabsLLC/KibaOS/blob/ddb6e80dbc82f354894e884f490618a33df3cc28/assets/wallpapers/015A7AE5-998D-4C49-9FEE-CF86A4984D14.png?raw=true"
 
   if ! [[ "${_board}" =~ ^[a-z0-9-]+$ ]]; then
     echo "ERROR: invalid shimboot board name '${_board}'" >&2; exit 1
@@ -44,30 +32,24 @@ build_kibaos_shimboot() {
     echo "ERROR: --shimboot needs root (losetup/chroot). Run: sudo -E bash build.sh --shimboot" >&2; exit 1
   fi
   if [ ! -f /etc/debian_version ]; then
-    echo "ERROR: --shimboot must run on a Debian/Ubuntu host, not the Arch container." >&2; exit 1
+    echo "ERROR: --shimboot (stage 2) must run on a Debian/Ubuntu host or container." >&2
+    echo "       The Arch container runs stage 1 instead: build.sh --shimboot-rootfs" >&2; exit 1
   fi
-
-  # Same board list shimboot uses to auto-switch to arm64.
+  if [ ! -s "${_tar}" ]; then
+    echo "ERROR: ${_tar} not found. Run stage 1 first (archlinux container): build.sh --shimboot-rootfs" >&2; exit 1
+  fi
   case " corsola hana jacuzzi kukui strongbad nyan-big kevin bob veyron-speedy veyron-jerry veyron-minnie scarlet elm peach-pi peach-pit stumpy daisy-spring trogdor " in
-    *" ${_board} "*) _arch="arm64" ;;
+    *" ${_board} "*) echo "ERROR: board '${_board}' is ARM; the KibaOS rootfs is x86_64 only." >&2; exit 1 ;;
   esac
-  echo "=== Shimboot board: ${_board} | arch: ${_arch} | desktop: ${_desktop} | debian: ${_release} ==="
+  echo "=== Shimboot board: ${_board} | rootfs: ${_tar} ==="
 
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y \
-    ca-certificates wget curl python3 unzip zip git debootstrap debian-archive-keyring \
+    ca-certificates wget curl python3 unzip zip git debootstrap \
     cpio binwalk pcregrep cgpt kmod pv lz4 cryptsetup \
-    e2fsprogs fdisk util-linux imagemagick xz-utils
-  if [ "${_arch}" = "arm64" ]; then
-    apt-get install -y qemu-user-static binfmt-support
-  fi
-  # Older debootstrap on Ubuntu hosts may not know a newer Debian release yet.
-  if [ ! -e "/usr/share/debootstrap/scripts/${_release}" ]; then
-    ln -s sid "/usr/share/debootstrap/scripts/${_release}"
-  fi
+    e2fsprogs fdisk util-linux xz-utils zstd
 
-  # Fail fast on a typo'd board (shimboot itself would limp on with an empty URL).
   if _boards="$(curl -fsSL --retry 3 https://cdn.cros.download/boards.txt)"; then
     if ! grep -q "/${_board}/" <<< "${_boards}"; then
       echo "ERROR: board '${_board}' has no shim on cdn.cros.download (see https://cros.download/recovery)" >&2
@@ -82,91 +64,22 @@ build_kibaos_shimboot() {
   git clone --depth 1 --branch "${_ref}" https://github.com/ading2210/shimboot.git "${_sb}"
   echo "shimboot @ $(git -C "${_sb}" rev-parse --short HEAD)"
 
-  # ── 1. Base Debian rootfs (shimboot's own builder: zram, shimboot apt repo, etc.)
   if findmnt -T "${_rootfs}/dev" >/dev/null 2>&1; then
     umount -l "${_rootfs}"/* 2>/dev/null || true
   fi
   rm -rf "${_rootfs}"
   mkdir -p "${_rootfs}"
-  ( cd "${_sb}" && ./build_rootfs.sh "${_rootfs}" "${_release}" \
-      custom_packages="task-${_desktop}-desktop" \
-      hostname="kibaos-${_board}" \
-      username=liveuser \
-      user_passwd=live \
-      arch="${_arch}" \
-      distro=debian )
+  zstd -dc "${_tar}" | tar --numeric-owner --xattrs --xattrs-include='*' --acls -xpf - -C "${_rootfs}"
+  [ -e "${_rootfs}/etc/os-release" ] || { echo "ERROR: rootfs tarball looks empty/corrupt" >&2; exit 1; }
 
-  # ── 2. KibaOS branding overlay (before shimboot patches the rootfs)
-  local _osr="${_rootfs}/usr/lib/os-release"
-  if [ -f "${_osr}" ]; then
-    sed -i -e '/^PRETTY_NAME=/d' -e '/^VARIANT=/d' -e '/^VARIANT_ID=/d' \
-           -e '/^BUILD_ID=/d' -e '/^VENDOR_NAME=/d' "${_osr}"
-    cat >> "${_osr}" << OSREL
-PRETTY_NAME="KibaOS Shimboot (Research) — Debian ${_release} base"
-VARIANT="Shimboot (Research)"
-VARIANT_ID=shimboot-research
-BUILD_ID=v${RUN_NUM:-dev}
-VENDOR_NAME="Kiba Labs"
-OSREL
-  fi
-
-  cat > "${_rootfs}/etc/kibaos-release" << KREL
-KibaOS Shimboot (Research) v${RUN_NUM:-dev}
-Board: ${_board}
-Base: Debian ${_release} + ${_desktop}, patched by ading2210/shimboot
-KREL
-
-  cat > "${_rootfs}/etc/motd" << 'MOTD'
-
-  KibaOS Shimboot (Research)
-  Experimental: booted from a ChromeOS shim. Expect rough edges.
-  Login: liveuser / live  --  change it: passwd
-
-MOTD
-
-  # Wallpaper (best effort -- never fail the build over a picture).
-  local _wall_dir="${_rootfs}/usr/share/backgrounds/kibaos"
-  mkdir -p "${_wall_dir}"
-  local _im="convert"; command -v magick >/dev/null 2>&1 && _im="magick"
-  if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wall-src "${_wall_url}" \
-     && "${_im}" /tmp/kiba-wall-src -resize 1920x1080^ -gravity center -extent 1920x1080 \
-          -quality 90 "${_wall_dir}/wallpaper.jpg"; then
-    if [ "${_desktop}" = "xfce" ]; then
-      local _xd="${_rootfs}/etc/xdg/xfce4/xfconf/xfce-perchannel-xml"
-      mkdir -p "${_xd}"
-      {
-        echo '<?xml version="1.0" encoding="UTF-8"?>'
-        echo '<channel name="xfce4-desktop" version="1.0">'
-        echo '  <property name="backdrop" type="empty">'
-        echo '    <property name="screen0" type="empty">'
-        for _mon in monitoreDP-1 monitoreDP1 monitorLVDS-1 monitor0 monitorVirtual1; do
-          echo "      <property name=\"${_mon}\" type=\"empty\">"
-          echo '        <property name="workspace0" type="empty">'
-          echo '          <property name="image-style" type="int" value="5"/>'
-          echo '          <property name="last-image" type="string" value="/usr/share/backgrounds/kibaos/wallpaper.jpg"/>'
-          echo '        </property>'
-          echo '      </property>'
-        done
-        echo '    </property>'
-        echo '  </property>'
-        echo '</channel>'
-      } > "${_xd}/xfce4-desktop.xml"
-    fi
-  else
-    echo "!! wallpaper fetch/convert failed -- shipping the stock one" >&2
-  fi
-  rm -f /tmp/kiba-wall-src
-
-  # ── 3. Shim + recovery image download, rootfs patch, disk image, zip
   ( cd "${_sb}" && ./build_complete.sh "${_board}" \
       rootfs_dir="${_rootfs}" \
       data_dir="${_data}" \
-      arch="${_arch}" \
-      distro=debian \
+      arch=amd64 \
+      distro=kibaos \
       compress_img=true \
       quiet=true )
 
-  # build_complete.sh has no `set -e`, so check the result ourselves.
   local _zip="${_data}/shimboot_${_board}.zip"
   if [ ! -s "${_zip}" ]; then
     echo "ERROR: shimboot produced no image (${_zip} missing/empty) -- check the log above." >&2
@@ -181,7 +94,7 @@ KibaOS Shimboot (Research) -- ${_name}
 EXPERIMENTAL. For Chromebooks you own, for experiments.
 
 1. Unzip ${_name}.zip -> shimboot_${_board}.bin
-2. Write it to a USB drive / SD card (8GB+, USB 3 recommended):
+2. Write it to a USB drive / SD card (16GB+, USB 3 recommended):
      sudo dd if=shimboot_${_board}.bin of=/dev/sdX bs=4M status=progress conv=fsync
    (or the Chromebook Recovery Utility's "use local image")
 3. Enable developer mode on the Chromebook, boot the USB from the
@@ -189,7 +102,12 @@ EXPERIMENTAL. For Chromebooks you own, for experiments.
 4. Login: liveuser / live
 
 Board: ${_board}   (pick the board matching your Chromebook: cros.download/recovery)
-Base:  Debian ${_release} + ${_desktop}, patched with ading2210/shimboot
+Base:  the KibaOS rootfs + a systemd patched for ChromeOS kernels
+       (ading2210/chromeos-systemd), assembled with ading2210/shimboot.
+
+Heads up: KibaOS ships a current systemd, which needs a Linux kernel >= 5.10
+(5.14+ recommended). Chromebooks whose shim carries an older kernel (4.x / 5.4)
+will most likely not get through boot.
 README
 
   echo "╔══════════════════════════════════════════╗"
@@ -362,7 +280,6 @@ PACMANCONF
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
-  # Source is a WebP; convert to a real JPEG (cover-crop to phone aspect).
   if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${KIBA_WALLPAPER_URL}" && \
      magick /tmp/kiba-wallpaper-src -resize 1080x2400^ -gravity center -extent 1080x2400 -quality 92 \
        "${_root}/usr/share/kibaos/wallpaper.jpg"; then
@@ -1847,7 +1764,7 @@ OOBEAUTOSTART
   sha256sum "${_out}/kibaos-mobile-rootfs.tar.gz" > "${_out}/kibaos-mobile-rootfs.tar.gz.sha256"
 
   _rootfs_kb="$(du -sk "${_root}" | cut -f1)"
-  _img_kb=$(( _rootfs_kb + (_rootfs_kb / 5) + 262144 ))   # +20% headroom, +256MB floor for OOBE/updates/writes
+  _img_kb=$(( _rootfs_kb + (_rootfs_kb / 5) + 262144 ))
   mkfs.ext4 -q -F -L kibaos-rootfs -d "${_root}" -m 0 \
     "${_out}/kibaos-mobile-rootfs.img" "${_img_kb}K"
   sha256sum "${_out}/kibaos-mobile-rootfs.img" > "${_out}/kibaos-mobile-rootfs.img.sha256"
@@ -2346,14 +2263,6 @@ lvm2
 tuned
 PACKAGES
 
-# ── NVIDIA open kernel modules (Turing / GTX 16xx / RTX 20-series and newer) ──
-# nvidia-open is the prebuilt module package for the stock `linux` kernel
-# (no DKMS compile in the chroot); it pins the exact linux version from the
-# same repo snapshot. nvidia-utils ships the GSP firmware, the nouveau
-# blacklist, nvidia_drm modeset/fbdev defaults and the Vulkan/GL ICDs.
-# Pascal/Maxwell and older are NOT supported by the open modules; they fall
-# back to nouveau/NVK via kibaos-gpu-select (see the GDM section below).
-# x86_64 only: Arch ships prebuilt nvidia-open for x86_64 alone.
 if [ "${KIBA_ARCH}" = "x86_64" ]; then
   cat >> "${PROFILE}/packages.x86_64" << 'NVIDIAPKGS'
 nvidia-open
@@ -2605,8 +2514,6 @@ if [ -f "${BOOT_SPLASH_RAW}" ] && file "${BOOT_SPLASH_RAW}" | grep -qi 'image'; 
   rm -f "${BOOT_SPLASH_RAW}"
 fi
 
-# Source is a WebP; convert to a real JPEG so every consumer (GDM, gsettings,
-# pcmanfm-qt, SDDM) can read it without a webp loader.
 if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${WALLPAPER_URL}" && \
    magick /tmp/kiba-wallpaper-src -quality 92 "${WALLPAPER_DEST}"; then
   :
@@ -2663,7 +2570,7 @@ gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null || true
 if [ -f "${BOOT_SPLASH}" ]; then
   cp "${BOOT_SPLASH}" "${INSTALLER_LOGO}"
 else
-  cp "${LOGO_256}" "${INSTALLER_LOGO}"   # fallback: reuse the generic logo
+  cp "${LOGO_256}" "${INSTALLER_LOGO}"
 fi
 
 pacman -Syu --noconfirm git
@@ -2717,13 +2624,6 @@ mkdir -p /usr/share/icons/hicolor/scalable/actions
 cp /usr/share/kibaos/logo-256.png /usr/share/icons/hicolor/scalable/actions/kibaos-watermark-symbolic.png 2>/dev/null || true
 gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null || true
 
-# ── kAI / kibavoice: local offline voice assistant ───────────────────────────
-# https://github.com/KibaLabsLLC/kAI  (llama.cpp + whisper.cpp + Piper, Qt6 UI)
-# Build deps are installed here; llama.cpp and whisper.cpp are fetched by the
-# project's own CMake at configure time. Models (~550 MB) ARE baked into the ISO
-# (see below), so the assistant works offline from first boot.
-# Runs as its own script so `set -e` is honoured (errexit is ignored inside an
-# `if` condition) and so cwd changes cannot leak into the surrounding build.
 echo "=== Building kAI (kibavoice) ==="
 cat > /tmp/kai-build.sh << 'KAIBUILD'
 #!/usr/bin/env bash
@@ -2738,27 +2638,12 @@ KAI_SRC=/tmp/kai-src
 rm -rf "${KAI_SRC}"
 git clone --depth 1 https://github.com/KibaLabsLLC/kAI.git "${KAI_SRC}"
 cd "${KAI_SRC}"
-# TEMPORARY guard: kAI commit 55e3b95 (2026-11-14) ends kSystemPrompt's first literal with
-# `;` and follows it with a second literal, which does not compile. This joins them and
-# is a no-op once that is fixed upstream, so it can be deleted then.
 sed -i -z 's/no emoji\."; *\n *"Your name/no emoji. "\n    "Your name/' src/main.cpp
-# System-wide (/usr), not install.sh's default of $HOME/.local: that would land in
-# root's home inside this chroot, where liveuser can't reach it (so the menu entry
-# and the dock pin would launch nothing). --no-models because install.sh would download
-# them into root's home; they are fetched into a system-wide location below instead.
-# --no-service because the daemon is a per-user systemd unit.
 bash ./install.sh --prefix /usr --no-models --no-service
 test -x /usr/bin/kibavoice-ui
-# Icon for the menu entry and the dock pin.
 install -Dm644 /usr/share/kibavoice/kibavoice.png /usr/share/icons/hicolor/256x256/apps/kibavoice.png
 gtk-update-icon-cache -f -t /usr/share/icons/hicolor 2>/dev/null || true
 
-# Bake the models (LLM + speech-to-text + Piper voice, ~550 MB) into the ISO.
-# kibavoice only looks in $XDG_DATA_HOME/kibavoice (per user, no system-wide fallback),
-# so they are fetched once into /usr/share/kibavoice-data and each user's data dir gets
-# symlinks to them through /etc/skel. That avoids a 550 MB copy per user, which on the
-# live session would be eaten out of RAM. If the download fails the build carries on and
-# the app simply downloads on first use instead.
 KAI_DATA=/usr/share/kibavoice-data
 install -d -m 755 "${KAI_DATA}"
 if XDG_DATA_HOME="${KAI_DATA}" /usr/bin/kibavoice fetch; then
@@ -2773,11 +2658,6 @@ else
   echo "WARNING: kAI model download failed; the ISO will ship without models and kAI will download them on first use." >&2
   rm -rf "${KAI_DATA}"
 fi
-# Always-on daemon, installed system-wide instead of via `kibavoice install-service`:
-# that command writes the unit to $HOME/.config (root's home in this chroot), so the
-# later `systemctl enable kibavoice` could not find it. The unit goes in the global user
-# unit directory and is enabled for every user (--global); it starts with each graphical
-# session, which on this ISO is boot (the live user autologs in).
 mkdir -p /usr/lib/systemd/user
 cat > /usr/lib/systemd/user/kibavoice.service << 'KAIUNIT'
 [Unit]
@@ -2790,7 +2670,6 @@ StartLimitBurst=8
 [Service]
 Type=simple
 ExecStart=/usr/bin/kibavoice-ui --background
-# Restart after crashes and kills. A clean exit (tray Quit, `kibavoice-ui --quit`) stays stopped.
 Restart=on-failure
 RestartSec=3
 Nice=5
@@ -2800,12 +2679,9 @@ Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 WantedBy=graphical-session.target
 KAIUNIT
 chmod 644 /usr/lib/systemd/user/kibavoice.service
-# daemon-reload needs a running systemd, which a build chroot/container does not have;
-# on a real boot systemd reads the unit fresh, so a failure here is harmless.
 systemctl daemon-reload 2>/dev/null || true
 systemctl --global enable kibavoice.service
 test -L /etc/systemd/user/graphical-session.target.wants/kibavoice.service
-# System-wide menu entry (`kibavoice install-desktop` only writes to one user's $HOME)
 cat > /usr/share/applications/kibavoice.desktop << 'KAIDESKTOP'
 [Desktop Entry]
 Type=Application
@@ -2934,19 +2810,12 @@ rm -f /etc/sudoers.d/builduser
 KIBA_PLYMOUTH_DIR="/usr/share/plymouth/themes/kibaos"
 mkdir -p "${KIBA_PLYMOUTH_DIR}"
 
-# The theme itself no longer draws a logo, but splash.png is still reused below as
-# the bgrt/spinner watermark and arch-logo.png, so keep staging it.
 if [ -f "${BOOT_SPLASH}" ]; then
   cp "${BOOT_SPLASH}" "${KIBA_PLYMOUTH_DIR}/splash.png"
 else
   cp /usr/share/kibaos/logo-256.png "${KIBA_PLYMOUTH_DIR}/splash.png" 2>/dev/null || true
 fi
 
-# Boot animation: kAI's gradient wave (KibaLabsLLC/kAI, ui/widgets.cpp,
-# WaveWidget::paintEvent) centered on white, kAI's card colour. Plymouth's script
-# module can't draw polygons, so the wave is pre-rendered at build time into
-# looping frames. See the generator's docstring for how the pieces combine; it
-# was checked pixel-for-pixel against the real QPainter code.
 KIBA_WAVE_DEPS=""
 for _p in python-numpy python-pillow; do
   pacman -Q "${_p}" >/dev/null 2>&1 || KIBA_WAVE_DEPS="${KIBA_WAVE_DEPS} ${_p}"
@@ -2989,8 +2858,6 @@ import sys
 import numpy as np
 from PIL import Image, ImageDraw
 
-# ---- layout -----------------------------------------------------------------
-# kAI's wave widget is 320x120. This is the same widget at 2x.
 W, H = 640, 240
 SS = 8                      # supersampling for antialiasing
 BG = (255, 255, 255)         # background; also the colour of the masks and covers
@@ -2998,12 +2865,9 @@ FPS = 25                    # Plymouth refreshes at ~50 Hz, so 2 ticks per frame
 LOOP_S = 6                  # seconds per seamless loop
 NFRAMES = FPS * LOOP_S
 
-# Soft edges so the wave floats on the background instead of being cut off like it is by
-# the card. Fractions of W / H. Set both to 0 for the card's hard edges.
 FEATHER_X = 0.14
 FEATHER_Y = 0.30
 
-# ---- kAI constants (ui/theme.h, ui/widgets.cpp) -----------------------------
 CYAN, BLUE = (0x6A, 0xD8, 0xFD), (0x3E, 0x64, 0xEB)
 VIOLET, PINK = (0x7E, 0x63, 0xFA), (0xF2, 0x9E, 0xF5)
 STOPS = [(0.00, CYAN), (0.33, BLUE), (0.66, VIOLET), (1.00, PINK)]
@@ -3011,11 +2875,9 @@ GRAD_LEN = 1.15 * W                 # gradient runs 0 .. 1.15*w, ReflectSpread
 GRAD_PERIOD = 2 * GRAD_LEN          # reflect pattern repeats every 2 lengths
 DRIFT_PX_PER_S = 36.0 * (W / 320)   # kAI: 36 px/s at its 320 px width
 
-# (wavelength, speedMul, alpha, offset) per layer, painted back to front
 LAYERS = [(1.15, 0.55, 70, 0.0), (0.80, 0.90, 105, 1.7),
           (0.55, 1.25, 150, 3.1), (0.95, 0.75, 255, 4.6)]
 
-# The "Thinking" mode: calm, steady, reads as "working on it".
 SPEED = 3.4                  # phase rate, rad/s (kAI Thinking)
 AMP_BASE, AMP_SWING, AMP_RATE = 0.30, 0.12, 3.2
 
@@ -3035,7 +2897,6 @@ def coverage(angle1, angle2, amp):
     for (wl, _sm, alpha, off), a1, a2 in zip(LAYERS, angle1, angle2):
         y = base_y - A * env * (np.sin(u * 2 * math.pi / wl * 1.6 + a1 + off)
                                 + 0.35 * np.sin(u * 2 * math.pi * 2.3 - a2 + off * 2))
-        # Pillow addresses pixel centres, so shift by half a supersample to match continuous coords.
         o = 0.5
         pts = ([(0.0 * SS - o, H * SS - o)] + [(x * SS - o, yy * SS - o) for x, yy in zip(xs, y)]
                + [((W + 4) * SS - o, H * SS - o)])
@@ -3084,7 +2945,6 @@ def main(outdir):
         c = coverage([r * t for r in rates1], [r * t for r in rates2], amp) * fe
         masks.append(1.0 - c)                          # BG overlay's alpha
 
-    # Crop the rows that are plain background in every frame (peaks never reach the top).
     lit = np.min(np.stack(masks), axis=0) < 0.999
     rows = np.where(lit.any(axis=1))[0]
     top = max(0, int(rows[0]) - 2)
@@ -3103,7 +2963,6 @@ def main(outdir):
     cover_w = int(math.ceil(GRAD_PERIOD))
     Image.new("RGB", (cover_w, hc), BG).save(os.path.join(outdir, "wave-cover.png"), optimize=True)
 
-    # Constants the Plymouth script needs, written in its own syntax.
     with open(os.path.join(outdir, "wave-params.script"), "w") as fh:
         fh.write("wave_w = %d;\nwave_h = %d;\nwave_frames = %d;\nwave_fps = %d;\n"
                  % (W, hc, NFRAMES, FPS))
@@ -3137,7 +2996,6 @@ ImageDir=/usr/share/plymouth/themes/kibaos
 ScriptFile=/usr/share/plymouth/themes/kibaos/kibaos.script
 PLYMOUTHDESC
 
-# The generator emits the wave_* constants; they go in front of the theme script.
 cat "${KIBA_PLYMOUTH_DIR}/wave-params.script" - > "${KIBA_PLYMOUTH_DIR}/kibaos.script" << 'PLYMOUTHSCRIPT'
 // KibaOS boot splash -- Plymouth script theme.
 // kAI's gradient wave, centered on white (kAI's card colour). Nothing else is drawn.
@@ -3249,9 +3107,6 @@ for _theme_dir in bgrt spinner; do
   fi
 done
 
-# Cutefish icon theme (https://github.com/cutefishos/icons, Colloid-based).
-# Its index.theme inherits hicolor,breeze, so breeze-icons covers anything it
-# lacks (it's added to the package list). Installs as /usr/share/icons/Cutefish.
 CUTEFISH_ICONS_BUILD="/tmp/cutefish-icons"
 rm -rf "${CUTEFISH_ICONS_BUILD}"
 git clone --depth 1 https://github.com/cutefishos/icons.git "${CUTEFISH_ICONS_BUILD}"
@@ -3264,14 +3119,6 @@ gtk-update-icon-cache -f /usr/share/icons/Cutefish 2>/dev/null || true
 rm -rf "${CUTEFISH_ICONS_BUILD}"
 echo "=== Icon theme: Cutefish installed ==="
 
-# VibePanel (https://github.com/prankstr/vibepanel) replaces wl-dock as the
-# bottom dock. It's a GTK4 + wlr-layer-shell panel; on labwc it uses its
-# "generic" backend (wlr-foreign-toplevel) for the taskbar widget. That generic
-# taskbar landed on upstream main after v0.17.2, so this builds a pinned main
-# commit with cargo instead of using a release/AUR binary. Only the taskbar
-# widget is configured (see ~/.config/vibepanel/ below): no launcher, since the
-# look launcher (Super key) does that job. Non-fatal: the session still boots
-# without a dock. Needs GTK >= 4.22 (Arch rolling has it).
 VIBEPANEL_REPO="https://github.com/prankstr/vibepanel.git"
 VIBEPANEL_COMMIT="cd751b15137aa32610ebce2c75644c7be745e35b"
 VIBEPANEL_BUILD="/tmp/vibepanel"
@@ -3309,11 +3156,6 @@ fi
 rm -rf "${VIBEPANEL_BUILD}"
 [ "${VIBEPANEL_RUST_WAS_PRESENT}" -eq 0 ] && pacman -Rns --noconfirm rust || true
 
-# look-bin (AUR): keyboard-first launcher for apps, files, clipboard, commands.
-# Same steps as `git clone https://aur.archlinux.org/look-bin.git && cd look-bin
-# && makepkg -si`, but makepkg refuses to run as root, so it runs as a throwaway
-# user (removed afterwards). --noconfirm because the chroot is non-interactive.
-# Retried since AUR git/TLS hiccups are common; non-fatal if it still fails.
 id kibabuild >/dev/null 2>&1 || useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
@@ -3332,11 +3174,6 @@ else
 fi
 rm -rf /tmp/look-bin
 
-# Lost Island (https://github.com/MarcoZorn/lost-island): GTK4 + layer-shell
-# "Dynamic Island" pill (clock, MPRIS media, volume OSD, notification peeks).
-# Upstream's Arch install is `git clone ... && cd lost-island/packaging &&
-# makepkg -si`; same throwaway build user as look-bin. Tracks upstream main (not
-# pinned). Non-fatal if it fails.
 LI_OK=0
 for _try in 1 2 3 4 5; do
   if su - kibabuild -c 'cd /tmp && rm -rf lost-island && git clone https://github.com/MarcoZorn/lost-island && cd lost-island/packaging && makepkg -si --noconfirm --needed'; then
@@ -3354,18 +3191,9 @@ rm -rf /tmp/lost-island
 rm -f /etc/sudoers.d/kibabuild
 userdel -r kibabuild 2>/dev/null || true
 
-# ── Windows Workspace: LSW (Linux Subsystem for Windows) ──────────────
-# https://github.com/acceleration3/linux-subsystem-windows
-# Installed from the upstream release tarball (same payload as the AUR
-# lsw-bin package -- makepkg can't run as root in this chroot). Pinned and
-# checksummed; to bump, take pkgver/sha256sums from
-# packaging/aur/PKGBUILD at the new tag. x86-64 only (upstream limitation).
 LSW_VERSION="0.2.3"
 LSW_SHA256="e091f5ece29fb100a3a4cf95f620e18dbb7116a267dffcbc481eeed7dce24e8e"
 if [ "$(uname -m)" = "x86_64" ]; then
-  # Runtime deps from lsw-bin's PKGBUILD (version constraints dropped;
-  # vulkan-driver is virtual, so name the AMD/Intel ICDs explicitly --
-  # NVIDIA users get theirs from nvidia-utils).
   pacman -S --noconfirm --needed \
     qt6-base libvirt libisofs libvncserver wimlib hivex \
     spdlog fmt zlib wayland libxkbcommon libdrm \
@@ -3384,7 +3212,6 @@ if [ "$(uname -m)" = "x86_64" ]; then
   echo "${LSW_SHA256}  ${LSW_TARBALL}" | sha256sum -c -
   tar --zstd -xf "${LSW_TARBALL}" -C / --no-same-owner usr
   rm -f "${LSW_TARBALL}"
-  # Same rename lsw-bin's package() does, so license files don't collide.
   [ -d /usr/share/licenses/lsw ] && mv /usr/share/licenses/lsw /usr/share/licenses/lsw-bin
   gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null || true
   update-desktop-database /usr/share/applications 2>/dev/null || true
@@ -3394,14 +3221,6 @@ else
   echo "=== LSW: skipped -- upstream is x86-64 only, Windows Workspace unavailable on $(uname -m) ==="
 fi
 
-# ── LSW auto-install: provision the Windows VM on the installed system's first login ──
-# No UI: a background job started from XDG autostart that runs LSW's headless
-# installer and reports start/finish/failure as desktop notifications. It does
-# nothing on the live ISO or the OEM account (the autostart is in /etc/skel, so
-# the user created at install time inherits it), when KVM/disk space aren't
-# there, or once a Windows VM already exists. The Windows account password is a
-# fresh random string -- the user's KibaOS login password is never stored or
-# reused -- kept 0600 in the user's home in case Windows ever asks for it.
 if [ -x /usr/bin/lsw-manager ]; then
   cat > /usr/local/bin/kibaos-lsw-autoinstall << 'LSWAUTO'
 #!/bin/bash
@@ -3412,7 +3231,6 @@ LOG="${STATE_DIR}/lsw-install.log"
 PASSFILE="${HOME}/.config/kibaos/windows-password"
 MAX_TRIES=3
 
-# Not on the live ISO, not in the OEM staging account, not on non-x86-64.
 [ -d /run/archiso ] && exit 0
 case "$(id -un)" in liveuser|oem|root) exit 0 ;; esac
 [ "$(uname -m)" = "x86_64" ] || exit 0
@@ -3423,7 +3241,6 @@ mkdir -p "${STATE_DIR}"
 
 note() { command -v notify-send >/dev/null 2>&1 && notify-send -a "Windows" "$1" "$2" 2>/dev/null; logger -t kibaos-lsw-autoinstall "$1: $2"; }
 
-# A VM from an earlier/manual run counts as done.
 if command -v virsh >/dev/null 2>&1 \
    && virsh -c qemu:///session list --all --name 2>/dev/null | grep -q '[^[:space:]]'; then
   touch "${DONE}"; exit 0
@@ -3432,7 +3249,6 @@ fi
 n=$(cat "${TRIES}" 2>/dev/null || echo 0)
 if [ "${n}" -ge "${MAX_TRIES}" ]; then exit 0; fi
 
-# Preconditions that are the machine's fault, not the installer's: don't burn a try.
 [ -r /dev/kvm ] && [ -w /dev/kvm ] || { logger -t kibaos-lsw-autoinstall "KVM not available, skipping"; exit 0; }
 FREE_GIB="$(df -BG --output=avail "${HOME}" 2>/dev/null | tail -n1 | tr -dc '0-9')"
 if [ -n "${FREE_GIB}" ] && [ "${FREE_GIB}" -lt 70 ]; then
@@ -3441,7 +3257,6 @@ fi
 
 echo $(( n + 1 )) > "${TRIES}"
 
-# Size the VM from the machine: half the cores and RAM, within sane bounds.
 CORES="$(nproc 2>/dev/null || echo 4)"
 VM_CPU=$(( CORES / 2 )); [ "${VM_CPU}" -lt 2 ] && VM_CPU=2; [ "${VM_CPU}" -gt 8 ] && VM_CPU=8
 MEM_MIB="$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null)"
@@ -3491,7 +3306,6 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 flatpak install --system --noninteractive flathub re.sonny.Junction
 echo "=== Junction: installed via flatpak (re.sonny.Junction) ==="
 
-# Planify (task manager, Todoist/Nextcloud sync). Non-fatal if Flathub is unreachable.
 if flatpak install --system --noninteractive flathub io.github.alainm23.planify; then
   echo "=== Planify: installed via flatpak (io.github.alainm23.planify) ==="
 else
@@ -3513,10 +3327,10 @@ if [ -d "${ADWAITA_ICONS}" ]; then
   find "${ADWAITA_ICONS}" -path '*/places/start-here-symbolic.svg' -print0 2>/dev/null \
     | while IFS= read -r -d '' _svg; do
         _dir=$(dirname "${_svg}")
-        _size=$(basename "$(dirname "${_dir}")")   # e.g. "48x48", or "scalable"
+        _size=$(basename "$(dirname "${_dir}")")
         _px="${_size%%x*}"
         case "${_px}" in
-          ''|*[!0-9]*) _px=256 ;;   # "scalable" or anything unparsable -> high-res master
+          ''|*[!0-9]*) _px=256 ;;
         esac
         magick "${LAUNCHER_MASTER}" -filter Lanczos -resize "${_px}x${_px}" \
           "${_dir}/start-here-symbolic.png"
@@ -4336,16 +4150,8 @@ mkdir -p /usr/share/wayland-sessions
 rm -rf /usr/share/wayland-sessions/budgie-desktop.desktop
 cat > /usr/local/bin/kibaos-session << 'KIBASESSION'
 #!/bin/bash
-# Runs labwc + budgie and restarts it if it dies shortly after starting, so a
-# crash does not bounce GDM back to the greeter (autologin is only attempted
-# once per boot). labwc is started with --session=budgie-desktop, which tells
-# labwc to exit when budgie-desktop exits -- and budgie-desktop can exit with
-# status 0 even on failure (e.g. the compositor-ready wait fails, or a required
-# component such as budgie-panel goes away). So an exit code of 0 only counts as
-# a real logout if the session had been up for a while.
-# Everything labwc/budgie print goes to the journal under kibaos-labwc.
-MAX_QUICK_CRASHES=5     # give up after this many quick exits in a row
-QUICK_SECS=20           # a run shorter than this counts as a crash, even rc=0
+MAX_QUICK_CRASHES=5
+QUICK_SECS=20
 crashes=0
 while :; do
   start=$(date +%s)
@@ -4354,9 +4160,6 @@ while :; do
   run=$(( $(date +%s) - start ))
   logger -t kibaos-session "labwc exited rc=${rc} after ${run}s"
   if [ "$run" -lt "$QUICK_SECS" ]; then
-    # Keep evidence of why the session died where it survives the greeter:
-    # budgie-session logs "Unrecoverable failure in required component ..."
-    # when budgie-panel/budgie-daemon crash, which ends the whole session.
     mkdir -p "$HOME/.cache" 2>/dev/null
     {
       echo "=== $(date -Is) labwc rc=${rc} after ${run}s ==="
@@ -4365,10 +4168,8 @@ while :; do
         | tail -n 60
     } >> "$HOME/.cache/kibaos-session-crash.log" 2>/dev/null
   fi
-  # terminated by logout/shutdown signal
   [ "$rc" -eq 143 ] && exit 0
   if [ "$run" -ge "$QUICK_SECS" ]; then
-    # a long-running session ending cleanly is a normal logout
     [ "$rc" -eq 0 ] && exit 0
     crashes=0
   else
@@ -4422,9 +4223,6 @@ chmod 644 /etc/gdm/custom.conf
 chmod 600 /var/lib/AccountsService/users/liveuser
 chown root:root /var/lib/AccountsService/users/liveuser
 
-# ── Autologin hardening ─────────────────────────────────────────────────────
-# 1. Known-good PAM stack for GDM autologin (pam_shells needs bash in
-#    /etc/shells, pam_nologin must not trip, no password prompt).
 grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
 {
   echo '#%PAM-1.0'
@@ -4438,26 +4236,15 @@ grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
     echo 'session    optional     pam_gnome_keyring.so auto_start'
 } > /etc/pam.d/gdm-autologin
 
-# 1b. GDM's udev rule (61-gdm.rules) runs /usr/lib/gdm-disable-wayland on
-#     NVIDIA / virtual GPUs, which writes WaylandEnable=false to
-#     /run/gdm/custom.conf (overrides /etc/gdm/custom.conf). KibaOS only has a
-#     Wayland session (labwc), so GDM then cannot find the autologin session
-#     and falls back to the greeter. Mask the rule (ArchWiki GDM page).
 mkdir -p /etc/udev/rules.d
 ln -sf /dev/null /etc/udev/rules.d/61-gdm.rules
 
-# 2. liveuser must not be locked or expired, or PAM account stage rejects it.
 passwd -u liveuser 2>/dev/null || true
 chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
 
-# 3. Re-assert the config on every boot before GDM starts, in case anything
-#    (package update, OEM leftovers) removed or replaced custom.conf.
 cat > /usr/local/bin/kibaos-live-autologin << 'LIVEAUTOLOGIN'
 #!/bin/bash
-# Only act on the live ISO (archiso mounts /run/archiso) and only while the
-# live user exists.
 [ -d /run/archiso ] || exit 0
-# Drop any runtime override that disabled Wayland (see gdm-disable-wayland).
 rm -f /run/gdm/custom.conf
 id liveuser >/dev/null 2>&1 || exit 0
 if ! grep -qs '^AutomaticLogin=liveuser' /etc/gdm/custom.conf; then
@@ -4490,13 +4277,6 @@ WantedBy=graphical.target
 LIVEAUTOLOGINSVC
 systemctl enable kibaos-live-autologin.service
 
-# 3b. Make GDM wait for the real GPU driver. Since kernel 6.9 GDM can start its
-#     greeter/autologin session on the simpledrm framebuffer before amdgpu/i915/
-#     nouveau has loaded; the GPU then appears mid-start and the session dies
-#     or hangs, so autologin falls back to the greeter (Ubuntu LP #2115451;
-#     Ubuntu patched gdm3 to wait for the real DRM driver). Gate GDM ourselves:
-#     wait up to 20s for a DRM card that isn't simpledrm, then go ahead anyway
-#     so headless or GPU-less machines still boot.
 cat > /usr/local/bin/kibaos-wait-drm << 'WAITDRM'
 #!/bin/bash
 for _ in $(seq 1 40); do
@@ -4521,11 +4301,6 @@ ExecStartPre=/usr/local/bin/kibaos-wait-drm
 TimeoutStartSec=90
 GDMWAITDRM
 
-# 3c. NVIDIA: open modules only drive Turing (device ID 0x1e00) and newer.
-#     nvidia-utils blacklists nouveau, so a Pascal/Maxwell/Kepler card would
-#     be left with no real DRM driver. For those, explicitly modprobe nouveau
-#     (blacklist only blocks alias autoload, not an explicit modprobe) before
-#     GDM starts. Supported cards are untouched: udev autoloads nvidia.
 cat > /usr/local/bin/kibaos-gpu-select << 'GPUSELECT'
 #!/bin/bash
 for d in /sys/bus/pci/devices/*; do
@@ -4556,7 +4331,6 @@ WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
 
-# 4. Fail the build loudly if the pieces autologin depends on are missing.
 for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/gdm.service /etc/pam.d/gdm-autologin; do
   [ -e "$_f" ] || { echo "ERROR: autologin prerequisite missing: $_f" >&2; exit 1; }
 done
@@ -4572,7 +4346,7 @@ mkdir -p "$OUT_DIR"
 FILE="$OUT_DIR/Screenshot from $(date '+%Y-%m-%d %H-%M-%S').png"
 
 if [ "${1:-}" = "region" ]; then
-  GEOM=$(slurp) || exit 0   # empty selection (Esc) -> exit quietly
+  GEOM=$(slurp) || exit 0
   grim -g "$GEOM" "$FILE"
 else
   grim "$FILE"
@@ -5088,7 +4862,7 @@ if ! grep -qE ':.*[a-zA-Z]' "$MARKER" 2>/dev/null || \
    ! awk -F: '{print $2}' "$MARKER" | tr ',' '\n' | while read -r g; do
        [ -n "$g" ] && ! getent group "$g" > /dev/null 2>&1 && exit 1
    done; then
-    : # some group still missing -- keep retrying on future boots
+    :
 else
     rm -f "$MARKER"
 fi
@@ -5120,10 +4894,6 @@ mkdir -p \
   "${SKEL}/.config/autostart" \
   "${SKEL}/.config/fastfetch"
 
-# Desktop icons: pcmanfm-qt (layer-shell). It also paints the desktop
-# background, so it sets the wallpaper itself via its CLI (valid modes:
-# color|stretch|fit|center|tile) instead of relying on the old
-# budgie-desktop-view path.
 cat > /usr/local/bin/kibaos-desktop-icons << 'DESKTOPICONSWRAP'
 #!/bin/sh
 pcmanfm-qt --desktop &
@@ -5213,21 +4983,12 @@ touch "${STAMP}"
 FIRSTLOGIN
 chmod +x /usr/local/bin/kibaos-first-login
 
-# ── No Budgie panel ──────────────────────────────────────────────────────
-# budgie-panel rebuilds a default panel whenever its `panels` list is empty
-# ("No panels to load" -> create_system_default()). That reads, in order,
-# /etc/budgie-desktop/panel.ini, /usr/share/budgie-desktop/panel.ini, then its
-# built-in layout. An existing [Panels] section with an empty Panels= list
-# creates zero panels, so shipping one here stops the rebuild.
 mkdir -p /etc/budgie-desktop
 cat > /etc/budgie-desktop/panel.ini << 'EMPTYPANELINI'
 [Panels]
 Panels=
 EMPTYPANELINI
 
-# Backup in case that layout is ignored: shortly after login, if a panel
-# showed up anyway, clear the list so budgie-panel drops it. (A bar may flash
-# for a few seconds when this fires.)
 cat > /usr/local/bin/kibaos-no-panel << 'NOPANEL'
 #!/usr/bin/env bash
 sleep 6
@@ -5385,20 +5146,7 @@ cat > "${SKEL}/.config/fastfetch/config.jsonc" << 'FFCONF'
 }
 FFCONF
 
-# ── look launcher: Super key opens it (labwc), look's own hotkey disabled ──
-# look-bin registers its own global hotkey (Alt+Space by default) at runtime;
-# launcher_hotkey=none turns that off ("bind lookapp --toggle yourself"), and
-# labwc owns the binding instead. Super_L on its own is bound with
-# onRelease="yes" so Super+<key> shortcuts (e.g. W-q) don't also pop the
-# launcher. lookapp must already be running for --toggle to work, hence the
-# autostart. The default labwc keybinds are kept via <default />.
 mkdir -p "${SKEL}/.look" "${SKEL}/.config/labwc"
-# White theme: Look's only light preset is "kindle" (cream paper, serif), so
-# it's used as the base for its light panel/control palette and overridden to
-# pure white with near-black text, a thin light-grey border and the system sans
-# font (Adwaita Sans, Look's Linux default) instead of Noto Serif. Individual
-# ui_* keys win over the preset's values. Colour channels are 0..1.
-# ui_tint_opacity=0.15 below = 85% transparency glass (0.85 would be 85% opaque)
 cat > "${SKEL}/.look/config" << 'LOOKCONF'
 launcher_hotkey=none
 ui_theme=kindle
@@ -5457,9 +5205,6 @@ X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LOOKAUTO
 
-# Lost Island: XDG autostart (upstream also ships a systemd user unit, but the
-# session here is labwc+budgie, so autostart is the simpler hook). It exits
-# quietly if it isn't installed.
 cat > "${SKEL}/.config/autostart/lost-island.desktop" << 'LIAUTO'
 [Desktop Entry]
 Type=Application
@@ -5471,16 +5216,6 @@ X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LIAUTO
 
-# ── VibePanel: glass dock (bottom): pinned apps + taskbar ───────────────
-# Pinned apps: Browser (chromium), Files (nemo via kibaos-files), Text
-# Editor (gnome-text-editor) and Kiba (kAI voice assistant, if it built). VibePanel's taskbar widget has no pinning at the
-# pinned commit above, so each pin is a `custom-<name>` button widget (image +
-# on_click) grouped with the taskbar in ONE island, so pins and open windows
-# share a single pill. The bar surface itself is fully transparent; the island
-# is 85% transparent (background_opacity = 0.15) with a hairline glass edge.
-# The OSD is off so Budgie's own OSD isn't doubled.
-# The OSD is off so Budgie's own OSD isn't doubled; the notification daemon
-# only claims org.freedesktop.Notifications if nothing else already owns it.
 mkdir -p "${SKEL}/.config/vibepanel"
 cat > "${SKEL}/.config/vibepanel/config.toml" << 'VIBEPANELCONF'
 [bar]
@@ -5523,8 +5258,6 @@ enabled = false
 enabled = false
 VIBEPANELCONF
 
-# Resolve icon files at build time ([widgets.custom-*].image needs an absolute
-# path). Prefers scalable SVGs, then the largest PNG; first name that exists wins.
 _kiba_find_icon() {
   local _n _d _f
   for _n in "$@"; do
@@ -5538,7 +5271,7 @@ _kiba_find_icon() {
   done
   return 1
 }
-_kiba_pin() {   # name  tooltip  fallback-glyph  desktop-file  icon-names...
+_kiba_pin() {
   local _name="$1" _tip="$2" _glyph="$3" _desk="$4"; shift 4
   local _img; _img=$(_kiba_find_icon "$@") || _img=""
   {
@@ -5552,8 +5285,6 @@ _kiba_pin() {   # name  tooltip  fallback-glyph  desktop-file  icon-names...
 _kiba_pin browser "Browser"     "🌐" /usr/share/applications/chromium.desktop            kibaos-browser chromium web-browser
 _kiba_pin files   "Files"       "📁" /usr/share/applications/kibaos-files.desktop        nemo system-file-manager folder
 _kiba_pin editor  "Text Editor" "📝" /usr/share/applications/org.gnome.TextEditor.desktop org.gnome.TextEditor accessories-text-editor text-editor
-# kAI is built non-fatally earlier, so only pin it if it is actually installed
-# (a pin for a missing app would just be a dead icon).
 if command -v kibavoice-ui >/dev/null 2>&1 && [ -f /usr/share/applications/kibavoice.desktop ]; then
   _kiba_pin kai "Kiba" "🎙" /usr/share/applications/kibavoice.desktop kibavoice audio-input-microphone
   sed -i 's/"custom-editor", "taskbar"/"custom-editor", "custom-kai", "taskbar"/' "${SKEL}/.config/vibepanel/config.toml"
@@ -6399,19 +6130,15 @@ NOLABWCBRIDGE
 install -d -m 755 -o 1000 -g 1000 /home/liveuser/.config/dconf
 chown -R 1000:1000 /home/liveuser/.config
 
-# Desktop icons: make executable + mark trusted so they launch without the
-# "Untrusted application launcher" prompt.
 for _icon in /home/liveuser/Desktop/*.desktop; do
   [ -f "${_icon}" ] || continue
   chmod 755 "${_icon}" 2>/dev/null || true
   chown 1000:1000 "${_icon}" 2>/dev/null || true
-  # Best-effort at build time (needs a gvfs metadata daemon, often absent in chroot)
   runuser -u liveuser -- gio set "${_icon}" metadata::trusted true 2>/dev/null || true
 done
 
 cat > /usr/local/bin/kibaos-trust-desktop-icons << 'TRUSTICONS'
 #!/bin/sh
-# Mark every launcher on the user's Desktop as executable + trusted.
 DESKTOP_DIR="$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")"
 [ -d "$DESKTOP_DIR" ] || exit 0
 for f in "$DESKTOP_DIR"/*.desktop; do
@@ -6451,8 +6178,6 @@ pkill -x gvfsd 2>/dev/null || true
 pkill -x dbus-daemon 2>/dev/null || true
 sleep 1
 
-# Unmount by reading /proc/mounts: stat() on a dead FUSE mount fails with
-# ENOTCONN, so any [ -e ] guard would wrongly skip it.
 awk '$3 ~ /^fuse/ {print $2}' /proc/mounts | while read -r _m; do
   fusermount3 -uz "${_m}" 2>/dev/null \
     || fusermount -uz "${_m}" 2>/dev/null \
@@ -6487,31 +6212,125 @@ if [ "${KIBA_ARCH}" = "aarch64" ]; then
     68B3537F39A313B3E574D06777193F152BDBE6A6
 fi
 
+kiba_shimboot_export_rootfs() {
+  local _rootfs="${WORKDIR}/work/x86_64/airootfs"
+  local _tar="${WORKDIR}/shimboot-rootfs.tar.zst"
+  local _ref="${KIBA_SHIMBOOT_REF:-main}"
+  local _pm=(pacman --root "${_rootfs}" --dbpath "${_rootfs}/var/lib/pacman")
+  local _pkgdir="/home/kibabuild/systemd-pkg"
+  local _sbsrc="/tmp/shimboot-src"
+
+  [ -e "${_rootfs}/etc/os-release" ] || { echo "ERROR: ${_rootfs} is missing after mkarchiso" >&2; exit 1; }
+
+  echo "=== Shimboot: building a ChromeOS-patched systemd ==="
+  pacman -S --noconfirm --needed base-devel git sudo python zstd
+  id kibabuild >/dev/null 2>&1 || useradd -m kibabuild
+  echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kibabuild
+  chmod 0440 /etc/sudoers.d/kibabuild
+
+  local _sdver
+  _sdver="$("${_pm[@]}" -Q systemd | awk '{print $2}')"
+  [ -n "${_sdver}" ] || { echo "ERROR: systemd isn't installed in the rootfs" >&2; exit 1; }
+  echo "rootfs systemd: ${_sdver}"
+
+  cat > /tmp/kiba-chromeos-mount-patch.py << 'KIBAPATCH'
+#!/usr/bin/env python3
+import re, sys
+
+path = sys.argv[1]
+src = open(path).read()
+pat = re.compile(
+    r'(int mount_nofollow\(\s*const char \*source,\s*const char \*target,\s*'
+    r'const char \*filesystemtype,\s*unsigned long mountflags,\s*const void \*data\) \{)'
+    r'.*?(\n\}\n)', re.S)
+new, n = pat.subn(
+    r'\1\n        /* KibaOS Shimboot: plain mount() for ChromeOS kernels (chromeos-systemd). */\n'
+    r'        return RET_NERRNO(mount(source, target, filesystemtype, mountflags, data));\2',
+    src, count=1)
+if n != 1 or 'RET_NERRNO(mount(source, target' not in new:
+    sys.exit("kiba-chromeos-mount-patch: mount_nofollow() not found in " + path)
+open(path, 'w').write(new)
+print("patched mount_nofollow() in", path)
+KIBAPATCH
+  cat > /tmp/kiba-pkgbuild-inject.txt << 'KIBAINJECT'
+  python3 /tmp/kiba-chromeos-mount-patch.py "$(find "$srcdir" -path '*/src/basic/mountpoint-util.c' | head -n1)" || exit 1
+KIBAINJECT
+  chmod 0644 /tmp/kiba-chromeos-mount-patch.py /tmp/kiba-pkgbuild-inject.txt
+
+  rm -rf "${_pkgdir}"
+  su kibabuild -c "git clone --quiet https://gitlab.archlinux.org/archlinux/packaging/packages/systemd.git '${_pkgdir}'"
+  su kibabuild -c "cd '${_pkgdir}' && git checkout --quiet '${_sdver}'" || {
+    echo "ERROR: no systemd packaging tag '${_sdver}' (Arch likely pushed a new systemd mid-build) -- re-run." >&2
+    exit 1
+  }
+  grep -q '^build() {' "${_pkgdir}/PKGBUILD" || { echo "ERROR: systemd PKGBUILD has no build() to patch" >&2; exit 1; }
+  sed -i 's/^pkgrel=\(.*\)$/pkgrel=\1.1/' "${_pkgdir}/PKGBUILD"
+  grep -q '^pkgrel=.*\.1$' "${_pkgdir}/PKGBUILD" || { echo "ERROR: couldn't bump pkgrel in the systemd PKGBUILD" >&2; exit 1; }
+  sed -i '/^build() {/r /tmp/kiba-pkgbuild-inject.txt' "${_pkgdir}/PKGBUILD"
+  chown -R kibabuild: "${_pkgdir}"
+  su kibabuild -c "cd '${_pkgdir}' && MAKEFLAGS='-j$(nproc)' makepkg -s --noconfirm --nocheck --skippgpcheck --skipinteg"
+
+  local _pkgs=() _f _n
+  for _f in "${_pkgdir}"/*.pkg.tar.zst; do
+    _n="$(pacman -Qp "${_f}" | awk '{print $1}')"
+    case "${_n}" in *-debug) continue ;; esac
+    if "${_pm[@]}" -Q "${_n}" >/dev/null 2>&1; then _pkgs+=("${_f}"); fi
+  done
+  [ "${#_pkgs[@]}" -gt 0 ] || { echo "ERROR: makepkg produced no installable systemd packages" >&2; exit 1; }
+  printf 'Installing patched: %s\n' "${_pkgs[@]##*/}"
+  "${_pm[@]}" -U --noconfirm --noscriptlet -dd --overwrite '*' "${_pkgs[@]}"
+  "${_pm[@]}" -Q systemd | grep -q -- '-1\.1$' || { echo "ERROR: patched systemd didn't land in the rootfs" >&2; exit 1; }
+  sed -i '/^\[options\]/a IgnorePkg = systemd systemd-libs systemd-sysvcompat' "${_rootfs}/etc/pacman.conf"
+
+  rm -rf "${_sbsrc}"
+  git clone --quiet --depth 1 --branch "${_ref}" https://github.com/ading2210/shimboot.git "${_sbsrc}"
+  cp -a "${_sbsrc}/rootfs/etc/." "${_rootfs}/etc/"
+  cp -a "${_sbsrc}/rootfs/usr/." "${_rootfs}/usr/"
+  mkdir -p "${_rootfs}/etc/systemd/system/graphical.target.wants"
+  ln -sf /etc/systemd/system/kill-frecon.service \
+    "${_rootfs}/etc/systemd/system/graphical.target.wants/kill-frecon.service"
+
+  local _osr
+  _osr="$(readlink -f "${_rootfs}/etc/os-release")"
+  case "${_osr}" in "${_rootfs}"/*) ;; *) _osr="${_rootfs}/usr/lib/os-release" ;; esac
+  sed -i -e '/^VARIANT=/d' -e '/^VARIANT_ID=/d' \
+         -e 's|^PRETTY_NAME=.*|PRETTY_NAME="KibaOS (Shimboot Research)"|' "${_osr}"
+  { echo; echo 'VARIANT="Shimboot (Research)"'; echo 'VARIANT_ID=shimboot-research'; } >> "${_osr}"
+  printf 'KibaOS Shimboot (Research) v%s\nKibaOS rootfs + ChromeOS-patched systemd\n' "${RUN_NUM:-dev}" \
+    > "${_rootfs}/etc/kibaos-release"
+
+  echo "=== Shimboot: packing the rootfs ==="
+  rm -f "${_tar}"
+  tar --numeric-owner --xattrs --acls -C "${_rootfs}" -cpf - . | zstd -T0 -3 -q -o "${_tar}"
+  ls -lh "${_tar}"
+  cd "${WORKDIR}"
+  rm -rf "${WORKDIR}/work" "${WORKDIR}/out"
+  echo "=== Shimboot rootfs ready: ${_tar} ==="
+}
+
+if [ "${KIBA_SHIMBOOT_ROOTFS}" = "1" ]; then
+  sed -i "s|^airootfs_image_tool_options=.*|airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '1' '-b' '131072' '-noappend')|" "${PROFILE}/profiledef.sh"
+fi
+
 mkarchiso -v -w work -o out "${PROFILE}/"
 
-# ── UEFI-only ISO, assembled by hand ───────────────────────────────────────
-# mkarchiso has now produced the complete ISO tree in work/iso (arch/ with the
-# squashfs + kernel + initramfs, EFI/BOOT/BOOTx64.EFI + boot/grub/ from
-# uefi.grub) plus the FAT ESP image in work/efiboot.img. Re-pack that tree with
-# the explicit xorriso command. No BIOS/El Torito legacy entry, no isolinux, no
-# hybrid MBR: the only boot path is the EFI System Partition.
+if [ "${KIBA_SHIMBOOT_ROOTFS}" = "1" ]; then
+  kiba_shimboot_export_rootfs
+  exit 0
+fi
+
 cd "${WORKDIR}"
 rm -rf iso_root kibaos.iso
 mv work/iso iso_root
-rm -f out/*.iso   # mkarchiso's own (differently-laid-out) ISO is not needed
+rm -f out/*.iso
 
 for _f in iso_root/EFI/BOOT/BOOTx64.EFI \
           work/efiboot.img; do
   [ -f "${_f}" ] || { echo "ERROR: ${_f} is missing -- cannot build the UEFI ISO" >&2; exit 1; }
 done
 
-# the El Torito UEFI image has to live inside the tree it is booted from
 cp -f work/efiboot.img iso_root/EFI/BOOT/efiboot.img
 
-# Publish the El Torito EFI image as a real GPT EFI System Partition.
-# This is important for USB media written sector-for-sector with dd: firmware
-# can discover the FAT ESP as a disk partition instead of relying only on the
-# optical-media El Torito boot catalog.
 xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -volid KIBAOS \
   -e EFI/BOOT/efiboot.img -no-emul-boot \
   -efi-boot-part --efi-boot-image \
@@ -6519,7 +6338,6 @@ xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -volid KIBAOS \
 
 if [ -f kibaos.iso ]; then
   mv kibaos.iso "${ISO}.iso"
-  # Record both boot metadata reports for the build log.
   xorriso -indev "${ISO}.iso" -report_el_torito plain -report_system_area plain 2>&1 | tail -n 60 || true
   sha256sum "${ISO}.iso" > "${ISO}.iso.sha256"
   echo "╔══════════════════════════════════════╗"
