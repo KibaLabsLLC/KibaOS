@@ -116,57 +116,32 @@ jobs:
           - arch: x86_64
             sf_dir: x86_64
             payload: "*.iso,*.iso.sha256"
-            prune_previous: true
+            prune_glob: "kibaos-v*.iso*"
           - arch: mobile
             sf_dir: mobile
             payload: "kibaos-mobile-installer.zip,kibaos-mobile-installer.zip.sha256"
-            prune_previous: false
+            prune_glob: "kibaos-mobile-installer*"
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
     env:
       SF_USER: ${{ secrets.SF_USER }}
       SSHPASS: ${{ secrets.SF_PASS }}
       REMOTE_DIR: /home/frs/project/kibaos/${{ matrix.sf_dir }}
-      MARKER: last-iso-build-number-${{ matrix.arch }}.txt
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      # How many past builds (per arch) to keep on GitHub Releases. SourceForge always keeps only the newest.
+      KEEP_BUILDS: 1
     steps:
-      - name: Check SourceForge credentials
-        id: creds
-        run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
-            echo "SourceForge credentials not configured. Skipping."
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Download build artifact
-        if: steps.creds.outputs.ok == 'true'
         uses: actions/download-artifact@v4
         with:
           name: kibaos-build-${{ matrix.arch }}
           path: dist
-      - name: Prepare SSH
-        if: steps.creds.outputs.ok == 'true'
+      - name: Collect payload files
         run: |
-          sudo apt-get install -y sshpass rsync
-          mkdir -p ~/.ssh
-          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-      - name: Remove previous build from SourceForge
-        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
-        run: |
-          rm -f "${MARKER}"
-          sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}" "${MARKER}" 2>/dev/null || true
-          if [ -s "${MARKER}" ]; then
-            PREV_ISO="kibaos-v$(cat "${MARKER}").iso"
-            echo "Removing previous ${{ matrix.arch }} build: ${PREV_ISO} (+ .sha256)"
-            printf '%s\n' "cd ${REMOTE_DIR}" "rm ${PREV_ISO}" "rm ${PREV_ISO}.sha256" "bye" \
-              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
-          else
-            echo "No previous build marker for ${{ matrix.arch }} -- nothing to delete."
-          fi
-      - name: Upload to SourceForge
-        if: steps.creds.outputs.ok == 'true'
-        run: |
-          FILES=()
+          : > "$RUNNER_TEMP/payload.txt"
           IFS=',' read -ra PATS <<< "${{ matrix.payload }}"
           for pat in "${PATS[@]}"; do
             mapfile -t FOUND < <(find dist -type f -name "$pat")
@@ -174,15 +149,91 @@ jobs:
               echo "::error::No file matching ${pat} in the ${{ matrix.arch }} build artifact" >&2
               exit 1
             fi
-            FILES+=("${FOUND[@]}")
+            printf '%s\n' "${FOUND[@]}" >> "$RUNNER_TEMP/payload.txt"
           done
+          echo "Payload:"; cat "$RUNNER_TEMP/payload.txt"
+      - name: Check SourceForge credentials
+        id: creds
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
+            echo "SourceForge credentials not configured. Skipping SourceForge."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Prepare SSH
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          sudo apt-get install -y sshpass rsync
+          mkdir -p ~/.ssh
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+      - name: Upload to SourceForge
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          mapfile -t FILES < "$RUNNER_TEMP/payload.txt"
           printf 'Uploading: %s\n' "${FILES[@]}"
           sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
-      - name: Record build marker on SourceForge
-        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
+      - name: Remove old builds from SourceForge
+        # Runs only after a successful upload, so a failed upload never leaves the project empty.
+        if: steps.creds.outputs.ok == 'true'
+        env:
+          PRUNE_GLOB: ${{ matrix.prune_glob }}
         run: |
-          echo "${{ github.run_number }}" > "${MARKER}"
-          sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
+          mapfile -t CURRENT < <(while read -r f; do basename "$f"; done < "$RUNNER_TEMP/payload.txt")
+          mapfile -t REMOTE < <(sshpass -e rsync --list-only "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/" | awk '$1 ~ /^-/ {print $5}')
+          CMDS=("cd ${REMOTE_DIR}")
+          for name in "${REMOTE[@]}"; do
+            # shellcheck disable=SC2053
+            [[ "$name" == $PRUNE_GLOB ]] || continue
+            printf '%s\n' "${CURRENT[@]}" | grep -qxF -- "$name" && continue
+            echo "Removing old build from SourceForge: $name"
+            CMDS+=("rm ${name}")
+          done
+          if [ "${#CMDS[@]}" -eq 1 ]; then echo "No old builds to remove."; exit 0; fi
+          printf '%s\n' "${CMDS[@]}" "bye" \
+            | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" || true
+      - name: Publish to GitHub Release
+        if: ${{ !cancelled() }}
+        run: |
+          TAG="build-${{ matrix.arch }}-${{ github.run_number }}"
+          LIMIT=2147483648   # GitHub release assets must be < 2 GiB each
+          ASSETS=(); SKIPPED=()
+          while read -r f; do
+            if [ "$(stat -c %s "$f")" -ge "$LIMIT" ]; then
+              echo "::warning::$(basename "$f") is >= 2 GiB -- too large for a GitHub release asset, SourceForge only."
+              SKIPPED+=("$(basename "$f")")
+            else
+              ASSETS+=("$f")
+            fi
+          done < "$RUNNER_TEMP/payload.txt"
+          {
+            echo "KibaOS build v${{ github.run_number }} (${{ matrix.arch }}), commit ${GITHUB_SHA::7}."
+            echo
+            echo "Mirror: https://sourceforge.net/projects/kibaos/files/${{ matrix.sf_dir }}/"
+            if [ "${#SKIPPED[@]}" -gt 0 ]; then
+              echo
+              echo "Too large for GitHub (2 GiB limit), download from SourceForge: ${SKIPPED[*]}"
+            fi
+          } > "$RUNNER_TEMP/notes.md"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" \
+              --title "KibaOS v${{ github.run_number }} (${{ matrix.arch }})" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --target "$GITHUB_SHA" \
+              --latest=${{ matrix.arch == 'x86_64' }}
+          fi
+      - name: Remove old GitHub Releases
+        if: ${{ !cancelled() }}
+        run: |
+          gh release list --limit 200 --json tagName,createdAt \
+            | jq -r --arg p "build-${{ matrix.arch }}-" --argjson keep "$KEEP_BUILDS" \
+                '[.[] | select(.tagName | startswith($p))] | sort_by(.createdAt) | reverse | .[$keep:] | .[].tagName' \
+            | while read -r t; do
+                echo "Deleting old release ${t}"
+                gh release delete "$t" --cleanup-tag --yes || true
+              done
   shimboot_build:
     # Two stages, both in privileged containers:
     #   1. archlinux: the normal KibaOS x86_64 profile build, exported as a rootfs
@@ -266,26 +317,35 @@ jobs:
     if: ${{ inputs.shimboot_only || inputs.build_shimboot }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
     env:
       SF_USER: ${{ secrets.SF_USER }}
       SSHPASS: ${{ secrets.SF_PASS }}
       REMOTE_DIR: /home/frs/project/kibaos/shimboot
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      KEEP_BUILDS: 1
     steps:
-      - name: Check SourceForge credentials
-        id: creds
-        run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
-            echo "SourceForge credentials not configured. Skipping."
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Download build artifact
-        if: steps.creds.outputs.ok == 'true'
         uses: actions/download-artifact@v4
         with:
           name: kibaos-build-shimboot
           path: dist
+      - name: Collect payload files
+        run: |
+          find dist -type f \( -name 'kibaos-shimboot-*.zip' -o -name 'kibaos-shimboot-*.zip.sha256' -o -name 'README-shimboot.txt' \) > "$RUNNER_TEMP/payload.txt"
+          if [ ! -s "$RUNNER_TEMP/payload.txt" ]; then echo "::error::No Shimboot files in the build artifact" >&2; exit 1; fi
+          echo "Payload:"; cat "$RUNNER_TEMP/payload.txt"
+      - name: Check SourceForge credentials
+        id: creds
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
+            echo "SourceForge credentials not configured. Skipping SourceForge."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Prepare SSH
         if: steps.creds.outputs.ok == 'true'
         run: |
@@ -317,10 +377,67 @@ jobs:
       - name: Upload to SourceForge
         if: steps.creds.outputs.ok == 'true'
         run: |
-          mapfile -t FILES < <(find dist -type f \( -name 'kibaos-shimboot-*.zip' -o -name 'kibaos-shimboot-*.zip.sha256' -o -name 'README-shimboot.txt' \))
-          if [ "${#FILES[@]}" -eq 0 ]; then echo "::error::No Shimboot files in the build artifact" >&2; exit 1; fi
+          mapfile -t FILES < "$RUNNER_TEMP/payload.txt"
           printf 'Uploading: %s\n' "${FILES[@]}"
           sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
+      - name: Remove old Shimboot builds from SourceForge
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          mapfile -t CURRENT < <(while read -r f; do basename "$f"; done < "$RUNNER_TEMP/payload.txt")
+          mapfile -t REMOTE < <(sshpass -e rsync --list-only "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/" | awk '$1 ~ /^-/ {print $5}')
+          CMDS=("cd ${REMOTE_DIR}")
+          for name in "${REMOTE[@]}"; do
+            [[ "$name" == kibaos-shimboot-* ]] || continue
+            printf '%s\n' "${CURRENT[@]}" | grep -qxF -- "$name" && continue
+            echo "Removing old build from SourceForge: $name"
+            CMDS+=("rm ${name}")
+          done
+          if [ "${#CMDS[@]}" -eq 1 ]; then echo "No old builds to remove."; exit 0; fi
+          printf '%s\n' "${CMDS[@]}" "bye" \
+            | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" || true
+      - name: Publish to GitHub Release
+        if: ${{ !cancelled() }}
+        run: |
+          BOARD="${{ needs.shimboot_build.outputs.board }}"
+          TAG="shimboot-${BOARD}-${{ github.run_number }}"
+          LIMIT=2147483648
+          ASSETS=(); SKIPPED=()
+          while read -r f; do
+            if [ "$(stat -c %s "$f")" -ge "$LIMIT" ]; then
+              echo "::warning::$(basename "$f") is >= 2 GiB -- too large for a GitHub release asset, SourceForge only."
+              SKIPPED+=("$(basename "$f")")
+            else
+              ASSETS+=("$f")
+            fi
+          done < "$RUNNER_TEMP/payload.txt"
+          {
+            echo "KibaOS Shimboot (Research) build v${{ github.run_number }} for board ${BOARD}, commit ${GITHUB_SHA::7}."
+            echo
+            echo "Mirror: https://sourceforge.net/projects/kibaos/files/shimboot/"
+            if [ "${#SKIPPED[@]}" -gt 0 ]; then
+              echo
+              echo "Too large for GitHub (2 GiB limit), download from SourceForge: ${SKIPPED[*]}"
+            fi
+          } > "$RUNNER_TEMP/notes.md"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" "${ASSETS[@]}" \
+              --title "KibaOS Shimboot v${{ github.run_number }} (${BOARD})" \
+              --notes-file "$RUNNER_TEMP/notes.md" \
+              --target "$GITHUB_SHA" \
+              --latest=false
+          fi
+      - name: Remove old Shimboot GitHub Releases
+        if: ${{ !cancelled() }}
+        run: |
+          gh release list --limit 200 --json tagName,createdAt \
+            | jq -r --arg p "shimboot-${{ needs.shimboot_build.outputs.board }}-" --argjson keep "$KEEP_BUILDS" \
+                '[.[] | select(.tagName | startswith($p))] | sort_by(.createdAt) | reverse | .[$keep:] | .[].tagName' \
+            | while read -r t; do
+                echo "Deleting old release ${t}"
+                gh release delete "$t" --cleanup-tag --yes || true
+              done
   vmtest_find:
     needs: build
     if: ${{ always() && inputs.run_vmtest }}
@@ -721,6 +838,13 @@ jobs:
         arch: [x86_64, mobile]
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      # Newest OTA patches to keep (per arch on SourceForge, overall on GitHub). Older ones are deleted.
+      OTA_KEEP: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -849,3 +973,48 @@ jobs:
           git config user.email "ota@kibaos.wolftech.tech"
           git tag "ota-patch-${{ needs.build.outputs.patch_num }}"
           retry git push origin "ota-patch-${{ needs.build.outputs.patch_num }}" 2>/dev/null || true
+      - name: Remove old OTA patches from SourceForge
+        env:
+          SF_USER: ${{ secrets.SF_USER }}
+          SSHPASS: ${{ secrets.SF_PASS }}
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then echo "SourceForge credentials not configured. Skipping."; exit 0; fi
+          ARCH="${{ matrix.arch }}"
+          OTA_DIR=/home/frs/project/kibaos/ota
+          mapfile -t NAMES < <(sshpass -e rsync --list-only "$SF_USER@frs.sourceforge.net:${OTA_DIR}/" | awk '$1 ~ /^-/ {print $5}')
+          # Patch numbers for this arch, oldest first, minus the newest OTA_KEEP -> the ones to delete.
+          mapfile -t OLD < <(printf '%s\n' "${NAMES[@]}" \
+            | sed -nE "s/^kibaos-ota-([0-9]+)-${ARCH}(\.tar\.gz|\.tar\.gz\.asc|-manifest\.txt)$/\1/p" \
+            | sort -un | head -n -"$OTA_KEEP")
+          if [ "${#OLD[@]}" -eq 0 ]; then echo "No old ${ARCH} OTA patches to remove."; exit 0; fi
+          CMDS=("cd ${OTA_DIR}")
+          for n in "${OLD[@]}"; do
+            echo "Removing OTA patch ${n} (${ARCH})"
+            CMDS+=("rm kibaos-ota-${n}-${ARCH}.tar.gz" "rm kibaos-ota-${n}-${ARCH}.tar.gz.asc" "rm kibaos-ota-${n}-${ARCH}-manifest.txt")
+          done
+          printf '%s\n' "${CMDS[@]}" "bye" \
+            | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" || true
+      - name: Publish OTA patch to GitHub Release
+        if: steps.diff.outputs.has_changes == 'true'
+        run: |
+          PATCH_NUM="${{ needs.build.outputs.patch_num }}"
+          ARCH="${{ matrix.arch }}"
+          TAG="ota-patch-${PATCH_NUM}"
+          FILES=("kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz" "kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz.asc" "kibaos-ota-${PATCH_NUM}-${ARCH}-manifest.txt")
+          # x86_64 and mobile legs share one release per patch number; whichever runs first creates it.
+          if gh release view "$TAG" >/dev/null 2>&1 \
+             || ! gh release create "$TAG" "${FILES[@]}" --title "KibaOS OTA patch ${PATCH_NUM}" \
+                  --notes "OTA patch ${PATCH_NUM}. Assets are per architecture (x86_64 / mobile)." \
+                  --target "$GITHUB_SHA" --latest=false; then
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+          fi
+      - name: Remove old OTA GitHub Releases
+        if: steps.diff.outputs.has_changes == 'true'
+        run: |
+          gh release list --limit 200 --json tagName \
+            | jq -r --argjson keep "$OTA_KEEP" \
+                '[.[] | select(.tagName | test("^ota-patch-[0-9]+$"))] | sort_by(.tagName | ltrimstr("ota-patch-") | tonumber) | reverse | .[$keep:] | .[].tagName' \
+            | while read -r t; do
+                echo "Deleting old OTA release ${t}"
+                gh release delete "$t" --cleanup-tag --yes || true
+              done
