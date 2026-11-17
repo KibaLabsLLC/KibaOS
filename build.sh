@@ -4156,6 +4156,10 @@ MAX_QUICK_CRASHES=5
 QUICK_SECS=20
 crashes=0
 export XDG_SESSION_TYPE=wayland
+# Greeter already runs with software rendering allowed; the session must too,
+# otherwise labwc crash-loops on machines with no usable GPU and greetd falls
+# back to the login screen instead of autologging in.
+export WLR_RENDERER_ALLOW_SOFTWARE=1
 export XDG_SESSION_DESKTOP=budgie-desktop
 export XDG_CURRENT_DESKTOP=Budgie:GNOME
 while :; do
