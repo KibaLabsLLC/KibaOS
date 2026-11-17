@@ -6316,14 +6316,19 @@ done
 # the El Torito UEFI image has to live inside the tree it is booted from
 cp -f work/efiboot.img iso_root/EFI/BOOT/efiboot.img
 
+# Publish the El Torito EFI image as a real GPT EFI System Partition.
+# This is important for USB media written sector-for-sector with dd: firmware
+# can discover the FAT ESP as a disk partition instead of relying only on the
+# optical-media El Torito boot catalog.
 xorriso -as mkisofs -iso-level 3 -full-iso9660-filenames -volid KIBAOS \
-  -eltorito-alt-boot -e EFI/BOOT/efiboot.img -no-emul-boot \
-  -isohybrid-gpt-basdat -o kibaos.iso iso_root/
+  -e EFI/BOOT/efiboot.img -no-emul-boot \
+  -efi-boot-part --efi-boot-image \
+  -o kibaos.iso iso_root/
 
 if [ -f kibaos.iso ]; then
   mv kibaos.iso "${ISO}.iso"
-  # log the UEFI boot entry and the GPT for the build record
-  xorriso -indev "${ISO}.iso" -report_el_torito plain -report_system_area plain 2>&1 | tail -n 40 || true
+  # Record both boot metadata reports for the build log.
+  xorriso -indev "${ISO}.iso" -report_el_torito plain -report_system_area plain 2>&1 | tail -n 60 || true
   sha256sum "${ISO}.iso" > "${ISO}.iso.sha256"
   echo "╔══════════════════════════════════════╗"
   echo "║  KibaOS build complete!       ║"
