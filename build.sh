@@ -2148,7 +2148,9 @@ pv
 lib32-mesa
 lib32-vulkan-icd-loader
 pkg-config
-gdm
+greetd
+greetd-regreet
+cage
 budgie-desktop
 pcmanfm-qt
 qt6-wayland
@@ -2383,7 +2385,7 @@ chmod 0440 "${AIROOTFS}/etc/sudoers.d/liveuser"
 WANTS="${AIROOTFS}/etc/systemd/system"
 mkdir -p "${WANTS}/default.target.wants" "${WANTS}/multi-user.target.wants"
 ln -sf /usr/lib/systemd/system/graphical.target       "${WANTS}/default.target"
-ln -sf /usr/lib/systemd/system/gdm.service             "${WANTS}/display-manager.service"
+ln -sf /usr/lib/systemd/system/greetd.service             "${WANTS}/display-manager.service"
 ln -sf /usr/lib/systemd/system/pacman-init.service    "${WANTS}/multi-user.target.wants/pacman-init.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service      "${WANTS}/multi-user.target.wants/bluetooth.service"
 
@@ -2751,10 +2753,17 @@ echo "${USERNAME_VAL}:${PASSWORD_VAL}" | chpasswd || fail "chpasswd failed"
 progress 85 "Cleaning up OEM account..."
 userdel -r oem 2>/dev/null || true
 rm -f /var/lib/AccountsService/users/oem 2>/dev/null || true
-if [ -f /etc/gdm/custom.conf.pre-oem ]; then
-  mv /etc/gdm/custom.conf.pre-oem /etc/gdm/custom.conf
+if [ -f /etc/greetd/config.toml.pre-oem ]; then
+  mv /etc/greetd/config.toml.pre-oem /etc/greetd/config.toml
 else
-  rm -f /etc/gdm/custom.conf 2>/dev/null || true
+  cat > /etc/greetd/config.toml << 'GREETDDEFAULT'
+[terminal]
+vt = 1
+
+[default_session]
+command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
+user = "greeter"
+GREETDDEFAULT
 fi
 
 progress 95 "Finishing up..."
@@ -2775,14 +2784,20 @@ touch /etc/kibaos/oem-pending
 id oem &>/dev/null || useradd -m -G wheel,audio,video,input,network,storage,power -s /bin/bash oem
 passwd -d oem 2>/dev/null || true
 
-mkdir -p /etc/gdm
-[ -f /etc/gdm/custom.conf ] && cp -f /etc/gdm/custom.conf /etc/gdm/custom.conf.pre-oem 2>/dev/null || true
-cat > /etc/gdm/custom.conf << 'GDMOEMCONF'
-[daemon]
-AutomaticLoginEnable=true
-AutomaticLogin=oem
-WaylandEnable=true
-GDMOEMCONF
+mkdir -p /etc/greetd
+[ -f /etc/greetd/config.toml ] && [ ! -f /etc/greetd/config.toml.pre-oem ] && cp -f /etc/greetd/config.toml /etc/greetd/config.toml.pre-oem 2>/dev/null || true
+cat > /etc/greetd/config.toml << 'GREETDOEMCONF'
+[terminal]
+vt = 1
+
+[default_session]
+command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
+user = "greeter"
+
+[initial_session]
+command = "/usr/local/bin/kibaos-session"
+user = "oem"
+GREETDOEMCONF
 
 mkdir -p /var/lib/AccountsService/users
 cat > /var/lib/AccountsService/users/oem << 'OEMACCOUNTS'
@@ -3866,28 +3881,15 @@ enable-built-in-theme=false
 BUDGIEOVERRIDE
 glib-compile-schemas /usr/share/glib-2.0/schemas/ 2>/dev/null || true
 
-mkdir -p /etc/dconf/profile /etc/dconf/db/gdm.d
-cat > /etc/dconf/profile/gdm << 'GDMPROFILE'
-user-db:user
-system-db:gdm
-file-db:/usr/share/gdm/greeter-dconf-defaults
-GDMPROFILE
+mkdir -p /etc/greetd
+cat > /etc/greetd/regreet.toml << 'REGREETCONF'
+[background]
+path = "/usr/share/kibaos/wallpaper.jpg"
+fit = "Cover"
 
-cp /usr/share/kibaos/wallpaper.jpg /usr/share/kibaos/gdm-background.jpg 2>/dev/null || true
-cat > /etc/dconf/db/gdm.d/01-kibaos << 'GDMDCONF'
-[org/gnome/desktop/background]
-picture-uri='file:///usr/share/kibaos/gdm-background.jpg'
-picture-uri-dark='file:///usr/share/kibaos/gdm-background.jpg'
-picture-options='zoom'
-
-[org/gnome/desktop/interface]
-color-scheme='prefer-dark'
-
-[org/gnome/login-screen]
-logo='/usr/share/kibaos/logo-256.png'
-disable-user-list=false
-GDMDCONF
-dconf update
+[GTK]
+application_prefer_dark_theme = true
+REGREETCONF
 
 : << 'DEAD_SDDM_THEME_BLOCK'
 SDDM_THEME_DIR="/usr/share/sddm/themes/kibaos"
@@ -4153,6 +4155,9 @@ cat > /usr/local/bin/kibaos-session << 'KIBASESSION'
 MAX_QUICK_CRASHES=5
 QUICK_SECS=20
 crashes=0
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=budgie-desktop
+export XDG_CURRENT_DESKTOP=Budgie:GNOME
 while :; do
   start=$(date +%s)
   systemd-cat -t kibaos-labwc /usr/bin/labwc --session=/usr/bin/budgie-desktop
@@ -4205,13 +4210,19 @@ Hidden=true
 NOLABWCBRIDGE
 rm -rf "${SKEL}/.config/budgie-desktop/labwc" 2>/dev/null || true
 
-mkdir -p /etc/gdm
-cat > /etc/gdm/custom.conf << 'GDMCONF'
-[daemon]
-AutomaticLoginEnable=true
-AutomaticLogin=liveuser
-WaylandEnable=true
-GDMCONF
+mkdir -p /etc/greetd
+cat > /etc/greetd/config.toml << 'GREETDCONF'
+[terminal]
+vt = 1
+
+[default_session]
+command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
+user = "greeter"
+
+[initial_session]
+command = "/usr/local/bin/kibaos-session"
+user = "liveuser"
+GREETDCONF
 mkdir -p /var/lib/AccountsService/users
 cat > /var/lib/AccountsService/users/liveuser << 'LIVEUSERACCOUNTS'
 [User]
@@ -4219,25 +4230,15 @@ Session=budgie-desktop
 XSession=budgie-desktop
 SystemAccount=false
 LIVEUSERACCOUNTS
-chmod 644 /etc/gdm/custom.conf
+chmod 644 /etc/greetd/config.toml
 chmod 600 /var/lib/AccountsService/users/liveuser
 chown root:root /var/lib/AccountsService/users/liveuser
 
 grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
-{
-  echo '#%PAM-1.0'
-  echo 'auth       required     pam_shells.so'
-  echo 'auth       requisite    pam_nologin.so'
-  echo 'auth       required     pam_permit.so'
-  echo 'account    include      system-local-login'
-  echo 'password   required     pam_deny.so'
-  echo 'session    include      system-local-login'
-  [ -e /usr/lib/security/pam_gnome_keyring.so ] && \
-    echo 'session    optional     pam_gnome_keyring.so auto_start'
-} > /etc/pam.d/gdm-autologin
-
-mkdir -p /etc/udev/rules.d
-ln -sf /dev/null /etc/udev/rules.d/61-gdm.rules
+if [ -e /usr/lib/security/pam_gnome_keyring.so ] && [ -f /etc/pam.d/greetd ] \
+   && ! grep -q pam_gnome_keyring /etc/pam.d/greetd; then
+  printf 'auth       optional     pam_gnome_keyring.so\nsession    optional     pam_gnome_keyring.so auto_start\n' >> /etc/pam.d/greetd
+fi
 
 passwd -u liveuser 2>/dev/null || true
 chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
@@ -4245,13 +4246,23 @@ chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
 cat > /usr/local/bin/kibaos-live-autologin << 'LIVEAUTOLOGIN'
 #!/bin/bash
 [ -d /run/archiso ] || exit 0
-rm -f /run/gdm/custom.conf
 id liveuser >/dev/null 2>&1 || exit 0
-if ! grep -qs '^AutomaticLogin=liveuser' /etc/gdm/custom.conf; then
-  mkdir -p /etc/gdm
-  printf '[daemon]\nAutomaticLoginEnable=true\nAutomaticLogin=liveuser\nWaylandEnable=true\n' > /etc/gdm/custom.conf
-  chmod 644 /etc/gdm/custom.conf
-  logger -t kibaos-live-autologin "custom.conf was missing autologin; rewrote it"
+if ! grep -qs '^user = "liveuser"' /etc/greetd/config.toml; then
+  mkdir -p /etc/greetd
+  cat > /etc/greetd/config.toml << 'GREETDLIVE'
+[terminal]
+vt = 1
+
+[default_session]
+command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
+user = "greeter"
+
+[initial_session]
+command = "/usr/local/bin/kibaos-session"
+user = "liveuser"
+GREETDLIVE
+  chmod 644 /etc/greetd/config.toml
+  logger -t kibaos-live-autologin "config.toml was missing autologin; rewrote it"
 fi
 mkdir -p /var/lib/AccountsService/users
 if ! grep -qs '^Session=budgie-desktop' /var/lib/AccountsService/users/liveuser; then
@@ -4264,8 +4275,8 @@ LIVEAUTOLOGIN
 chmod +x /usr/local/bin/kibaos-live-autologin
 cat > /etc/systemd/system/kibaos-live-autologin.service << 'LIVEAUTOLOGINSVC'
 [Unit]
-Description=Ensure GDM autologin for the KibaOS live user
-Before=gdm.service display-manager.service
+Description=Ensure greetd autologin for the KibaOS live user
+Before=greetd.service display-manager.service
 After=local-fs.target systemd-sysusers.service
 
 [Service]
@@ -4290,16 +4301,16 @@ for _ in $(seq 1 40); do
   done
   sleep 0.5
 done
-logger -t kibaos-wait-drm "no non-simpledrm GPU driver after 20s, starting GDM anyway"
+logger -t kibaos-wait-drm "no non-simpledrm GPU driver after 20s, starting greetd anyway"
 exit 0
 WAITDRM
 chmod +x /usr/local/bin/kibaos-wait-drm
-mkdir -p /etc/systemd/system/gdm.service.d
-cat > /etc/systemd/system/gdm.service.d/10-kibaos-wait-drm.conf << 'GDMWAITDRM'
+mkdir -p /etc/systemd/system/greetd.service.d
+cat > /etc/systemd/system/greetd.service.d/10-kibaos-wait-drm.conf << 'GREETDWAITDRM'
 [Service]
 ExecStartPre=/usr/local/bin/kibaos-wait-drm
 TimeoutStartSec=90
-GDMWAITDRM
+GREETDWAITDRM
 
 cat > /usr/local/bin/kibaos-gpu-select << 'GPUSELECT'
 #!/bin/bash
@@ -4320,7 +4331,7 @@ cat > /etc/systemd/system/kibaos-gpu-select.service << 'GPUSELECTSVC'
 [Unit]
 Description=Use nouveau for NVIDIA GPUs the open kernel modules do not support
 After=systemd-udev-trigger.service
-Before=gdm.service display-manager.service
+Before=greetd.service display-manager.service
 
 [Service]
 Type=oneshot
@@ -4331,13 +4342,12 @@ WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
 
-for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/gdm.service /etc/pam.d/gdm-autologin; do
+for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/greetd.service /usr/bin/cage /usr/bin/regreet /etc/greetd/regreet.toml; do
   [ -e "$_f" ] || { echo "ERROR: autologin prerequisite missing: $_f" >&2; exit 1; }
 done
-id gdm >/dev/null 2>&1 || echo "WARNING: gdm user missing at build time (created by sysusers at boot)" >&2
-mkdir -p /var/lib/gdm /var/log/gdm
-chown gdm:gdm /var/lib/gdm /var/log/gdm 2>/dev/null || true
-chmod 750 /var/lib/gdm
+id greeter >/dev/null 2>&1 || echo "WARNING: greeter user missing at build time (created by sysusers at boot)" >&2
+mkdir -p /var/lib/regreet /var/log/regreet /var/cache/regreet
+chown greeter:greeter /var/lib/regreet /var/log/regreet /var/cache/regreet 2>/dev/null || true
 cat > /usr/local/bin/kibaos-screenshot << 'SCREENSHOT'
 #!/bin/bash
 set -euo pipefail
@@ -4568,7 +4578,7 @@ rollback_patch() {
 
 restart_compositor() {
   log "Restarting session..."
-  systemctl restart gdm 2>/dev/null || \
+  systemctl restart greetd 2>/dev/null || \
   pkill -TERM labwc 2>/dev/null || \
   pkill -TERM labwc 2>/dev/null || true
   sleep 1
@@ -4576,13 +4586,13 @@ restart_compositor() {
 }
 
 restart_display_manager() {
-  log "Restarting GDM..."
-  systemctl restart gdm
+  log "Restarting greetd..."
+  systemctl restart greetd
   for i in $(seq 1 20); do
     [ -S "/run/user/1000/${WAYLAND_DISPLAY:-wayland-0}" ] && break
     sleep 0.5
   done
-  log "GDM restarted."
+  log "greetd restarted."
 }
 
 run_post_hooks() {
@@ -4702,7 +4712,7 @@ NEEDS_COMPOSITOR_RESTART=false
 while IFS= read -r line; do
   FILEPATH=$(echo "${line}" | awk '{print $2}' | sed 's|^\./||')
   case "${FILEPATH}" in
-    etc/gdm*|usr/lib/gdm*|usr/bin/gdm*|usr/share/gdm*|etc/dconf/db/gdm.d*)
+    etc/greetd*|usr/lib/greetd*|usr/bin/greetd*|usr/bin/regreet*|usr/share/regreet*)
       NEEDS_DISPLAY_RESTART=true ;;
     usr/bin/labwc*)
       NEEDS_COMPOSITOR_RESTART=true ;;
@@ -4711,7 +4721,7 @@ done < "${MANIFEST}"
 
 _active_user_info() {
   loginctl list-sessions --no-legend 2>/dev/null | while read -r _sid _uid _user _rest; do
-    [ "${_user}" = "gdm" ] && continue
+    [ "${_user}" = "greeter" ] && continue
     [ "$(loginctl show-session "${_sid}" -p Class --value 2>/dev/null)" = "user" ] || continue
     [ "$(loginctl show-session "${_sid}" -p Active --value 2>/dev/null)" = "yes" ] || continue
     echo "${_uid} ${_user}"
@@ -5883,7 +5893,7 @@ TIMESYNCD
 timedatectl set-local-rtc 0 2>/dev/null || true
 systemctl enable systemd-timesyncd
 
-systemctl enable gdm
+systemctl enable greetd
 
 systemctl enable NetworkManager
 
