@@ -17,9 +17,24 @@ on:
         required: false
         type: boolean
         default: false
+      build_shimboot:
+        description: 'Also build the Shimboot (Research) Chromebook image alongside the normal builds'
+        required: false
+        type: boolean
+        default: false
+      shimboot_only:
+        description: 'Only build the Shimboot (Research) Chromebook image -- skips x86_64, mobile and OTA'
+        required: false
+        type: boolean
+        default: false
+      shimboot_board:
+        description: 'Chromebook board for the Shimboot build (e.g. dedede, octopus, nissa -- see cros.download/recovery)'
+        required: false
+        type: string
+        default: 'dedede'
 jobs:
   build:
-    if: ${{ !inputs.skip_build }}
+    if: ${{ !inputs.skip_build && !inputs.shimboot_only }}
     strategy:
       fail-fast: false
       matrix:
@@ -93,7 +108,7 @@ jobs:
           retention-days: ${{ matrix.retention_days }}
   publish:
     needs: build
-    if: ${{ !inputs.skip_build }}
+    if: ${{ !inputs.skip_build && !inputs.shimboot_only }}
     strategy:
       fail-fast: false
       matrix:
@@ -168,6 +183,129 @@ jobs:
         run: |
           echo "${{ github.run_number }}" > "${MARKER}"
           sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
+  shimboot_build:
+    # Runs in a privileged Ubuntu container (shimboot's scripts are Debian-based,
+    # so not the archlinux image). The host /dev is mounted in so the loop
+    # partition nodes (loopNpM) that losetup -P creates are visible inside.
+    if: ${{ inputs.shimboot_only || inputs.build_shimboot }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      board: ${{ steps.cfg.outputs.board }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Resolve Shimboot board
+        id: cfg
+        env:
+          BOARD_IN: ${{ inputs.shimboot_board }}
+        run: |
+          BOARD="${BOARD_IN:-dedede}"
+          if ! [[ "$BOARD" =~ ^[a-z0-9-]+$ ]]; then
+            echo "::error::Invalid shimboot_board '${BOARD}' (lowercase letters, digits, dashes only)"
+            exit 1
+          fi
+          echo "board=${BOARD}" >> "$GITHUB_OUTPUT"
+          echo "Building KibaOS Shimboot (Research) for board: ${BOARD}"
+      - name: Free disk space
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
+          remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
+          rm_cmd: "rmz"
+          rmz_version: "3.1.1"
+      - name: Build Shimboot image
+        env:
+          RUN_NUM: ${{ github.run_number }}
+          KIBA_SHIMBOOT_BOARD: ${{ steps.cfg.outputs.board }}
+        run: |
+          docker run --rm --privileged \
+            -v /dev:/dev \
+            -v "$PWD:/w" \
+            -e RUN_NUM="${RUN_NUM}" \
+            -e KIBA_SHIMBOOT_BOARD="${KIBA_SHIMBOOT_BOARD}" \
+            -e KIBA_WORKDIR=/w \
+            ubuntu:24.04 \
+            /bin/bash /w/build.sh --shimboot
+      - name: Verify Shimboot output
+        run: |
+          ZIP="$(ls out/kibaos-shimboot-*.zip 2>/dev/null | head -1)"
+          if [ -z "$ZIP" ] || [ ! -s "$ZIP" ]; then echo "::error::No Shimboot zip in out/ -- build.sh didn't produce it"; exit 1; fi
+          ls -lh out/
+          (cd out && sha256sum -c kibaos-shimboot-*.zip.sha256)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kibaos-build-shimboot
+          path: out/
+          retention-days: 7
+          compression-level: 0
+  shimboot_publish:
+    needs: shimboot_build
+    if: ${{ inputs.shimboot_only || inputs.build_shimboot }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SF_USER: ${{ secrets.SF_USER }}
+      SSHPASS: ${{ secrets.SF_PASS }}
+      REMOTE_DIR: /home/frs/project/kibaos/shimboot
+    steps:
+      - name: Check SourceForge credentials
+        id: creds
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
+            echo "SourceForge credentials not configured. Skipping."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download build artifact
+        if: steps.creds.outputs.ok == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: kibaos-build-shimboot
+          path: dist
+      - name: Prepare SSH
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          sudo apt-get install -y sshpass rsync
+          mkdir -p ~/.ssh
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+      - name: Ensure shimboot folder exists on SourceForge
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          exists() { sshpass -e rsync --list-only "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/" >/dev/null 2>&1; }
+          if exists; then
+            echo "${REMOTE_DIR} already exists."
+          else
+            echo "${REMOTE_DIR} not found -- creating it."
+            printf '%s\n' "cd $(dirname "${REMOTE_DIR}")" "mkdir $(basename "${REMOTE_DIR}")" "bye" \
+              | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" || true
+            if ! exists; then
+              echo "sftp mkdir didn't take -- trying rsync --mkpath."
+              mkdir -p empty-dir
+              sshpass -e rsync -av --mkpath empty-dir/ "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/" || true
+            fi
+            if exists; then
+              echo "Created ${REMOTE_DIR}."
+            else
+              echo "::error::Could not create ${REMOTE_DIR} on SourceForge" >&2
+              exit 1
+            fi
+          fi
+      - name: Upload to SourceForge
+        if: steps.creds.outputs.ok == 'true'
+        run: |
+          mapfile -t FILES < <(find dist -type f \( -name 'kibaos-shimboot-*.zip' -o -name 'kibaos-shimboot-*.zip.sha256' -o -name 'README-shimboot.txt' \))
+          if [ "${#FILES[@]}" -eq 0 ]; then echo "::error::No Shimboot files in the build artifact" >&2; exit 1; fi
+          printf 'Uploading: %s\n' "${FILES[@]}"
+          sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
   vmtest_find:
     needs: build
     if: ${{ always() && inputs.run_vmtest }}
@@ -561,7 +699,7 @@ jobs:
           exit 1
   ota:
     needs: build
-    if: ${{ !inputs.skip_ota && !inputs.skip_build }}
+    if: ${{ !inputs.skip_ota && !inputs.skip_build && !inputs.shimboot_only }}
     strategy:
       fail-fast: false
       matrix:
