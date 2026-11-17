@@ -28,10 +28,10 @@ on:
         type: boolean
         default: false
       shimboot_board:
-        description: 'Chromebook board for the Shimboot build (e.g. dedede, octopus, nissa -- see cros.download/recovery)'
+        description: 'Chromebook board for the Shimboot build (x86_64 only; its shim needs a Linux 5.10+ kernel, e.g. nissa -- see cros.download/recovery)'
         required: false
         type: string
-        default: 'dedede'
+        default: 'nissa'
 jobs:
   build:
     if: ${{ !inputs.skip_build && !inputs.shimboot_only }}
@@ -184,12 +184,16 @@ jobs:
           echo "${{ github.run_number }}" > "${MARKER}"
           sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
   shimboot_build:
-    # Runs in a privileged Ubuntu container (shimboot's scripts are Debian-based,
-    # so not the archlinux image). The host /dev is mounted in so the loop
-    # partition nodes (loopNpM) that losetup -P creates are visible inside.
+    # Two stages, both in privileged containers:
+    #   1. archlinux: the normal KibaOS x86_64 profile build, exported as a rootfs
+    #      tarball with a ChromeOS-patched systemd (build.sh --shimboot-rootfs)
+    #   2. ubuntu: shimboot's scripts are Debian-based, so the shim patching and
+    #      disk image happen here (build.sh --shimboot). The host /dev is mounted
+    #      in so the loop partition nodes (loopNpM) that losetup -P creates are
+    #      visible inside.
     if: ${{ inputs.shimboot_only || inputs.build_shimboot }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     outputs:
       board: ${{ steps.cfg.outputs.board }}
     steps:
@@ -200,7 +204,7 @@ jobs:
         env:
           BOARD_IN: ${{ inputs.shimboot_board }}
         run: |
-          BOARD="${BOARD_IN:-dedede}"
+          BOARD="${BOARD_IN:-nissa}"
           if ! [[ "$BOARD" =~ ^[a-z0-9-]+$ ]]; then
             echo "::error::Invalid shimboot_board '${BOARD}' (lowercase letters, digits, dashes only)"
             exit 1
@@ -220,7 +224,18 @@ jobs:
           remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
-      - name: Build Shimboot image
+      - name: Build KibaOS rootfs for Shimboot (Arch container)
+        env:
+          RUN_NUM: ${{ github.run_number }}
+        run: |
+          docker run --rm --privileged \
+            -v "$PWD:/w" \
+            -e RUN_NUM="${RUN_NUM}" \
+            -e KIBA_ARCH=x86_64 \
+            archlinux:latest \
+            /bin/bash /w/build.sh --shimboot-rootfs
+          ls -lh shimboot-rootfs.tar.zst
+      - name: Assemble Shimboot image (Ubuntu container)
         env:
           RUN_NUM: ${{ github.run_number }}
           KIBA_SHIMBOOT_BOARD: ${{ steps.cfg.outputs.board }}
