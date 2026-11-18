@@ -2151,6 +2151,7 @@ pkg-config
 greetd
 greetd-regreet
 cage
+dconf
 budgie-desktop
 pcmanfm-qt
 qt6-wayland
@@ -2385,7 +2386,7 @@ chmod 0440 "${AIROOTFS}/etc/sudoers.d/liveuser"
 WANTS="${AIROOTFS}/etc/systemd/system"
 mkdir -p "${WANTS}/default.target.wants" "${WANTS}/multi-user.target.wants"
 ln -sf /usr/lib/systemd/system/graphical.target       "${WANTS}/default.target"
-ln -sf /usr/lib/systemd/system/greetd.service             "${WANTS}/display-manager.service"
+ln -sf /usr/lib/systemd/system/greetd.service          "${WANTS}/display-manager.service"
 ln -sf /usr/lib/systemd/system/pacman-init.service    "${WANTS}/multi-user.target.wants/pacman-init.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service      "${WANTS}/multi-user.target.wants/bluetooth.service"
 
@@ -2753,18 +2754,7 @@ echo "${USERNAME_VAL}:${PASSWORD_VAL}" | chpasswd || fail "chpasswd failed"
 progress 85 "Cleaning up OEM account..."
 userdel -r oem 2>/dev/null || true
 rm -f /var/lib/AccountsService/users/oem 2>/dev/null || true
-if [ -f /etc/greetd/config.toml.pre-oem ]; then
-  mv /etc/greetd/config.toml.pre-oem /etc/greetd/config.toml
-else
-  cat > /etc/greetd/config.toml << 'GREETDDEFAULT'
-[terminal]
-vt = 1
-
-[default_session]
-command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
-user = "greeter"
-GREETDDEFAULT
-fi
+/usr/local/bin/kibaos-greetd-config
 
 progress 95 "Finishing up..."
 mkdir -p /etc/kibaos
@@ -2784,20 +2774,7 @@ touch /etc/kibaos/oem-pending
 id oem &>/dev/null || useradd -m -G wheel,audio,video,input,network,storage,power -s /bin/bash oem
 passwd -d oem 2>/dev/null || true
 
-mkdir -p /etc/greetd
-[ -f /etc/greetd/config.toml ] && [ ! -f /etc/greetd/config.toml.pre-oem ] && cp -f /etc/greetd/config.toml /etc/greetd/config.toml.pre-oem 2>/dev/null || true
-cat > /etc/greetd/config.toml << 'GREETDOEMCONF'
-[terminal]
-vt = 1
-
-[default_session]
-command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
-user = "greeter"
-
-[initial_session]
-command = "/usr/local/bin/kibaos-session"
-user = "oem"
-GREETDOEMCONF
+/usr/local/bin/kibaos-greetd-config oem
 
 mkdir -p /var/lib/AccountsService/users
 cat > /var/lib/AccountsService/users/oem << 'OEMACCOUNTS'
@@ -3881,15 +3858,257 @@ enable-built-in-theme=false
 BUDGIEOVERRIDE
 glib-compile-schemas /usr/share/glib-2.0/schemas/ 2>/dev/null || true
 
-mkdir -p /etc/greetd
-cat > /etc/greetd/regreet.toml << 'REGREETCONF'
-[background]
-path = "/usr/share/kibaos/wallpaper.jpg"
-fit = "Cover"
+install -d -m 755 /usr/share/kibaos/greeter /etc/greetd
+cat > /usr/local/bin/kiba-greeter-gen.py << 'KIBAGREETGEN'
+#!/usr/bin/env python3
+"""
+KibaOS greeter assets (palette taken from the OOBE welcome card).
+
+  background.jpg  blue wallpaper with soft light hills
+  card-wave.png   gradient wave that sits along the bottom of the login card
+  mascot.png      Kiba, shown at the top of the card
+
+Usage: generate-assets.py OUTDIR [MASCOT_PNG]
+"""
+import math, os, sys
+import numpy as np
+from PIL import Image
+
+
+def rgb(h):
+    h = h.lstrip("#")
+    return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], dtype=np.float32)
+
+
+def ramp(n, stops):
+    t = np.linspace(0, 1, n, dtype=np.float32)
+    ts = [s[0] for s in stops]
+    cs = [rgb(s[1]) for s in stops]
+    return np.stack([np.interp(t, ts, [c[k] for c in cs]) for k in range(3)], axis=1)
+
+
+def hills(h, w, base, terms, soft=1.0):
+    """1.0 below the wave line, 0.0 above, with a `soft`-pixel edge."""
+    x = np.linspace(0, 1, w, dtype=np.float32)
+    top = base * h + sum(a * h * np.sin(2 * math.pi * f * x + p) for a, f, p in terms)
+    y = np.arange(h, dtype=np.float32)[:, None] + 0.5
+    return np.clip((y - top[None, :]) / soft + 0.5, 0.0, 1.0)
+
+
+def over(dst_rgb, dst_a, src_rgb, src_a):
+    out_a = src_a + dst_a * (1 - src_a)
+    safe = np.maximum(out_a, 1e-6)[..., None]
+    out_rgb = (src_rgb * src_a[..., None] + dst_rgb * dst_a[..., None] * (1 - src_a[..., None])) / safe
+    return out_rgb, out_a
+
+
+def make_background(path, w=1920, h=1080):
+    col = ramp(h, [(0, "#0a3dc7"), (0.45, "#2563e5"), (1, "#1f45b0")])
+    img = np.repeat(col[:, None, :], w, axis=1)
+    x = np.linspace(0, 1, w, dtype=np.float32)[None, :]
+    y = np.linspace(0, 1, h, dtype=np.float32)[:, None]
+    glow = np.exp(-(((x - 0.88) / 0.35) ** 2 + ((y - 0.55) / 0.30) ** 2))
+    img = img + glow[..., None] * (rgb("#6ea2ff") - img) * 0.45
+    white = np.array([255, 255, 255], dtype=np.float32)
+    for base, terms, alpha, soft in [
+        (0.40, [(0.07, 0.8, 0.4), (0.03, 1.7, 2.0)], 0.07, 90.0),
+        (0.58, [(0.08, 0.7, 3.1), (0.03, 1.9, 0.8)], 0.09, 70.0),
+        (0.76, [(0.06, 0.9, 5.0), (0.02, 2.1, 1.5)], 0.12, 50.0),
+    ]:
+        m = hills(h, w, base, terms, soft) * alpha
+        img = img * (1 - m[..., None]) + white * m[..., None]
+    img += np.random.default_rng(7).uniform(-1.2, 1.2, img.shape[:2])[..., None]
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8), "RGB").save(path, quality=95, subsampling=0)
+
+
+def make_card_wave(path, w=1000, h=280):
+    rgb_c = np.zeros((h, w, 3), np.float32)
+    a_c = np.zeros((h, w), np.float32)
+    layers = [
+        (0.06, [(0.050, 1.3, 0.5), (0.020, 2.6, 1.7)],
+         [(0, "#cfdcfb"), (1, "#f1e4fb")], 0.80),
+        (0.20, [(0.070, 1.1, 2.4), (0.025, 2.3, 0.3)],
+         [(0, "#a9bdf7"), (0.55, "#c2b3f3"), (1, "#f7dff2")], 0.70),
+        (0.36, [(0.060, 1.0, 4.0), (0.025, 2.4, 1.1)],
+         [(0, "#518af2"), (0.30, "#697cf1"), (0.52, "#7060db"), (0.76, "#b381e7"), (1, "#f59ad0")], 1.0),
+    ]
+    for base, terms, stops, alpha in layers:
+        m = hills(h, w, base, terms) * alpha
+        row = ramp(w, stops)
+        src = np.repeat(row[None, :, :], h, axis=0)
+        rgb_c, a_c = over(rgb_c, a_c, src, m)
+    out = np.dstack([np.clip(rgb_c, 0, 255), np.clip(a_c, 0, 1) * 255]).astype(np.uint8)
+    Image.fromarray(out, "RGBA").save(path, optimize=True)
+
+
+def make_mascot(path, src):
+    im = Image.open(src).convert("RGBA")
+    im.thumbnail((256, 256), Image.LANCZOS)
+    canvas = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    canvas.paste(im, ((256 - im.width) // 2, (256 - im.height) // 2), im)
+    canvas.save(path, optimize=True)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit("usage: generate-assets.py OUTDIR [MASCOT_PNG]")
+    out = sys.argv[1]
+    os.makedirs(out, exist_ok=True)
+    make_background(os.path.join(out, "background.jpg"))
+    make_card_wave(os.path.join(out, "card-wave.png"))
+    if len(sys.argv) > 2 and os.path.isfile(sys.argv[2]):
+        make_mascot(os.path.join(out, "mascot.png"), sys.argv[2])
+KIBAGREETGEN
+_greeter_mascot=/usr/share/kibaos/logo-256.png
+[ -f /usr/share/kibavoice/kibavoice.png ] && _greeter_mascot=/usr/share/kibavoice/kibavoice.png
+python3 /usr/local/bin/kiba-greeter-gen.py /usr/share/kibaos/greeter "${_greeter_mascot}"
+rm -f /usr/local/bin/kiba-greeter-gen.py
+test -s /usr/share/kibaos/greeter/background.jpg -a -s /usr/share/kibaos/greeter/card-wave.png
+[ -s /usr/share/kibaos/greeter/mascot.png ] || echo "WARNING: greeter mascot missing (no kibavoice.png / logo-256.png)" >&2
+chmod 755 /usr/share/kibaos /usr/share/kibaos/greeter
+chmod 644 /usr/share/kibaos/greeter/* 2>/dev/null || true
+cat > /etc/greetd/regreet.css << 'KIBAGREETCSS'
+/* KibaOS greeter theme for ReGreet (GTK4) -- mirrors the OOBE welcome card. */
+
+window, window.background {
+  font-family: "Inter", "Nunito", "Noto Sans", sans-serif;
+  color: #171a40;
+  background-color: #1d4fd8;
+  background-image: url("file:///usr/share/kibaos/greeter/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ---- the card ---- */
+frame.background {
+  background-color: #ffffff;
+  background-image: url("file:///usr/share/kibaos/greeter/card-wave.png"),
+                    url("file:///usr/share/kibaos/greeter/mascot.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: left bottom, center 28px;
+  background-size: 100% auto, 128px 128px;
+  border: none;
+  border-radius: 40px;
+  color: #171a40;
+  box-shadow: 0 30px 80px rgba(7, 20, 80, 0.45), 0 4px 14px rgba(7, 20, 80, 0.18);
+}
+frame.background > grid { padding: 148px 34px 20px 34px; }
+/* keep the field rows clear of the wave; buttons sit on it */
+frame.background > grid > box { margin-top: 40px; }
+
+/* greeting / status message ("Hello there!") */
+frame.background > grid > label:first-child {
+  font-size: 32px;
+  font-weight: 800;
+  color: #171a40;
+}
+/* "User:" / "Session:" / password prompt */
+frame.background > grid > label {
+  color: #6b74a8;
+  font-size: 13px;
+  font-weight: 600;
+}
+frame.background > grid > label:first-child { color: #171a40; font-size: 32px; font-weight: 800; }
+
+/* ---- inputs ---- */
+entry, combobox button {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid #dfe5f5;
+  background-color: #f2f5fc;
+  background-image: none;
+  color: #171a40;
+  box-shadow: none;
+}
+entry:focus-within, combobox button:focus {
+  border-color: #3b5bdb;
+  box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.18);
+}
+togglebutton {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid #dfe5f5;
+  background-color: #f2f5fc;
+  background-image: none;
+  color: #6b74a8;
+  box-shadow: none;
+}
+togglebutton:checked { background-color: #3b5bdb; color: #ffffff; border-color: #3b5bdb; }
+popover > contents { border-radius: 18px; }
+
+/* ---- Cancel / Login (sit on the wave, like "Let's Go") ---- */
+grid > box > button {
+  min-height: 46px;
+  padding: 0 26px;
+  border-radius: 999px;
+  border: none;
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: none;
+}
+grid > box > button:hover { background-color: rgba(255, 255, 255, 0.42); }
+grid > box > button.suggested-action {
+  background-color: #ffffff;
+  color: #3b5bdb;
+  padding: 0 34px;
+  box-shadow: 0 8px 24px rgba(40, 50, 160, 0.30);
+}
+grid > box > button.suggested-action:hover { background-color: #f4f7ff; }
+
+/* ---- Reboot / Power Off ---- */
+button.destructive-action {
+  min-height: 40px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: none;
+}
+button.destructive-action:hover { background-color: rgba(255, 255, 255, 0.28); }
+
+/* ---- clock: dark pill hanging off the top edge, like the desktop status pill ---- */
+frame.background.widget-clock {
+  background-image: none;
+  background-color: rgba(5, 10, 40, 0.72);
+  color: #ffffff;
+  border-radius: 0 0 22px 22px;
+  padding: 6px 22px;
+  box-shadow: none;
+  font-weight: 600;
+}
+frame.background.widget-clock label { color: #ffffff; font-size: 14px; }
+
+/* ---- notification bar ---- */
+infobar { border-radius: 18px; background-color: rgba(255, 255, 255, 0.92); }
+infobar label { color: #171a40; }
+KIBAGREETCSS
+cat > /etc/greetd/regreet.toml << 'KIBAGREETTOML'
+[appearance]
+greeting_msg = "Hello there!"
 
 [GTK]
-application_prefer_dark_theme = true
-REGREETCONF
+application_prefer_dark_theme = false
+theme_name = "Adwaita"
+icon_theme_name = "Adwaita"
+
+[commands]
+reboot = [ "loginctl", "reboot" ]
+poweroff = [ "loginctl", "poweroff" ]
+
+[widget.clock]
+format = "%a %H:%M"
+resolution = "500ms"
+KIBAGREETTOML
+chmod 644 /etc/greetd/regreet.css /etc/greetd/regreet.toml
 
 : << 'DEAD_SDDM_THEME_BLOCK'
 SDDM_THEME_DIR="/usr/share/sddm/themes/kibaos"
@@ -4152,16 +4371,15 @@ mkdir -p /usr/share/wayland-sessions
 rm -rf /usr/share/wayland-sessions/budgie-desktop.desktop
 cat > /usr/local/bin/kibaos-session << 'KIBASESSION'
 #!/bin/bash
+# greetd doesn't set these (gdm did, from DesktopNames=Budgie;GNOME).
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=budgie-desktop
+export XDG_CURRENT_DESKTOP=Budgie:GNOME
+systemctl --user import-environment XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP 2>/dev/null || true
+dbus-update-activation-environment --systemd XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP 2>/dev/null || true
 MAX_QUICK_CRASHES=5
 QUICK_SECS=20
 crashes=0
-export XDG_SESSION_TYPE=wayland
-# Greeter already runs with software rendering allowed; the session must too,
-# otherwise labwc crash-loops on machines with no usable GPU and greetd falls
-# back to the login screen instead of autologging in.
-export WLR_RENDERER_ALLOW_SOFTWARE=1
-export XDG_SESSION_DESKTOP=budgie-desktop
-export XDG_CURRENT_DESKTOP=Budgie:GNOME
 while :; do
   start=$(date +%s)
   systemd-cat -t kibaos-labwc /usr/bin/labwc --session=/usr/bin/budgie-desktop
@@ -4214,19 +4432,29 @@ Hidden=true
 NOLABWCBRIDGE
 rm -rf "${SKEL}/.config/budgie-desktop/labwc" 2>/dev/null || true
 
+cat > /usr/local/bin/kibaos-greetd-config << 'GREETDCFGSCRIPT'
+#!/bin/bash
+# usage: kibaos-greetd-config [autologin-user]
+# Writes /etc/greetd/config.toml: ReGreet (themed) on cage, plus an optional
+# one-shot autologin (greetd's initial_session) for the live / OEM user.
+set -e
+_user="${1:-}"
 mkdir -p /etc/greetd
-cat > /etc/greetd/config.toml << 'GREETDCONF'
-[terminal]
-vt = 1
-
-[default_session]
-command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
-user = "greeter"
-
-[initial_session]
-command = "/usr/local/bin/kibaos-session"
-user = "liveuser"
-GREETDCONF
+_tmp="$(mktemp /etc/greetd/.config.toml.XXXXXX)"
+{
+  printf '[terminal]\nvt = 1\n\n'
+  printf '[default_session]\n'
+  printf 'command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals dbus-run-session cage -s -mlast -d -- regreet"\n'
+  printf 'user = "greeter"\n'
+  if [ -n "${_user}" ]; then
+    printf '\n[initial_session]\ncommand = "/usr/local/bin/kibaos-session"\nuser = "%s"\n' "${_user}"
+  fi
+} > "${_tmp}"
+chmod 644 "${_tmp}"
+mv -f "${_tmp}" /etc/greetd/config.toml
+GREETDCFGSCRIPT
+chmod 755 /usr/local/bin/kibaos-greetd-config
+/usr/local/bin/kibaos-greetd-config
 mkdir -p /var/lib/AccountsService/users
 cat > /var/lib/AccountsService/users/liveuser << 'LIVEUSERACCOUNTS'
 [User]
@@ -4234,15 +4462,16 @@ Session=budgie-desktop
 XSession=budgie-desktop
 SystemAccount=false
 LIVEUSERACCOUNTS
-chmod 644 /etc/greetd/config.toml
 chmod 600 /var/lib/AccountsService/users/liveuser
 chown root:root /var/lib/AccountsService/users/liveuser
 
 grep -qx '/bin/bash' /etc/shells || echo '/bin/bash' >> /etc/shells
-if [ -e /usr/lib/security/pam_gnome_keyring.so ] && [ -f /etc/pam.d/greetd ] \
+if [ -f /etc/pam.d/greetd ] && [ -e /usr/lib/security/pam_gnome_keyring.so ] \
    && ! grep -q pam_gnome_keyring /etc/pam.d/greetd; then
-  printf 'auth       optional     pam_gnome_keyring.so\nsession    optional     pam_gnome_keyring.so auto_start\n' >> /etc/pam.d/greetd
+  echo 'auth       optional     pam_gnome_keyring.so' >> /etc/pam.d/greetd
+  echo 'session    optional     pam_gnome_keyring.so auto_start' >> /etc/pam.d/greetd
 fi
+
 
 passwd -u liveuser 2>/dev/null || true
 chage -I -1 -m 0 -M 99999 -E -1 liveuser 2>/dev/null || true
@@ -4252,22 +4481,10 @@ cat > /usr/local/bin/kibaos-live-autologin << 'LIVEAUTOLOGIN'
 [ -d /run/archiso ] || exit 0
 id liveuser >/dev/null 2>&1 || exit 0
 if ! grep -qs '^user = "liveuser"' /etc/greetd/config.toml; then
-  mkdir -p /etc/greetd
-  cat > /etc/greetd/config.toml << 'GREETDLIVE'
-[terminal]
-vt = 1
-
-[default_session]
-command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 dbus-run-session cage -s -mlast -- regreet"
-user = "greeter"
-
-[initial_session]
-command = "/usr/local/bin/kibaos-session"
-user = "liveuser"
-GREETDLIVE
-  chmod 644 /etc/greetd/config.toml
-  logger -t kibaos-live-autologin "config.toml was missing autologin; rewrote it"
+  /usr/local/bin/kibaos-greetd-config liveuser
+  logger -t kibaos-live-autologin "greetd config was missing autologin; rewrote it"
 fi
+rm -f /run/greetd.run
 mkdir -p /var/lib/AccountsService/users
 if ! grep -qs '^Session=budgie-desktop' /var/lib/AccountsService/users/liveuser; then
   printf '[User]\nSession=budgie-desktop\nXSession=budgie-desktop\nSystemAccount=false\n' > /var/lib/AccountsService/users/liveuser
@@ -4310,11 +4527,11 @@ exit 0
 WAITDRM
 chmod +x /usr/local/bin/kibaos-wait-drm
 mkdir -p /etc/systemd/system/greetd.service.d
-cat > /etc/systemd/system/greetd.service.d/10-kibaos-wait-drm.conf << 'GREETDWAITDRM'
+cat > /etc/systemd/system/greetd.service.d/10-kibaos-wait-drm.conf << 'GDMWAITDRM'
 [Service]
 ExecStartPre=/usr/local/bin/kibaos-wait-drm
 TimeoutStartSec=90
-GREETDWAITDRM
+GDMWAITDRM
 
 cat > /usr/local/bin/kibaos-gpu-select << 'GPUSELECT'
 #!/bin/bash
@@ -4346,10 +4563,13 @@ WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
 
-for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/greetd.service /usr/bin/cage /usr/bin/regreet /etc/greetd/regreet.toml; do
+for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage; do
   [ -e "$_f" ] || { echo "ERROR: autologin prerequisite missing: $_f" >&2; exit 1; }
 done
 id greeter >/dev/null 2>&1 || echo "WARNING: greeter user missing at build time (created by sysusers at boot)" >&2
+if [ ! -f /etc/pam.d/greetd ]; then
+  printf '#%PAM-1.0\nauth       required     pam_securetty.so\nauth       requisite    pam_nologin.so\nauth       include      system-local-login\naccount    include      system-local-login\nsession    include      system-local-login\n' > /etc/pam.d/greetd
+fi
 mkdir -p /var/lib/regreet /var/log/regreet /var/cache/regreet
 chown greeter:greeter /var/lib/regreet /var/log/regreet /var/cache/regreet 2>/dev/null || true
 cat > /usr/local/bin/kibaos-screenshot << 'SCREENSHOT'
@@ -4582,7 +4802,7 @@ rollback_patch() {
 
 restart_compositor() {
   log "Restarting session..."
-  systemctl restart greetd 2>/dev/null || \
+  { [ -d /run/archiso ] && rm -f /run/greetd.run; systemctl restart greetd 2>/dev/null; } || \
   pkill -TERM labwc 2>/dev/null || \
   pkill -TERM labwc 2>/dev/null || true
   sleep 1
@@ -4591,6 +4811,7 @@ restart_compositor() {
 
 restart_display_manager() {
   log "Restarting greetd..."
+  [ -d /run/archiso ] && rm -f /run/greetd.run
   systemctl restart greetd
   for i in $(seq 1 20); do
     [ -S "/run/user/1000/${WAYLAND_DISPLAY:-wayland-0}" ] && break
@@ -4716,7 +4937,7 @@ NEEDS_COMPOSITOR_RESTART=false
 while IFS= read -r line; do
   FILEPATH=$(echo "${line}" | awk '{print $2}' | sed 's|^\./||')
   case "${FILEPATH}" in
-    etc/greetd*|usr/lib/greetd*|usr/bin/greetd*|usr/bin/regreet*|usr/share/regreet*)
+    etc/greetd*|usr/bin/greetd*|usr/bin/regreet*|usr/bin/cage*|usr/share/kibaos/greeter*)
       NEEDS_DISPLAY_RESTART=true ;;
     usr/bin/labwc*)
       NEEDS_COMPOSITOR_RESTART=true ;;
