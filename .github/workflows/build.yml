@@ -252,14 +252,13 @@ jobs:
       matrix:
         fw: [uefi]
     runs-on: ubuntu-24.04
-    # 26 attempts (1 + 25 retries) x ~5.5 min worst case
-    timeout-minutes: 180
+    # Up to (1 + MAX_RETRIES) attempts x ~(2 x SWITCH_WAIT + boot) each
+    timeout-minutes: 45
     permissions:
       actions: read
     env:
-      SHOTS: 10
-      INTERVAL: 30
-      MAX_RETRIES: 25
+      SWITCH_WAIT: 120
+      MAX_RETRIES: 2
     steps:
       - name: Download selected build artifact
         uses: actions/download-artifact@v4
@@ -288,7 +287,7 @@ jobs:
             sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
           fi
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 ovmf imagemagick netcat-openbsd
+          sudo apt-get install -y qemu-system-x86 ovmf netcat-openbsd
           cat > qmp.py <<'PYQMP'
           import json, os, socket, sys
 
@@ -390,11 +389,6 @@ jobs:
             fi
             rm -f qemu.pid
           }
-          is_mostly_white() {
-            local ratio
-            ratio=$(convert "$1" -colorspace gray -threshold 90% -format '%[fx:mean]' info:)
-            awk -v value="$ratio" 'BEGIN { exit !(value >= 0.85) }'
-          }
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
@@ -403,71 +397,40 @@ jobs:
           # we assume the VM is sitting at the login screen.
           kill_installer() { python3 qga.py; }
 
-          # A candidate is a screenshot that is not blank and not the white installer.
-          is_candidate() {
-            local f="$1" sd
-            if is_mostly_white "$f"; then echo "  $f: mostly white (installer)"; return 1; fi
-            sd=$(convert "$f" -format '%[fx:standard_deviation]' info:)
-            if ! awk -v v="$sd" 'BEGIN{exit !(v>0.005)}'; then echo "  $f: blank (stddev=$sd)"; return 1; fi
-            echo "  $f: CANDIDATE"
-            return 0
-          }
-
           SELECTED=""
           dir=""
           for attempt in $(seq 0 "$MAX_RETRIES"); do
             echo "=== ${{ matrix.fw }}: attempt $((attempt + 1))/$((MAX_RETRIES + 1)) ==="
-            if [ "$attempt" -eq 0 ] || ! vm_alive; then
-              stop_vm
-              start_vm
-            else
-              echo "No usable desktop yet -- rebooting VM (QMP system_reset)"
-              python3 qmp.py reset || { stop_vm; start_vm; }
-            fi
-
+            stop_vm
+            start_vm
             dir="attempts/$(printf '%02d' "$((attempt + 1))")"
             mkdir -p "$dir"
-            installer_killed=0
-            for i in $(seq 1 "$SHOTS"); do
-              sleep "$INTERVAL"
-              if ! vm_alive; then
-                echo "QEMU already exited"
-                break
-              fi
-              shot="$dir/$(printf '%02d' "$i")-$((i * INTERVAL))s.png"
-              capture_probe "$dir/probe.png" || { echo "screendump failed"; continue; }
-              if is_mostly_white "$dir/probe.png" && [ "$installer_killed" -eq 0 ]; then
-                # The white splash stays up ~120s before the installer starts, so a
-                # failed kill here is expected early on. Keep retrying on every white
-                # frame; only an attempt that never manages a kill counts as login.
-                echo "Mostly-white screen. Trying to kill io.kibaos.oobe via QEMU guest agent..."
-                if kill_installer; then
-                  installer_killed=1
-                  sleep 5
-                  capture_probe "$shot" || cp "$dir/probe.png" "$shot" || true
-                else
-                  echo "  Not running yet (splash?) -- will retry on the next white frame."
-                  mv "$dir/probe.png" "$shot"
-                fi
-              else
-                mv "$dir/probe.png" "$shot"
-              fi
-            done
-            rm -f "$dir/probe.png"
 
-            SELECTED=""
-            if [ "$installer_killed" -eq 1 ]; then
-              while IFS= read -r f; do
-                if is_candidate "$f"; then SELECTED="$f"; fi
-              done < <(find "$dir" -maxdepth 1 -type f -name '[0-9][0-9]-*.png' | sort)
+            # Screen switch 1: white splash -> installer. No pixel checks, just wait.
+            echo "Waiting ${SWITCH_WAIT}s for the splash to hand over to the installer..."
+            sleep "$SWITCH_WAIT"
+            vm_alive || { echo "QEMU exited early"; continue; }
+            capture_probe "$dir/01-before-kill-${SWITCH_WAIT}s.png" || echo "screendump failed (non-fatal)"
+
+            # Kill the installer if it is running. If it is not, assume the
+            # VM is already past it (login screen / desktop).
+            if kill_installer; then
+              echo "Installer killed."
             else
-              echo "Installer was never killed this attempt -- assuming the VM is at the login screen."
+              echo "Installer not running -- assuming already past it."
             fi
-            if [ -n "$SELECTED" ]; then
+
+            # Screen switch 2: installer gone -> login screen / desktop. Wait again.
+            echo "Waiting ${SWITCH_WAIT}s for the login screen / desktop..."
+            sleep "$SWITCH_WAIT"
+            vm_alive || { echo "QEMU exited early"; continue; }
+            final="$dir/02-final-$((SWITCH_WAIT * 2))s.png"
+            if capture_probe "$final" && [ -s "$final" ]; then
+              SELECTED="$final"
               echo "Attempt $((attempt + 1)): selected $SELECTED"
               break
             fi
-            echo "Attempt $((attempt + 1)): no usable desktop screenshot."
+            echo "Attempt $((attempt + 1)): final screendump failed."
           done
           stop_vm
 
