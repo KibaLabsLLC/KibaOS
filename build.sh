@@ -3043,7 +3043,7 @@ rm -rf "${VIBEPANEL_BUILD}"
 # Build is non-fatal: if anything fails the ISO still ships plain Budgie.
 ASH_COMMIT="dd43004382235b79520a0b775857915ad3c371d4"
 ASH_DIR="/opt/chromeos-linux"
-ASH_BUILD_DEPS="go meson ninja pkgconf wayland python-jinja2 gawk binutils unzip perl"
+ASH_BUILD_DEPS="go meson ninja pkgconf wayland python-jinja gawk binutils unzip perl"
 ASH_RUNTIME_DEPS="xorg-xwayland xorg-xrandr xorg-xrdb xorg-xhost xorg-xauth libpulse librsvg libxcomposite xkeyboard-config"
 ASH_OK=0
 if pacman -S --noconfirm --needed ${ASH_BUILD_DEPS} ${ASH_RUNTIME_DEPS} \
