@@ -2,124 +2,14 @@
 set -ex
 
 KIBA_ARCH="x86_64"
-KIBA_SHIMBOOT_ROOTFS="${KIBA_SHIMBOOT_ROOTFS:-0}"
 for _a in "$@"; do
   case "${_a}" in
     --mobile) KIBA_ARCH="mobile" ;;
-    --shimboot) KIBA_ARCH="shimboot" ;;
-    --shimboot-rootfs) KIBA_SHIMBOOT_ROOTFS=1 ;;
   esac
 done
 [ "${KIBA_ARCH}" = "x86_64" ] && [ "${KIBA_MOBILE:-0}" = "1" ] && KIBA_ARCH="mobile"
-export KIBA_ARCH KIBA_SHIMBOOT_ROOTFS
+export KIBA_ARCH
 echo "=== KibaOS build target: ${KIBA_ARCH} ==="
-
-build_kibaos_shimboot() {
-  local _board="${KIBA_SHIMBOOT_BOARD:-nissa}"
-  local _ref="${KIBA_SHIMBOOT_REF:-main}"
-  local _work="${KIBA_WORKDIR:-$PWD}"
-  local _tar="${KIBA_SHIMBOOT_ROOTFS_TAR:-${_work}/shimboot-rootfs.tar.zst}"
-  local _out="${_work}/out"
-  local _sb="${_work}/shimboot-src"
-  local _data="${_work}/shimboot-data"
-  local _rootfs="${_data}/rootfs_${_board}"
-  local _name="kibaos-shimboot-${_board}-v${RUN_NUM:-dev}"
-
-  if ! [[ "${_board}" =~ ^[a-z0-9-]+$ ]]; then
-    echo "ERROR: invalid shimboot board name '${_board}'" >&2; exit 1
-  fi
-  if [ "$(id -u)" -ne 0 ]; then
-    echo "ERROR: --shimboot needs root (losetup/chroot). Run: sudo -E bash build.sh --shimboot" >&2; exit 1
-  fi
-  if [ ! -f /etc/debian_version ]; then
-    echo "ERROR: --shimboot (stage 2) must run on a Debian/Ubuntu host or container." >&2
-    echo "       The Arch container runs stage 1 instead: build.sh --shimboot-rootfs" >&2; exit 1
-  fi
-  if [ ! -s "${_tar}" ]; then
-    echo "ERROR: ${_tar} not found. Run stage 1 first (archlinux container): build.sh --shimboot-rootfs" >&2; exit 1
-  fi
-  case " corsola hana jacuzzi kukui strongbad nyan-big kevin bob veyron-speedy veyron-jerry veyron-minnie scarlet elm peach-pi peach-pit stumpy daisy-spring trogdor " in
-    *" ${_board} "*) echo "ERROR: board '${_board}' is ARM; the KibaOS rootfs is x86_64 only." >&2; exit 1 ;;
-  esac
-  echo "=== Shimboot board: ${_board} | rootfs: ${_tar} ==="
-
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update
-  apt-get install -y \
-    ca-certificates wget curl python3 unzip zip git debootstrap \
-    cpio binwalk pcregrep cgpt kmod pv lz4 cryptsetup \
-    e2fsprogs fdisk util-linux xz-utils zstd
-
-  if _boards="$(curl -fsSL --retry 3 https://cdn.cros.download/boards.txt)"; then
-    if ! grep -q "/${_board}/" <<< "${_boards}"; then
-      echo "ERROR: board '${_board}' has no shim on cdn.cros.download (see https://cros.download/recovery)" >&2
-      exit 1
-    fi
-  else
-    echo "!! couldn't fetch the shim board list -- continuing, shimboot will complain if it's wrong" >&2
-  fi
-
-  rm -rf "${_sb}" "${_out}"
-  mkdir -p "${_out}" "${_data}"
-  git clone --depth 1 --branch "${_ref}" https://github.com/ading2210/shimboot.git "${_sb}"
-  echo "shimboot @ $(git -C "${_sb}" rev-parse --short HEAD)"
-
-  if findmnt -T "${_rootfs}/dev" >/dev/null 2>&1; then
-    umount -l "${_rootfs}"/* 2>/dev/null || true
-  fi
-  rm -rf "${_rootfs}"
-  mkdir -p "${_rootfs}"
-  zstd -dc "${_tar}" | tar --numeric-owner --xattrs --xattrs-include='*' --acls -xpf - -C "${_rootfs}"
-  [ -e "${_rootfs}/etc/os-release" ] || { echo "ERROR: rootfs tarball looks empty/corrupt" >&2; exit 1; }
-
-  ( cd "${_sb}" && ./build_complete.sh "${_board}" \
-      rootfs_dir="${_rootfs}" \
-      data_dir="${_data}" \
-      arch=amd64 \
-      distro=kibaos \
-      compress_img=true \
-      quiet=true )
-
-  local _zip="${_data}/shimboot_${_board}.zip"
-  if [ ! -s "${_zip}" ]; then
-    echo "ERROR: shimboot produced no image (${_zip} missing/empty) -- check the log above." >&2
-    exit 1
-  fi
-  mv "${_zip}" "${_out}/${_name}.zip"
-  ( cd "${_out}" && sha256sum "${_name}.zip" > "${_name}.zip.sha256" )
-
-  cat > "${_out}/README-shimboot.txt" << README
-KibaOS Shimboot (Research) -- ${_name}
-=====================================
-EXPERIMENTAL. For Chromebooks you own, for experiments.
-
-1. Unzip ${_name}.zip -> shimboot_${_board}.bin
-2. Write it to a USB drive / SD card (16GB+, USB 3 recommended):
-     sudo dd if=shimboot_${_board}.bin of=/dev/sdX bs=4M status=progress conv=fsync
-   (or the Chromebook Recovery Utility's "use local image")
-3. Enable developer mode on the Chromebook, boot the USB from the
-   developer-mode screen (Ctrl+U / Ctrl+L), pick "KibaOS".
-4. Login: liveuser / live
-
-Board: ${_board}   (pick the board matching your Chromebook: cros.download/recovery)
-Base:  the KibaOS rootfs + a systemd patched for ChromeOS kernels
-       (ading2210/chromeos-systemd), assembled with ading2210/shimboot.
-
-Heads up: KibaOS ships a current systemd, which needs a Linux kernel >= 5.10
-(5.14+ recommended). Chromebooks whose shim carries an older kernel (4.x / 5.4)
-will most likely not get through boot.
-README
-
-  echo "╔══════════════════════════════════════════╗"
-  echo "║  KibaOS Shimboot (Research) build done!  ║"
-  echo "║  ${_out}/${_name}.zip"
-  echo "╚══════════════════════════════════════════╝"
-}
-
-if [ "${KIBA_ARCH}" = "shimboot" ]; then
-  build_kibaos_shimboot
-  exit 0
-fi
 
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 10/' /etc/pacman.conf
 
@@ -276,12 +166,12 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/ddb6e80dbc82f354894e884f490618a33df3cc28/assets/wallpapers/015A7AE5-998D-4C49-9FEE-CF86A4984D14.png?raw=true"
+  KIBA_WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/94af5d6df5004736a02d71eda69475d2701ea7e1/assets/wallpapers/921586155_1169488599092817_1268279823267809927_n.webp"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
   if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${KIBA_WALLPAPER_URL}" && \
-     magick /tmp/kiba-wallpaper-src -resize 1080x2400^ -gravity center -extent 1080x2400 -quality 92 \
+     magick /tmp/kiba-wallpaper-src -resize 1080x -background '#05070b' -gravity center -extent 1080x2400 -quality 92 \
        "${_root}/usr/share/kibaos/wallpaper.jpg"; then
     :
   else
@@ -2494,7 +2384,7 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
-WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/ddb6e80dbc82f354894e884f490618a33df3cc28/assets/wallpapers/015A7AE5-998D-4C49-9FEE-CF86A4984D14.png?raw=true"
+WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/94af5d6df5004736a02d71eda69475d2701ea7e1/assets/wallpapers/921586155_1169488599092817_1268279823267809927_n.webp"
 BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
@@ -2518,7 +2408,7 @@ if [ -f "${BOOT_SPLASH_RAW}" ] && file "${BOOT_SPLASH_RAW}" | grep -qi 'image'; 
 fi
 
 if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "${WALLPAPER_URL}" && \
-   magick /tmp/kiba-wallpaper-src -quality 92 "${WALLPAPER_DEST}"; then
+   magick /tmp/kiba-wallpaper-src[0] -quality 92 "${WALLPAPER_DEST}"; then
   :
 else
   magick -size 1920x1080 gradient:"#003f5c-#0099cc" "${WALLPAPER_DEST}"
@@ -2581,10 +2471,6 @@ git clone https://github.com/KibaLabsLLC/Roko
 cd Roko
 bash build.sh
 cd ..
-git clone https://github.com/tortr-rs/goget.git
-cd goget
-make 
-make install
 set -euo pipefail
 git clone --depth 1 https://github.com/KibaLabsLLC/Okami.git
 cd Okami
@@ -2975,7 +2861,7 @@ test -s "${KIBA_PLYMOUTH_DIR}/wave-0.png" -a -s "${KIBA_PLYMOUTH_DIR}/wave-149.p
      -a -s "${KIBA_PLYMOUTH_DIR}/wave-gradient.png" -a -s "${KIBA_PLYMOUTH_DIR}/wave-cover.png" \
   || { echo "ERROR: Plymouth wave frames are missing" >&2; exit 1; }
 rm -f /tmp/kiba-wave-gen.py
-[ -n "${KIBA_WAVE_DEPS}" ] && pacman -Rns --noconfirm ${KIBA_WAVE_DEPS} || true
+# (python-numpy/python-pillow cleanup deferred until after kiba-greeter-gen.py runs)
 
 cat > "${KIBA_PLYMOUTH_DIR}/kibaos.plymouth" << 'PLYMOUTHDESC'
 [Plymouth Theme]
@@ -3148,23 +3034,92 @@ fi
 rm -rf "${VIBEPANEL_BUILD}"
 [ "${VIBEPANEL_RUST_WAS_PRESENT}" -eq 0 ] && pacman -Rns --noconfirm rust || true
 
+# ── ChromeOS Ash shell layered over the Budgie session ───────────────────
+# Uses samukhin/chromeos-linux: a prebuilt ChromiumOS Chrome snapshot (Ash is
+# an X11 client; it runs fine as an Xwayland client under labwc), plus Go
+# D-Bus "bridges" for the ChromeOS daemons it expects, plus sommelier. The
+# session is started from a Budgie autostart entry and Ash is forced
+# fullscreen + always-on-top by a labwc window rule, so it covers Budgie.
+# Build is non-fatal: if anything fails the ISO still ships plain Budgie.
+ASH_COMMIT="dd43004382235b79520a0b775857915ad3c371d4"
+ASH_DIR="/opt/chromeos-linux"
+ASH_BUILD_DEPS="go meson ninja pkgconf wayland python-jinja2 gawk binutils unzip perl"
+ASH_RUNTIME_DEPS="xorg-xwayland xorg-xrandr xorg-xrdb xorg-xhost xorg-xauth libpulse librsvg libxcomposite xkeyboard-config"
+ASH_OK=0
+if pacman -S --noconfirm --needed ${ASH_BUILD_DEPS} ${ASH_RUNTIME_DEPS} \
+   && rm -rf "${ASH_DIR}" && mkdir -p "${ASH_DIR}" \
+   && git -C "${ASH_DIR}" init -q \
+   && git -C "${ASH_DIR}" fetch -q --depth 1 https://github.com/samukhin/chromeos-linux.git "${ASH_COMMIT}" \
+   && git -C "${ASH_DIR}" checkout -q FETCH_HEAD \
+   && (cd "${ASH_DIR}" && make) \
+   && test -x "${ASH_DIR}/dist/chrome/chromeos-ash"; then
+  ASH_OK=1
+fi
+if [ "${ASH_OK}" -eq 1 ]; then
+  rm -rf "${ASH_DIR}/.git" "${ASH_DIR}/chromeos-bin/.stage" "${ASH_DIR}/.cache"
+  pacman -Rns --noconfirm go meson ninja python-jinja2 2>/dev/null || true
+
+  # setup-system.sh installs the D-Bus policy / tmpfiles for ONE user. On the
+  # live ISO that is liveuser; on an installed system it is the first real
+  # user, so redo it at boot (idempotent) rather than baking one name in.
+  cat > /usr/local/bin/kibaos-ash-setup << 'ASHSETUP'
+#!/bin/bash
+_u="$(getent passwd | awk -F: '$3>=1000 && $3<60000 {print $1; exit}')"
+[ -n "${_u}" ] || exit 0
+/opt/chromeos-linux/scripts/setup-system.sh --user "${_u}" || true
+systemd-tmpfiles --create /etc/tmpfiles.d/chromeos-linux.conf 2>/dev/null || true
+ASHSETUP
+  chmod 755 /usr/local/bin/kibaos-ash-setup
+  cat > /etc/systemd/system/kibaos-ash-setup.service << 'ASHSETUPUNIT'
+[Unit]
+Description=KibaOS Ash shell system setup (D-Bus policy, runtime dirs)
+After=dbus.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/kibaos-ash-setup
+[Install]
+WantedBy=multi-user.target
+ASHSETUPUNIT
+  systemctl enable kibaos-ash-setup.service || true
+
+  # Session launcher. Runs inside the Budgie/labwc session, so DISPLAY is the
+  # Xwayland display labwc provides; Ash then draws over everything else.
+  cat > /usr/local/bin/kibaos-ash-session << 'ASHLAUNCH'
+#!/bin/bash
+# Wait for labwc's Xwayland (DISPLAY) so start-session.sh does not try startx.
+for _ in $(seq 1 60); do
+  if [ -z "${DISPLAY:-}" ]; then
+    for _s in /tmp/.X11-unix/X*; do [ -S "${_s}" ] && export DISPLAY=":${_s##*/X}" && break; done
+  fi
+  [ -n "${DISPLAY:-}" ] && [ -S "/tmp/.X11-unix/X${DISPLAY#:}" ] && break
+  sleep 0.5
+done
+[ -n "${DISPLAY:-}" ] || { logger -t kibaos-ash "no X display, not starting Ash"; exit 1; }
+[ -d /var/lib/ash-profile ] && [ -w /var/lib/ash-profile ] || { logger -t kibaos-ash "ash profile dir not ready (kibaos-ash-setup)"; exit 1; }
+exec /opt/chromeos-linux/session/start-session.sh
+ASHLAUNCH
+  chmod 755 /usr/local/bin/kibaos-ash-session
+  mkdir -p /etc/xdg/autostart
+  cat > /etc/xdg/autostart/kibaos-ash.desktop << 'ASHAUTO'
+[Desktop Entry]
+Type=Application
+Name=ChromeOS Ash Shell
+Exec=/usr/local/bin/kibaos-ash-session
+TryExec=/opt/chromeos-linux/session/start-session.sh
+OnlyShowIn=Budgie;GNOME;
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=2
+NoDisplay=true
+ASHAUTO
+  echo "=== ChromeOS Ash shell installed ==="
+else
+  echo "!! ChromeOS Ash build failed -- continuing with plain Budgie" >&2
+  rm -rf "${ASH_DIR}"
+fi
+
 id kibabuild >/dev/null 2>&1 || useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
-LOOK_OK=0
-for _try in 1 2 3 4 5; do
-  if su - kibabuild -c 'cd /tmp && rm -rf look-bin && git clone https://aur.archlinux.org/look-bin.git && cd look-bin && makepkg -si --noconfirm --needed'; then
-    LOOK_OK=1; break
-  fi
-  echo "!! look-bin AUR build attempt ${_try}/5 failed -- retrying in 10s" >&2
-  sleep 10
-done
-if [ "${LOOK_OK}" -eq 1 ] && pacman -Q look-bin >/dev/null 2>&1; then
-  echo "=== look-bin installed ==="
-else
-  echo "!! look-bin AUR build failed -- continuing without it" >&2
-fi
-rm -rf /tmp/look-bin
 
 LI_OK=0
 for _try in 1 2 3 4 5; do
@@ -3963,6 +3918,7 @@ _greeter_mascot=/usr/share/kibaos/logo-256.png
 [ -f /usr/share/kibavoice/kibavoice.png ] && _greeter_mascot=/usr/share/kibavoice/kibavoice.png
 python3 /usr/local/bin/kiba-greeter-gen.py /usr/share/kibaos/greeter "${_greeter_mascot}"
 rm -f /usr/local/bin/kiba-greeter-gen.py
+[ -n "${KIBA_WAVE_DEPS}" ] && pacman -Rns --noconfirm ${KIBA_WAVE_DEPS} || true
 test -s /usr/share/kibaos/greeter/background.jpg -a -s /usr/share/kibaos/greeter/card-wave.png
 [ -s /usr/share/kibaos/greeter/mascot.png ] || echo "WARNING: greeter mascot missing (no kibavoice.png / logo-256.png)" >&2
 chmod 755 /usr/share/kibaos /usr/share/kibaos/greeter
@@ -5381,64 +5337,30 @@ cat > "${SKEL}/.config/fastfetch/config.jsonc" << 'FFCONF'
 }
 FFCONF
 
-mkdir -p "${SKEL}/.look" "${SKEL}/.config/labwc"
-cat > "${SKEL}/.look/config" << 'LOOKCONF'
-launcher_hotkey=none
-ui_theme=kindle
-ui_tint_red=1.0
-ui_tint_green=1.0
-ui_tint_blue=1.0
-ui_tint_opacity=0.15
-ui_font_red=0.11
-ui_font_green=0.11
-ui_font_blue=0.12
-ui_font_opacity=1.0
-ui_font_name=Adwaita Sans
-ui_border_red=0.85
-ui_border_green=0.85
-ui_border_blue=0.87
-ui_border_opacity=0.8
-ui_border_thickness=1.0
-LOOKCONF
-
+mkdir -p "${SKEL}/.config/labwc"
 cat > "${SKEL}/.config/labwc/rc.xml" << 'LABWCRC'
 <?xml version="1.0"?>
 <labwc_config>
-  <keyboard>
-    <default />
-    <keybind key="Super_L" onRelease="yes">
-      <action name="Execute" command="lookapp --toggle" />
-    </keybind>
-  </keyboard>
-
-  <!-- On sway/i3/Hyprland look registers its own window rules at runtime; on
-       labwc it doesn't, so do the equivalent here: no titlebar/border, and
-       keep the launcher out of the dock and the Alt-Tab list. -->
+  <!-- ChromeOS Ash is an X11 client drawing its own shelf/launcher/windows;
+       keep it undecorated, fullscreen and above the Budgie panels. -->
   <windowRules>
-    <windowRule identifier="lookapp">
+    <windowRule identifier="chromeos-ash">
       <serverDecoration>no</serverDecoration>
       <skipTaskbar>yes</skipTaskbar>
       <skipWindowSwitcher>yes</skipWindowSwitcher>
+      <action name="ToggleAlwaysOnTop" />
+      <action name="ToggleFullscreen" />
     </windowRule>
-    <windowRule identifier="look">
+    <windowRule identifier="chrome">
       <serverDecoration>no</serverDecoration>
       <skipTaskbar>yes</skipTaskbar>
       <skipWindowSwitcher>yes</skipWindowSwitcher>
+      <action name="ToggleAlwaysOnTop" />
+      <action name="ToggleFullscreen" />
     </windowRule>
   </windowRules>
 </labwc_config>
 LABWCRC
-
-mkdir -p "${SKEL}/.config/autostart"
-cat > "${SKEL}/.config/autostart/lookapp.desktop" << 'LOOKAUTO'
-[Desktop Entry]
-Type=Application
-Name=Look
-Exec=lookapp
-X-GNOME-Autostart-enabled=true
-X-GNOME-Autostart-Delay=3
-NoDisplay=true
-LOOKAUTO
 
 cat > "${SKEL}/.config/autostart/lost-island.desktop" << 'LIAUTO'
 [Desktop Entry]
@@ -6447,112 +6369,7 @@ if [ "${KIBA_ARCH}" = "aarch64" ]; then
     68B3537F39A313B3E574D06777193F152BDBE6A6
 fi
 
-kiba_shimboot_export_rootfs() {
-  local _rootfs="${WORKDIR}/work/x86_64/airootfs"
-  local _tar="${WORKDIR}/shimboot-rootfs.tar.zst"
-  local _ref="${KIBA_SHIMBOOT_REF:-main}"
-  local _pm=(pacman --root "${_rootfs}" --dbpath "${_rootfs}/var/lib/pacman")
-  local _pkgdir="/home/kibabuild/systemd-pkg"
-  local _sbsrc="/tmp/shimboot-src"
-
-  [ -e "${_rootfs}/etc/os-release" ] || { echo "ERROR: ${_rootfs} is missing after mkarchiso" >&2; exit 1; }
-
-  echo "=== Shimboot: building a ChromeOS-patched systemd ==="
-  pacman -S --noconfirm --needed base-devel git sudo python zstd
-  id kibabuild >/dev/null 2>&1 || useradd -m kibabuild
-  echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kibabuild
-  chmod 0440 /etc/sudoers.d/kibabuild
-
-  local _sdver
-  _sdver="$("${_pm[@]}" -Q systemd | awk '{print $2}')"
-  [ -n "${_sdver}" ] || { echo "ERROR: systemd isn't installed in the rootfs" >&2; exit 1; }
-  echo "rootfs systemd: ${_sdver}"
-
-  cat > /tmp/kiba-chromeos-mount-patch.py << 'KIBAPATCH'
-#!/usr/bin/env python3
-import re, sys
-
-path = sys.argv[1]
-src = open(path).read()
-pat = re.compile(
-    r'(int mount_nofollow\(\s*const char \*source,\s*const char \*target,\s*'
-    r'const char \*filesystemtype,\s*unsigned long mountflags,\s*const void \*data\) \{)'
-    r'.*?(\n\}\n)', re.S)
-new, n = pat.subn(
-    r'\1\n        /* KibaOS Shimboot: plain mount() for ChromeOS kernels (chromeos-systemd). */\n'
-    r'        return RET_NERRNO(mount(source, target, filesystemtype, mountflags, data));\2',
-    src, count=1)
-if n != 1 or 'RET_NERRNO(mount(source, target' not in new:
-    sys.exit("kiba-chromeos-mount-patch: mount_nofollow() not found in " + path)
-open(path, 'w').write(new)
-print("patched mount_nofollow() in", path)
-KIBAPATCH
-  cat > /tmp/kiba-pkgbuild-inject.txt << 'KIBAINJECT'
-  python3 /tmp/kiba-chromeos-mount-patch.py "$(find "$srcdir" -path '*/src/basic/mountpoint-util.c' | head -n1)" || exit 1
-KIBAINJECT
-  chmod 0644 /tmp/kiba-chromeos-mount-patch.py /tmp/kiba-pkgbuild-inject.txt
-
-  rm -rf "${_pkgdir}"
-  su kibabuild -c "git clone --quiet https://gitlab.archlinux.org/archlinux/packaging/packages/systemd.git '${_pkgdir}'"
-  su kibabuild -c "cd '${_pkgdir}' && git checkout --quiet '${_sdver}'" || {
-    echo "ERROR: no systemd packaging tag '${_sdver}' (Arch likely pushed a new systemd mid-build) -- re-run." >&2
-    exit 1
-  }
-  grep -q '^build() {' "${_pkgdir}/PKGBUILD" || { echo "ERROR: systemd PKGBUILD has no build() to patch" >&2; exit 1; }
-  sed -i 's/^pkgrel=\(.*\)$/pkgrel=\1.1/' "${_pkgdir}/PKGBUILD"
-  grep -q '^pkgrel=.*\.1$' "${_pkgdir}/PKGBUILD" || { echo "ERROR: couldn't bump pkgrel in the systemd PKGBUILD" >&2; exit 1; }
-  sed -i '/^build() {/r /tmp/kiba-pkgbuild-inject.txt' "${_pkgdir}/PKGBUILD"
-  chown -R kibabuild: "${_pkgdir}"
-  su kibabuild -c "cd '${_pkgdir}' && MAKEFLAGS='-j$(nproc)' makepkg -s --noconfirm --nocheck --skippgpcheck --skipinteg"
-
-  local _pkgs=() _f _n
-  for _f in "${_pkgdir}"/*.pkg.tar.zst; do
-    _n="$(pacman -Qp "${_f}" | awk '{print $1}')"
-    case "${_n}" in *-debug) continue ;; esac
-    if "${_pm[@]}" -Q "${_n}" >/dev/null 2>&1; then _pkgs+=("${_f}"); fi
-  done
-  [ "${#_pkgs[@]}" -gt 0 ] || { echo "ERROR: makepkg produced no installable systemd packages" >&2; exit 1; }
-  printf 'Installing patched: %s\n' "${_pkgs[@]##*/}"
-  "${_pm[@]}" -U --noconfirm --noscriptlet -dd --overwrite '*' "${_pkgs[@]}"
-  "${_pm[@]}" -Q systemd | grep -q -- '-1\.1$' || { echo "ERROR: patched systemd didn't land in the rootfs" >&2; exit 1; }
-  sed -i '/^\[options\]/a IgnorePkg = systemd systemd-libs systemd-sysvcompat' "${_rootfs}/etc/pacman.conf"
-
-  rm -rf "${_sbsrc}"
-  git clone --quiet --depth 1 --branch "${_ref}" https://github.com/ading2210/shimboot.git "${_sbsrc}"
-  cp -a "${_sbsrc}/rootfs/etc/." "${_rootfs}/etc/"
-  cp -a "${_sbsrc}/rootfs/usr/." "${_rootfs}/usr/"
-  mkdir -p "${_rootfs}/etc/systemd/system/graphical.target.wants"
-  ln -sf /etc/systemd/system/kill-frecon.service \
-    "${_rootfs}/etc/systemd/system/graphical.target.wants/kill-frecon.service"
-
-  local _osr
-  _osr="$(readlink -f "${_rootfs}/etc/os-release")"
-  case "${_osr}" in "${_rootfs}"/*) ;; *) _osr="${_rootfs}/usr/lib/os-release" ;; esac
-  sed -i -e '/^VARIANT=/d' -e '/^VARIANT_ID=/d' \
-         -e 's|^PRETTY_NAME=.*|PRETTY_NAME="KibaOS (Shimboot Research)"|' "${_osr}"
-  { echo; echo 'VARIANT="Shimboot (Research)"'; echo 'VARIANT_ID=shimboot-research'; } >> "${_osr}"
-  printf 'KibaOS Shimboot (Research) v%s\nKibaOS rootfs + ChromeOS-patched systemd\n' "${RUN_NUM:-dev}" \
-    > "${_rootfs}/etc/kibaos-release"
-
-  echo "=== Shimboot: packing the rootfs ==="
-  rm -f "${_tar}"
-  tar --numeric-owner --xattrs --acls -C "${_rootfs}" -cpf - . | zstd -T0 -3 -q -o "${_tar}"
-  ls -lh "${_tar}"
-  cd "${WORKDIR}"
-  rm -rf "${WORKDIR}/work" "${WORKDIR}/out"
-  echo "=== Shimboot rootfs ready: ${_tar} ==="
-}
-
-if [ "${KIBA_SHIMBOOT_ROOTFS}" = "1" ]; then
-  sed -i "s|^airootfs_image_tool_options=.*|airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '1' '-b' '131072' '-noappend')|" "${PROFILE}/profiledef.sh"
-fi
-
 mkarchiso -v -w work -o out "${PROFILE}/"
-
-if [ "${KIBA_SHIMBOOT_ROOTFS}" = "1" ]; then
-  kiba_shimboot_export_rootfs
-  exit 0
-fi
 
 cd "${WORKDIR}"
 rm -rf iso_root kibaos.iso
