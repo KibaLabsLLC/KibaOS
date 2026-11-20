@@ -166,7 +166,7 @@ PACMANCONF
     chown 1000:1000 /home/liveuser
   "
 
-  KIBA_WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/94af5d6df5004736a02d71eda69475d2701ea7e1/assets/wallpapers/921586155_1169488599092817_1268279823267809927_n.webp"
+  KIBA_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/41df3d787d866c912510a99b04631be0bcf23bb6/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp"
   KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
   mkdir -p "${_root}/usr/share/kibaos"
 
@@ -2384,7 +2384,7 @@ grep -q 'HandlePowerKey' /etc/systemd/logind.conf && \
 
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
-WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/94af5d6df5004736a02d71eda69475d2701ea7e1/assets/wallpapers/921586155_1169488599092817_1268279823267809927_n.webp"
+WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/41df3d787d866c912510a99b04631be0bcf23bb6/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp"
 BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
