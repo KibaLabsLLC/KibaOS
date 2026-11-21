@@ -49,7 +49,7 @@
 
 ## Overview
 
-KibaOS is a complete, ready-to-use desktop operating system. It is built on **Arch Linux** and uses the **Budgie** desktop environment. Arch is a *rolling release*, which means it is continuously kept up to date rather than replaced by large yearly versions.
+KibaOS is a complete, ready-to-use desktop operating system. It is built on **Arch Linux** and uses the **Ash** desktop environment. Arch is a *rolling release*, which means it is continuously kept up to date rather than replaced by large yearly versions.
 
 KibaOS follows one design rule: **nothing should look or feel like it is showing you the plumbing.** The installer, the icons, the terminal and even the boot screen are chosen or built to follow it.
 
@@ -80,7 +80,7 @@ KibaOS works well out of the box, so you don't need to spend an afternoon instal
 | Feature | What it means for you |
 | --- | --- |
 | **A solid foundation** | Built on Arch Linux, a respected base known for staying current and supporting the newest hardware. |
-| **A clean, familiar desktop** | The Budgie desktop provides a top panel, a bottom dock and a clock, laid out so everything is easy to find. |
+| **A clean, familiar desktop** | The Ash desktop provides a top panel, a bottom dock and a clock, laid out so everything is easy to find. |
 | **Everyday apps, pre-installed** | File manager (Nemo), web browser, calculator, calendar, email (Geary), notes, music and a to-do list. Each is relabeled with a plain, simple name so the desktop feels like one product. |
 | **A simple terminal, when you need it** | The built-in terminal is deliberately minimal: one window, no tabs, no menus. It is there for the rare moment you need it. |
 | **`kiba`, a friendly app manager** | Install, remove and update software with plain-language commands instead of memorizing package-manager flags. See [Managing Apps](#managing-apps). |
@@ -92,7 +92,7 @@ KibaOS works well out of the box, so you don't need to spend an afternoon instal
 
 ## Design & Theming
 
-The look of KibaOS is not an afterthought on top of stock Arch and Budgie. Every visual layer is chosen deliberately so the system reads as one coherent product.
+The look of KibaOS is not an afterthought on top of stock Arch and Ash. Every visual layer is chosen deliberately so the system reads as one coherent product.
 
 | Layer | What we use | Why |
 | --- | --- | --- |
@@ -238,7 +238,7 @@ docker run --rm --privileged \
 ```
 
 > [!NOTE]
-> `build.sh` runs the entire build: it sets up the Arch Linux base, configures the Budgie desktop, applies KibaOS customizations, builds Okami and packages everything into a bootable ISO. Official releases on SourceForge are built with this same script by GitHub Actions whenever changes are pushed.
+> `build.sh` runs the entire build: it sets up the Arch Linux base, configures the Ash desktop, applies KibaOS customizations, builds Okami and packages everything into a bootable ISO. Official releases on SourceForge are built with this same script by GitHub Actions whenever changes are pushed.
 
 ---
 
@@ -278,7 +278,7 @@ Issues and pull requests are welcome at [KibaLabsLLC/Kiba](https://github.com/Ki
 
 KibaOS is released under the **GNU General Public License v3.0 (GPL-3.0)**.
 
-KibaOS is also a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, Budgie and more), each under its own license.
+KibaOS is also a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, Ash and more), each under its own license.
 
 ---
 
