@@ -2197,448 +2197,6 @@ ln -sf /usr/lib/systemd/system/greetd.service "$WANTS/display-manager.service"
 ln -sf /usr/lib/systemd/system/pacman-init.service "$WANTS/multi-user.target.wants/pacman-init.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service "$WANTS/multi-user.target.wants/bluetooth.service"
 mkdir -p "$AIROOTFS/root"
-# ============================================================================
-# KibaDE (replaces AuraDE): built from source, then installed from a local repo
-#
-#  - clones KibaLabsLLC/KibaDE and adds patch 0161 (Kiba "K" start-menu icon)
-#    to its Chromium patch series, so it is applied by the official series
-#    mechanism (ci/bootstrap-chromium-src.sh / refresh-bootstrap-series.sh)
-#  - bootstraps the pinned Chromium tree, builds chromiumos-ash from it, then
-#    builds the small KibaDE packages and indexes them into a local repo
-#  - the repo is copied into the ISO at /var/cache/kibaos/repo, which is also
-#    where the KibaOS installer looks for it
-#
-# Knobs (environment):
-#   KIBADE_REPO_URL / KIBADE_REF   source to build (default: main)
-#   KIBADE_BUILD_ROOT              work area (needs ~150 GB free, hours of CPU)
-#   KIBADE_REUSE_REPO=1            skip the build when $KIBADE_BUILD_ROOT/repo
-#                                  already holds a finished build
-#   KIBADE_JOBS                    parallel jobs (default: nproc)
-# ============================================================================
-KIBADE_REPO_URL="${KIBADE_REPO_URL:-https://github.com/KibaLabsLLC/KibaDE.git}"
-KIBADE_REF="${KIBADE_REF:-main}"
-KIBADE_BUILD_ROOT="${KIBADE_BUILD_ROOT:-$WORKDIR/kibade-build}"
-KIBADE_LOCAL_REPO="$KIBADE_BUILD_ROOT/repo"
-KIBADE_JOBS="${KIBADE_JOBS:-$(nproc)}"
-KIBADE_WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b9abfc2f3816253bb774c06fd4c1c119e32efa5c/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp?raw=true"
-kibade_note(){ echo "=== KibaDE: $* ===";}
-kibade_install_deps(){
-local _pb _d
-for _pb in "$@";do
-( unset depends makedepends;source "$_pb" >/dev/null 2>&1||true;printf '%s\n' "${makedepends[@]}" "${depends[@]}" )
-done|sed -E 's/[<>=].*//;s/:.*//'|grep -Ev '^(kibaos.*|chromiumos-ash|shill-nm-adapter|)$'|sort -u|while read -r _d;do
-pacman -S --needed --noconfirm "$_d" >/dev/null 2>&1||echo "note: $_d is not in the Arch repos, skipped" >&2
-done
-}
-build_kibade_from_source(){
-if [ "$KIBA_ARCH" != "x86_64" ];then
-echo "ERROR: KibaDE only has an x86_64 build; $KIBA_ARCH is not supported" >&2
-exit 1
-fi
-local _src="$KIBADE_BUILD_ROOT/KibaDE" _work="$KIBADE_BUILD_ROOT/work" _u=kibadebuild _repo="$KIBADE_LOCAL_REPO"
-mkdir -p "$KIBADE_BUILD_ROOT" "$_repo"
-if [ "${KIBADE_REUSE_REPO:-0}" = "1" ]&&[ -f "$_repo/kibaos.db.tar.gz" ]&&ls "$_repo"/chromiumos-ash-*.pkg.tar.* >/dev/null 2>&1;then
-kibade_note "reusing finished build in $_repo"
-return 0
-fi
-kibade_note "installing build dependencies"
-pacman -S --noconfirm --needed base-devel bubblewrap git curl rsync sudo python ninja gn clang lld bison flex gperf nodejs python-pip patch pacman-contrib devtools arch-install-scripts openssh imagemagick cargo rust libgit2
-id "$_u" >/dev/null 2>&1||useradd -m -s /bin/bash "$_u"
-rm -rf "$_src"
-git clone "$KIBADE_REPO_URL" "$_src"
-git -C "$_src" checkout "$KIBADE_REF"
-# --- patch 0161: Kiba "K" start-menu (launcher) icon --------------------------
-cat >"$_src/patches/0161-kiba-start-menu-icon.patch" <<'KIBADE_START_ICON_PATCH'
-diff --git a/ash/shelf/home_button.cc b/ash/shelf/home_button.cc
-index 5293c08..33b6a2f 100644
---- a/ash/shelf/home_button.cc
-+++ b/ash/shelf/home_button.cc
-@@ -7,6 +7,8 @@
- #include <math.h>  // std::ceil
- 
- #include <memory>
-+#include <optional>
-+#include <vector>
- 
- #include "ash/app_list/app_list_controller_impl.h"
- #include "ash/app_list/app_list_model_provider.h"
-@@ -29,6 +31,7 @@
- #include "ash/style/style_util.h"
- #include "ash/style/typography.h"
- #include "ash/user_education/user_education_class_properties.h"
-+#include "base/base64.h"
- #include "base/check_op.h"
- #include "base/i18n/rtl.h"
- #include "base/memory/raw_ptr.h"
-@@ -48,8 +51,12 @@
- #include "ui/display/screen.h"
- #include "ui/events/ash/keyboard_capability.h"
- #include "ui/events/devices/device_data_manager.h"
-+#include "skia/ext/image_operations.h"
- #include "ui/gfx/canvas.h"
- #include "ui/gfx/geometry/transform_util.h"
-+#include "ui/gfx/image/image.h"
-+#include "ui/gfx/image/image_skia.h"
-+#include "ui/gfx/image/image_skia_operations.h"
- #include "ui/gfx/scoped_canvas.h"
- #include "ui/views/animation/animation_builder.h"
- #include "ui/views/animation/flood_fill_ink_drop_ripple.h"
-@@ -121,6 +128,241 @@ constexpr base::TimeDelta kQuickAppContainerFadeInDuration =
- constexpr base::TimeDelta kQuickAppSlideOutDuration = base::Milliseconds(200);
- constexpr base::TimeDelta kQuickAppFadeOutDuration = base::Milliseconds(100);
- 
-+// KibaOS: the start menu (launcher) button icon, a 128x128 PNG with a
-+// transparent background, embedded as base64 so the shelf needs no resource
-+// bundle entry to draw it.
-+constexpr char kKibaStartIconBase64[] =
-+    "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"
-+    "uKVUGUcAAAAASUVORK5CYII=";
-+
-+// Edge length, in dip, that the KibaOS start icon is drawn at.
-+constexpr int kKibaStartIconSizeDip = 24;
-+
-+// Decodes the embedded icon once. Returns a null image if it cannot be
-+// decoded, in which case the stock launcher icon is used.
-+gfx::ImageSkia LoadKibaStartIcon() {
-+  std::optional<std::vector<uint8_t>> png =
-+      base::Base64Decode(kKibaStartIconBase64);
-+  if (!png || png->empty()) {
-+    return gfx::ImageSkia();
-+  }
-+  gfx::Image decoded = gfx::Image::CreateFrom1xPNGBytes(*png);
-+  if (decoded.IsEmpty()) {
-+    return gfx::ImageSkia();
-+  }
-+  return gfx::ImageSkiaOperations::CreateResizedImage(
-+      decoded.AsImageSkia(), skia::ImageOperations::RESIZE_BEST,
-+      gfx::Size(kKibaStartIconSizeDip, kKibaStartIconSizeDip));
-+}
-+
- }  // namespace
- 
- class HomeButton::ButtonImageView : public views::View {
-@@ -259,20 +501,21 @@ class HomeButton::ButtonImageView : public views::View {
-   }
- 
-   void UpdateIconImageModel() {
--    if (Shell::Get()->keyboard_capability()->GetMetaKeyToDisplay() ==
--        ui::mojom::MetaKey::kLauncherRefresh) {
--      image_model_ =
--          ui::ImageModel::FromVectorIcon(kCampbellHeroIcon, GetIconColorId());
--    } else {
--      image_model_ = std::nullopt;
--      image_ = gfx::ImageSkia();
--      return;
-+    // KibaOS: always show the Kiba start icon, whatever the meta key is.
-+    image_model_ = std::nullopt;
-+    if (image_.isNull()) {
-+      image_ = LoadKibaStartIcon();
-     }
--
--    if (image_model_ && GetColorProvider()) {
--      image_ = image_model_->Rasterize(GetColorProvider());
--    } else {
--      image_ = gfx::ImageSkia();
-+    if (image_.isNull()) {
-+      // The embedded icon could not be decoded: fall back to the stock look.
-+      if (Shell::Get()->keyboard_capability()->GetMetaKeyToDisplay() ==
-+          ui::mojom::MetaKey::kLauncherRefresh) {
-+        image_model_ =
-+            ui::ImageModel::FromVectorIcon(kCampbellHeroIcon, GetIconColorId());
-+        if (GetColorProvider()) {
-+          image_ = image_model_->Rasterize(GetColorProvider());
-+        }
-+      }
-     }
-   }
- 
-KIBADE_START_ICON_PATCH
-grep -qx '0161-kiba-start-menu-icon.patch' "$_src/patches/SERIES"||{
-[ -n "$(tail -c1 "$_src/patches/SERIES")" ]&&echo >>"$_src/patches/SERIES"
-echo '0161-kiba-start-menu-icon.patch' >>"$_src/patches/SERIES"
-}
-# --- packages the public repo lists but does not contain ----------------------
-# kibaos depends on kibaos-wallpapers and kibaos-boot, and the release scripts
-# rsync both directories, but neither is in KibaLabsLLC/KibaDE. kibaos-wallpapers
-# ships the Kiba wallpaper into /usr/share/kibaos/wallpapers (where Ash's
-# Personalization app looks); kibaos-boot is an empty placeholder.
-if [ ! -f "$_src/kibaos-wallpapers/PKGBUILD" ];then
-mkdir -p "$_src/kibaos-wallpapers"
-cat >"$_src/kibaos-wallpapers/PKGBUILD" <<'WALLPKG'
-pkgname=kibaos-wallpapers
-pkgver=1
-pkgrel=1
-pkgdesc="Kiba default desktop wallpaper"
-arch=('any')
-license=('custom')
-makedepends=('curl' 'imagemagick')
-build() {
-curl -fL --retry 5 --retry-delay 3 -o kiba-wallpaper-src "$KIBADE_WALLPAPER_URL"
-magick "kiba-wallpaper-src[0]" -quality 92 kiba-default.jpg
-}
-package() {
-install -Dm644 kiba-default.jpg "$pkgdir/usr/share/kibaos/wallpapers/kiba-default.jpg"
-}
-WALLPKG
-fi
-if [ ! -f "$_src/kibaos-boot/PKGBUILD" ];then
-mkdir -p "$_src/kibaos-boot"
-cat >"$_src/kibaos-boot/PKGBUILD" <<'BOOTPKG'
-pkgname=kibaos-boot
-pkgver=1
-pkgrel=1
-pkgdesc="KibaOS boot integration (placeholder: boot theming is done by the ISO build)"
-arch=('any')
-license=('custom')
-package() { :; }
-BOOTPKG
-fi
-chown -R "$_u:$_u" "$KIBADE_BUILD_ROOT"
-kibade_install_deps "$_src/chromiumos-ash/PKGBUILD" "$_src"/kibaos*/PKGBUILD "$_src/shill-nm-adapter/PKGBUILD"
-# --- Chromium: bootstrap the pinned tree and apply the whole series -----------
-kibade_note "bootstrapping the pinned Chromium tree (large download)"
-runuser -u "$_u" -- env KIBAOS_WORKDIR="$_work" KIBAOS_BOOTSTRAP_JOBS="$KIBADE_JOBS" \
-"$_src/build-kibaos.sh" --source-only --no-deps --workdir "$_work" --jobs "$KIBADE_JOBS"
-local _chrome="$_work/chromium-bootstrap/src"
-[ -d "$_chrome/.git" ]||{ echo "ERROR: Chromium checkout missing at $_chrome" >&2;exit 1;}
-grep -q 'LoadKibaStartIcon' "$_chrome/ash/shelf/home_button.cc"||{ echo "ERROR: start-menu icon patch is not in the Chromium tree" >&2;exit 1;}
-kibade_note "compiling chromiumos-ash (this takes hours)"
-runuser -u "$_u" -- env CHROME_SRC="$_chrome" KIBAOS_WORKDIR="$_work/current-package" \
-"$_src/ci/build-current-chromiumos-ash-package.sh"
-cp -a "$_work"/current-package/pkgdest/chromiumos-ash-*.pkg.tar.* "$_repo"/
-# --- everything else ------------------------------------------------------------
-kibade_note "building kibaosfs"
-runuser -u "$_u" -- env KIBAOS_WORKDIR="$_work/kibaosfs-package" "$_src/ci/build-kibaosfs-package.sh"
-cp -a "$_work"/kibaosfs-package/pkgdest/kibaosfs-[0-9]*.pkg.tar.* "$_repo"/
-local _p
-for _p in kibaos-account-helper kibaos-system-helper shill-nm-adapter kibaos-power kibaos-hardware kibaos-wallpapers kibaos-boot kibaos-host-bridge kibaos-login kibaos-greeter kibaos-webapp-shortcuts kibaos;do
-[ -f "$_src/$_p/PKGBUILD" ]||{ echo "note: $_p has no PKGBUILD, skipped" >&2;continue;}
-kibade_note "building $_p"
-if ! runuser -u "$_u" -- bash -c "cd '$_src/$_p' && KIBADE_WALLPAPER_URL='$KIBADE_WALLPAPER_URL' PKGDEST='$_repo' makepkg --force --noconfirm --nodeps --skippgpcheck --clean";then
-case "$_p" in
-kibaos-greeter)echo "WARNING: kibaos-greeter failed to build; the ISO uses regreet, continuing" >&2;;
-*)echo "ERROR: required package $_p failed to build" >&2;exit 1;;
-esac
-fi
-done
-chown -R root:root "$_repo"
-rm -f "$_repo"/kibaos.db* "$_repo"/kibaos.files*
-( cd "$_repo"&&repo-add kibaos.db.tar.gz ./*.pkg.tar.* )
-ls "$_repo"/kibaos-[0-9]*.pkg.tar.* >/dev/null 2>&1||{ echo "ERROR: the kibaos package was not built" >&2;exit 1;}
-kibade_note "build finished: $(ls "$_repo"/*.pkg.tar.*|wc -l) packages in $_repo"
-}
-build_kibade_from_source
-mkdir -p "$AIROOTFS/var/cache/kibaos"
-rm -rf "$AIROOTFS/var/cache/kibaos/repo"
-cp -a "$KIBADE_LOCAL_REPO" "$AIROOTFS/var/cache/kibaos/repo"
 cat >"$AIROOTFS/root/customize_airootfs.sh" <<'CUSTOMIZE'
 #!/usr/bin/env bash
 set -e
@@ -2724,7 +2282,7 @@ grep -q 'HandleLidSwitchDocked' /etc/systemd/logind.conf||echo 'HandleLidSwitchD
 grep -q 'HandleLidSwitchExternalPower' /etc/systemd/logind.conf||echo 'HandleLidSwitchExternalPower=ignore' >>/etc/systemd/logind.conf
 grep -q 'HandlePowerKey' /etc/systemd/logind.conf&&sed -i 's/^HandlePowerKey=.*/HandlePowerKey=poweroff/' /etc/systemd/logind.conf
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-WALLPAPER_URL="https://github.com/KibaLabsLLC/KibaOS/blob/b9abfc2f3816253bb774c06fd4c1c119e32efa5c/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp?raw=true"
+WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/379e9a72e646ad11ce9ab60106e8f1b105486172/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp"
 BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
@@ -2974,8 +2532,8 @@ passwd -d oem 2>/dev/null||true
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/oem <<'OEMACCOUNTS'
 [User]
-Session=kibaos
-XSession=kibaos
+Session=aurade
+XSession=aurade
 SystemAccount=false
 OEMACCOUNTS
 echo "OEM mode prepared. This device will boot to a temporary 'oem' account"
@@ -3310,24 +2868,23 @@ if pacman -Q jack2 >/dev/null 2>&1;then
 pacman -Rdd --noconfirm jack2
 fi
 pacman -S --noconfirm --needed pipewire-jack qt6-multimedia-ffmpeg
-if ! grep -q '^\[kibaos\]' /etc/pacman.conf;then
-printf '\n[kibaos]\nSigLevel = Optional TrustAll\nServer = file:///var/cache/kibaos/repo\n' >>/etc/pacman.conf
-fi
-KIBADE_OK=0
-if pacman -Syu --noconfirm --needed kibaos&&[ -x /usr/bin/kibaos-session-supervisor ]&&[ -x /usr/bin/chromiumos-ash-session ]&&[ -f /usr/share/wayland-sessions/kibaos.desktop ];then
-KIBADE_OK=1
-fi
-if [ "$KIBADE_OK" -eq 1 ];then
-echo "=== KibaDE installed ==="
-if [ -f /etc/kibaos/features.conf ];then
-sed -i 's|^KIBAOS_DEFAULT_WALLPAPER=.*|KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg|' /etc/kibaos/features.conf
-grep -q '^KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg$' /etc/kibaos/features.conf||echo 'KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg' >>/etc/kibaos/features.conf
-else
-mkdir -p /etc/kibaos
-echo 'KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg' >/etc/kibaos/features.conf
+AURADE_KEY_FPR="BC390DCF360B2184DBBF008B8B2AB2EFE667CB69"
+AURADE_KEY_URL="https://raw.githubusercontent.com/Cam396/aurade/main/pins/aurade-release.gpg"
+AURADE_REPO_URL="https://github.com/Cam396/aurade/releases/download/repo-x86_64"
+AURADE_OK=0
+if curl -fsSL --retry 5 --retry-delay 3 -o /tmp/aurade-release.gpg "$AURADE_KEY_URL"&&[ "$(gpg --show-keys --with-colons /tmp/aurade-release.gpg|awk -F: '$1=="fpr"{print $10;exit}')" = "$AURADE_KEY_FPR" ]&&pacman-key --add /tmp/aurade-release.gpg&&pacman-key --lsign-key "$AURADE_KEY_FPR";then
+grep -q '^\[aurade\]' /etc/pacman.conf||printf '\n[aurade]\nServer = %s\n' "$AURADE_REPO_URL" >>/etc/pacman.conf
+if pacman -Syu --noconfirm --needed aurade&&[ -x /usr/bin/aurade-session-supervisor ]&&[ -f /usr/share/wayland-sessions/aurade.desktop ];then
+AURADE_OK=1
 fi
 else
-echo "ERROR: KibaDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
+echo "ERROR: could not fetch/verify the AuraDE release key (expected $AURADE_KEY_FPR)" >&2
+fi
+rm -f /tmp/aurade-release.gpg
+if [ "$AURADE_OK" -eq 1 ];then
+echo "=== AuraDE installed ==="
+else
+echo "ERROR: AuraDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 exit 1
 fi
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
@@ -4528,7 +4085,7 @@ printf '[default_session]\n'
 printf 'command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals dbus-run-session cage -s -mlast -d -- regreet"\n'
 printf 'user = "greeter"\n'
 if [ -n "$_user" ];then
-_cmd=/usr/bin/kibaos-session-supervisor
+_cmd=/usr/bin/aurade-session-supervisor
 printf '\n[initial_session]\ncommand = "%s"\nuser = "%s"\n' "$_cmd" "$_user"
 fi
 } >"$_tmp"
@@ -4540,8 +4097,8 @@ chmod 755 /usr/local/bin/kibaos-greetd-config
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/liveuser <<'LIVEUSERACCOUNTS'
 [User]
-Session=kibaos
-XSession=kibaos
+Session=aurade
+XSession=aurade
 SystemAccount=false
 LIVEUSERACCOUNTS
 chmod 600 /var/lib/AccountsService/users/liveuser
@@ -4563,8 +4120,8 @@ logger -t kibaos-live-autologin "greetd config was missing autologin; rewrote it
 fi
 rm -f /run/greetd.run
 mkdir -p /var/lib/AccountsService/users
-if ! grep -qs '^Session=kibaos' /var/lib/AccountsService/users/liveuser;then
-printf '[User]\nSession=kibaos\nXSession=kibaos\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
+if ! grep -qs '^Session=aurade' /var/lib/AccountsService/users/liveuser;then
+printf '[User]\nSession=aurade\nXSession=aurade\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
 chmod 600 /var/lib/AccountsService/users/liveuser
 fi
 passwd -u liveuser >/dev/null 2>&1||true
@@ -4637,7 +4194,7 @@ ExecStart=/usr/local/bin/kibaos-gpu-select
 WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
-for _f in /usr/share/wayland-sessions/kibaos.desktop /usr/bin/kibaos-session-supervisor /usr/bin/chromiumos-ash-session /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
+for _f in /usr/share/wayland-sessions/aurade.desktop /usr/bin/aurade-session-supervisor /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
 [ -e "$_f" ]||{
 echo "ERROR: autologin prerequisite missing: $_f" >&2
 exit 1
