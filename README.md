@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/6fe7408237f4aa542447f0678ef841d79bc9e740/branding/README/30D0C88E-6851-464B-84C1-CFED18BE10ED.png?raw=true" alt="KibaOS" width="800" />
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/87106c300ba2f32759001967e9f2f1fb944877bb/branding/README/917365023_1156582867109920_701384252513852255_n.webp?raw=true" alt="KibaOS" width=“800" />
 </p>
 <p align="center">
   <strong>A ready-to-use desktop from Kiba Labs, LLC.</strong>
