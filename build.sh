@@ -2697,10 +2697,8 @@ else
 echo "ERROR: AuraDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 exit 1
 fi
-# 1. Find every file that contains the string (raw bytes)
-grep -rlaI -e AuraDE -e AURADE /usr/lib/chromiumos-ash /usr/share 2>/dev/null
-# 2. Same-length replace, binary-safe, display-case only
-LC_ALL=C sed -i 's/AuraDE/KibaOS/g; s/AURADE/KIBAOS/g' <files>
+# Find every file containing the string (raw bytes), then same-length replace, binary-safe, display-case only
+grep -rlaF -e AuraDE -e AURADE /usr/lib/chromiumos-ash /usr/share 2>/dev/null | xargs -r env LC_ALL=C sed -i 's/AuraDE/KibaOS/g; s/AURADE/KIBAOS/g' || true
 sed -i '/^CHROME=/a CHROME_FLAGS="${CHROME_FLAGS:-} --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg"' /usr/bin/chromiumos-ash-session
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
