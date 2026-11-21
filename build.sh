@@ -1961,6 +1961,8 @@ go
 sof-firmware
 thermald
 xorg-xwayland
+xorg-server
+xorg-xinit
 icu
 gcc
 debugedit
@@ -1977,22 +1979,17 @@ greetd
 greetd-regreet
 cage
 dconf
-budgie-desktop
+gsettings-desktop-schemas
 pcmanfm-qt
 qt6-wayland
-budgie-session
-budgie-extras
 webkit2gtk-4.1
 python-gobject
-labwc
-swaybg
 grim
 slurp
 wl-clipboard
 tesseract
 tesseract-data-eng
 libnotify
-swayidle
 gtklock
 wlopm
 wlr-randr
@@ -2540,8 +2537,8 @@ passwd -d oem 2>/dev/null||true
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/oem <<'OEMACCOUNTS'
 [User]
-Session=budgie-desktop
-XSession=budgie-desktop
+Session=chromeos-ash
+XSession=chromeos-ash
 SystemAccount=false
 OEMACCOUNTS
 echo "OEM mode prepared. This device will boot to a temporary 'oem' account"
@@ -2865,39 +2862,14 @@ test -f /usr/share/icons/Cutefish/index.theme
 gtk-update-icon-cache -f /usr/share/icons/Cutefish 2>/dev/null||true
 rm -rf "$CUTEFISH_ICONS_BUILD"
 echo "=== Icon theme: Cutefish installed ==="
-VIBEPANEL_REPO="https://github.com/prankstr/vibepanel.git"
-VIBEPANEL_COMMIT="cd751b15137aa32610ebce2c75644c7be745e35b"
-VIBEPANEL_BUILD="/tmp/vibepanel"
 rm -f /etc/xdg/autostart/cutefish-dock.desktop /etc/xdg/autostart/wl-dock.desktop
 pacman -R --noconfirm cutefish-dock 2>/dev/null||true
 pacman -Rns --noconfirm wl-dock 2>/dev/null||true
 rm -f /usr/bin/wl-dock
-VIBEPANEL_RUST_WAS_PRESENT=1
-command -v cargo >/dev/null 2>&1||VIBEPANEL_RUST_WAS_PRESENT=0
-if pacman -S --noconfirm --needed rust pkgconf gettext git \
-gtk4 gtk4-layer-shell libpulse systemd-libs dbus wayland&&rm -rf "$VIBEPANEL_BUILD"&&mkdir -p "$VIBEPANEL_BUILD"&&git -C "$VIBEPANEL_BUILD" init -q&&git -C "$VIBEPANEL_BUILD" fetch -q --depth 1 "$VIBEPANEL_REPO" "$VIBEPANEL_COMMIT"&&git -C "$VIBEPANEL_BUILD" checkout -q FETCH_HEAD&&(cd "$VIBEPANEL_BUILD"&&CARGO_HOME="$VIBEPANEL_BUILD/.cargo-home" CARGO_TARGET_DIR="$VIBEPANEL_BUILD/target" \
-cargo build --release --locked -p vibepanel)&&install -Dm755 "$VIBEPANEL_BUILD/target/release/vibepanel" /usr/bin/vibepanel&&test -x /usr/bin/vibepanel;then
-mkdir -p /etc/xdg/autostart
-cat >/etc/xdg/autostart/vibepanel.desktop <<'VIBEPANELAUTO'
-[Desktop Entry]
-Type=Application
-Name=VibePanel
-Exec=vibepanel
-TryExec=vibepanel
-OnlyShowIn=Budgie;GNOME;
-X-GNOME-Autostart-Delay=2
-NoDisplay=true
-VIBEPANELAUTO
-echo "=== vibepanel installed ==="
-else
-echo "!! vibepanel build failed -- continuing without a dock" >&2
-fi
-rm -rf "$VIBEPANEL_BUILD"
-[ "$VIBEPANEL_RUST_WAS_PRESENT" -eq 0 ]&&pacman -Rns --noconfirm rust||true
 ASH_COMMIT="dd43004382235b79520a0b775857915ad3c371d4"
 ASH_DIR="/opt/chromeos-linux"
 ASH_BUILD_DEPS="go meson ninja pkgconf wayland python-jinja2 gawk binutils unzip perl"
-ASH_RUNTIME_DEPS="xorg-xwayland xorg-xrandr xorg-xrdb xorg-xhost xorg-xauth libpulse librsvg libxcomposite xkeyboard-config"
+ASH_RUNTIME_DEPS="xorg-server xorg-xinit xorg-xwayland xorg-xrandr xorg-xrdb xorg-xhost xorg-xauth libpulse librsvg libxcomposite xkeyboard-config"
 ASH_OK=0
 if pacman -S --noconfirm --needed $ASH_BUILD_DEPS $ASH_RUNTIME_DEPS&&rm -rf "$ASH_DIR"&&mkdir -p "$ASH_DIR"&&git -C "$ASH_DIR" init -q&&git -C "$ASH_DIR" fetch -q --depth 1 https://github.com/samukhin/chromeos-linux.git "$ASH_COMMIT"&&git -C "$ASH_DIR" checkout -q FETCH_HEAD&&(cd "$ASH_DIR"&&make)&&test -x "$ASH_DIR/dist/chrome/chromeos-ash";then
 ASH_OK=1
@@ -2971,34 +2943,15 @@ ASHSETUPUNIT
 systemctl enable kibaos-ash-setup.service||true
 cat >/usr/local/bin/kibaos-ash-session <<'ASHLAUNCH'
 #!/bin/bash
+# KibaOS: normal ChromeOS Ash session (greetd -> start-session.sh -> startx -> Ash).
+# Runs on its own Xorg server: start-session.sh sees no $DISPLAY and brings up its
+# own X server, runs the D-Bus bridges, and loops Ash itself.
 SESSION=/opt/chromeos-linux/session/start-session.sh
 PROFILES=/var/lib/ash-profiles
 QUICK_SECS=20
-MAX_QUICK=5
 [ -x "$SESSION" ]||{
-logger -t kibaos-ash "$SESSION missing, not starting Ash"
+logger -t kibaos-ash "$SESSION missing, returning to the greeter"
 exit 1
-}
-exec 9>"${XDG_RUNTIME_DIR:-/tmp}/kibaos-ash-session.lock"
-flock -n 9||exit 0
-find_display(){
-local _i _s _n
-for _i in $(seq 1 60);do
-if [ -n "${DISPLAY:-}" ];then
-_n="${DISPLAY#:}"
-_n="${_n%%.*}"
-[ -S "/tmp/.X11-unix/X$_n" ]&&return 0
-unset DISPLAY
-fi
-for _s in /tmp/.X11-unix/X*;do
-if [ -S "$_s" ]&&[ -O "$_s" ];then
-export DISPLAY=":${_s##*/X}"
-return 0
-fi
-done
-sleep 0.5
-done
-return 1
 }
 for _i in $(seq 1 60);do
 [ -d "$PROFILES" ]&&[ -w "$PROFILES" ]&&break
@@ -3008,44 +2961,37 @@ PROFILE="$PROFILES/$(id -un)"
 if [ -d "$PROFILES" ]&&[ -w "$PROFILES" ]&&mkdir -p "$PROFILE"&&chmod 700 "$PROFILE";then
 export ASH_PROFILE_DIR="$PROFILE"
 else
-logger -t kibaos-ash "cannot use $PROFILE as $(id -un): is the user in group 'users' (re-run kibaos-ash-setup / reboot)?"
+logger -t kibaos-ash "cannot use $PROFILE as $(id -un): is the user in group 'users'? returning to the greeter"
 exit 1
 fi
+unset DISPLAY WAYLAND_DISPLAY
 umask 002
-child=""
-trap '[ -n "${child}" ] && kill -TERM "${child}" 2>/dev/null; pkill -TERM -u "$(id -u)" -f "${SESSION}" 2>/dev/null; exit 0' TERM INT
-crashes=0
-while :;do
-find_display||{
-logger -t kibaos-ash "no X display, not (re)starting Ash"
-exit 1
-}
 start=$(date +%s)
-"$SESSION" 9>&-&
-child=$!
-wait "$child"
+"$SESSION"
 rc=$?
-child=""
 run=$(($(date +%s)-start))
 logger -t kibaos-ash "Ash session exited rc=$rc after ${run}s"
-if [ "$run" -lt "$QUICK_SECS" ];then crashes=$((crashes+1));else crashes=0;fi
-if [ "$crashes" -ge "$MAX_QUICK" ];then
-logger -t kibaos-ash "Ash died ${crashes}x in under ${QUICK_SECS}s, giving up (Budgie stays)"
+if [ "$run" -lt "$QUICK_SECS" ];then
+logger -t kibaos-ash "Ash died in under ${QUICK_SECS}s, returning to the greeter"
 exit 1
 fi
-sleep $((crashes+1))
-done
+exit 0
 ASHLAUNCH
 chmod 755 /usr/local/bin/kibaos-ash-session
-mkdir -p /etc/xdg/labwc
-cat >/etc/xdg/labwc/autostart <<'ASHLABWCAUTO'
-# KibaOS: ChromeOS Ash shell supervisor (restarts Ash if it exits)
-/usr/local/bin/kibaos-ash-session &
-ASHLABWCAUTO
+mkdir -p /usr/share/wayland-sessions
+cat >/usr/share/wayland-sessions/chromeos-ash.desktop <<'ASHSESSIONDESKTOP'
+[Desktop Entry]
+Name=ChromeOS Ash
+Comment=ChromeOS Ash shell on its own X server
+Exec=/usr/local/bin/kibaos-ash-session
+Type=Application
+DesktopNames=ChromeOS
+ASHSESSIONDESKTOP
 echo "=== ChromeOS Ash shell installed ==="
 else
-echo "!! ChromeOS Ash build failed -- continuing with plain Budgie" >&2
+echo "ERROR: ChromeOS Ash build failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 rm -rf "$ASH_DIR"
+exit 1
 fi
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
@@ -3720,10 +3666,6 @@ window:backdrop {
 }
 GTK4CSS
 mkdir -p /usr/share/glib-2.0/schemas
-cat >/usr/share/glib-2.0/schemas/zz-kibaos-budgie.gschema.override <<'BUDGIEOVERRIDE'
-[com.solus-project.budgie-panel]
-enable-built-in-theme=false
-BUDGIEOVERRIDE
 glib-compile-schemas /usr/share/glib-2.0/schemas/ 2>/dev/null||true
 install -d -m 755 /usr/share/kibaos/greeter /etc/greetd
 cat >/usr/local/bin/kiba-greeter-gen.py <<'KIBAGREETGEN'
@@ -4235,63 +4177,8 @@ SDDMQML
 DEAD_SDDM_THEME_BLOCK
 mkdir -p /usr/share/wayland-sessions
 rm -rf /usr/share/wayland-sessions/budgie-desktop.desktop
-cat >/usr/local/bin/kibaos-session <<'KIBASESSION'
-#!/bin/bash
-export XDG_SESSION_TYPE=wayland
-export XDG_SESSION_DESKTOP=budgie-desktop
-export XDG_CURRENT_DESKTOP=Budgie:GNOME
-systemctl --user import-environment XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP 2>/dev/null||true
-dbus-update-activation-environment --systemd XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP 2>/dev/null||true
-MAX_QUICK_CRASHES=5
-QUICK_SECS=20
-crashes=0
-while :;do
-start=$(date +%s)
-systemd-cat -t kibaos-labwc /usr/bin/labwc --session=/usr/bin/budgie-desktop
-rc=$?
-run=$(($(date +%s)-start))
-logger -t kibaos-session "labwc exited rc=$rc after ${run}s"
-if [ "$run" -lt "$QUICK_SECS" ];then
-mkdir -p "$HOME/.cache" 2>/dev/null
-{
-echo "=== $(date -Is) labwc rc=$rc after ${run}s ==="
-journalctl --user -b --no-pager -n 400 2>/dev/null|grep -i -E 'unrecoverable|killed by signal|dumped core|segfault|abort|budgie-session|kibaos-labwc|labwc'|tail -n 60
-} >>"$HOME/.cache/kibaos-session-crash.log" 2>/dev/null
-fi
-[ "$rc" -eq 143 ]&&exit 0
-if [ "$run" -ge "$QUICK_SECS" ];then
-[ "$rc" -eq 0 ]&&exit 0
-crashes=0
-else
-crashes=$((crashes+1))
-fi
-if [ "$crashes" -ge "$MAX_QUICK_CRASHES" ];then
-logger -t kibaos-session "session exited ${crashes}x in under ${QUICK_SECS}s, giving up"
-exit 1
-fi
-sleep 1
-done
-KIBASESSION
-chmod +x /usr/local/bin/kibaos-session
-cat >/usr/share/wayland-sessions/budgie-desktop.desktop <<'WFSESSION'
-[Desktop Entry]
-Name=Budgie Desktop on labwc
-Comment=This session logs you into the Budgie Desktop
-Exec=/usr/local/bin/kibaos-session
-Icon=
-Type=Application
-DesktopNames=Budgie;GNOME
-WFSESSION
 SKEL="/etc/skel"
 mkdir -p "$SKEL/.config/autostart"
-cat >"$SKEL/.config/autostart/org.buddiesofbudgie.labwc-bridge.desktop" <<'NOLABWCBRIDGE'
-[Desktop Entry]
-Type=Application
-Name=Budgie labwc bridge (disabled — KibaOS runs labwc, not labwc)
-Exec=/bin/true
-Hidden=true
-NOLABWCBRIDGE
-rm -rf "$SKEL/.config/budgie-desktop/labwc" 2>/dev/null||true
 cat >/usr/local/bin/kibaos-greetd-config <<'GREETDCFGSCRIPT'
 #!/bin/bash
 set -e
@@ -4304,7 +4191,8 @@ printf '[default_session]\n'
 printf 'command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals dbus-run-session cage -s -mlast -d -- regreet"\n'
 printf 'user = "greeter"\n'
 if [ -n "$_user" ];then
-printf '\n[initial_session]\ncommand = "/usr/local/bin/kibaos-session"\nuser = "%s"\n' "$_user"
+_cmd=/usr/local/bin/kibaos-ash-session
+printf '\n[initial_session]\ncommand = "%s"\nuser = "%s"\n' "$_cmd" "$_user"
 fi
 } >"$_tmp"
 chmod 644 "$_tmp"
@@ -4315,8 +4203,8 @@ chmod 755 /usr/local/bin/kibaos-greetd-config
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/liveuser <<'LIVEUSERACCOUNTS'
 [User]
-Session=budgie-desktop
-XSession=budgie-desktop
+Session=chromeos-ash
+XSession=chromeos-ash
 SystemAccount=false
 LIVEUSERACCOUNTS
 chmod 600 /var/lib/AccountsService/users/liveuser
@@ -4338,8 +4226,8 @@ logger -t kibaos-live-autologin "greetd config was missing autologin; rewrote it
 fi
 rm -f /run/greetd.run
 mkdir -p /var/lib/AccountsService/users
-if ! grep -qs '^Session=budgie-desktop' /var/lib/AccountsService/users/liveuser;then
-printf '[User]\nSession=budgie-desktop\nXSession=budgie-desktop\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
+if ! grep -qs '^Session=chromeos-ash' /var/lib/AccountsService/users/liveuser;then
+printf '[User]\nSession=chromeos-ash\nXSession=chromeos-ash\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
 chmod 600 /var/lib/AccountsService/users/liveuser
 fi
 passwd -u liveuser >/dev/null 2>&1||true
@@ -4412,7 +4300,7 @@ ExecStart=/usr/local/bin/kibaos-gpu-select
 WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
-for _f in /usr/share/wayland-sessions/budgie-desktop.desktop /usr/local/bin/kibaos-session /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
+for _f in /usr/share/wayland-sessions/chromeos-ash.desktop /usr/local/bin/kibaos-ash-session /usr/bin/Xorg /usr/bin/startx /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
 [ -e "$_f" ]||{
 echo "ERROR: autologin prerequisite missing: $_f" >&2
 exit 1
@@ -4629,7 +4517,7 @@ log "Restarting session..."
 {
 [ -d /run/archiso ]&&rm -f /run/greetd.run
 systemctl restart greetd 2>/dev/null
-}||pkill -TERM labwc 2>/dev/null||pkill -TERM labwc 2>/dev/null||true
+}||pkill -TERM Xorg 2>/dev/null||true
 sleep 1
 log "Session restarted."
 }
@@ -4747,7 +4635,7 @@ FILEPATH=$(echo "$line"|awk '{print $2}'|sed 's|^\./||')
 case "$FILEPATH" in
 etc/greetd*|usr/bin/greetd*|usr/bin/regreet*|usr/bin/cage*|usr/share/kibaos/greeter*)NEEDS_DISPLAY_RESTART=true
 ;;
-usr/bin/labwc*)NEEDS_COMPOSITOR_RESTART=true
+usr/bin/Xorg*|usr/bin/startx*)NEEDS_COMPOSITOR_RESTART=true
 esac
 done <"$MANIFEST"
 _active_user_info(){
@@ -4951,11 +4839,6 @@ gtk-enable-animations=1
 GTK3SKEL
 cp /etc/gtk-3.0/gtk.css "$SKEL/.config/gtk-3.0/gtk.css"
 cp /etc/gtk-4.0/gtk.css "$SKEL/.config/gtk-4.0/gtk.css"
-dbus-run-session -- dconf write /com/solus-project/budgie-panel/panels "@as []"||true
-cat >/usr/share/glib-2.0/schemas/99-kibaos-budgie.gschema.override <<'EOF'
-[com.solus-project.budgie-panel]
-panels=@as []
-EOF
 glib-compile-schemas /usr/share/glib-2.0/schemas/
 cat >/usr/local/bin/kibaos-first-login <<'FIRSTLOGIN'
 #!/usr/bin/env bash
@@ -4992,33 +4875,6 @@ gsettings set org.nemo.preferences show-location-entry false
 touch "$STAMP"
 FIRSTLOGIN
 chmod +x /usr/local/bin/kibaos-first-login
-mkdir -p /etc/budgie-desktop
-cat >/etc/budgie-desktop/panel.ini <<'EMPTYPANELINI'
-[Panels]
-Panels=
-EMPTYPANELINI
-cat >/usr/local/bin/kibaos-no-panel <<'NOPANEL'
-#!/usr/bin/env bash
-sleep 6
-for _ in 1 2 3;do
-cur="$(gsettings get com.solus-project.budgie-panel panels 2>/dev/null)"
-case "$cur" in
-"@as []"|"[]");;
-*)gsettings set com.solus-project.budgie-panel panels "@as []"
-esac
-sleep 4
-done
-NOPANEL
-chmod +x /usr/local/bin/kibaos-no-panel
-cat >"$SKEL/.config/autostart/kibaos-no-panel.desktop" <<'NOPANELDESK'
-[Desktop Entry]
-Type=Application
-Name=KibaOS No Panel
-Exec=/usr/local/bin/kibaos-no-panel
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-NOPANELDESK
 cat >"$SKEL/.config/autostart/kibaos-configure.desktop" <<'AUTOCFG'
 [Desktop Entry]
 Type=Application
@@ -5082,12 +4938,11 @@ cat >"$SKEL/.config/fontconfig/fonts.conf" <<'FONTCONF'
 FONTCONF
 cat >"$SKEL/.config/electron-flags.conf" <<'ELECTRONFLAGS'
 --enable-features=UseOzonePlatform
---ozone-platform=wayland
---enable-wayland-ime
+--ozone-platform=x11
 ELECTRONFLAGS
 cat >"$SKEL/.config/chrome-flags.conf" <<'CHROMEFLAGS'
 --enable-features=UseOzonePlatform
---ozone-platform=wayland
+--ozone-platform=x11
 CHROMEFLAGS
 cat >"$SKEL/.config/autostart/polkit-agent.desktop" <<'POLKIT'
 [Desktop Entry]
@@ -5140,32 +4995,6 @@ cat >"$SKEL/.config/fastfetch/config.jsonc" <<'FFCONF'
   ]
 }
 FFCONF
-mkdir -p "$SKEL/.config/labwc"
-cat >"$SKEL/.config/labwc/rc.xml" <<'LABWCRC'
-<?xml version="1.0"?>
-<labwc_config>
-  <!-- ChromeOS Ash is an X11 client drawing its own shelf/launcher/windows;
-       keep it undecorated, fullscreen and above the Budgie panels. -->
-  <windowRules>
-    <windowRule identifier="chromeos-ash">
-      <serverDecoration>no</serverDecoration>
-      <skipTaskbar>yes</skipTaskbar>
-      <skipWindowSwitcher>yes</skipWindowSwitcher>
-      <action name="ToggleAlwaysOnTop" />
-      <action name="ToggleFullscreen" />
-    </windowRule>
-    <windowRule identifier="chrome">
-      <serverDecoration>no</serverDecoration>
-      <skipTaskbar>yes</skipTaskbar>
-      <skipWindowSwitcher>yes</skipWindowSwitcher>
-      <action name="ToggleAlwaysOnTop" />
-      <action name="ToggleFullscreen" />
-    </windowRule>
-  </windowRules>
-</labwc_config>
-LABWCRC
-mkdir -p /home/liveuser/.config/labwc
-install -m 644 -o 1000 -g 1000 "$SKEL/.config/labwc/rc.xml" /home/liveuser/.config/labwc/rc.xml
 cat >"$SKEL/.config/autostart/lost-island.desktop" <<'LIAUTO'
 [Desktop Entry]
 Type=Application
@@ -5176,101 +5005,6 @@ X-GNOME-Autostart-enabled=true
 X-GNOME-Autostart-Delay=3
 NoDisplay=true
 LIAUTO
-mkdir -p "$SKEL/.config/vibepanel"
-cat >"$SKEL/.config/vibepanel/config.toml" <<'VIBEPANELCONF'
-[bar]
-position = "bottom"
-size = 56
-padding = 6
-screen_margin = 12
-border_radius = 30
-background_opacity = 0.0   # transparent bar: only the dock island is drawn
-auto_hide = "never"
-
-[widgets]
-left = []
-center = [{ group = ["custom-browser", "custom-files", "custom-editor", "taskbar"] }]
-right = []
-border_radius = 30         # % of height: lightly rounded rectangle
-background_color = "#ffffff"
-background_opacity = 0.15  # 85% transparency glass
-popover_background_opacity = 0.15
-
-[widgets.taskbar]
-show_icon = true
-show_title = false
-icon_size = 36
-show_workspace_separator = false
-show_active = true
-
-[theme]
-mode = "light"
-animations = true
-ripple = false
-shadows = false
-blur = true            # real blur where the compositor supports ext-background-effect-v1
-outline = false
-
-[osd]
-enabled = false
-
-[polkit]
-enabled = false
-VIBEPANELCONF
-_kiba_find_icon(){
-local _n _d _f
-for _n in "$@";do
-for _d in /usr/share/icons/Cutefish /usr/share/icons/Papirus /usr/share/icons/Adwaita \
-/usr/share/icons/hicolor /usr/share/pixmaps;do
-[ -d "$_d" ]||continue
-_f=$(find "$_d" -name "$_n.svg" 2>/dev/null|head -n1)
-[ -n "$_f" ]||_f=$(find "$_d" -name "$_n.png" 2>/dev/null|sort -V|tail -n1)
-[ -n "$_f" ]&&{
-echo "$_f"
-return 0
-}
-done
-done
-return 1
-}
-_kiba_pin(){
-local _name="$1" _tip="$2" _glyph="$3" _desk="$4"
-shift 4
-local _img
-_img=$(_kiba_find_icon "$@")||_img=""
-{
-echo ""
-echo "[widgets.custom-$_name]"
-if [ -n "$_img" ];then echo "image = \"$_img\"";else echo "label = \"$_glyph\"";fi
-echo "tooltip = \"$_tip\""
-echo "on_click = \"gio launch $_desk\""
-} >>"$SKEL/.config/vibepanel/config.toml"
-}
-_kiba_pin browser "Browser" "🌐" /usr/share/applications/chromium.desktop kibaos-browser chromium web-browser
-_kiba_pin files "Files" "📁" /usr/share/applications/kibaos-files.desktop nemo system-file-manager folder
-_kiba_pin editor "Text Editor" "📝" /usr/share/applications/org.gnome.TextEditor.desktop org.gnome.TextEditor accessories-text-editor text-editor
-if command -v kibavoice-ui >/dev/null 2>&1&&[ -f /usr/share/applications/kibavoice.desktop ];then
-_kiba_pin kai "Kiba" "🎙" /usr/share/applications/kibavoice.desktop kibavoice audio-input-microphone
-sed -i 's/"custom-editor", "taskbar"/"custom-editor", "custom-kai", "taskbar"/' "$SKEL/.config/vibepanel/config.toml"
-grep -q '"custom-kai"' "$SKEL/.config/vibepanel/config.toml"
-fi
-cat >"$SKEL/.config/vibepanel/style.css" <<'VIBEPANELCSS'
-/* Glass dock: pinned apps + open windows in one translucent island. The
-   pins already make it wide, so no min-width floor is needed. */
-.widget.taskbar,
-.widget[class*="custom-"] {
-  background-image: none;
-  box-shadow: none;
-}
-
-.widget.taskbar {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-.taskbar-button {
-  border-radius: 10px;
-}
-VIBEPANELCSS
 cp -aT "$SKEL/" /home/liveuser/
 chown -R 1000:1000 /home/liveuser
 chmod 750 /home/liveuser
@@ -5310,55 +5044,6 @@ StartupWMClass=Joplin
 JOPLINDESKTOP
 rm -rf "$JOPLIN_TMP")&&echo "=== Joplin installed ==="||echo "!! Joplin install failed -- continuing without it" >&2
 sed -i 's/GTK_THEME=Adwaita-dark/GTK_THEME=KibaOS/' /etc/environment
-(set -e
-BW_SRC="/tmp/budgie-welcome"
-rm -rf "$BW_SRC"
-git clone --depth 1 https://github.com/UbuntuBudgie/budgie-welcome.git "$BW_SRC"
-cd "$BW_SRC"
-for _js in bootstrap baguetteBox popper;do
-cp "data/js/$_js.js" "data/js/$_js.min.js"
-done
-bash sassc-compile.sh
-mkdir -p /usr/share/budgie-welcome /usr/lib/budgie-welcome /usr/share/budgie-welcome-shims
-cp -r data/. /usr/share/budgie-welcome/
-install -Dm755 budgie-welcome /usr/lib/budgie-welcome/budgie-welcome.py
-install -Dm755 budgie-welcome-privileged-actions /usr/lib/budgie-welcome/budgie-welcome-privileged-actions
-install -Dm644 org.budgie.welcome.policy /usr/share/polkit-1/actions/org.budgie.welcome.policy
-install -Dm644 budgie-welcome.1 /usr/share/man/man1/budgie-welcome.1
-cat >/usr/share/budgie-welcome-shims/apt.py <<'APTSHIM'
-class Cache(dict):
-    def __getitem__(self, k): raise KeyError(k)
-    def __contains__(self, k): return False
-    def has_key(self, k): return False
-    def open(self, *a, **k): pass
-    def close(self, *a, **k): pass
-APTSHIM
-cat >/usr/share/budgie-welcome-shims/notify2.py <<'NOTIFYSHIM'
-def init(*a, **k): return True
-class Notification:
-    def __init__(self, *a, **k): pass
-    def show(self): return True
-    def set_timeout(self, *a): pass
-    def add_action(self, *a, **k): pass
-NOTIFYSHIM
-cat >/usr/bin/budgie-welcome <<'BWLAUNCH'
-#!/bin/sh
-export PYTHONPATH="/usr/share/budgie-welcome-shims${PYTHONPATH:+:$PYTHONPATH}"
-exec python3 /usr/lib/budgie-welcome/budgie-welcome.py "$@"
-BWLAUNCH
-chmod 755 /usr/bin/budgie-welcome
-cat >/usr/share/applications/budgie-welcome.desktop <<'BWDESKTOP'
-[Desktop Entry]
-Type=Application
-Name=Budgie Welcome
-Comment=Find out about your desktop and Budgie applets
-Exec=budgie-welcome
-Icon=help-about
-Terminal=false
-Categories=Utility;GTK;
-Keywords=welcome;budgie;tour;applets;
-BWDESKTOP
-rm -rf "$BW_SRC")&&echo "=== Budgie Welcome installed ==="||echo "!! Budgie Welcome install failed -- continuing without it" >&2
 mkdir -p /usr/share/applications /etc/skel/Desktop /etc/skel/Documents \
 /etc/skel/Downloads /etc/skel/Pictures /etc/skel/Music /etc/skel/Videos
 cat >/etc/skel/.config/user-dirs.dirs <<'USERDIRS'
@@ -5753,15 +5438,10 @@ cp "/usr/share/applications/$src_desktop.desktop" \
 chmod +x "/home/liveuser/Desktop/$src_desktop.desktop" 2>/dev/null||true
 done
 cat >/etc/environment <<'ENV'
-DESKTOP_SESSION=Budgie
-XDG_CURRENT_DESKTOP=Budgie
-XDG_SESSION_DESKTOP=Budgie
-XDG_SESSION_TYPE=wayland
-KWIN_FORCE_SW_CURSOR=1
-MOZ_ENABLE_WAYLAND=1
-ELECTRON_OZONE_PLATFORM_HINT=wayland
-CLUTTER_BACKEND=wayland
-SDL_VIDEODRIVER=wayland
+DESKTOP_SESSION=chromeos-ash
+XDG_CURRENT_DESKTOP=ChromeOS
+XDG_SESSION_DESKTOP=chromeos-ash
+XDG_SESSION_TYPE=x11
 KIBAOS_VERSION=rolling
 KIBAOS_VENDOR="Kiba Labs, LLC"
 ENV
@@ -6013,13 +5693,6 @@ find /usr/share/icons -name 'icon-theme.cache' -delete 2>/dev/null||true
 rm -rf /var/lib/pacman/sync/* /tmp/* /var/tmp/* 2>/dev/null||true
 chown -R 1000:1000 /home/liveuser
 mkdir -p /home/liveuser/.config/autostart
-cat >/home/liveuser/.config/autostart/org.buddiesofbudgie.labwc-bridge.desktop <<'NOLABWCBRIDGE'
-[Desktop Entry]
-Type=Application
-Name=Budgie labwc bridge (disabled — KibaOS runs labwc, not labwc)
-Exec=/bin/true
-Hidden=true
-NOLABWCBRIDGE
 install -d -m 755 -o 1000 -g 1000 /home/liveuser/.config/dconf
 chown -R 1000:1000 /home/liveuser/.config
 for _icon in /home/liveuser/Desktop/*.desktop;do
