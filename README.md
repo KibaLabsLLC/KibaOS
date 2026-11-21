@@ -31,7 +31,7 @@
 > **Before you download:** KibaOS supports **UEFI-based systems only**. The mobile edition supports Android devices that support TrebleDroid and have TWRP, and requires **Android 9 exactly**. Earlier and later versions are not compatible.
 
 <p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/cd80900a3f2c6f319a5733c01f25b3f5e0f5e20e/assets/splash/FCE6EED9-BA57-45CF-AF90-5AA056A069F2.gif?raw=true"
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/cd80900a3f2c6f319a5733c01f25b3f5e0f5e20e/assets/splKibaDE/FCE6EED9-BA57-45CF-AF90-5AA056A069F2.gif?raw=true"
        width="240"
        alt="Kiba, the KibaOS mascot, peeking in and waving">
 </p>
@@ -49,7 +49,7 @@
 
 ## Overview
 
-KibaOS is a complete, ready-to-use desktop operating system. It is built on **Arch Linux** and uses the **Ash** desktop environment. Arch is a *rolling release*, which means it is continuously kept up to date rather than replaced by large yearly versions.
+KibaOS is a complete, ready-to-use desktop operating system. It is built on **Arch Linux** and uses the **KibaDE** desktop environment. Arch is a *rolling release*, which means it is continuously kept up to date rather than replaced by large yearly versions.
 
 KibaOS follows one design rule: **nothing should look or feel like it is showing you the plumbing.** The installer, the icons, the terminal and even the boot screen are chosen or built to follow it.
 
@@ -80,7 +80,7 @@ KibaOS works well out of the box, so you don't need to spend an afternoon instal
 | Feature | What it means for you |
 | --- | --- |
 | **A solid foundation** | Built on Arch Linux, a respected base known for staying current and supporting the newest hardware. |
-| **A clean, familiar desktop** | The Ash desktop provides a top panel, a bottom dock and a clock, laid out so everything is easy to find. |
+| **A clean, familiar desktop** | The KibaDE desktop provides a top panel, a bottom dock and a clock, laid out so everything is easy to find. |
 | **Everyday apps, pre-installed** | File manager (Nemo), web browser, calculator, calendar, email (Geary), notes, music and a to-do list. Each is relabeled with a plain, simple name so the desktop feels like one product. |
 | **A simple terminal, when you need it** | The built-in terminal is deliberately minimal: one window, no tabs, no menus. It is there for the rare moment you need it. |
 | **`kiba`, a friendly app manager** | Install, remove and update software with plain-language commands instead of memorizing package-manager flags. See [Managing Apps](#managing-apps). |
@@ -92,11 +92,11 @@ KibaOS works well out of the box, so you don't need to spend an afternoon instal
 
 ## Design & Theming
 
-The look of KibaOS is not an afterthought on top of stock Arch and Ash. Every visual layer is chosen deliberately so the system reads as one coherent product.
+The look of KibaOS is not an afterthought on top of stock Arch and KibaDE. Every visual layer is chosen deliberately so the system reads as one coherent product.
 
 | Layer | What we use | Why |
 | --- | --- | --- |
-| **Boot splash** | Custom KibaOS Plymouth theme, with an animated Kiba peeking in from the corner | A clean, branded first impression instead of a default boot screen. |
+| **Boot splKibaDE** | Custom KibaOS Plymouth theme, with an animated Kiba peeking in from the corner | A clean, branded first impression instead of a default boot screen. |
 | **App icons** | Cutefish icon theme | A consistent, modern icon set across every app. |
 | **Window & UI theme** | Ant-Dark with the Dracula color scheme | A calm dark base that stays easy on the eyes. |
 | **Motion** | KibaOS's own "Organic Motion Language" | A shared set of named, natural-feeling animation curves used across the desktop and installer. |
@@ -126,13 +126,13 @@ An **ISO file** is a single file that holds an entire disc's worth of data, and 
 
 ### Step 2: Write It to a USB Drive
 
-You will need a USB flash drive of **8 GB or larger**. Everything on it will be erased.
+You will need a USB flKibaDE drive of **8 GB or larger**. Everything on it will be erased.
 
-Free graphical tools such as [Balena Etcher](https://etcher.balena.io) or [Ventoy](https://www.ventoy.net) make this easy: select the ISO, select the drive, and click **Flash**.
+Free graphical tools such as [Balena Etcher](https://etcher.balena.io) or [Ventoy](https://www.ventoy.net) make this easy: select the ISO, select the drive, and click **FlKibaDE**.
 
 > [!TIP]
 > **On Linux?** You can also use `dd`:
-> ```bash
+> ```bKibaDE
 > sudo dd if=kibaos.iso of=/dev/sdX bs=4M status=progress && sync
 > ```
 > Replace `sdX` with your USB device. Double-check it first, because `dd` will overwrite whatever you point it at.
@@ -207,7 +207,7 @@ KibaOS includes **Okami**, a graphical app store for installing and updating app
 
 For people who prefer typing, KibaOS provides short commands on top of the `pacman` package manager:
 
-```bash
+```bKibaDE
 update          # Update all packages
 install <pkg>   # Install a package
 remove <pkg>    # Remove a package
@@ -227,7 +227,7 @@ You can build your own copy of the ISO instead of downloading the prebuilt one. 
 - [Docker](https://www.docker.com)
 - A Linux computer with at least **15 GB** of free disk space
 
-```bash
+```bKibaDE
 git clone https://github.com/KibaLabsLLC/Kiba
 cd Kiba
 docker run --rm --privileged \
@@ -238,7 +238,7 @@ docker run --rm --privileged \
 ```
 
 > [!NOTE]
-> `build.sh` runs the entire build: it sets up the Arch Linux base, configures the Ash desktop, applies KibaOS customizations, builds Okami and packages everything into a bootable ISO. Official releases on SourceForge are built with this same script by GitHub Actions whenever changes are pushed.
+> `build.sh` runs the entire build: it sets up the Arch Linux base, configures the KibaDE desktop, applies KibaOS customizations, builds Okami and packages everything into a bootable ISO. Official releases on SourceForge are built with this same script by GitHub Actions whenever changes are pushed.
 
 ---
 
@@ -278,7 +278,7 @@ Issues and pull requests are welcome at [KibaLabsLLC/Kiba](https://github.com/Ki
 
 KibaOS is released under the **GNU General Public License v3.0 (GPL-3.0)**.
 
-KibaOS is also a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, Ash and more), each under its own license.
+KibaOS is also a distribution rather than a single piece of software. It bundles many separate projects (the Linux kernel, KibaDE and more), each under its own license.
 
 ---
 
