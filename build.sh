@@ -2353,10 +2353,6 @@ else
 cp "$LOGO_256" "$INSTALLER_LOGO"
 fi
 pacman -Syu --noconfirm git
-git clone https://github.com/KibaLabsLLC/Roko
-cd Roko
-bash build.sh
-cd ..
 set -euo pipefail
 git clone --depth 1 https://github.com/KibaLabsLLC/Okami.git
 cd Okami
