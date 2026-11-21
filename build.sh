@@ -1978,6 +1978,7 @@ greetd-regreet
 cage
 dconf
 gsettings-desktop-schemas
+pcmanfm-qt
 qt6-wayland
 webkit2gtk-4.1
 python-gobject
@@ -2033,6 +2034,7 @@ kvantum
 pipewire
 pipewire-pulse
 pipewire-alsa
+pipewire-jack
 wireplumber
 networkmanager
 
@@ -2844,6 +2846,8 @@ cp "$KIBA_PLYMOUTH_DIR/splash.png" \
 "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
 fi
 done
+rm -rf /tmp/kiba-plymouth-snapshot
+cp -a "$KIBA_PLYMOUTH_DIR" /tmp/kiba-plymouth-snapshot
 CUTEFISH_ICONS_BUILD="/tmp/cutefish-icons"
 rm -rf "$CUTEFISH_ICONS_BUILD"
 git clone --depth 1 https://github.com/cutefishos/icons.git "$CUTEFISH_ICONS_BUILD"
@@ -2863,6 +2867,11 @@ rm -f /etc/xdg/autostart/cutefish-dock.desktop /etc/xdg/autostart/wl-dock.deskto
 pacman -R --noconfirm cutefish-dock 2>/dev/null||true
 pacman -Rns --noconfirm wl-dock 2>/dev/null||true
 rm -f /usr/bin/wl-dock
+# Resolve JACK provider conflict: prefer pipewire-jack, drop jack2
+if pacman -Q jack2 >/dev/null 2>&1;then
+pacman -Rdd --noconfirm jack2
+fi
+pacman -S --noconfirm --needed pipewire-jack qt6-multimedia-ffmpeg
 AURADE_KEY_FPR="BC390DCF360B2184DBBF008B8B2AB2EFE667CB69"
 AURADE_KEY_URL="https://raw.githubusercontent.com/Cam396/aurade/main/pins/aurade-release.gpg"
 AURADE_REPO_URL="https://github.com/Cam396/aurade/releases/download/repo-x86_64"
@@ -4693,6 +4702,25 @@ mkdir -p \
 "$SKEL/.config/gtk-4.0" \
 "$SKEL/.config/autostart" \
 "$SKEL/.config/fastfetch"
+cat >/usr/local/bin/kibaos-desktop-icons <<'DESKTOPICONSWRAP'
+#!/bin/sh
+pcmanfm-qt --desktop&
+PID=$!
+sleep 2
+pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.jpg
+wait "$PID"
+DESKTOPICONSWRAP
+chmod +x /usr/local/bin/kibaos-desktop-icons
+cat >"$SKEL/.config/autostart/pcmanfm-qt-desktop.desktop" <<'DESKTOPVIEW'
+[Desktop Entry]
+Type=Application
+Name=PCManFM-Qt Desktop
+Exec=/usr/local/bin/kibaos-desktop-icons
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-AutoRestart=true
+DESKTOPVIEW
 cat >"$SKEL/.config/gtk-3.0/settings.ini" <<'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
@@ -5546,6 +5574,38 @@ cat >/etc/tmpfiles.d/kibaos.conf <<'TMPFILES'
 e /tmp/kibaos-ocr.* - - - 1d
 TMPFILES
 systemctl enable systemd-tmpfiles-clean.timer
+echo "=== Re-applying KibaOS boot animation ==="
+KIBA_PLY_DIR="/usr/share/plymouth/themes/kibaos"
+if [ -d /tmp/kiba-plymouth-snapshot ];then
+rm -rf "$KIBA_PLY_DIR"
+mkdir -p "$KIBA_PLY_DIR"
+cp -a /tmp/kiba-plymouth-snapshot/. "$KIBA_PLY_DIR/"
+fi
+for _f in kibaos.plymouth kibaos.script splash.png wave-0.png wave-149.png wave-gradient.png wave-cover.png;do
+[ -s "$KIBA_PLY_DIR/$_f" ]||{
+echo "ERROR: boot animation asset $_f is missing -- cannot re-apply KibaOS boot animation" >&2
+exit 1
+}
+done
+mkdir -p /etc/plymouth
+cat >/etc/plymouth/plymouthd.conf <<'PLYMOUTHD_FINAL'
+[Daemon]
+Theme=kibaos
+ShowDelay=0
+DeviceTimeout=8
+PLYMOUTHD_FINAL
+plymouth-set-default-theme -R kibaos||echo "!! plymouth-set-default-theme -R failed" >&2
+cp "$KIBA_PLY_DIR/splash.png" /usr/share/plymouth/arch-logo.png
+for _theme_dir in bgrt spinner;do
+if [ -d "/usr/share/plymouth/themes/$_theme_dir" ];then
+cp "$KIBA_PLY_DIR/splash.png" "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
+fi
+done
+[ "$(plymouth-set-default-theme)" = "kibaos" ]||{
+echo "ERROR: default Plymouth theme is not kibaos after re-apply" >&2
+exit 1
+}
+echo "=== Boot animation: kibaos theme re-applied ==="
 rm -rf /var/cache/pacman/pkg/*
 rm -rf /usr/share/man/* /usr/share/info/* /usr/share/doc/*
 find /usr/lib/firmware -mindepth 1 -maxdepth 1 \
