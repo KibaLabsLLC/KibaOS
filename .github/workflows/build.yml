@@ -365,7 +365,7 @@ jobs:
                       s.close()
               raise SystemExit("guest agent never answered")
 
-          rc = run("/usr/bin/pkill", ["-TERM", "-f", "io.kibaos.oobe"])
+          rc = run("/usr/bin/pkill", ["-TERM", "-f", "kibaos-installer-gui"])
           print("pkill exit code:", rc, "(1 = no installer running -> assume login screen)")
           sys.exit(0 if rc == 0 else 1)
           PYQGA
