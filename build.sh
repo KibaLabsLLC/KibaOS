@@ -1961,8 +1961,6 @@ go
 sof-firmware
 thermald
 xorg-xwayland
-xorg-server
-xorg-xinit
 icu
 gcc
 debugedit
@@ -1980,7 +1978,6 @@ greetd-regreet
 cage
 dconf
 gsettings-desktop-schemas
-pcmanfm-qt
 qt6-wayland
 webkit2gtk-4.1
 python-gobject
@@ -2537,8 +2534,8 @@ passwd -d oem 2>/dev/null||true
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/oem <<'OEMACCOUNTS'
 [User]
-Session=chromeos-ash
-XSession=chromeos-ash
+Session=aurade
+XSession=aurade
 SystemAccount=false
 OEMACCOUNTS
 echo "OEM mode prepared. This device will boot to a temporary 'oem' account"
@@ -2866,131 +2863,23 @@ rm -f /etc/xdg/autostart/cutefish-dock.desktop /etc/xdg/autostart/wl-dock.deskto
 pacman -R --noconfirm cutefish-dock 2>/dev/null||true
 pacman -Rns --noconfirm wl-dock 2>/dev/null||true
 rm -f /usr/bin/wl-dock
-ASH_COMMIT="dd43004382235b79520a0b775857915ad3c371d4"
-ASH_DIR="/opt/chromeos-linux"
-ASH_BUILD_DEPS="go meson ninja pkgconf wayland python-jinja2 gawk binutils unzip perl"
-ASH_RUNTIME_DEPS="xorg-server xorg-xinit xorg-xwayland xorg-xrandr xorg-xrdb xorg-xhost xorg-xauth libpulse librsvg libxcomposite xkeyboard-config"
-ASH_OK=0
-if pacman -S --noconfirm --needed $ASH_BUILD_DEPS $ASH_RUNTIME_DEPS&&rm -rf "$ASH_DIR"&&mkdir -p "$ASH_DIR"&&git -C "$ASH_DIR" init -q&&git -C "$ASH_DIR" fetch -q --depth 1 https://github.com/samukhin/chromeos-linux.git "$ASH_COMMIT"&&git -C "$ASH_DIR" checkout -q FETCH_HEAD&&(cd "$ASH_DIR"&&make)&&test -x "$ASH_DIR/dist/chrome/chromeos-ash";then
-ASH_OK=1
+AURADE_KEY_FPR="BC390DCF360B2184DBBF008B8B2AB2EFE667CB69"
+AURADE_KEY_URL="https://raw.githubusercontent.com/Cam396/aurade/main/pins/aurade-release.gpg"
+AURADE_REPO_URL="https://github.com/Cam396/aurade/releases/download/repo-x86_64"
+AURADE_OK=0
+if curl -fsSL --retry 5 --retry-delay 3 -o /tmp/aurade-release.gpg "$AURADE_KEY_URL"&&[ "$(gpg --show-keys --with-colons /tmp/aurade-release.gpg|awk -F: '$1=="fpr"{print $10;exit}')" = "$AURADE_KEY_FPR" ]&&pacman-key --add /tmp/aurade-release.gpg&&pacman-key --lsign-key "$AURADE_KEY_FPR";then
+grep -q '^\[aurade\]' /etc/pacman.conf||printf '\n[aurade]\nServer = %s\n' "$AURADE_REPO_URL" >>/etc/pacman.conf
+if pacman -Syu --noconfirm --needed aurade&&[ -x /usr/bin/aurade-session-supervisor ]&&[ -f /usr/share/wayland-sessions/aurade.desktop ];then
+AURADE_OK=1
 fi
-if [ "$ASH_OK" -eq 1 ];then
-rm -rf "$ASH_DIR/.git" "$ASH_DIR/chromeos-bin/.stage" "$ASH_DIR/.cache"
-_sess="$ASH_DIR/session/chromeos-linux-session"
-if [ -f /usr/share/kibaos/wallpaper.jpg ]&&grep -q '^    --use-first-display-as-internal \\$' "$_sess";then
-awk '
-      /^    --use-first-display-as-internal \\$/ {
-        print "    --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg \\"
-        print "    --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg \\"
-        print "    --guest-wallpaper-large=/usr/share/kibaos/wallpaper.jpg \\"
-        print "    --guest-wallpaper-small=/usr/share/kibaos/wallpaper.jpg \\"
-      }
-      { print }' "$_sess" >"$_sess.new"&&cat "$_sess.new" >"$_sess"
-rm -f "$_sess.new"
 else
-echo "WARNING: could not add Ash wallpaper flags (anchor or wallpaper missing)" >&2
+echo "ERROR: could not fetch/verify the AuraDE release key (expected $AURADE_KEY_FPR)" >&2
 fi
-pacman -Rns --noconfirm go meson ninja python-jinja2 2>/dev/null||true
-cat >/usr/local/bin/kibaos-ash-setup <<'ASHSETUP'
-#!/bin/bash
-getent group users >/dev/null||groupadd users
-mapfile -t _users < <(getent passwd|awk -F: '$3>=1000 && $3<60000 && $7 !~ /(nologin|false)$/ {print $1}')
-[ "${#_users[@]}" -gt 0 ]||exit 0
-for _u in "${_users[@]}";do
-id -nG "$_u"|tr ' ' '\n'|grep -qx users||usermod -aG users "$_u"||true
-done
-_p="${_users[0]}"
-/opt/chromeos-linux/scripts/setup-system.sh --user "$_p"||true
-_pol=/etc/dbus-1/system.d/chromeos-bridges.conf
-if [ -f "$_pol" ]&&grep -q '<policy user=' "$_pol";then
-sed -i 's|<policy user="[^"]*">|<policy group="users">|' "$_pol"
-systemctl reload dbus.service 2>/dev/null||{
-systemctl restart dbus.service 2>/dev/null||true
-systemctl restart polkit.service 2>/dev/null||systemctl restart polkitd.service 2>/dev/null||true
-}
-fi
-_tf=/etc/tmpfiles.d/chromeos-linux.conf
-if [ -f "$_tf" ];then
-awk -v u="$_p" '
-    $1 ~ /^[dfDF]$/ && $4 == u {
-      m = $3
-      if (m == "0700") m = "2770"; else if (m == "0755") m = "2775"; else if (m == "0644") m = "0664"
-      print $1, $2, m, "root", $5, ($6 == "" ? "-" : $6)
-      next
-    }
-    { print }' "$_tf" >"$_tf.new"&&mv -f "$_tf.new" "$_tf"
-grep -q '^d /var/lib/ash-profiles ' "$_tf"||echo 'd /var/lib/ash-profiles 1770 root users -' >>"$_tf"
-systemd-tmpfiles --create "$_tf" 2>/dev/null||true
-fi
-if [ -d /var/lib/timezone ];then
-chown root:users /var/lib/timezone
-chmod 0775 /var/lib/timezone
-fi
-ASHSETUP
-chmod 755 /usr/local/bin/kibaos-ash-setup
-cat >/etc/systemd/system/kibaos-ash-setup.service <<'ASHSETUPUNIT'
-[Unit]
-Description=KibaOS Ash shell system setup (D-Bus policy, runtime dirs)
-After=dbus.service local-fs.target systemd-sysusers.service
-Before=greetd.service display-manager.service
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/usr/local/bin/kibaos-ash-setup
-[Install]
-WantedBy=multi-user.target
-ASHSETUPUNIT
-systemctl enable kibaos-ash-setup.service||true
-cat >/usr/local/bin/kibaos-ash-session <<'ASHLAUNCH'
-#!/bin/bash
-# KibaOS: normal ChromeOS Ash session (greetd -> start-session.sh -> startx -> Ash).
-# Runs on its own Xorg server: start-session.sh sees no $DISPLAY and brings up its
-# own X server, runs the D-Bus bridges, and loops Ash itself.
-SESSION=/opt/chromeos-linux/session/start-session.sh
-PROFILES=/var/lib/ash-profiles
-QUICK_SECS=20
-[ -x "$SESSION" ]||{
-logger -t kibaos-ash "$SESSION missing, returning to the greeter"
-exit 1
-}
-for _i in $(seq 1 60);do
-[ -d "$PROFILES" ]&&[ -w "$PROFILES" ]&&break
-sleep 1
-done
-PROFILE="$PROFILES/$(id -un)"
-if [ -d "$PROFILES" ]&&[ -w "$PROFILES" ]&&mkdir -p "$PROFILE"&&chmod 700 "$PROFILE";then
-export ASH_PROFILE_DIR="$PROFILE"
+rm -f /tmp/aurade-release.gpg
+if [ "$AURADE_OK" -eq 1 ];then
+echo "=== AuraDE installed ==="
 else
-logger -t kibaos-ash "cannot use $PROFILE as $(id -un): is the user in group 'users'? returning to the greeter"
-exit 1
-fi
-unset DISPLAY WAYLAND_DISPLAY
-umask 002
-start=$(date +%s)
-"$SESSION"
-rc=$?
-run=$(($(date +%s)-start))
-logger -t kibaos-ash "Ash session exited rc=$rc after ${run}s"
-if [ "$run" -lt "$QUICK_SECS" ];then
-logger -t kibaos-ash "Ash died in under ${QUICK_SECS}s, returning to the greeter"
-exit 1
-fi
-exit 0
-ASHLAUNCH
-chmod 755 /usr/local/bin/kibaos-ash-session
-mkdir -p /usr/share/wayland-sessions
-cat >/usr/share/wayland-sessions/chromeos-ash.desktop <<'ASHSESSIONDESKTOP'
-[Desktop Entry]
-Name=ChromeOS Ash
-Comment=ChromeOS Ash shell on its own X server
-Exec=/usr/local/bin/kibaos-ash-session
-Type=Application
-DesktopNames=ChromeOS
-ASHSESSIONDESKTOP
-echo "=== ChromeOS Ash shell installed ==="
-else
-echo "ERROR: ChromeOS Ash build failed -- Budgie is gone, so there is no desktop to fall back to" >&2
-rm -rf "$ASH_DIR"
+echo "ERROR: AuraDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 exit 1
 fi
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
@@ -4191,7 +4080,7 @@ printf '[default_session]\n'
 printf 'command = "env GTK_USE_PORTAL=0 GDK_DEBUG=no-portals dbus-run-session cage -s -mlast -d -- regreet"\n'
 printf 'user = "greeter"\n'
 if [ -n "$_user" ];then
-_cmd=/usr/local/bin/kibaos-ash-session
+_cmd=/usr/bin/aurade-session-supervisor
 printf '\n[initial_session]\ncommand = "%s"\nuser = "%s"\n' "$_cmd" "$_user"
 fi
 } >"$_tmp"
@@ -4203,8 +4092,8 @@ chmod 755 /usr/local/bin/kibaos-greetd-config
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/liveuser <<'LIVEUSERACCOUNTS'
 [User]
-Session=chromeos-ash
-XSession=chromeos-ash
+Session=aurade
+XSession=aurade
 SystemAccount=false
 LIVEUSERACCOUNTS
 chmod 600 /var/lib/AccountsService/users/liveuser
@@ -4226,8 +4115,8 @@ logger -t kibaos-live-autologin "greetd config was missing autologin; rewrote it
 fi
 rm -f /run/greetd.run
 mkdir -p /var/lib/AccountsService/users
-if ! grep -qs '^Session=chromeos-ash' /var/lib/AccountsService/users/liveuser;then
-printf '[User]\nSession=chromeos-ash\nXSession=chromeos-ash\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
+if ! grep -qs '^Session=aurade' /var/lib/AccountsService/users/liveuser;then
+printf '[User]\nSession=aurade\nXSession=aurade\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
 chmod 600 /var/lib/AccountsService/users/liveuser
 fi
 passwd -u liveuser >/dev/null 2>&1||true
@@ -4300,7 +4189,7 @@ ExecStart=/usr/local/bin/kibaos-gpu-select
 WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
-for _f in /usr/share/wayland-sessions/chromeos-ash.desktop /usr/local/bin/kibaos-ash-session /usr/bin/Xorg /usr/bin/startx /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
+for _f in /usr/share/wayland-sessions/aurade.desktop /usr/bin/aurade-session-supervisor /usr/lib/systemd/system/greetd.service /usr/bin/regreet /usr/bin/cage;do
 [ -e "$_f" ]||{
 echo "ERROR: autologin prerequisite missing: $_f" >&2
 exit 1
@@ -4517,7 +4406,7 @@ log "Restarting session..."
 {
 [ -d /run/archiso ]&&rm -f /run/greetd.run
 systemctl restart greetd 2>/dev/null
-}||pkill -TERM Xorg 2>/dev/null||true
+}||pkill -TERM weston 2>/dev/null||true
 sleep 1
 log "Session restarted."
 }
@@ -4635,7 +4524,7 @@ FILEPATH=$(echo "$line"|awk '{print $2}'|sed 's|^\./||')
 case "$FILEPATH" in
 etc/greetd*|usr/bin/greetd*|usr/bin/regreet*|usr/bin/cage*|usr/share/kibaos/greeter*)NEEDS_DISPLAY_RESTART=true
 ;;
-usr/bin/Xorg*|usr/bin/startx*)NEEDS_COMPOSITOR_RESTART=true
+usr/bin/weston*)NEEDS_COMPOSITOR_RESTART=true
 esac
 done <"$MANIFEST"
 _active_user_info(){
@@ -4804,25 +4693,6 @@ mkdir -p \
 "$SKEL/.config/gtk-4.0" \
 "$SKEL/.config/autostart" \
 "$SKEL/.config/fastfetch"
-cat >/usr/local/bin/kibaos-desktop-icons <<'DESKTOPICONSWRAP'
-#!/bin/sh
-pcmanfm-qt --desktop&
-PID=$!
-sleep 2
-pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.jpg
-wait "$PID"
-DESKTOPICONSWRAP
-chmod +x /usr/local/bin/kibaos-desktop-icons
-cat >"$SKEL/.config/autostart/pcmanfm-qt-desktop.desktop" <<'DESKTOPVIEW'
-[Desktop Entry]
-Type=Application
-Name=PCManFM-Qt Desktop
-Exec=/usr/local/bin/kibaos-desktop-icons
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-X-GNOME-AutoRestart=true
-DESKTOPVIEW
 cat >"$SKEL/.config/gtk-3.0/settings.ini" <<'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
@@ -4938,11 +4808,12 @@ cat >"$SKEL/.config/fontconfig/fonts.conf" <<'FONTCONF'
 FONTCONF
 cat >"$SKEL/.config/electron-flags.conf" <<'ELECTRONFLAGS'
 --enable-features=UseOzonePlatform
---ozone-platform=x11
+--ozone-platform=wayland
+--enable-wayland-ime
 ELECTRONFLAGS
 cat >"$SKEL/.config/chrome-flags.conf" <<'CHROMEFLAGS'
 --enable-features=UseOzonePlatform
---ozone-platform=x11
+--ozone-platform=wayland
 CHROMEFLAGS
 cat >"$SKEL/.config/autostart/polkit-agent.desktop" <<'POLKIT'
 [Desktop Entry]
@@ -5438,10 +5309,12 @@ cp "/usr/share/applications/$src_desktop.desktop" \
 chmod +x "/home/liveuser/Desktop/$src_desktop.desktop" 2>/dev/null||true
 done
 cat >/etc/environment <<'ENV'
-DESKTOP_SESSION=chromeos-ash
-XDG_CURRENT_DESKTOP=ChromeOS
-XDG_SESSION_DESKTOP=chromeos-ash
-XDG_SESSION_TYPE=x11
+XDG_SESSION_TYPE=wayland
+KWIN_FORCE_SW_CURSOR=1
+MOZ_ENABLE_WAYLAND=1
+ELECTRON_OZONE_PLATFORM_HINT=wayland
+CLUTTER_BACKEND=wayland
+SDL_VIDEODRIVER=wayland
 KIBAOS_VERSION=rolling
 KIBAOS_VENDOR="Kiba Labs, LLC"
 ENV
