@@ -2354,39 +2354,6 @@ cp "$LOGO_256" "$INSTALLER_LOGO"
 fi
 pacman -Syu --noconfirm git
 set -euo pipefail
-git clone --depth 1 https://github.com/KibaLabsLLC/Okami.git
-cd Okami
-pacman -Syu --noconfirm --needed \
-cmake extra-cmake-modules qt6-base qt6-declarative qt6-svg kirigami flatpak kcoreaddons ki18n
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-mkdir -p build&&cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . -j"$(nproc)"
-git clone https://github.com/KibaLabsLLC/KibaD
-cd KibaD/
-mkdir -p "/usr/lib/systemd/system"
-cat >"/usr/lib/systemd/system/kibad.service" <<'EOF'
-[Unit]
-Description=KibaD Hardware Telemetry Daemon
-After=graphical-session.target
-Wants=network-online.target
-
-[Service]
-User=1000
-Environment="WAYLAND_DISPLAY=wayland-0"
-Environment="XDG_RUNTIME_DIR=/run/user/1000"
-Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus"
-Type=simple
-ExecStart=/usr/lib/kibad/kibad
-Restart=on-failure
-RestartSec=10
-
-[Install]
-WantedBy=graphical-session.target
-EOF
-cargo build --release
-install -Dm755 target/release/kibad \
-"/usr/lib/kibad/kibad"
 mkdir -p /usr/share/icons/hicolor/scalable/actions
 cp /usr/share/kibaos/logo-256.png /usr/share/icons/hicolor/scalable/actions/kibaos-watermark-symbolic.png 2>/dev/null||true
 gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null||true
