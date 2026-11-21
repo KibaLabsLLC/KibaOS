@@ -25,8 +25,6 @@
   <a href="https://matrix.to/#/#kibalabs:matrix.org">Matrix</a>
 </p>
 
-⸻
-
 <p align="center">
   <img src="https://raw.githubusercontent.com/KibaLabsLLC/Kiba/main/branding/oin-member-2-0-horiz-1.png" alt="Open Invention Network Member" width="180" />
 </p>
