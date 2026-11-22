@@ -2711,13 +2711,16 @@ Handles what a raw `grep -F | sed` cannot see:
     name is invisible until decompressed. Entries are rewritten and the pak is
     rebuilt (ids, aliases and entry order unchanged, verified before writing).
   * UTF-16LE strings (Chromium keeps many as char16_t).
-  * Case variants: AuraDE, AURADE, Aurade.
+  * Only the display spelling "AuraDE" (never AURADE_* env vars or *Aurade* identifiers).
 Name swaps are same length (6 chars) so ELF binaries stay valid; the tagline is
 only rewritten in paks and text files, where length may change.
 """
 import gzip, os, struct, sys
 
-NAME = [("AuraDE", "KibaOS"), ("AURADE", "KIBAOS"), ("Aurade", "KibaOS")]
+# Display name ONLY. AURADE_* are environment variables read by the session scripts and
+# *Aurade* (requestAuradeNetworkApps, onAuradeUpdateClick_ ...) are identifiers shared
+# between the WebUI JS and the browser binary: renaming either breaks things.
+NAME = [("AuraDE", "KibaOS")]
 TAGLINES_OLD = ["Fast. Secure. Effortless."]
 TAGLINE_NEW = "Fast. Simple. Limitless."
 BROTLI_MAGIC = b"\x1e\x9b"
@@ -2853,13 +2856,12 @@ def do_file(path):
     if "keyring" in path or "gnupg" in path or path.endswith((".gpg", ".sig", ".asc", ".kbx", ".key", ".pem")):
         return
     try:
-        if os.path.islink(path) or not os.path.isfile(path) or os.path.getsize(path) > 256 * 1024 * 1024:
+        if os.path.islink(path) or not os.path.isfile(path) or os.path.getsize(path) > 2 * 1024 ** 3:
             return
         d = open(path, "rb").read()
     except OSError:
         return
-    low = d.lower()
-    if b"aurade" not in low and "aurade".encode("utf-16-le") not in low and \
+    if b"AuraDE" not in d and "AuraDE".encode("utf-16-le") not in d and \
        not any(t.encode() in d or t.encode("utf-16-le") in d for t in TAGLINES_OLD):
         if not path.endswith(".pak"):
             return
@@ -2874,6 +2876,41 @@ def do_file(path):
         os.chmod(path, mode)
         stats["files"] += 1
 
+def pak_entries(path):
+    d = open(path, "rb").read()
+    if d[:2] == b"\x1f\x8b":
+        d = gzip.decompress(d)
+    if len(d) < 12 or struct.unpack_from("<I", d, 0)[0] != 5:
+        return
+    count = struct.unpack_from("<H", d, 8)[0]
+    ents = [struct.unpack_from("<HI", d, 12 + i * 6) for i in range(count + 1)]
+    for i in range(count):
+        p = d[ents[i][1]:ents[i + 1][1]]
+        try:
+            p = unpack_entry(p)[1]
+        except Exception:
+            continue
+        yield ents[i][0], p
+
+def verify(roots):
+    """Fail the build if the welcome title could still say AuraDE."""
+    bad = []
+    for root in roots:
+        for dp, dn, fn in os.walk(root):
+            for f in fn:
+                path = os.path.join(dp, f)
+                if f.endswith(".pak") and not os.path.islink(path):
+                    for i, p in pak_entries(path):
+                        if b"AuraDE" in p or "AuraDE".encode("utf-16-le") in p:
+                            bad.append("%s entry %d" % (path, i))
+    en = [r for r in roots if os.path.isdir(r)]
+    found_locale = any(os.path.exists(os.path.join(r, "locales", "en-US.pak")) for r in en)
+    print("kiba-rebrand: verify: %d pak entr(ies) still contain AuraDE; en-US locale pak %s"
+          % (len(bad), "present" if found_locale else "NOT FOUND"))
+    for b in bad[:20]:
+        print("kiba-rebrand: STILL AuraDE: " + b, file=sys.stderr)
+    return not bad and found_locale
+
 def main(roots):
     for root in roots:
         for dp, dn, fn in os.walk(root):
@@ -2883,6 +2920,8 @@ def main(roots):
     print("kiba-rebrand: %(paks)d pak(s) / %(entries)d pak entries / %(files)d file(s) rewritten" % stats)
     for s in stats["skipped"]:
         print("kiba-rebrand: SKIPPED " + s, file=sys.stderr)
+    if not verify(roots):
+        sys.exit(2)
 
 if __name__ == "__main__":
     main(sys.argv[1:] or ["/usr/lib/chromiumos-ash", "/usr/lib/aurade-greeter", "/usr/share"])
@@ -2890,9 +2929,25 @@ KIBAREBRAND
 chmod +x /usr/local/bin/kiba-rebrand
 python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt||{ echo "ERROR: kiba-rebrand failed" >&2;exit 1; }
 # Verify: no display-case name left in ASCII or UTF-16, anywhere that ships
-_left="$(grep -rlaE 'AuraDE|AURADE|Aurade|A.u.r.a.D.E|Fast\. Secure\. Effortless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
+_left="$(grep -rlaE 'AuraDE|A.u.r.a.D.E|Fast\. Secure\. Effortless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
 [ -n "$_left" ]&&echo "!! rebrand: display-name strings still present in: $_left" >&2
-rm -f /usr/local/bin/kiba-rebrand
+# Keep the tool and re-run it whenever pacman reinstalls/updates the AuraDE packages --
+# otherwise an update (or the installer pulling the package again) restores "AuraDE".
+mkdir -p /etc/pacman.d/hooks
+cat >/etc/pacman.d/hooks/99-kibaos-rebrand.hook <<'KIBAHOOK'
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = chromiumos-ash
+Target = aurade
+Target = aurade-greeter
+
+[Action]
+Description = Rebranding AuraDE -> KibaOS...
+When = PostTransaction
+Exec = /usr/bin/python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter
+KIBAHOOK
 sed -i '/^CHROME=/a CHROME_FLAGS="${CHROME_FLAGS:-} --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg"' /usr/bin/chromiumos-ash-session
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
