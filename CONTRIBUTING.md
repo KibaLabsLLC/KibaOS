@@ -2,8 +2,6 @@
 
 Thank you for your interest in contributing to **KibaOS**!
 
-KibaOS is a ready-to-use Linux desktop built on Arch Linux with the Budgie desktop environment. Our goal is simple: **nothing should look or feel like it is showing you the plumbing**. Every contribution — whether code, design, documentation, or testing — should help keep that experience calm, coherent, and approachable.
-
 This guide will help you get started.
 
 ## Table of Contents
@@ -80,7 +78,7 @@ docker run --rm --privileged \
   /w/build.sh
 ```
 
-The `build.sh` script sets up the Arch Linux base, configures the Budgie desktop, applies KibaOS customizations, builds related components, and produces a bootable ISO.
+The `build.sh` script sets up the Arch Linux base, configures the desktop, applies KibaOS customizations, builds related components, and produces a bootable ISO.
 
 Official builds are produced via GitHub Actions when changes are merged.
 
