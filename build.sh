@@ -2281,7 +2281,7 @@ grep -q 'HandleLidSwitchDocked' /etc/systemd/logind.conf||echo 'HandleLidSwitchD
 grep -q 'HandleLidSwitchExternalPower' /etc/systemd/logind.conf||echo 'HandleLidSwitchExternalPower=ignore' >>/etc/systemd/logind.conf
 grep -q 'HandlePowerKey' /etc/systemd/logind.conf&&sed -i 's/^HandlePowerKey=.*/HandlePowerKey=poweroff/' /etc/systemd/logind.conf
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
-WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/99bcf5ffda8d7ea000dbf3be51c3a5888a5efcf0/assets/wallpapers/913191256_1475353824533438_3815242921024001402_n.webp"
+WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/eb32d69184b0ab434031bdbcf10e7f05230bf04a/assets/wallpapers/914336476_1020081810382353_5994052822657741584_n.webp"
 BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
