@@ -2359,282 +2359,22 @@ gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null||true
 userdel -r builduser 2>/dev/null||true
 rm -f /etc/sudoers.d/builduser
 KIBA_PLYMOUTH_DIR="/usr/share/plymouth/themes/kibaos"
-mkdir -p "$KIBA_PLYMOUTH_DIR"
-if [ -f "$BOOT_SPLASH" ];then
-cp "$BOOT_SPLASH" "$KIBA_PLYMOUTH_DIR/splash.png"
-else
-cp /usr/share/kibaos/logo-256.png "$KIBA_PLYMOUTH_DIR/splash.png" 2>/dev/null||true
+KIBA_SPLASH_SRC="/tmp/kiba-assets-splash"
+rm -rf "$KIBA_SPLASH_SRC"
+_splash_ok=0
+for _try in 1 2 3 4 5;do
+if git clone --depth 1 https://github.com/KibaLabsLLC/Assets "$KIBA_SPLASH_SRC"&&[ -f "$KIBA_SPLASH_SRC/Splash/install.sh" ];then
+_splash_ok=1
+break
 fi
-KIBA_WAVE_DEPS=""
-for _p in python-numpy python-pillow;do
-pacman -Q "$_p" >/dev/null 2>&1||KIBA_WAVE_DEPS="$KIBA_WAVE_DEPS $_p"
+echo "!! Assets clone attempt $_try/5 failed -- retrying in 5s" >&2
+rm -rf "$KIBA_SPLASH_SRC"
+sleep 5
 done
-pacman -S --noconfirm --needed python-numpy python-pillow
-cat >/tmp/kiba-wave-gen.py <<'KIBAWAVEGEN'
-#!/usr/bin/env python3
-"""
-Generates the assets for KibaOS's boot animation: kAI's gradient wave (see
-KibaLabsLLC/kAI ui/widgets.cpp, WaveWidget::paintEvent) on white, the colour of
-kAI's card.
-
-Why two kinds of asset instead of full-colour frames
-----------------------------------------------------
-All four wave layers are filled with the *same* gradient colour G(x) at
-different opacities a_i, so over a background colour BG
-
-    pixel = G(x) * C(x, y) + BG * (1 - C(x, y)),
-    C = 1 - prod_i(1 - a_i * m_i(x, y))
-
-where m_i is each layer's antialiased coverage. Plymouth's script module
-cannot draw polygons, but it can stack sprites, so the theme shows:
-
-    1. gradient strip   (wave-gradient.png)    scrolled with SetX -> exact drift
-    2. BG-coloured alpha mask (wave-N.png), alpha = 1 - C, one per loop frame
-    3. BG-coloured side covers (wave-cover.png) hiding the part of the strip that
-       sticks out past the wave region
-
-The mask frames loop seamlessly: every sine's angular rate is rounded to a whole
-number of cycles per loop (LOOP_S), staying within a few percent of kAI's rates.
-
-Usage: kiba-wave-gen.py OUTDIR
-Needs: python-numpy, python-pillow
-"""
-import math
-import os
-import sys
-
-import numpy as np
-from PIL import Image, ImageDraw
-
-W, H = 640, 240
-SS = 8                      # supersampling for antialiasing
-BG = (255, 255, 255)         # background; also the colour of the masks and covers
-FPS = 25                    # Plymouth refreshes at ~50 Hz, so 2 ticks per frame
-LOOP_S = 6                  # seconds per seamless loop
-NFRAMES = FPS * LOOP_S
-
-FEATHER_X = 0.14
-FEATHER_Y = 0.30
-
-CYAN, BLUE = (0x6A, 0xD8, 0xFD), (0x3E, 0x64, 0xEB)
-VIOLET, PINK = (0x7E, 0x63, 0xFA), (0xF2, 0x9E, 0xF5)
-STOPS = [(0.00, CYAN), (0.33, BLUE), (0.66, VIOLET), (1.00, PINK)]
-GRAD_LEN = 1.15 * W                 # gradient runs 0 .. 1.15*w, ReflectSpread
-GRAD_PERIOD = 2 * GRAD_LEN          # reflect pattern repeats every 2 lengths
-DRIFT_PX_PER_S = 36.0 * (W / 320)   # kAI: 36 px/s at its 320 px width
-
-LAYERS = [(1.15, 0.55, 70, 0.0), (0.80, 0.90, 105, 1.7),
-          (0.55, 1.25, 150, 3.1), (0.95, 0.75, 255, 4.6)]
-
-SPEED = 3.4                  # phase rate, rad/s (kAI Thinking)
-AMP_BASE, AMP_SWING, AMP_RATE = 0.30, 0.12, 3.2
-
-
-def cycles_per_loop(rate):
-    return max(1, round(rate * LOOP_S / (2 * math.pi)))
-
-
-def coverage(angle1, angle2, amp):
-    """C(x, y) in 0..1, shape (H, W): union of the four translucent layers."""
-    xs = np.arange(0, W + 4 + 1, 3.0)
-    u = xs / W
-    env = np.power(np.sin(math.pi * np.clip(u, 0, 1)), 0.9) * 0.65 + 0.35
-    A = H * 0.40 * amp
-    base_y = H * 0.60
-    keep = np.ones((H, W), dtype=np.float64)          # prod(1 - a_i * m_i)
-    for (wl, _sm, alpha, off), a1, a2 in zip(LAYERS, angle1, angle2):
-        y = base_y - A * env * (np.sin(u * 2 * math.pi / wl * 1.6 + a1 + off)
-                                + 0.35 * np.sin(u * 2 * math.pi * 2.3 - a2 + off * 2))
-        o = 0.5
-        pts = ([(0.0 * SS - o, H * SS - o)] + [(x * SS - o, yy * SS - o) for x, yy in zip(xs, y)]
-               + [((W + 4) * SS - o, H * SS - o)])
-        im = Image.new("L", (W * SS, H * SS), 0)
-        ImageDraw.Draw(im).polygon(pts, fill=255)
-        m = np.asarray(im, dtype=np.float64).reshape(H, SS, W, SS).mean(axis=(1, 3)) / 255.0
-        keep *= 1.0 - (alpha / 255.0) * m
-    return 1.0 - keep
-
-
-def feather():
-    def ramp(d, span):
-        if span <= 0:
-            return np.ones_like(d)
-        t = np.clip(d / span, 0, 1)
-        return t * t * (3 - 2 * t)
-    x = np.arange(W) + 0.5
-    y = np.arange(H) + 0.5
-    fx = ramp(np.minimum(x, W - x), FEATHER_X * W)
-    fy = ramp(H - y, FEATHER_Y * H)
-    return np.outer(fy, fx)
-
-
-def gradient_strip(width, height):
-    """kAI's reflecting 4-stop gradient, sampled over `width` px."""
-    t = (np.arange(width) + 0.5) / GRAD_LEN
-    t = np.mod(t, 2.0)
-    t = np.where(t > 1.0, 2.0 - t, t)
-    pos = [s[0] for s in STOPS]
-    chans = [np.interp(t, pos, [s[1][c] for s in STOPS]) for c in range(3)]
-    row = np.stack(chans, axis=-1)
-    return np.repeat(row[None, :, :], height, axis=0)
-
-
-def main(outdir):
-    os.makedirs(outdir, exist_ok=True)
-    rates1 = [cycles_per_loop(SPEED * sm) * 2 * math.pi / LOOP_S for (_, sm, _, _) in LAYERS]
-    rates2 = [cycles_per_loop(SPEED * 0.7 * sm) * 2 * math.pi / LOOP_S for (_, sm, _, _) in LAYERS]
-    amp_rate = cycles_per_loop(AMP_RATE) * 2 * math.pi / LOOP_S
-    fe = feather()
-
-    masks = []
-    for f in range(NFRAMES):
-        t = f / FPS
-        amp = AMP_BASE + AMP_SWING * math.sin(amp_rate * t)
-        c = coverage([r * t for r in rates1], [r * t for r in rates2], amp) * fe
-        masks.append(1.0 - c)                          # BG overlay's alpha
-
-    lit = np.min(np.stack(masks), axis=0) < 0.999
-    rows = np.where(lit.any(axis=1))[0]
-    top = max(0, int(rows[0]) - 2)
-    hc = H - top
-
-    for f, a in enumerate(masks):
-        rgba = np.zeros((hc, W, 4), dtype=np.uint8)
-        rgba[..., :3] = BG
-        rgba[..., 3] = np.round(a[top:] * 255).astype(np.uint8)
-        Image.fromarray(rgba, "RGBA").save(os.path.join(outdir, "wave-%d.png" % f), optimize=True)
-
-    strip_w = int(math.ceil(GRAD_PERIOD)) + W
-    strip = gradient_strip(strip_w, hc).round().astype(np.uint8)
-    Image.fromarray(strip, "RGB").save(os.path.join(outdir, "wave-gradient.png"), optimize=True)
-
-    cover_w = int(math.ceil(GRAD_PERIOD))
-    Image.new("RGB", (cover_w, hc), BG).save(os.path.join(outdir, "wave-cover.png"), optimize=True)
-
-    with open(os.path.join(outdir, "wave-params.script"), "w") as fh:
-        fh.write("wave_w = %d;\nwave_h = %d;\nwave_frames = %d;\nwave_fps = %d;\n"
-                 % (W, hc, NFRAMES, FPS))
-        fh.write("wave_period = %d;\nwave_drift = %.4f;\nwave_cover_w = %d;\n"
-                 % (math.ceil(GRAD_PERIOD), DRIFT_PX_PER_S, cover_w))
-    print("wave: %d frames, %dx%d, strip %dx%d" % (NFRAMES, W, hc, strip_w, hc))
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit("usage: kiba-wave-gen.py OUTDIR")
-    main(sys.argv[1])
-KIBAWAVEGEN
-python3 /tmp/kiba-wave-gen.py "$KIBA_PLYMOUTH_DIR"||{
-echo "ERROR: failed to render the Plymouth wave animation" >&2
+[ "$_splash_ok" -eq 1 ]||{
+echo "ERROR: could not fetch KibaLabsLLC/Assets (Splash/install.sh)" >&2
 exit 1
 }
-test -s "$KIBA_PLYMOUTH_DIR/wave-0.png" -a -s "$KIBA_PLYMOUTH_DIR/wave-149.png" \
--a -s "$KIBA_PLYMOUTH_DIR/wave-gradient.png" -a -s "$KIBA_PLYMOUTH_DIR/wave-cover.png"||{
-echo "ERROR: Plymouth wave frames are missing" >&2
-exit 1
-}
-rm -f /tmp/kiba-wave-gen.py
-cat >"$KIBA_PLYMOUTH_DIR/kibaos.plymouth" <<'PLYMOUTHDESC'
-[Plymouth Theme]
-Name=KibaOS
-Description=KibaOS boot splash (kAI wave)
-ModuleName=script
-
-[script]
-ImageDir=/usr/share/plymouth/themes/kibaos
-ScriptFile=/usr/share/plymouth/themes/kibaos/kibaos.script
-PLYMOUTHDESC
-cat "$KIBA_PLYMOUTH_DIR/wave-params.script" - >"$KIBA_PLYMOUTH_DIR/kibaos.script" <<'PLYMOUTHSCRIPT'
-// KibaOS boot splash -- Plymouth script theme.
-// kAI's gradient wave, centered on white (kAI's card colour). Nothing else is drawn.
-// wave_* constants are prepended by the build (generated alongside the frames).
-//
-// Compositing, bottom to top:
-//   z=1  wave-gradient.png  kAI's reflecting gradient, scrolled sideways (exact drift)
-//   z=2  wave-N.png         white alpha mask whose holes are the wave (looping frames)
-//   z=3  wave-cover.png     white blocks hiding the strip outside the wave region
-// Because every layer of kAI's wave is the same gradient colour at a different
-// opacity, gradient under a white overlay of alpha (1 - coverage) is
-// pixel-identical to painting the layers on white.
-
-Window.SetBackgroundTopColor(1, 1, 1);
-Window.SetBackgroundBottomColor(1, 1, 1);
-
-wave_x = Math.Int((Window.GetWidth() - wave_w) / 2);
-wave_y = Math.Int((Window.GetHeight() - wave_h) / 2);
-
-wave_strip = Sprite(Image("wave-gradient.png"));
-wave_strip.SetZ(1);
-wave_strip.SetX(wave_x);
-wave_strip.SetY(wave_y);
-
-wave_images = [];
-for (wave_i = 0; wave_i < wave_frames; wave_i++)
-  wave_images[wave_i] = Image("wave-" + wave_i + ".png");
-wave_mask = Sprite(wave_images[0]);
-wave_mask.SetZ(2);
-wave_mask.SetX(wave_x);
-wave_mask.SetY(wave_y);
-
-wave_cover_image = Image("wave-cover.png");
-wave_cover_left = Sprite(wave_cover_image);
-wave_cover_left.SetZ(3);
-wave_cover_left.SetX(wave_x - wave_cover_w);
-wave_cover_left.SetY(wave_y);
-wave_cover_right = Sprite(wave_cover_image);
-wave_cover_right.SetZ(3);
-wave_cover_right.SetX(wave_x + wave_w);
-wave_cover_right.SetY(wave_y);
-
-// The refresh callback runs ~50 times per second.
-wave_tick = 0;
-fun refresh_callback() {
-  wave_tick++;
-
-  frame = Math.Int(wave_tick * wave_fps / 50);
-  frame = frame - Math.Int(frame / wave_frames) * wave_frames;
-  wave_mask.SetImage(wave_images[frame]);
-
-  drift = wave_tick * wave_drift / 50;
-  drift = drift - Math.Int(drift / wave_period) * wave_period;
-  wave_strip.SetX(wave_x - Math.Int(drift));
-}
-Plymouth.SetRefreshFunction(refresh_callback);
-
-// Full-disk-encryption unlock: the only other thing that is ever drawn, and
-// only while a password is being asked for. Sits just under the wave.
-pw_prompt_sprite = Sprite();
-pw_bullets_sprite = Sprite();
-pw_y = wave_y + wave_h + 24;
-
-fun display_password_callback(prompt, bullets) {
-  if (prompt == "")
-    prompt = "Enter your password to unlock the disk:";
-  pw_prompt_image = Image.Text(prompt, 0.482, 0.510, 0.722, 1);   // kAI "muted" 7B82B8
-  pw_prompt_sprite.SetImage(pw_prompt_image);
-  pw_prompt_sprite.SetOpacity(1);
-  pw_prompt_sprite.SetX(Window.GetWidth() / 2 - pw_prompt_image.GetWidth() / 2);
-  pw_prompt_sprite.SetY(pw_y);
-
-  pw_text = "";
-  for (pw_i = 0; pw_i < bullets; pw_i++)
-    pw_text = pw_text + "*";
-  if (pw_text == "") pw_text = " ";
-  pw_bullets_image = Image.Text(pw_text, 0.078, 0.118, 0.310, 1); // kAI "navy" 141E4F
-  pw_bullets_sprite.SetImage(pw_bullets_image);
-  pw_bullets_sprite.SetOpacity(1);
-  pw_bullets_sprite.SetX(Window.GetWidth() / 2 - pw_bullets_image.GetWidth() / 2);
-  pw_bullets_sprite.SetY(pw_y + pw_prompt_image.GetHeight() + 8);
-}
-Plymouth.SetDisplayPasswordFunction(display_password_callback);
-
-fun display_normal_callback() {
-  pw_prompt_sprite.SetOpacity(0);
-  pw_bullets_sprite.SetOpacity(0);
-}
-Plymouth.SetDisplayNormalFunction(display_normal_callback);
-PLYMOUTHSCRIPT
-rm -f "$KIBA_PLYMOUTH_DIR/wave-params.script"
 mkdir -p /etc/plymouth
 cat >/etc/plymouth/plymouthd.conf <<'PLYMOUTHD'
 [Daemon]
@@ -2642,17 +2382,22 @@ Theme=kibaos
 ShowDelay=0
 DeviceTimeout=8
 PLYMOUTHD
-plymouth-set-default-theme -R kibaos 2>/dev/null||true
-echo "=== Boot splash: custom kibaos Plymouth theme installed ==="
-cp "$KIBA_PLYMOUTH_DIR/splash.png" /usr/share/plymouth/arch-logo.png
+chmod +x "$KIBA_SPLASH_SRC/Splash/install.sh"
+(cd "$KIBA_SPLASH_SRC/Splash"&&./install.sh)||echo "!! Splash install.sh reported a failure (usually the initramfs rebuild) -- checking theme files anyway" >&2
+for _f in kibaos.plymouth kibaos.script background.png logo.png raccoon.png;do
+[ -s "$KIBA_PLYMOUTH_DIR/$_f" ]||{
+echo "ERROR: Splash asset $_f was not installed into $KIBA_PLYMOUTH_DIR" >&2
+exit 1
+}
+done
+echo "=== Boot splash: KibaLabsLLC/Assets Splash installed via install.sh ==="
+magick "$KIBA_PLYMOUTH_DIR/logo.png" -filter Lanczos -resize '480x480>' /usr/share/kibaos/plymouth-logo.png||cp "$KIBA_PLYMOUTH_DIR/logo.png" /usr/share/kibaos/plymouth-logo.png
+cp /usr/share/kibaos/plymouth-logo.png /usr/share/plymouth/arch-logo.png
 for _theme_dir in bgrt spinner;do
 if [ -d "/usr/share/plymouth/themes/$_theme_dir" ];then
-cp "$KIBA_PLYMOUTH_DIR/splash.png" \
-"/usr/share/plymouth/themes/$_theme_dir/watermark.png"
+cp /usr/share/kibaos/plymouth-logo.png "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
 fi
 done
-rm -rf /tmp/kiba-plymouth-snapshot
-cp -a "$KIBA_PLYMOUTH_DIR" /tmp/kiba-plymouth-snapshot
 CUTEFISH_ICONS_BUILD="/tmp/cutefish-icons"
 rm -rf "$CUTEFISH_ICONS_BUILD"
 git clone --depth 1 https://github.com/cutefishos/icons.git "$CUTEFISH_ICONS_BUILD"
@@ -5396,19 +5141,13 @@ cat >/etc/tmpfiles.d/kibaos.conf <<'TMPFILES'
 e /tmp/kibaos-ocr.* - - - 1d
 TMPFILES
 systemctl enable systemd-tmpfiles-clean.timer
-echo "=== Re-applying KibaOS boot animation ==="
+echo "=== Re-applying KibaOS boot animation (KibaLabsLLC/Assets Splash/install.sh) ==="
 KIBA_PLY_DIR="/usr/share/plymouth/themes/kibaos"
-if [ -d /tmp/kiba-plymouth-snapshot ];then
-rm -rf "$KIBA_PLY_DIR"
-mkdir -p "$KIBA_PLY_DIR"
-cp -a /tmp/kiba-plymouth-snapshot/. "$KIBA_PLY_DIR/"
+KIBA_SPLASH_SRC="/tmp/kiba-assets-splash"
+if [ ! -f "$KIBA_SPLASH_SRC/Splash/install.sh" ];then
+rm -rf "$KIBA_SPLASH_SRC"
+git clone --depth 1 https://github.com/KibaLabsLLC/Assets "$KIBA_SPLASH_SRC"
 fi
-for _f in kibaos.plymouth kibaos.script splash.png wave-0.png wave-149.png wave-gradient.png wave-cover.png;do
-[ -s "$KIBA_PLY_DIR/$_f" ]||{
-echo "ERROR: boot animation asset $_f is missing -- cannot re-apply KibaOS boot animation" >&2
-exit 1
-}
-done
 mkdir -p /etc/plymouth
 cat >/etc/plymouth/plymouthd.conf <<'PLYMOUTHD_FINAL'
 [Daemon]
@@ -5416,17 +5155,26 @@ Theme=kibaos
 ShowDelay=0
 DeviceTimeout=8
 PLYMOUTHD_FINAL
+chmod +x "$KIBA_SPLASH_SRC/Splash/install.sh"
+(cd "$KIBA_SPLASH_SRC/Splash"&&./install.sh)||echo "!! Splash install.sh reported a failure (usually the initramfs rebuild) -- checking theme files anyway" >&2
+for _f in kibaos.plymouth kibaos.script background.png logo.png raccoon.png;do
+[ -s "$KIBA_PLY_DIR/$_f" ]||{
+echo "ERROR: boot animation asset $_f is missing -- cannot re-apply KibaOS boot animation" >&2
+exit 1
+}
+done
 plymouth-set-default-theme -R kibaos||echo "!! plymouth-set-default-theme -R failed" >&2
-cp "$KIBA_PLY_DIR/splash.png" /usr/share/plymouth/arch-logo.png
+[ -s /usr/share/kibaos/plymouth-logo.png ]&&cp /usr/share/kibaos/plymouth-logo.png /usr/share/plymouth/arch-logo.png
 for _theme_dir in bgrt spinner;do
-if [ -d "/usr/share/plymouth/themes/$_theme_dir" ];then
-cp "$KIBA_PLY_DIR/splash.png" "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
+if [ -d "/usr/share/plymouth/themes/$_theme_dir" ]&&[ -s /usr/share/kibaos/plymouth-logo.png ];then
+cp /usr/share/kibaos/plymouth-logo.png "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
 fi
 done
 [ "$(plymouth-set-default-theme)" = "kibaos" ]||{
 echo "ERROR: default Plymouth theme is not kibaos after re-apply" >&2
 exit 1
 }
+rm -rf "$KIBA_SPLASH_SRC"
 echo "=== Boot animation: kibaos theme re-applied ==="
 rm -rf /var/cache/pacman/pkg/*
 rm -rf /usr/share/man/* /usr/share/info/* /usr/share/doc/*
