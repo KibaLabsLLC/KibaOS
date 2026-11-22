@@ -2699,6 +2699,105 @@ exit 1
 fi
 # Find every file containing the string (raw bytes), then same-length replace, binary-safe, display-case only
 grep -rlaF -e AuraDE -e AURADE /usr/lib/chromiumos-ash /usr/share 2>/dev/null | xargs -r env LC_ALL=C sed -i 's/AuraDE/KibaOS/g; s/AURADE/KIBAOS/g' || true
+# Welcome-screen tagline ("Fast. Secure. Effortless." -> "Fast. Simple. Limitless.") in every locale pak.
+# Locale paks can be gzip'd and the translated strings differ in length, so rewrite the pak properly instead of sed.
+python3 - <<'KIBATAGLINE' || echo "!! tagline update failed -- continuing" >&2
+import glob, gzip, os, struct, sys
+RID = 45648  # IDS_OOBE_WELCOME_SCREEN tagline ("Fast. Secure. Effortless.")
+D = sys.argv[1] if len(sys.argv) > 1 else "/usr/lib/chromiumos-ash/locales"
+T = {
+"af": "Vinnig. Eenvoudig. Grenseloos.",
+"am": "ፈጣን። ቀላል። ገደብ የለሽ።",
+"ar": "سريع. بسيط. بلا حدود.",
+"bg": "Бързо. Просто. Безгранично.",
+"bn": "দ্রুত। সহজ। সীমাহীন।",
+"ca": "Ràpid. Senzill. Il·limitat.",
+"cs": "Rychle. Jednoduše. Bez hranic.",
+"cy": "Cyflym. Syml. Diderfyn.",
+"da": "Hurtig. Enkel. Grænseløs.",
+"de": "Schnell. Einfach. Grenzenlos.",
+"el": "Γρήγορο. Απλό. Χωρίς όρια.",
+"en-GB": "Fast. Simple. Limitless.",
+"en-US": "Fast. Simple. Limitless.",
+"es": "Rápido. Sencillo. Sin límites.",
+"es-419": "Rápido. Sencillo. Sin límites.",
+"et": "Kiire. Lihtne. Piiramatu.",
+"eu": "Azkarra. Sinplea. Mugarik gabea.",
+"fa": "سریع. ساده. بی\u200cکران.",
+"fi": "Nopea. Yksinkertainen. Rajaton.",
+"fil": "Mabilis. Simple. Walang limitasyon.",
+"fr": "Rapide. Simple. Sans limites.",
+"gl": "Rápido. Sinxelo. Sen límites.",
+"gu": "ઝડપી. સરળ. અમર્યાદ.",
+"he": "מהיר. פשוט. ללא גבולות.",
+"hi": "तेज़. सरल. असीमित.",
+"hr": "Brz. Jednostavan. Bez granica.",
+"hu": "Gyors. Egyszerű. Határtalan.",
+"id": "Cepat. Sederhana. Tanpa batas.",
+"is": "Hraðvirkt, einfalt og takmarkalaust.",
+"it": "Veloce. Semplice. Senza limiti.",
+"ja": "高速。シンプル。無限。",
+"kn": "ವೇಗ. ಸರಳ. ಅಪರಿಮಿತ.",
+"ko": "빠르게. 간편하게. 한계 없이.",
+"lt": "Greita. Paprasta. Be ribų.",
+"lv": "Ātri. Vienkārši. Bez robežām.",
+"ml": "വേഗമേറിയത്. ലളിതം. അതിരുകളില്ലാത്തത്.",
+"mn": "Хурдан. Энгийн. Хязгааргүй.",
+"mr": "जलद. सोपे. अमर्याद.",
+"ms": "Pantas. Mudah. Tanpa had.",
+"nb": "Rask. Enkel. Grenseløs.",
+"nl": "Snel, eenvoudig, grenzeloos.",
+"pl": "Szybko. Prosto. Bez ograniczeń.",
+"pt-BR": "Rápido. Simples. Sem limites.",
+"pt-PT": "Rápido. Simples. Sem limites.",
+"ro": "Rapid. Simplu. Fără limite.",
+"ru": "Быстро. Просто. Без границ.",
+"sk": "Rýchlo. Jednoducho. Bez hraníc.",
+"sl": "Hitro. Preprosto. Brez meja.",
+"sr": "Брзо. Једноставно. Без граница.",
+"sv": "Snabbt. Enkelt. Gränslöst.",
+"sw": "Haraka. Rahisi. Bila kikomo.",
+"ta": "வேகமானது. எளிமையானது. எல்லையற்றது.",
+"te": "వేగవంతమైనది. సరళమైనది. అపరిమితమైనది.",
+"th": "เร็ว เรียบง่าย ไร้ขีดจำกัด",
+"tr": "Hızlı. Basit. Sınırsız.",
+"uk": "Швидко. Просто. Без обмежень.",
+"vi": "Nhanh. Đơn giản. Không giới hạn.",
+"zh-CN": "快速、简单、无限。",
+"zh-TW": "快速、簡單、無限。",
+"zu": "Kuyashesha. Kulula. Akunamkhawulo.",
+}
+done = skipped = 0
+for loc, text in sorted(T.items()):
+    p = os.path.join(D, loc + ".pak")
+    if not os.path.isfile(p):
+        print("!! tagline: no", p, file=sys.stderr); continue
+    try:
+        raw = open(p, "rb").read()
+        gz = raw[:2] == b"\x1f\x8b"
+        b = gzip.decompress(raw) if gz else raw
+        ver, enc = struct.unpack_from("<IB", b, 0)
+        if ver != 5: raise ValueError("pak version %d" % ver)
+        rc, ac = struct.unpack_from("<HH", b, 8)
+        ents = [struct.unpack_from("<HI", b, 12 + 6 * i) for i in range(rc + 1)]
+        tail = b[12 + 6 * (rc + 1): ents[0][1]]  # alias table
+        idx = next((i for i in range(rc) if ents[i][0] == RID), None)
+        if idx is None:
+            skipped += 1; continue
+        data = [b[ents[i][1]:ents[i + 1][1]] for i in range(rc)]
+        data[idx] = text.encode("utf-8") if enc == 1 else text.encode("utf-16-le")
+        off = 12 + 6 * (rc + 1) + len(tail)
+        out = bytearray(b[:12])
+        for i in range(rc):
+            out += struct.pack("<HI", ents[i][0], off); off += len(data[i])
+        out += struct.pack("<HI", ents[rc][0], off) + tail + b"".join(data)
+        res = gzip.compress(bytes(out), 9, mtime=0) if gz else bytes(out)
+        open(p + ".tmp", "wb").write(res); os.replace(p + ".tmp", p)
+        done += 1
+    except Exception as e:
+        print("!! tagline: %s failed: %s" % (p, e), file=sys.stderr)
+print("tagline: updated %d locale paks (%d without the string)" % (done, skipped))
+KIBATAGLINE
 sed -i '/^CHROME=/a CHROME_FLAGS="${CHROME_FLAGS:-} --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg"' /usr/bin/chromiumos-ash-session
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
