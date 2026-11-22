@@ -1,5 +1,5 @@
  <p align="center">
-  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/87106c300ba2f32759001967e9f2f1fb944877bb/branding/README/917365023_1156582867109920_701384252513852255_n.webp?raw=true" alt="KibaOS" width=“800" />
+  <img src="https://github.com/KibaLabsLLC/KibaOS/blob/87106c300ba2f32759001967e9f2f1fb944877bb/branding/README/917365023_1156582867109920_701384252513852255_n.webp?raw=true" alt="KibaOS" width="800" />
 </p>
 <p align="center">
   <strong>A ready-to-use desktop from Kiba Labs, LLC.</strong>
@@ -31,9 +31,9 @@
 
 Meet KibaOS
 
-KibaOS is a modern desktop operating system designed around simplicity, consistency, and a refined user experience.
+KibaOS is a friendly operating system for your computer. It's designed to be simple, consistent, and pleasant to use.
 
-Built to make everyday computing feel effortless, KibaOS brings together a thoughtfully designed desktop, essential applications, and a cohesive visual identity.
+Everyday computing should feel effortless. KibaOS gives you a tidy desktop, the apps you need, and a look that stays the same everywhere.
 
 Developed and maintained by Kiba Labs, LLC.
 
@@ -43,22 +43,22 @@ The Desktop
   <img width="1000" alt="KibaOS Desktop" src="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/main/assets/screenshots/desktop.png">
 </p>
 
-A clean, cohesive desktop experience with carefully considered details, intuitive navigation, and a familiar feel.
+A clean, familiar desktop that's easy to find your way around.
 
 What’s Included
 
-* KibaDE — A cohesive desktop experience designed around simplicity.
-* Everyday applications — Essential tools ready to use out of the box.
-* Okami — A graphical application store for discovering and installing software.
-* Automatic updates — Keep your system up to date with minimal interruption.
-* Custom design — A consistent visual identity throughout the operating system.
+* KibaDE — A simple, easy-to-use desktop.
+* Everyday apps — The tools you need, ready to go the moment you turn it on.
+* Apps & Games — A store where you can find and install more software with a click.
+* Automatic updates — Stay up to date without being interrupted.
+* Custom design — One look and feel throughout.
 
 System Compatibility
 
-KibaOS currently supports:
+KibaOS works on:
 
-* 64-bit x86 computers with UEFI firmware.
-* Android devices compatible with TrebleDroid and TWRP running Android 9 for the mobile edition.
+* Most PCs with a 64-bit Intel or AMD processor and UEFI startup.
+* Android 9 phones and tablets that support TrebleDroid and TWRP (mobile edition).
 
 Get KibaOS
 
@@ -89,12 +89,14 @@ Support KibaOS
 
 License
 
-KibaOS is released under the GNU General Public License v3.0 (GPL-3.0). Individual bundled components may have their own respective licenses.
+KibaOS is free software, released under the GNU General Public License v3.0 (GPL-3.0). Some included apps have their own licenses.
 
 <p align="center">
   <strong>KibaOS</strong>
   <br />
   A Kiba Labs, LLC project.
+  <br />
+  Built on Arch.
   <br />
   <a href="https://kibaos.com">Website</a> ·
   <a href="https://sourceforge.net/projects/kibaos/">Downloads</a> ·
