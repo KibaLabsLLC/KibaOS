@@ -2698,7 +2698,162 @@ echo "ERROR: AuraDE install failed -- Budgie is gone, so there is no desktop to 
 exit 1
 fi
 # Find every file containing the string (raw bytes), then same-length replace, binary-safe, display-case only
-grep -rlaF -e AuraDE -e AURADE /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share 2>/dev/null | xargs -r env LC_ALL=C sed -i 's/AuraDE/KibaOS/g; s/AURADE/KIBAOS/g' || true
+# Rebrand AuraDE -> KibaOS and set the tagline. The old raw grep|sed could not see
+# names inside gzip/brotli-compressed .pak entries or UTF-16 strings, which is where
+# the "Welcome to AuraDE" OOBE title lives. This walks paks properly.
+pacman -S --noconfirm --needed python python-brotli||echo "!! python-brotli missing -- brotli pak entries will be skipped" >&2
+cat >/usr/local/bin/kiba-rebrand <<'KIBAREBRAND'
+#!/usr/bin/env python3
+"""Rebrand AuraDE -> KibaOS everywhere it can hide, and set the tagline.
+
+Handles what a raw `grep -F | sed` cannot see:
+  * .pak resource bundles (v5): entries are gzip/brotli compressed, so the
+    name is invisible until decompressed. Entries are rewritten and the pak is
+    rebuilt (ids, aliases and entry order unchanged, verified before writing).
+  * UTF-16LE strings (Chromium keeps many as char16_t).
+  * Case variants: AuraDE, AURADE, Aurade.
+Name swaps are same length (6 chars) so ELF binaries stay valid; the tagline is
+only rewritten in paks and text files, where length may change.
+"""
+import gzip, os, struct, sys
+
+NAME = [("AuraDE", "KibaOS"), ("AURADE", "KIBAOS"), ("Aurade", "KibaOS")]
+TAGLINE_OLD = "Fast. Simple. Limitless."
+TAGLINE_NEW = "Switch to simple"
+BROTLI_MAGIC = b"\x1e\x9b"
+try:
+    import brotli
+except Exception:
+    brotli = None
+
+stats = {"paks": 0, "entries": 0, "files": 0, "skipped": []}
+
+def swap(b, tagline):
+    """Replace in UTF-8 and UTF-16LE; returns (new_bytes, changed)."""
+    out = b
+    pairs = list(NAME)
+    if tagline:
+        pairs.append((TAGLINE_OLD, TAGLINE_NEW))
+    for old, new in pairs:
+        for enc in ("utf-8", "utf-16-le"):
+            o, n = old.encode(enc), new.encode(enc)
+            if o in out:
+                out = out.replace(o, n)
+    return out, out != b
+
+def unpack_entry(p):
+    if p[:2] == b"\x1f\x8b":
+        return "gzip", gzip.decompress(p)
+    if p[:2] == BROTLI_MAGIC:
+        if brotli is None:
+            raise RuntimeError("brotli entry but python brotli module missing")
+        size = int.from_bytes(p[2:8], "little")
+        raw = brotli.decompress(p[8:])
+        if len(raw) != size:
+            raise RuntimeError("brotli size mismatch")
+        return "brotli", raw
+    return None, p
+
+def pack_entry(kind, raw):
+    if kind == "gzip":
+        return gzip.compress(raw, 9, mtime=0)
+    if kind == "brotli":
+        return BROTLI_MAGIC + len(raw).to_bytes(6, "little") + brotli.compress(raw)
+    return raw
+
+def do_pak(path):
+    d = open(path, "rb").read()
+    if len(d) < 12 or struct.unpack_from("<I", d, 0)[0] != 5:
+        stats["skipped"].append(path + " (not pak v5)")
+        return False
+    enc = d[4]
+    count, acount = struct.unpack_from("<HH", d, 8)
+    ents = [struct.unpack_from("<HI", d, 12 + i * 6) for i in range(count + 1)]
+    abase = 12 + (count + 1) * 6
+    aliases = d[abase:abase + acount * 4]
+    payloads, changed = [], 0
+    for i in range(count):
+        p = d[ents[i][1]:ents[i + 1][1]]
+        try:
+            kind, raw = unpack_entry(p)
+        except Exception as e:
+            stats["skipped"].append("%s entry %d: %s" % (path, ents[i][0], e))
+            payloads.append(p)
+            continue
+        new, ch = swap(raw, True)
+        if ch:
+            p = pack_entry(kind, new)
+            changed += 1
+        payloads.append(p)
+    if not changed:
+        return False
+    # rebuild
+    head = d[:8] + struct.pack("<HH", count, acount)
+    off = 12 + (count + 1) * 6 + acount * 4
+    table, body = b"", b""
+    for i in range(count):
+        table += struct.pack("<HI", ents[i][0], off + len(body))
+        body += payloads[i]
+    table += struct.pack("<HI", ents[count][0], off + len(body))
+    out = head + table + aliases + body
+    # verify: same ids, same alias table, same count
+    c2, a2 = struct.unpack_from("<HH", out, 8)
+    e2 = [struct.unpack_from("<HI", out, 12 + i * 6) for i in range(c2 + 1)]
+    assert (c2, a2) == (count, acount)
+    assert [x[0] for x in e2] == [x[0] for x in ents]
+    assert out[abase:abase + acount * 4] == aliases
+    tmp = path + ".kiba-tmp"
+    open(tmp, "wb").write(out)
+    os.chmod(tmp, os.stat(path).st_mode)
+    os.replace(tmp, path)
+    stats["paks"] += 1
+    stats["entries"] += changed
+    return True
+
+def do_file(path):
+    # never touch signed/keyed material: a changed byte breaks the signature
+    if "keyring" in path or "gnupg" in path or path.endswith((".gpg", ".sig", ".asc", ".kbx", ".key", ".pem")):
+        return
+    try:
+        if os.path.islink(path) or not os.path.isfile(path) or os.path.getsize(path) > 256 * 1024 * 1024:
+            return
+        d = open(path, "rb").read()
+    except OSError:
+        return
+    low = d.lower()
+    if b"aurade" not in low and "aurade".encode("utf-16-le") not in low and \
+       TAGLINE_OLD.encode() not in d and TAGLINE_OLD.encode("utf-16-le") not in d:
+        if not path.endswith(".pak"):
+            return
+    if path.endswith(".pak"):
+        do_pak(path)
+        return
+    is_text = b"\x00" not in d[:8192] and not d.startswith(b"\x7fELF")
+    new, ch = swap(d, is_text)
+    if ch:
+        mode = os.stat(path).st_mode
+        open(path, "wb").write(new)
+        os.chmod(path, mode)
+        stats["files"] += 1
+
+def main(roots):
+    for root in roots:
+        for dp, dn, fn in os.walk(root):
+            for f in fn:
+                do_file(os.path.join(dp, f))
+    print("kiba-rebrand: %(paks)d pak(s) / %(entries)d pak entries / %(files)d file(s) rewritten" % stats)
+    for s in stats["skipped"]:
+        print("kiba-rebrand: SKIPPED " + s, file=sys.stderr)
+
+if __name__ == "__main__":
+    main(sys.argv[1:] or ["/usr/lib/chromiumos-ash", "/usr/lib/aurade-greeter", "/usr/share"])
+KIBAREBRAND
+chmod +x /usr/local/bin/kiba-rebrand
+python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt||{ echo "ERROR: kiba-rebrand failed" >&2;exit 1; }
+# Verify: no display-case name left in ASCII or UTF-16, anywhere that ships
+_left="$(grep -rlaE 'AuraDE|AURADE|Aurade|A.u.r.a.D.E|Fast\. Simple\. Limitless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
+[ -n "$_left" ]&&echo "!! rebrand: display-name strings still present in: $_left" >&2
+rm -f /usr/local/bin/kiba-rebrand
 sed -i '/^CHROME=/a CHROME_FLAGS="${CHROME_FLAGS:-} --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg"' /usr/bin/chromiumos-ash-session
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
