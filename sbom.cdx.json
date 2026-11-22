@@ -1,0 +1,5240 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:3550692f-cfbf-48f4-a036-97e9e321d81f",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-11-22T17:18:07Z",
+    "component": {
+      "type": "operating-system",
+      "name": "KibaOS",
+      "description": "Arch Linux-based operating system featuring the KibaDE desktop environment.",
+      "supplier": {
+        "name": "Kiba Labs, LLC",
+        "url": [
+          "https://kibaos.com/"
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://kibaos.com/"
+        },
+        {
+          "type": "vcs",
+          "url": "https://github.com/KibaLabsLLC/KibaOS"
+        }
+      ],
+      "properties": [
+        {
+          "name": "kibaos:desktop-environment",
+          "value": "KibaDE"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "7zip",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "Halium GSI (ubports_GSI_installer_v10)",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "binary (zip)"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "mirrors.lolinet.com/firmware/halium/GSI"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile installer zip"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "overridable via KIBA_MOBILE_GSI_URL; skippable"
+        }
+      ],
+      "version": "v10"
+    },
+    {
+      "type": "application",
+      "name": "Joplin",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "AppImage"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "github.com/laurent22/joplin releases"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "no checksum verified"
+        }
+      ],
+      "version": "latest at build time"
+    },
+    {
+      "type": "application",
+      "name": "Magisk (magiskboot)",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "binary (APK)"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "github.com/topjohnwu/Magisk releases"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile installer zip"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "no checksum verified"
+        }
+      ],
+      "version": "latest at build time"
+    },
+    {
+      "type": "library",
+      "name": "accountsservice",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "adwaita-icon-theme",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "amd-ucode",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "arch-install-scripts",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "archiso",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "archlinux-keyring",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "aurade",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "[aurade] github.com/Cam396/aurade/releases/download/repo-x86_64"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "third-party repo; key fpr BC390DCF360B2184DBBF008B8B2AB2EFE667CB69"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "aurade-greeter",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "[aurade] third-party repo"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base-devel",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base-devel",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "base-devel",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bash",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bluez",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bluez",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bluez-utils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "bluez-utils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "boost",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "breeze-icons",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "budgie-control-center",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "cairo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "capstone",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "chatty",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "chromium",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "cmake",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "curl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "curl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "cutefish-icons",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "source (cmake)"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "github.com/cutefishos/icons.git"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "shallow clone, installed to /usr; cmake removed after if it was absent"
+        }
+      ],
+      "version": "HEAD (unpinned)"
+    },
+    {
+      "type": "library",
+      "name": "dbus",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dconf",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "debugedit",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dialog",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dosfstools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dosfstools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "dtc",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "e2fsprogs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "earlyoom",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "edk2-ovmf",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "efibootmgr",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "egl-wayland",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "eglinfo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ell",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "evince",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "exfatprogs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "fakeroot",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "fastfetch",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "file-roller",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "flatpak",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "fmt",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "freetype2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "fribidi",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "fuse3",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gawk",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gcc",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "git",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "git",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "git",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "glib2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "glib2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "glib2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "glm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnome-calls",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnome-console",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnome-photos",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnome-text-editor",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnupg",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gnutls",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "go",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gptfdisk",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "greetd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "greetd-tuigreet",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "grim",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "grub",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gsettings-desktop-schemas",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gst-plugins-bad",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gst-plugins-base",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gst-plugins-good",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gstreamer",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gtk4",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gtk4-layer-shell",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gtklock",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gvfs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gvfs-mtp",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "gvfs-smb",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "halium-generic-ramdisk",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "binary (cpio.gz)"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "$KIBA_MOBILE_HALIUM_RAMDISK_URL"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile installer zip"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "URL from env var"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "harfbuzz",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "haruna",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "hicolor-icon-theme",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "hivex",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "icu",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "imagemagick",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "imagemagick",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "intel-ucode",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "io.github.alain23.planify",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "flatpak"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "flathub"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "optional"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "iproute2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "irqbalance",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "jq",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "keyutils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "kooha",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "kvantum",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lib32-mesa",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lib32-nvidia-utils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lib32-vulkan-icd-loader",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libadwaita",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libaio",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libbpf",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libcbor",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libdrm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libdrm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libelf",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libevdev",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libglvnd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libinput",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libisoburn",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libisofs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libjpeg-turbo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libjpeg-turbo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libnetfilter_queue",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libnotify",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libpipewire",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libpng",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libpng",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libsasl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libseccomp",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libslirp",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "liburing",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libusb",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libva-nvidia-driver",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libvirt",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libvncserver",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libxkbcommon",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libxkbcommon",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "libxml2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "linux",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "linux-firmware",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "linux-firmware-intel",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "linux-headers",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "lost-island",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "source (makepkg)"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "github.com/MarcoZorn/lost-island (packaging/)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "optional; build failure tolerated"
+        }
+      ],
+      "version": "HEAD (unpinned)"
+    },
+    {
+      "type": "library",
+      "name": "loupe",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "lsw (linux-subsystem-windows)",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "binary tarball"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "github.com/acceleration3/linux-subsystem-windows"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (x86_64)"
+        },
+        {
+          "name": "kibaos:notes",
+          "value": "sha256 e091f5ece29fb100a3a4cf95f620e18dbb7116a267dffcbc481eeed7dce24e8e"
+        }
+      ],
+      "version": "0.2.3"
+    },
+    {
+      "type": "library",
+      "name": "lvm2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "lzo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "malcontent",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mesa",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mesa",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "meson",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "meson",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "meson",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mkinitcpio",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mkinitcpio-archiso",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mtools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "mtools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nano",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nemo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "network-manager-applet",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "networkmanager",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "networkmanager",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "networkmanager",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nftables",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ninja",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ninja",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ninja",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nlohmann-json",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "noto-fonts",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "noto-fonts-cjk",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "noto-fonts-emoji",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ntfs-3g",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "numactl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nvidia-open",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nvidia-settings",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "nvidia-utils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64 only)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ocl-icd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ofono",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "AUR"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "aur.archlinux.org/ofono.git"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "openbsd-netcat",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "openssh",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "openssl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pam",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pango",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "papirus-icon-theme",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "parted",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pciutils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pcmanfm-qt",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "phoc",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire-alsa",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire-jack",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire-jack",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire-pulse",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pipewire-pulse",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pixman",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pixman",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pkg-config",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "plymouth",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "polkit",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "polkit",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "power-profiles-daemon",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pv",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pyalpm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python-brotli",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python-docutils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python-gobject",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python-numpy",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "python-pillow",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qemu-guest-agent",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qemu-img",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qt6-base",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qt6-multimedia-ffmpeg",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "qt6-wayland",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "name": "re.sonny.Junction",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "flatpak"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "flathub"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "rust",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sassc",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "scrot",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sddm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sdl3",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "slurp",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "snappy",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sof-firmware",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "spdlog",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "squashfs-tools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (desktop build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "squashfs-tools",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "squeekboard",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sudo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sudo",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "sysprof",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "systemd-libs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tesseract",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tesseract-data-eng",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "thermald",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "totem",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ttf-nunito",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tuned",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "udisks2",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unzip",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "upower",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "upower",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "v4l2loopback-dkms",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vala",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (OOBE build deps)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "virtiofsd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "virtiofsd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-headers",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-icd-loader",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-icd-loader",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-icd-loader",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-intel",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "vulkan-radeon",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "waybar",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wayland",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wayland",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wayland-protocols",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "webkit2gtk-4.1",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "weston",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (customize step)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wget",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wimlib",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wireplumber",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wireplumber",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wl-clipboard",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wlopm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wlr-randr",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wlrctl",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "AUR"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "aur.archlinux.org/wlrctl.git"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wlroots0.20",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "wtype",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch Linux ARM [core/extra/alarm]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "mobile rootfs (aarch64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdg-desktop-portal",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdg-desktop-portal-gtk",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdg-desktop-portal-wlr",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdg-user-dirs",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdg-utils",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xdotool",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xorg-xwayland",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "xterm",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "yyjson",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "zenity",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "zip",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "build host (mobile build)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "zlib",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "zram-generator",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch [core/extra/multilib]"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop ISO (x86_64)"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "zstd",
+      "properties": [
+        {
+          "name": "kibaos:ecosystem",
+          "value": "pacman"
+        },
+        {
+          "name": "kibaos:source",
+          "value": "Arch"
+        },
+        {
+          "name": "kibaos:scope",
+          "value": "desktop chroot (LSW runtime deps, x86_64)"
+        }
+      ]
+    }
+  ],
+  "properties": [
+    {
+      "name": "kibaos:inventory-source",
+      "value": "User-provided package/build inventory"
+    },
+    {
+      "name": "kibaos:inventory-status",
+      "value": "Declared inventory; not yet verified against a specific built artifact"
+    },
+    {
+      "name": "kibaos:component-record-count",
+      "value": "283"
+    },
+    {
+      "name": "kibaos:source-row-count",
+      "value": "292"
+    },
+    {
+      "name": "kibaos:version-note",
+      "value": "Blank versions were intentionally omitted rather than guessed."
+    },
+    {
+      "name": "kibaos:scope-note",
+      "value": "Component scope distinctions are preserved as custom properties, including desktop ISO, mobile rootfs, build-host, build-dependency, and optional components."
+    },
+    {
+      "name": "kibaos:integrity-note",
+      "value": "Only the LSW SHA-256 digest was supplied; other external binaries with unverified checksums are noted in their component properties."
+    }
+  ]
+}
