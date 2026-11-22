@@ -1,0 +1,20 @@
+
+cff-version: 1.2.0
+message: "If you use KibaOS, please cite it using the following metadata."
+
+title: "KibaOS"
+abstract: "KibaOS is an operating system developed by Kiba Labs, LLC, focused on simplicity, refinement, and modern desktop computing."
+
+authors:
+  - name: "Kiba Labs, LLC"
+
+version: "1.0.0"
+
+url: "https://kibaos.com"
+repository-code: "https://github.com/KibaLabsLLC/KibaOS"
+
+keywords:
+  - Linux
+  - Operating System
+  - Arch Linux
+  - Desktop Environment
