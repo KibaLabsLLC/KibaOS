@@ -8,7 +8,7 @@ abstract: "KibaOS is an operating system developed by Kiba Labs, LLC, focused on
 authors:
   - name: "Kiba Labs, LLC"
 
-version: "1.0.0"
+version: "Latest"
 
 url: "https://kibaos.com"
 repository-code: "https://github.com/KibaLabsLLC/KibaOS"
