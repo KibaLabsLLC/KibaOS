@@ -2718,8 +2718,8 @@ only rewritten in paks and text files, where length may change.
 import gzip, os, struct, sys
 
 NAME = [("AuraDE", "KibaOS"), ("AURADE", "KIBAOS"), ("Aurade", "KibaOS")]
-TAGLINE_OLD = "Fast. Simple. Limitless."
-TAGLINE_NEW = "Switch to simple"
+TAGLINES_OLD = ["Fast. Secure. Effortless."]
+TAGLINE_NEW = "Fast. Simple. Limitless."
 BROTLI_MAGIC = b"\x1e\x9b"
 try:
     import brotli
@@ -2733,7 +2733,7 @@ def swap(b, tagline):
     out = b
     pairs = list(NAME)
     if tagline:
-        pairs.append((TAGLINE_OLD, TAGLINE_NEW))
+        pairs.extend((t, TAGLINE_NEW) for t in TAGLINES_OLD)
     for old, new in pairs:
         for enc in ("utf-8", "utf-16-le"):
             o, n = old.encode(enc), new.encode(enc)
@@ -2763,6 +2763,13 @@ def pack_entry(kind, raw):
 
 def do_pak(path):
     d = open(path, "rb").read()
+    # Locale paks (locales/*.pak) are gzip-compressed as a WHOLE FILE around a
+    # normal pak; unwrap, rewrite the inner pak, and gzip it back.
+    if d[:2] == b"\x1f\x8b":
+        return do_pak_bytes(path, gzip.decompress(d), True)
+    return do_pak_bytes(path, d, False)
+
+def do_pak_bytes(path, d, wrapped):
     if len(d) < 12 or struct.unpack_from("<I", d, 0)[0] != 5:
         stats["skipped"].append(path + " (not pak v5)")
         return False
@@ -2803,7 +2810,7 @@ def do_pak(path):
     assert [x[0] for x in e2] == [x[0] for x in ents]
     assert out[abase:abase + acount * 4] == aliases
     tmp = path + ".kiba-tmp"
-    open(tmp, "wb").write(out)
+    open(tmp, "wb").write(gzip.compress(out, 9, mtime=0) if wrapped else out)
     os.chmod(tmp, os.stat(path).st_mode)
     os.replace(tmp, path)
     stats["paks"] += 1
@@ -2822,7 +2829,7 @@ def do_file(path):
         return
     low = d.lower()
     if b"aurade" not in low and "aurade".encode("utf-16-le") not in low and \
-       TAGLINE_OLD.encode() not in d and TAGLINE_OLD.encode("utf-16-le") not in d:
+       not any(t.encode() in d or t.encode("utf-16-le") in d for t in TAGLINES_OLD):
         if not path.endswith(".pak"):
             return
     if path.endswith(".pak"):
@@ -2851,7 +2858,7 @@ KIBAREBRAND
 chmod +x /usr/local/bin/kiba-rebrand
 python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt||{ echo "ERROR: kiba-rebrand failed" >&2;exit 1; }
 # Verify: no display-case name left in ASCII or UTF-16, anywhere that ships
-_left="$(grep -rlaE 'AuraDE|AURADE|Aurade|A.u.r.a.D.E|Fast\. Simple\. Limitless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
+_left="$(grep -rlaE 'AuraDE|AURADE|Aurade|A.u.r.a.D.E|Fast\. Secure\. Effortless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
 [ -n "$_left" ]&&echo "!! rebrand: display-name strings still present in: $_left" >&2
 rm -f /usr/local/bin/kiba-rebrand
 sed -i '/^CHROME=/a CHROME_FLAGS="${CHROME_FLAGS:-} --default-wallpaper-large=/usr/share/kibaos/wallpaper.jpg --default-wallpaper-small=/usr/share/kibaos/wallpaper.jpg"' /usr/bin/chromiumos-ash-session
