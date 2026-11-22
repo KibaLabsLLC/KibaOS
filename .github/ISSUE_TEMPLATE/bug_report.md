@@ -45,4 +45,4 @@ Add any other context about the problem here. This could include:
 ---
 
 > [!NOTE]
-> If you're reporting a bug in a specific application (e.g., Okami, terminal), please also note the application version if available.
+> If you're reporting a bug in a specific application (e.g., kAI, terminal), please also note the application version if available.
