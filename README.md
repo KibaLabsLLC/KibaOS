@@ -50,7 +50,6 @@ What’s Included
 * KibaDE — A simple, easy-to-use desktop.
 * Everyday apps — The tools you need, ready to go the moment you turn it on.
 * Apps & Games — A store where you can find and install more software with a click.
-* Automatic updates — Stay up to date without being interrupted.
 * Custom design — One look and feel throughout.
 
 System Compatibility
