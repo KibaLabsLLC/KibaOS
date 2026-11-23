@@ -550,21 +550,6 @@ if [ -d "/usr/share/plymouth/themes/$_theme_dir" ];then
 cp /usr/share/kibaos/plymouth-logo.png "/usr/share/plymouth/themes/$_theme_dir/watermark.png"
 fi
 done
-CUTEFISH_ICONS_BUILD="/tmp/cutefish-icons"
-rm -rf "$CUTEFISH_ICONS_BUILD"
-git clone --depth 1 https://github.com/cutefishos/icons.git "$CUTEFISH_ICONS_BUILD"
-CMAKE_WAS_PRESENT=1
-command -v cmake >/dev/null 2>&1||{
-CMAKE_WAS_PRESENT=0
-pacman -S --noconfirm --needed cmake
-}
-cmake -S "$CUTEFISH_ICONS_BUILD" -B "$CUTEFISH_ICONS_BUILD/build" -DCMAKE_INSTALL_PREFIX=/usr
-cmake --install "$CUTEFISH_ICONS_BUILD/build"
-[ "$CMAKE_WAS_PRESENT" -eq 0 ]&&pacman -Rns --noconfirm cmake||true
-test -f /usr/share/icons/Cutefish/index.theme
-gtk-update-icon-cache -f /usr/share/icons/Cutefish 2>/dev/null||true
-rm -rf "$CUTEFISH_ICONS_BUILD"
-echo "=== Icon theme: Cutefish installed ==="
 rm -f /etc/xdg/autostart/cutefish-dock.desktop /etc/xdg/autostart/wl-dock.desktop
 pacman -R --noconfirm cutefish-dock 2>/dev/null||true
 pacman -Rns --noconfirm wl-dock 2>/dev/null||true
@@ -996,7 +981,7 @@ cat >/etc/gtk-3.0/settings.ini <<'GTK3RC'
 [Settings]
 gtk-theme-name=Adwaita-dark
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Cutefish
+gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
@@ -1008,7 +993,7 @@ mkdir -p /etc/gtk-4.0
 cat >/etc/gtk-4.0/settings.ini <<'GTK4RC'
 [Settings]
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Cutefish
+gtk-icon-theme-name=Papirus-Dark
 GTK4RC
 mkdir -p /usr/share/Kvantum/KibaOS/config
 mkdir -p /usr/share/Kvantum/KibaOS/Translations
@@ -2383,7 +2368,7 @@ mkdir -p \
 cat >"$SKEL/.config/gtk-3.0/settings.ini" <<'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=Cutefish
+gtk-icon-theme-name=Papirus-Dark
 gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
@@ -2402,7 +2387,7 @@ cat >/usr/local/bin/kibaos-first-login <<'FIRSTLOGIN'
 STAMP="$HOME/.config/.kibaos-configured"
 [ -f "$STAMP" ]&&exit 0
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Cutefish'
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
 gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita'
 gsettings set org.gnome.desktop.interface cursor-size 24
 gsettings set org.gnome.desktop.interface font-name 'Nunito 11'
