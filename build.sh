@@ -124,7 +124,6 @@ greetd
 greetd-tuigreet
 dconf
 gsettings-desktop-schemas
-qt6-wayland
 webkit2gtk-4.1
 python-gobject
 grim
@@ -931,14 +930,6 @@ id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
 LI_OK=0
-for _try in 1 2 3 4 5;do
-if su - kibabuild -c 'cd /tmp && rm -rf lost-island && git clone https://github.com/MarcoZorn/lost-island && cd lost-island/packaging && makepkg -si --noconfirm --needed';then
-LI_OK=1
-break
-fi
-echo "!! lost-island build attempt $_try/5 failed -- retrying in 10s" >&2
-sleep 10
-done
 if [ "$LI_OK" -eq 1 ]&&command -v lost-island >/dev/null 2>&1;then
 echo "=== lost-island installed ==="
 else
