@@ -37,9 +37,6 @@ fi
 mkdir -p "$AIROOTFS"
 sed -i 's/^CheckSpace/#CheckSpace/' "$PROFILE/pacman.conf"
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 10/' "$PROFILE/pacman.conf"
-if [ "$KIBA_ARCH" = "x86_64" ];then
-sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' "$PROFILE/pacman.conf"
-fi
 cat >"$PROFILE/profiledef.sh" <<'PROFILEDEF'
 #!/usr/bin/env bash
 iso_name="kibaos"
@@ -113,7 +110,6 @@ bluez-utils
 go
 sof-firmware
 thermald
-xorg-xwayland
 icu
 gcc
 debugedit
@@ -188,7 +184,6 @@ exfatprogs
 polkit
 udisks2
 upower
-scrot
 fastfetch
 flatpak
 xdg-desktop-portal
@@ -197,7 +192,6 @@ xdg-desktop-portal-wlr
 imagemagick
 eglinfo
 gnupg
-xdotool
 v4l2loopback-dkms
 xdg-utils
 gawk
@@ -209,7 +203,6 @@ gst-plugins-bad
 plymouth
 squashfs-tools
 
-virtiofsd
 qemu-guest-agent
 breeze-icons
 dialog
@@ -265,7 +258,6 @@ sed -i '/^# linux-firmware split the Intel GuC\/HuC blobs/,/^# fails and KWin ca
 "$PROFILE/packages.x86_64"
 sed -i '/^thermald$/d' "$PROFILE/packages.x86_64"
 sed -i '/^syslinux$/d' "$PROFILE/packages.x86_64"
-sed -i '/^lib32-mesa$/d; /^lib32-vulkan-icd-loader$/d' "$PROFILE/packages.x86_64"
 sed -i '/^mkinitcpio-archiso$/d' "$PROFILE/packages.x86_64"
 sed -i 's/^linux$/linux-aarch64/; s/^linux-headers$/linux-aarch64-headers/' \
 "$PROFILE/packages.x86_64"
@@ -375,9 +367,6 @@ useradd -r -s /usr/bin/nologin -U alpm 2>/dev/null||true
 mkdir -p /var/cache/pacman/pkg
 chmod 755 /var/cache/pacman /var/cache/pacman/pkg
 chown -R alpm:alpm /var/cache/pacman
-if [ "$(uname -m)" = "x86_64" ];then
-sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
-fi
 if [ "$(uname -m)" = "x86_64" ];then
 cat >/etc/pacman.d/mirrorlist <<'MIRRORLIST'
 Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
@@ -973,113 +962,6 @@ fi
 rm -rf /tmp/lost-island
 rm -f /etc/sudoers.d/kibabuild
 userdel -r kibabuild 2>/dev/null||true
-LSW_VERSION="0.2.3"
-LSW_SHA256="e091f5ece29fb100a3a4cf95f620e18dbb7116a267dffcbc481eeed7dce24e8e"
-if [ "$(uname -m)" = "x86_64" ];then
-pacman -S --noconfirm --needed \
-qt6-base libvirt libisofs libvncserver wimlib hivex \
-spdlog fmt zlib wayland libxkbcommon libdrm \
-vulkan-icd-loader ocl-icd libglvnd libpipewire \
-glib2 pixman gnutls libpng libjpeg-turbo libsasl snappy lzo \
-zstd numactl keyutils libslirp libbpf \
-libelf libcbor systemd-libs libseccomp dtc pam fuse3 \
-libaio liburing capstone libusb \
-edk2-ovmf qemu-img 7zip curl hicolor-icon-theme sdl3 \
-vulkan-radeon vulkan-intel \
-virtiofsd
-LSW_TARBALL="/tmp/lsw-$LSW_VERSION-x86_64.tar.zst"
-curl -fL --retry 5 --retry-delay 5 -o "$LSW_TARBALL" \
-"https://github.com/acceleration3/linux-subsystem-windows/releases/download/v$LSW_VERSION/lsw-$LSW_VERSION-x86_64.tar.zst"
-echo "$LSW_SHA256  $LSW_TARBALL"|sha256sum -c -
-tar --zstd -xf "$LSW_TARBALL" -C / --no-same-owner usr
-rm -f "$LSW_TARBALL"
-[ -d /usr/share/licenses/lsw ]&&mv /usr/share/licenses/lsw /usr/share/licenses/lsw-bin
-gtk-update-icon-cache -f /usr/share/icons/hicolor 2>/dev/null||true
-update-desktop-database /usr/share/applications 2>/dev/null||true
-test -x /usr/bin/lsw-manager
-echo "=== LSW: installed v$LSW_VERSION ($(/usr/bin/lsw-manager --help >/dev/null 2>&1&&echo ok||echo 'help check skipped')) ==="
-else
-echo "=== LSW: skipped -- upstream is x86-64 only, Windows Workspace unavailable on $(uname -m) ==="
-fi
-if [ -x /usr/bin/lsw-manager ];then
-cat >/usr/local/bin/kibaos-lsw-autoinstall <<'LSWAUTO'
-#!/bin/bash
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/kibaos"
-DONE="$STATE_DIR/lsw-installed"
-TRIES="$STATE_DIR/lsw-attempts"
-LOG="$STATE_DIR/lsw-install.log"
-PASSFILE="$HOME/.config/kibaos/windows-password"
-MAX_TRIES=3
-[ -d /run/archiso ]&&exit 0
-case "$(id -un)" in liveuser|oem|root)exit 0;esac
-[ "$(uname -m)" = "x86_64" ]||exit 0
-command -v lsw-manager >/dev/null 2>&1||exit 0
-mkdir -p "$STATE_DIR"
-[ -f "$DONE" ]&&exit 0
-note(){
-command -v notify-send >/dev/null 2>&1&&notify-send -a "Windows" "$1" "$2" 2>/dev/null
-logger -t kibaos-lsw-autoinstall "$1: $2"
-}
-if command -v virsh >/dev/null 2>&1&&virsh -c qemu:///session list --all --name 2>/dev/null|grep -q '[^[:space:]]';then
-touch "$DONE"
-exit 0
-fi
-n=$(cat "$TRIES" 2>/dev/null||echo 0)
-if [ "$n" -ge "$MAX_TRIES" ];then exit 0;fi
-[ -r /dev/kvm ]&&[ -w /dev/kvm ]||{
-logger -t kibaos-lsw-autoinstall "KVM not available, skipping"
-exit 0
-}
-FREE_GIB="$(df -BG --output=avail "$HOME" 2>/dev/null|tail -n1|tr -dc '0-9')"
-if [ -n "$FREE_GIB" ]&&[ "$FREE_GIB" -lt 70 ];then
-logger -t kibaos-lsw-autoinstall "only $FREE_GIB GB free (need ~70), skipping"
-exit 0
-fi
-echo $((n+1)) >"$TRIES"
-CORES="$(nproc 2>/dev/null||echo 4)"
-VM_CPU=$((CORES/2))
-[ "$VM_CPU" -lt 2 ]&&VM_CPU=2
-[ "$VM_CPU" -gt 8 ]&&VM_CPU=8
-MEM_MIB="$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo 2>/dev/null)"
-VM_MEM=$((${MEM_MIB:-8192}/2))
-[ "$VM_MEM" -lt 4096 ]&&VM_MEM=4096
-[ "$VM_MEM" -gt 16384 ]&&VM_MEM=16384
-if [ ! -s "$PASSFILE" ];then
-mkdir -p "$(dirname "$PASSFILE")"
-(umask 077
-tr -dc 'A-Za-z0-9' </dev/urandom|head -c 20 >"$PASSFILE")
-fi
-WIN_PASS="$(cat "$PASSFILE")"
-note "Setting up Windows" "Installing in the background -- this can take 15-35 minutes. You can keep using your PC."
-export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
-nice -n 10 ionice -c3 lsw-manager \
---accept-license \
---edition "Windows 11" --language "English" \
---user "KibaUser" --password "$WIN_PASS" \
---cpu "$VM_CPU" --memory "$VM_MEM" --disk 64 >> \
-"$LOG" 2>&1
-rc=$?
-if [ "$rc" -eq 0 ];then
-touch "$DONE"
-note "Windows is ready" "Your Windows apps are available from the app menu."
-else
-note "Windows setup hit a snag" "It will retry next time you log in. Details: $LOG"
-fi
-exit "$rc"
-LSWAUTO
-chmod +x /usr/local/bin/kibaos-lsw-autoinstall
-mkdir -p /etc/skel/.config/autostart
-cat >/etc/skel/.config/autostart/kibaos-lsw-autoinstall.desktop <<'LSWAUTODESK'
-[Desktop Entry]
-Type=Application
-Name=Windows auto-setup
-Exec=/usr/local/bin/kibaos-lsw-autoinstall
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-X-GNOME-Autostart-Delay=30
-LSWAUTODESK
-echo "=== LSW: first-login auto-install armed ==="
-fi
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 ADWAITA_ICONS="/usr/share/icons/Adwaita"
 LAUNCHER_MASTER="/tmp/kibaos-launcher-icon.png"
