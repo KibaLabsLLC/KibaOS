@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       skip_build:
-        description: 'Skip building both architectures'
+        description: 'Skip building; publish + OTA the newest GitHub build artifact if SourceForge is older'
         required: false
         type: boolean
         default: false
@@ -18,37 +18,14 @@ on:
         type: boolean
         default: false
 jobs:
-  build:
+  build_x86_64:
     if: ${{ !inputs.skip_build }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-            runner: ubuntu-latest
-            docker_image: archlinux:latest
-            build_flags: ""
-            free_disk: true
-            retention_days: 7
-            artifact_path: |
-              *.iso
-              *.iso.sha256
-          - arch: mobile
-            runner: ubuntu-24.04-arm
-            docker_image: menci/archlinuxarm:base-devel
-            build_flags: "--mobile"
-            free_disk: false
-            retention_days: 1
-            artifact_path: out/
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
     timeout-minutes: 180
-    outputs:
-      patch_num: ${{ github.run_number }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Free disk space
-        if: ${{ matrix.free_disk }}
         uses: endersonmenezes/free-disk-space@v3
         with:
           remove_android: true
@@ -66,97 +43,193 @@ jobs:
           docker run --rm --privileged \
             -v "$PWD:/w" \
             -e RUN_NUM="${{ github.run_number }}" \
-            -e KIBA_ARCH="${{ matrix.arch }}" \
-            "${{ matrix.docker_image }}" \
-            /bin/bash /w/build.sh ${{ matrix.build_flags }}
-      - name: Verify mobile installer zip is self-contained
-        if: matrix.arch == 'mobile'
-        run: |
-          ZIP="out/kibaos-mobile-installer.zip"
-          if [ ! -f "$ZIP" ]; then echo "::error::${ZIP} not found -- build.sh didn't produce it"; exit 1; fi
-          command -v unzip >/dev/null || sudo apt-get install -y unzip
-          unzip -l "$ZIP"
-          missing=0
-          for required in rootfs.img android-rootfs.img halium-generic-ramdisk.cpio.gz magiskboot META-INF/com/google/android/update-binary; do
-            if ! unzip -l "$ZIP" | awk '{print $4}' | grep -qx "$required"; then
-              echo "::error::${ZIP} is missing ${required} -- not a self-contained installer (GSI fetch likely failed/was skipped this run)"
-              missing=1
-            fi
-          done
-          if [ "$missing" -eq 1 ]; then echo "::error::Refusing to publish an installer zip that requires a manual GSI push -- see build.sh's KIBA_MOBILE_GSI_URL / KIBA_SKIP_GSI_FETCH handling."; exit 1; fi
-          echo "Zip is self-contained: rootfs + GSI + boot-repack ingredients all present."
+            -e KIBA_ARCH="x86_64" \
+            "archlinux:latest" \
+            /bin/bash /w/build.sh
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kibaos-build-${{ matrix.arch }}
-          path: ${{ matrix.artifact_path }}
-          retention-days: ${{ matrix.retention_days }}
-  publish:
-    needs: build
-    if: ${{ !inputs.skip_build }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-            sf_dir: x86_64
-            payload: "*.iso,*.iso.sha256"
-            prune_previous: true
-          - arch: mobile
-            sf_dir: mobile
-            payload: "kibaos-mobile-installer.zip,kibaos-mobile-installer.zip.sha256"
-            prune_previous: false
+          name: kibaos-build-x86_64
+          path: |
+            *.iso
+            *.iso.sha256
+          retention-days: 7
+  # Decides which GitHub artifact to ship and whether SourceForge needs it.
+  #  - Build ran this run: ship this run's artifact (always newer than SourceForge).
+  #  - Build skipped: find the newest unexpired artifact from an earlier run and
+  #    only ship it if SourceForge's recorded version is older than that run.
+  latest_x86_64:
+    needs: build_x86_64
+    if: ${{ !cancelled() && contains(fromJSON('["success","skipped"]'), needs.build_x86_64.result) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      actions: read
+    outputs:
+      run_id: ${{ steps.pick.outputs.run_id }}
+      patch_num: ${{ steps.pick.outputs.patch_num }}
+      head_sha: ${{ steps.pick.outputs.head_sha }}
+      publish_needed: ${{ steps.compare.outputs.publish_needed }}
+      ota_needed: ${{ steps.compare.outputs.ota_needed }}
+    steps:
+      - name: Pick the newest x86_64 build artifact
+        id: pick
+        uses: actions/github-script@v7
+        env:
+          BUILD_RESULT: ${{ needs.build_x86_64.result }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const artifactName = 'kibaos-build-x86_64';
+
+            if (process.env.BUILD_RESULT === 'success') {
+              core.info(`Build ran in this run; using run ${context.runId}.`);
+              core.setOutput('run_id', String(context.runId));
+              core.setOutput('patch_num', String(context.runNumber));
+              core.setOutput('head_sha', context.sha);
+              core.setOutput('fresh', 'true');
+              return;
+            }
+
+            const workflowRef = process.env.GITHUB_WORKFLOW_REF;
+            const workflowFile = workflowRef.split('/.github/workflows/')[1]?.split('@')[0];
+            if (!workflowFile) {
+              core.setFailed(`Could not determine workflow file from GITHUB_WORKFLOW_REF: ${workflowRef}`);
+              return;
+            }
+            const branch = context.ref.startsWith('refs/heads/')
+              ? context.ref.replace(/^refs\/heads\//, '')
+              : undefined;
+
+            core.info(`Build skipped; searching ${workflowFile} runs newest-first for ${artifactName}.`);
+            for (let page = 1; ; page++) {
+              const response = await github.rest.actions.listWorkflowRuns({
+                owner,
+                repo,
+                workflow_id: workflowFile,
+                ...(branch ? { branch } : {}),
+                per_page: 100,
+                page
+              });
+              const runs = response.data.workflow_runs;
+              if (runs.length === 0) break;
+
+              for (const run of runs) {
+                if (run.id === context.runId) continue;
+                const artifacts = await github.paginate(
+                  github.rest.actions.listWorkflowRunArtifacts,
+                  { owner, repo, run_id: run.id, per_page: 100 }
+                );
+                const match = artifacts.find(a => a.name === artifactName && !a.expired);
+                if (match) {
+                  core.info(`Found ${artifactName} in run ${run.id} (#${run.run_number}, ${run.html_url}).`);
+                  core.setOutput('run_id', String(run.id));
+                  core.setOutput('patch_num', String(run.run_number));
+                  core.setOutput('head_sha', run.head_sha);
+                  core.setOutput('fresh', 'false');
+                  return;
+                }
+                core.info(`Run ${run.id} has no usable ${artifactName}; checking the next older run.`);
+              }
+            }
+            core.setFailed(`No unexpired ${artifactName} artifact found in any previous run of ${workflowFile}${branch ? ` on branch ${branch}` : ''}.`);
+      - name: Compare with the latest version on SourceForge
+        id: compare
+        env:
+          SF_USER: ${{ secrets.SF_USER }}
+          SSHPASS: ${{ secrets.SF_PASS }}
+          ART: ${{ steps.pick.outputs.patch_num }}
+          FRESH: ${{ steps.pick.outputs.fresh }}
+        run: |
+          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
+            echo "SourceForge credentials not configured. Nothing to push."
+            echo "publish_needed=false" >> "$GITHUB_OUTPUT"
+            echo "ota_needed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$FRESH" = "true" ]; then
+            echo "Fresh build #${ART} -- publishing and generating OTA."
+            echo "publish_needed=true" >> "$GITHUB_OUTPUT"
+            echo "ota_needed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          sudo apt-get install -y sshpass rsync
+          mkdir -p ~/.ssh
+          ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+
+          SF=/home/frs/project/kibaos
+          # Prints the leading integer of a remote file, or 0 if missing/empty.
+          read_version() {
+            local f v
+            f=$(mktemp)
+            sshpass -e rsync -q "$SF_USER@frs.sourceforge.net:${SF}/$1" "$f" 2>/dev/null || true
+            v=$(grep -Eo '^[0-9]+' "$f" | head -1 || true)
+            echo "${v:-0}"
+          }
+
+          SF_ISO=$(read_version x86_64/last-iso-build-number-x86_64.txt)
+          SF_OTA=$(read_version ota/last-ota-build-x86_64.txt)
+          # Older SourceForge layouts only have latest-patch-level.
+          [ "$SF_OTA" -eq 0 ] && SF_OTA=$(read_version ota/latest-patch-level)
+
+          PUB=false; OTA=false
+          [ "$SF_ISO" -lt "$ART" ] && PUB=true
+          [ "$SF_OTA" -lt "$ART" ] && OTA=true
+          echo "publish_needed=${PUB}" >> "$GITHUB_OUTPUT"
+          echo "ota_needed=${OTA}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Skipped build: latest artifact vs SourceForge (x86_64)"
+            echo "- Latest GitHub artifact: v${ART}"
+            echo "- SourceForge ISO: v${SF_ISO} -> publish ${PUB}"
+            echo "- SourceForge OTA: v${SF_OTA} -> OTA ${OTA}"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+  publish_x86_64:
+    needs: latest_x86_64
+    if: ${{ needs.latest_x86_64.outputs.publish_needed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      actions: read
     env:
       SF_USER: ${{ secrets.SF_USER }}
       SSHPASS: ${{ secrets.SF_PASS }}
-      REMOTE_DIR: /home/frs/project/kibaos/${{ matrix.sf_dir }}
-      MARKER: last-iso-build-number-${{ matrix.arch }}.txt
+      REMOTE_DIR: /home/frs/project/kibaos/x86_64
+      MARKER: last-iso-build-number-x86_64.txt
+      PATCH_NUM: ${{ needs.latest_x86_64.outputs.patch_num }}
     steps:
-      - name: Check SourceForge credentials
-        id: creds
-        run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
-            echo "SourceForge credentials not configured. Skipping."
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Download build artifact
-        if: steps.creds.outputs.ok == 'true'
         uses: actions/download-artifact@v4
         with:
-          name: kibaos-build-${{ matrix.arch }}
+          name: kibaos-build-x86_64
+          run-id: ${{ needs.latest_x86_64.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: dist
       - name: Prepare SSH
-        if: steps.creds.outputs.ok == 'true'
         run: |
           sudo apt-get install -y sshpass rsync
           mkdir -p ~/.ssh
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
       - name: Remove previous build from SourceForge
-        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
         run: |
           rm -f "${MARKER}"
           sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}" "${MARKER}" 2>/dev/null || true
           if [ -s "${MARKER}" ]; then
             PREV_ISO="kibaos-v$(cat "${MARKER}").iso"
-            echo "Removing previous ${{ matrix.arch }} build: ${PREV_ISO} (+ .sha256)"
+            echo "Removing previous x86_64 build: ${PREV_ISO} (+ .sha256)"
             printf '%s\n' "cd ${REMOTE_DIR}" "rm ${PREV_ISO}" "rm ${PREV_ISO}.sha256" "bye" \
               | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
           else
-            echo "No previous build marker for ${{ matrix.arch }} -- nothing to delete."
+            echo "No previous build marker for x86_64 -- nothing to delete."
           fi
       - name: Upload to SourceForge
-        if: steps.creds.outputs.ok == 'true'
         run: |
           FILES=()
-          IFS=',' read -ra PATS <<< "${{ matrix.payload }}"
-          for pat in "${PATS[@]}"; do
+          for pat in "*.iso" "*.iso.sha256"; do
             mapfile -t FOUND < <(find dist -type f -name "$pat")
             if [ "${#FOUND[@]}" -eq 0 ]; then
-              echo "::error::No file matching ${pat} in the ${{ matrix.arch }} build artifact" >&2
+              echo "::error::No file matching ${pat} in the x86_64 build artifact" >&2
               exit 1
             fi
             FILES+=("${FOUND[@]}")
@@ -164,12 +237,11 @@ jobs:
           printf 'Uploading: %s\n' "${FILES[@]}"
           sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
       - name: Record build marker on SourceForge
-        if: steps.creds.outputs.ok == 'true' && matrix.prune_previous
         run: |
-          echo "${{ github.run_number }}" > "${MARKER}"
+          echo "${PATCH_NUM}" > "${MARKER}"
           sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
   vmtest_find:
-    needs: build
+    needs: build_x86_64
     if: ${{ always() && inputs.run_vmtest }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -522,22 +594,25 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
-  ota:
-    needs: build
-    if: ${{ !inputs.skip_ota && !inputs.skip_build }}
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64, mobile]
+  ota_x86_64:
+    needs: latest_x86_64
+    if: ${{ !inputs.skip_ota && needs.latest_x86_64.outputs.ota_needed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: write
+    env:
+      ARCH: x86_64
+      PATCH_NUM: ${{ needs.latest_x86_64.outputs.patch_num }}
+      HEAD_SHA: ${{ needs.latest_x86_64.outputs.head_sha }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: kibaos-build-${{ matrix.arch }}
+          name: kibaos-build-x86_64
+          run-id: ${{ needs.latest_x86_64.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install tools
         run: |
           sudo tee /usr/local/bin/retry >/dev/null <<'EOF'
@@ -554,7 +629,6 @@ jobs:
           sudo chmod +x /usr/local/bin/retry
           retry sudo apt-get install -y squashfs-tools sshpass rsync
       - name: Extract airootfs from ISO for OTA diffing
-        if: matrix.arch == 'x86_64'
         run: |
           ISO=$(ls *.iso | head -1)
           mkdir -p /tmp/iso-mount /tmp/airootfs-extracted
@@ -563,14 +637,6 @@ jobs:
           sudo unsquashfs -d /tmp/airootfs-extracted -processors "$(nproc)" "$SFS"
           sudo umount /tmp/iso-mount
           echo "Extracted file count: $(find /tmp/airootfs-extracted -type f | wc -l)"
-      - name: Extract mobile rootfs tarball for OTA diffing
-        if: matrix.arch == 'mobile'
-        run: |
-          TARBALL=$(find . -name 'kibaos-mobile-rootfs.tar.gz' | head -1)
-          if [ -z "$TARBALL" ]; then echo "kibaos-mobile-rootfs.tar.gz not found in downloaded artifact!" >&2; exit 1; fi
-          mkdir -p /tmp/airootfs-extracted
-          sudo tar -xzf "$TARBALL" -C /tmp/airootfs-extracted
-          echo "Extracted file count: $(find /tmp/airootfs-extracted -type f | wc -l)"
       - name: Download previous build manifest from SourceForge
         env:
           SF_USER: ${{ secrets.SF_USER }}
@@ -578,7 +644,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           retry ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          retry sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/ota/last-build-manifest-${{ matrix.arch }}.txt" ./last-build-manifest.txt || echo "No previous manifest found — this is a full baseline build."
+          retry sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/ota/last-build-manifest-${ARCH}.txt" ./last-build-manifest.txt || echo "No previous manifest found — this is a full baseline build."
       - name: Generate current build manifest
         run: |
           cd /tmp/airootfs-extracted
@@ -604,8 +670,6 @@ jobs:
       - name: Bundle OTA patch from extracted airootfs
         if: steps.diff.outputs.has_changes == 'true'
         run: |
-          PATCH_NUM="${{ needs.build.outputs.patch_num }}"
-          ARCH="${{ matrix.arch }}"
           PATCH_DIR="ota-patch-${PATCH_NUM}-${ARCH}"
           mkdir -p "${PATCH_DIR}"
           sed 's|^\./||' changed_files.txt > changed_files_rel.txt
@@ -627,22 +691,19 @@ jobs:
           echo "$OTA_SIGNING_KEY" | gpg --batch --import
           KEY_FP=$(gpg --list-keys --with-colons ota@kibaos.wolftech.tech | awk -F: '/^fpr/{print $10; exit}')
           echo "${KEY_FP}:6:" | gpg --import-ownertrust
-          T="kibaos-ota-${{ needs.build.outputs.patch_num }}-${{ matrix.arch }}.tar.gz"
+          T="kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz"
           gpg --batch --yes --local-user ota@kibaos.wolftech.tech --detach-sign --armor "$T"
           gpg --verify "$T.asc" "$T" && echo "Signature verified OK." || { echo "Signature self-check failed!"; exit 1; }
       - name: Write latest-patch-level
         if: steps.diff.outputs.has_changes == 'true'
-        run: echo "${{ needs.build.outputs.patch_num }}" > latest-patch-level
+        run: echo "${PATCH_NUM}" > latest-patch-level
       - name: Upload OTA artifacts to SourceForge
         env:
           SF_USER: ${{ secrets.SF_USER }}
           SSHPASS: ${{ secrets.SF_PASS }}
         run: |
-          if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then echo "SourceForge credentials not configured. Skipping."; exit 0; fi
           mkdir -p ~/.ssh
           retry ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
-          PATCH_NUM="${{ needs.build.outputs.patch_num }}"
-          ARCH="${{ matrix.arch }}"
           R="$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/ota"
           retry sshpass -e rsync -avP baseline-manifest.txt "$R/last-build-manifest-${ARCH}.txt"
           if [ "${{ steps.diff.outputs.has_changes }}" == "true" ]; then
@@ -651,11 +712,18 @@ jobs:
           else
             echo "No changes for ${ARCH} — only baseline manifest updated."
           fi
-          if [ "${ARCH}" = "x86_64" ] && [ -f latest-patch-level ]; then retry sshpass -e rsync -avP latest-patch-level "$R/"; fi
+          if [ -f latest-patch-level ]; then retry sshpass -e rsync -avP latest-patch-level "$R/"; fi
+          # Record which build SourceForge's OTA is now at, so a skipped-build run
+          # can tell whether the newest GitHub artifact is newer than what's published.
+          echo "${PATCH_NUM}" > last-ota-build.txt
+          retry sshpass -e rsync -avP last-ota-build.txt "$R/last-ota-build-${ARCH}.txt"
       - name: Tag this build
-        if: steps.diff.outputs.has_changes == 'true' && matrix.arch == 'x86_64'
+        if: steps.diff.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git config user.name "KibaOS OTA Bot"
-          git config user.email "ota@kibaos.wolftech.tech"
-          git tag "ota-patch-${{ needs.build.outputs.patch_num }}"
-          retry git push origin "ota-patch-${{ needs.build.outputs.patch_num }}" 2>/dev/null || true
+          # Tag the commit the artifact was built from (not necessarily the current HEAD).
+          gh api "repos/${{ github.repository }}/git/refs" \
+            -f ref="refs/tags/ota-patch-${PATCH_NUM}" -f sha="${HEAD_SHA}" >/dev/null 2>&1 \
+            && echo "Tagged ota-patch-${PATCH_NUM} at ${HEAD_SHA}." \
+            || echo "Tag ota-patch-${PATCH_NUM} already exists or could not be created."
