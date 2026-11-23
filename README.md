@@ -57,7 +57,6 @@ System Compatibility
 KibaOS works on:
 
 * Most PCs with a 64-bit Intel or AMD processor and UEFI startup.
-* Android 9 phones and tablets that support TrebleDroid and TWRP (mobile edition).
 
 Get KibaOS
 
