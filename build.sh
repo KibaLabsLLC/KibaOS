@@ -102,10 +102,6 @@ wget
 git
 power-profiles-daemon
 xdg-user-dirs
-noto-fonts
-noto-fonts-emoji
-noto-fonts-cjk
-ttf-nunito
 bluez-utils
 go
 sof-firmware
@@ -138,8 +134,6 @@ wlr-randr
 gvfs
 gvfs-mtp
 gvfs-smb
-papirus-icon-theme
-adwaita-icon-theme
 accountsservice
 sassc
 meson
@@ -170,7 +164,6 @@ yyjson
 boost
 glm
 network-manager-applet
-kvantum
 pipewire
 pipewire-pulse
 pipewire-alsa
@@ -184,7 +177,6 @@ polkit
 udisks2
 upower
 fastfetch
-flatpak
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 xdg-desktop-portal-wlr
@@ -203,7 +195,6 @@ plymouth
 squashfs-tools
 
 qemu-guest-agent
-breeze-icons
 dialog
 iproute2
 openbsd-netcat
@@ -930,6 +921,14 @@ id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
 LI_OK=0
+for _try in 1 2 3 4 5;do
+if su - kibabuild -c 'cd /tmp && rm -rf lost-island && git clone https://github.com/MarcoZorn/lost-island && cd lost-island/packaging && makepkg -si --noconfirm --needed';then
+LI_OK=1
+break
+fi
+echo "!! lost-island build attempt $_try/5 failed -- retrying in 10s" >&2
+sleep 10
+done
 if [ "$LI_OK" -eq 1 ]&&command -v lost-island >/dev/null 2>&1;then
 echo "=== lost-island installed ==="
 else
@@ -938,7 +937,6 @@ fi
 rm -rf /tmp/lost-island
 rm -f /etc/sudoers.d/kibabuild
 userdel -r kibabuild 2>/dev/null||true
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 ADWAITA_ICONS="/usr/share/icons/Adwaita"
 LAUNCHER_MASTER="/tmp/kibaos-launcher-icon.png"
 if [ -f "$LOGO_256" ];then
@@ -972,8 +970,6 @@ cat >/etc/gtk-3.0/settings.ini <<'GTK3RC'
 [Settings]
 gtk-theme-name=Adwaita-dark
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
 gtk-xft-hinting=1
@@ -984,13 +980,7 @@ mkdir -p /etc/gtk-4.0
 cat >/etc/gtk-4.0/settings.ini <<'GTK4RC'
 [Settings]
 gtk-application-prefer-dark-theme=1
-gtk-icon-theme-name=Papirus-Dark
 GTK4RC
-mkdir -p /usr/share/Kvantum/KibaOS/config
-mkdir -p /usr/share/Kvantum/KibaOS/Translations
-chmod -R 755 /usr/share/Kvantum/KibaOS
-echo "[General]
-Theme=KibaOS" >/etc/xdg/kvantum.kvconfig
 cat >/etc/gtk-3.0/gtk.css <<'GTK3PANEL'
 /* ════════════════════════════════════════════════════════════════════════
  * KibaOS Organic Motion Language
@@ -2359,8 +2349,6 @@ mkdir -p \
 cat >"$SKEL/.config/gtk-3.0/settings.ini" <<'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
-gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=Nunito 11
 gtk-cursor-theme-size=24
 gtk-xft-antialias=1
 gtk-xft-hinting=1
@@ -2378,12 +2366,7 @@ cat >/usr/local/bin/kibaos-first-login <<'FIRSTLOGIN'
 STAMP="$HOME/.config/.kibaos-configured"
 [ -f "$STAMP" ]&&exit 0
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
-gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
-gsettings set org.gnome.desktop.interface cursor-theme 'Adwaita'
 gsettings set org.gnome.desktop.interface cursor-size 24
-gsettings set org.gnome.desktop.interface font-name 'Nunito 11'
-gsettings set org.gnome.desktop.interface document-font-name 'Nunito 11'
-gsettings set org.gnome.desktop.interface monospace-font-name 'Noto Sans Mono 11'
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 gsettings set org.gnome.desktop.interface enable-animations true
 gsettings set org.gnome.desktop.interface text-scaling-factor 1.0
@@ -2392,7 +2375,6 @@ gsettings set org.gnome.desktop.background picture-uri-dark 'file:///usr/share/k
 gsettings set org.gnome.desktop.background picture-options 'zoom'
 gsettings set org.gnome.desktop.background primary-color '#0d1b2a'
 gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
-gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Nunito SemiBold 10'
 gsettings set org.gnome.desktop.wm.preferences action-double-click-titlebar 'toggle-maximize'
 gsettings set org.gnome.desktop.wm.preferences num-workspaces 4
 gsettings set org.gnome.desktop.wm.preferences focus-mode 'click'
@@ -2451,18 +2433,6 @@ cat >"$SKEL/.config/fontconfig/fonts.conf" <<'FONTCONF'
     <edit name="lcdfilter" mode="assign"><const>lcddefault</const></edit>
     <edit name="embeddedbitmap" mode="assign"><bool>false</bool></edit>
   </match>
-  <alias>
-    <family>sans-serif</family>
-    <prefer><family>Nunito</family></prefer>
-  </alias>
-  <alias>
-    <family>system-ui</family>
-    <prefer><family>Nunito</family></prefer>
-  </alias>
-  <alias>
-    <family>monospace</family>
-    <prefer><family>Noto Sans Mono</family></prefer>
-  </alias>
 </fontconfig>
 FONTCONF
 cat >"$SKEL/.config/electron-flags.conf" <<'ELECTRONFLAGS'
@@ -2525,382 +2495,10 @@ cat >"$SKEL/.config/fastfetch/config.jsonc" <<'FFCONF'
   ]
 }
 FFCONF
-cat >"$SKEL/.config/autostart/lost-island.desktop" <<'LIAUTO'
-[Desktop Entry]
-Type=Application
-Name=Lost Island
-Exec=lost-island
-TryExec=lost-island
-X-GNOME-Autostart-enabled=true
-X-GNOME-Autostart-Delay=3
-NoDisplay=true
-LIAUTO
 cp -aT "$SKEL/" /home/liveuser/
 chown -R 1000:1000 /home/liveuser
 chmod 750 /home/liveuser
 mkdir -p /usr/local/bin
-mkdir -p /usr/share/kibaos-welcome
-sed -i 's/GTK_THEME=Adwaita-dark/GTK_THEME=KibaOS/' /etc/environment
-mkdir -p /usr/share/applications /etc/skel/Desktop /etc/skel/Documents \
-/etc/skel/Downloads /etc/skel/Pictures /etc/skel/Music /etc/skel/Videos
-cat >/etc/skel/.config/user-dirs.dirs <<'USERDIRS'
-XDG_DESKTOP_DIR="$HOME/Desktop"
-XDG_DOWNLOAD_DIR="$HOME/Downloads"
-XDG_DOCUMENTS_DIR="$HOME/Documents"
-XDG_PICTURES_DIR="$HOME/Pictures"
-XDG_MUSIC_DIR="$HOME/Music"
-XDG_VIDEOS_DIR="$HOME/Videos"
-USERDIRS
-mkdir -p /etc/skel/.config/autostart
-cat >/usr/local/bin/kibaos-first-login-setup <<'FIRSTLOGIN'
-#!/bin/bash
-MARKER="$HOME/.config/.kibaos-first-login-done"
-[ -f "$MARKER" ]&&exit 0
-mkdir -p "$HOME/.config/gtk-3.0"
-cat >"$HOME/.config/gtk-3.0/bookmarks" <<BOOKMARKS
-file://$HOME/Desktop Desktop
-file://$HOME/Documents Documents
-file://$HOME/Downloads Downloads
-file://$HOME/Pictures Pictures
-file://$HOME/Music Music
-file://$HOME/Videos Videos
-BOOKMARKS
-mkdir -p "$HOME/.config"
-touch "$MARKER"
-FIRSTLOGIN
-chmod +x /usr/local/bin/kibaos-first-login-setup
-cat >/etc/skel/.config/autostart/kibaos-first-login-setup.desktop <<'FIRSTLOGINDESK'
-[Desktop Entry]
-Type=Application
-Name=KibaOS First Login Setup
-Exec=/usr/local/bin/kibaos-first-login-setup
-NoDisplay=true
-X-GNOME-Autostart-Phase=Initialization
-FIRSTLOGINDESK
-mkdir -p /usr/share/kibapkg
-cat >/usr/share/kibapkg/kibapkg.py <<'KIBAPKG'
-#!/usr/bin/env python3
-"""kibapkg — a friendly front-end to libalpm (via pyalpm) for KibaOS.
-Invoked as `kiba`. Talks to libalpm directly; never shells out to pacman."""
-import os
-import re
-import sys
-import pyalpm
-
-ROOT = "/"
-DBPATH = "/var/lib/pacman"
-PACMAN_CONF = "/etc/pacman.conf"
-MIRRORLIST = "/etc/pacman.d/mirrorlist"
-
-
-def die(msg):
-    print(f"kiba: {msg}")
-    sys.exit(1)
-
-
-def need_root():
-    if os.geteuid() != 0:
-        os.execvp("sudo", ["sudo", sys.executable, __file__] + sys.argv[1:])
-
-
-def active_mirrors(limit=5):
-    mirrors = []
-    if os.path.exists(MIRRORLIST):
-        with open(MIRRORLIST) as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith("Server"):
-                    url = line.split("=", 1)[1].strip()
-                    mirrors.append(url)
-                    if len(mirrors) >= limit:
-                        break
-    return mirrors
-
-
-def repo_names():
-    repos = []
-    if os.path.exists(PACMAN_CONF):
-        with open(PACMAN_CONF) as f:
-            for line in f:
-                m = re.match(r"^\[(\w+)\]$", line.strip())
-                if m and m.group(1) != "options":
-                    repos.append(m.group(1))
-    return repos or ["core", "extra", "multilib"]
-
-
-def make_handle():
-    h = pyalpm.Handle(ROOT, DBPATH)
-    mirrors = active_mirrors()
-    for repo in repo_names():
-        db = h.register_syncdb(repo, pyalpm.SIG_DATABASE_OPTIONAL)
-        db.servers = [m.replace("$repo", repo).replace("$arch", os.uname().machine) for m in mirrors]
-    return h
-
-
-def cb_event(*_):
-    pass  # kept silent on purpose — kiba prints its own plain-language status
-
-
-def run_transaction(h, build_trans, verb):
-    h.dlcb = lambda name, xfered, total: None
-    h.eventcb = cb_event
-    t = h.init_transaction()
-    try:
-        build_trans(h, t)
-        t.prepare()
-        if not t.to_add and not t.to_remove:
-            print(f"kiba: nothing to {verb}.")
-            t.release()
-            return
-        for pkg in t.to_add:
-            print(f"  + {pkg.name} {pkg.version}")
-        for pkg in t.to_remove:
-            print(f"  - {pkg.name} {pkg.version}")
-        t.commit()
-        print(f"kiba: {verb} complete.")
-    except pyalpm.error as e:
-        print(f"kiba: couldn't {verb} that — {e}")
-        sys.exit(1)
-    finally:
-        try:
-            t.release()
-        except Exception:
-            pass
-
-
-def cmd_search(h, terms):
-    seen = set()
-    for db in h.get_syncdbs():
-        for pkg in db.search(terms):
-            if pkg.name not in seen:
-                seen.add(pkg.name)
-                print(f"{pkg.name:<28} {pkg.version:<16} {pkg.desc}")
-
-
-def cmd_list(h):
-    for pkg in h.get_localdb().pkgcache:
-        print(f"{pkg.name:<28} {pkg.version}")
-
-
-def cmd_info(h, name):
-    pkg = h.get_localdb().get_pkg(name)
-    source = "installed"
-    if pkg is None:
-        for db in h.get_syncdbs():
-            pkg = db.get_pkg(name)
-            if pkg:
-                source = f"available in {db.name}"
-                break
-    if pkg is None:
-        die(f"no package named '{name}'")
-    print(f"{pkg.name}  {pkg.version}  ({source})")
-    print(pkg.desc)
-
-
-def cmd_install(h, names):
-    def build(h, t):
-        for name in names:
-            pkg = None
-            for db in h.get_syncdbs():
-                pkg = db.get_pkg(name)
-                if pkg:
-                    break
-            if pkg is None:
-                die(f"no package named '{name}'")
-            t.add_pkg(pkg)
-    run_transaction(h, build, "install")
-
-
-def cmd_remove(h, names):
-    def build(h, t):
-        for name in names:
-            pkg = h.get_localdb().get_pkg(name)
-            if pkg is None:
-                die(f"'{name}' isn't installed")
-            t.remove_pkg(pkg)
-    run_transaction(h, build, "remove")
-
-
-def cmd_update(h):
-    def build(h, t):
-        for db in h.get_syncdbs():
-            db.update(force=False)
-        h.sysupgrade(downgrade=False)
-    run_transaction(h, build, "update")
-
-
-HELP = """kiba — the KibaOS package manager
-
-  kiba install <name...>   install one or more apps
-  kiba remove  <name...>   remove one or more apps
-  kiba update              update everything
-  kiba search  <term>      search for an app
-  kiba list                list installed apps
-  kiba info    <name>      show details about an app
-"""
-
-
-def main():
-    args = sys.argv[1:]
-    if not args or args[0] in ("-h", "--help", "help"):
-        print(HELP)
-        return
-    cmd, rest = args[0], args[1:]
-    if cmd in ("install", "remove", "update"):
-        need_root()
-    h = make_handle()
-    if cmd == "install" and rest:
-        cmd_install(h, rest)
-    elif cmd == "remove" and rest:
-        cmd_remove(h, rest)
-    elif cmd == "update":
-        cmd_update(h)
-    elif cmd == "search" and rest:
-        cmd_search(h, rest)
-    elif cmd == "list":
-        cmd_list(h)
-    elif cmd == "info" and rest:
-        cmd_info(h, rest[0])
-    else:
-        print(HELP)
-
-
-if __name__ == "__main__":
-    main()
-KIBAPKG
-chmod +x /usr/share/kibapkg/kibapkg.py
-ln -sf /usr/share/kibapkg/kibapkg.py /usr/local/bin/kiba
-ln -sf /usr/share/kibapkg/kibapkg.py /usr/local/bin/kibapkg
-echo "=== Installing pacman shim (real pacman -> /usr/lib/kibaos/pacman-real) ==="
-mkdir -p /usr/lib/kibaos
-if [ -f /usr/bin/pacman ]&&[ ! -f /usr/lib/kibaos/pacman-real ];then
-mv /usr/bin/pacman /usr/lib/kibaos/pacman-real
-fi
-cat >/usr/bin/pacman <<'PACMANSHIM'
-#!/usr/bin/env bash
-REAL=/usr/lib/kibaos/pacman-real
-if [ -n "${KIBAOS_REAL_PACMAN:-}" ]||[ ! -t 1 ];then
-exec "$REAL" "$@"
-fi
-rest=("$@")
-rest=("${rest[@]:1}")
-for a in "${rest[@]}";do
-case "$a" in -*)exec "$REAL" "$@";esac
-done
-case "$1" in
--S|--sync)[ "${#rest[@]}" -ge 1 ]||exec "$REAL" "$@"
-exec kiba install "${rest[@]}"
-;;
--R|--remove)[ "${#rest[@]}" -ge 1 ]||exec "$REAL" "$@"
-exec kiba remove "${rest[@]}"
-;;
--Syu|-Syyu)[ "${#rest[@]}" -eq 0 ]||exec "$REAL" "$@"
-exec kiba update
-;;
--Ss|--search)[ "${#rest[@]}" -ge 1 ]||exec "$REAL" "$@"
-exec kiba search "${rest[@]}"
-;;
--Qi)[ "${#rest[@]}" -eq 1 ]||exec "$REAL" "$@"
-exec kiba info "${rest[0]}"
-;;
--Q|--query)[ "${#rest[@]}" -eq 0 ]||exec "$REAL" "$@"
-exec kiba list
-;;
-*)exec "$REAL" "$@"
-esac
-PACMANSHIM
-chmod +x /usr/bin/pacman
-echo "=== pacman shim installed ==="
-cat >/usr/share/applications/kibaos-install.desktop <<'INSTDESK'
-[Desktop Entry]
-Name=Install KibaOS
-Comment=Install KibaOS to your hard drive
-Exec=/usr/bin/io.kibaos.oobe
-Icon=kibaos
-Terminal=false
-Type=Application
-Categories=System;
-Keywords=install;setup;kibaos;
-INSTDESK
-cat >/usr/share/applications/kibaos-about.desktop <<'ABOUTDESK'
-[Desktop Entry]
-Name=About KibaOS
-Comment=Learn more about KibaOS
-Exec=xdg-open https://github.com/WolfTech-Innovations/Kiba
-Icon=kibaos
-Terminal=false
-Type=Application
-Categories=System;
-ABOUTDESK
-for _avahi_desk in avahi-discover bssh bvnc;do
-if [ -f "/usr/share/applications/$_avahi_desk.desktop" ];then
-cp "/usr/share/applications/$_avahi_desk.desktop" \
-"/usr/share/applications/$_avahi_desk.desktop.bak" 2>/dev/null||true
-printf '[Desktop Entry]\nNoDisplay=true\n' >> \
-"/usr/share/applications/$_avahi_desk.desktop"
-fi
-done
-if [ -f "/usr/share/applications/org.gnome.Terminal.desktop" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' \
-"/usr/share/applications/org.gnome.Terminal.desktop"||true
-grep -q '^NoDisplay=' "/usr/share/applications/org.gnome.Terminal.desktop"||echo 'NoDisplay=true' >>"/usr/share/applications/org.gnome.Terminal.desktop"
-fi
-for _bcc_desk in budgie-control-center.desktop \
-org.buddiesofbudgie.BudgieControlCenter.desktop \
-budgie-desktop-settings.desktop \
-org.buddiesofbudgie.BudgieDesktopSettings.desktop;do
-if [ -f "/usr/share/applications/$_bcc_desk" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' "/usr/share/applications/$_bcc_desk"||true
-grep -q '^NoDisplay=' "/usr/share/applications/$_bcc_desk"||echo 'NoDisplay=true' >>"/usr/share/applications/$_bcc_desk"
-fi
-done
-for _hidden_desk in kvantummanager.desktop \
-org.gnome.Sysprof.desktop \
-sysprof.desktop \
-sysprof4.desktop \
-org.gnome.Extensions.desktop \
-com.github.hedges.gnome-extensions.desktop \
-qv4l2.desktop \
-qvidcap.desktop \
-tuned-gui.desktop \
-tuned-adm-gui.desktop \
-lstopo.desktop \
-hwloc.desktop;do
-if [ -f "/usr/share/applications/$_hidden_desk" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' "/usr/share/applications/$_hidden_desk"||true
-grep -q '^NoDisplay=' "/usr/share/applications/$_hidden_desk"||echo 'NoDisplay=true' >>"/usr/share/applications/$_hidden_desk"
-fi
-done
-for _gcc_desk in gnome-control-center.desktop \
-org.gnome.Settings.desktop;do
-if [ -f "/usr/share/applications/$_gcc_desk" ];then
-sed -i 's/^Name=.*/Name=Settings/' "/usr/share/applications/$_gcc_desk"||true
-sed -i '/^Name\[/d' "/usr/share/applications/$_gcc_desk"||true
-fi
-done
-for _panel_desk in gnome-multitasking-panel.desktop \
-gnome-search-panel.desktop \
-gnome-wwan-panel.desktop \
-gnome-online-accounts-panel.desktop;do
-if [ -f "/usr/share/applications/$_panel_desk" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' "/usr/share/applications/$_panel_desk"||true
-grep -q '^NoDisplay=' "/usr/share/applications/$_panel_desk"||echo 'NoDisplay=true' >>"/usr/share/applications/$_panel_desk"
-fi
-done
-for _sw_desk in org.gnome.Software.desktop;do
-if [ -f "/usr/share/applications/$_sw_desk" ];then
-sed -i 's/^Name=.*/Name=App Store/' "/usr/share/applications/$_sw_desk"||true
-sed -i '/^Name\[/d' "/usr/share/applications/$_sw_desk"||true
-fi
-done
-if [ -f "/usr/share/applications/nm-connection-editor.desktop" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' "/usr/share/applications/nm-connection-editor.desktop"||true
-grep -q '^NoDisplay=' "/usr/share/applications/nm-connection-editor.desktop"||echo 'NoDisplay=true' >>"/usr/share/applications/nm-connection-editor.desktop"
-fi
-if [ -f "/usr/share/applications/cmake-gui.desktop" ];then
-sed -i 's/^NoDisplay=.*/NoDisplay=true/' "/usr/share/applications/cmake-gui.desktop"||true
-grep -q '^NoDisplay=' "/usr/share/applications/cmake-gui.desktop"||echo 'NoDisplay=true' >>"/usr/share/applications/cmake-gui.desktop"
-fi
 echo 'kernel.sysrq = 0' >/etc/sysctl.d/50-kibaos-disable-sysrq.conf
 grep -q '^NAutoVTs' /etc/systemd/logind.conf&&sed -i 's/^NAutoVTs=.*/NAutoVTs=1/' /etc/systemd/logind.conf||echo 'NAutoVTs=1' >>/etc/systemd/logind.conf
 systemctl mask getty@tty2.service getty@tty3.service getty@tty4.service \
@@ -2930,7 +2528,7 @@ cat >/etc/issue <<'ISSUE'
   ██║  ██╗██║██████╔╝██║  ██║╚██████╔╝███████║
   ╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
 
-  KibaOS by Kiba Labs
+  KibaOS by Kiba Labs, LLC
   Live session: user=liveuser  password=live
   Install: click the desktop icon or run  install
 
@@ -3286,10 +2884,7 @@ if [ -f kibaos.iso ];then
 mv kibaos.iso "$ISO.iso"
 xorriso -indev "$ISO.iso" -report_el_torito plain -report_system_area plain 2>&1|tail -n 60||true
 sha256sum "$ISO.iso" >"$ISO.iso.sha256"
-echo "╔══════════════════════════════════════╗"
-echo "║  KibaOS build complete!       ║"
-echo "║  $ISO.iso            ║"
-echo "╚══════════════════════════════════════╝"
+echo "Build Complete!"
 else
 echo "ERROR: kibaos.iso not found after xorriso!"
 exit 1
