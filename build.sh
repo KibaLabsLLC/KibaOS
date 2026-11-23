@@ -3345,13 +3345,6 @@ rm -rf "$KIBA_SPLASH_SRC"
 echo "=== Boot animation: kibaos theme re-applied ==="
 rm -rf /var/cache/pacman/pkg/*
 rm -rf /usr/share/man/* /usr/share/info/* /usr/share/doc/*
-find /usr/lib/firmware -mindepth 1 -maxdepth 1 \
-! -name 'i915' ! -name 'amdgpu' ! -name 'radeon' \
-! -name 'nouveau' ! -name 'nvidia' ! -name 'iwlwifi*' ! -name 'ath*' \
-! -name 'ath10k' ! -name 'ath11k' ! -name 'rtl_nic' \
-! -name 'rtlwifi' ! -name 'rtw88' ! -name 'rtw89' \
-! -name 'sof' ! -name 'sof-tplg' ! -name 'intel' \
--exec rm -rf {} + 2>/dev/null||true
 find /usr/share/locale -mindepth 1 -maxdepth 1 \
 ! -name 'en_US' ! -name 'en_GB' ! -name 'locale.alias' \
 -exec rm -rf {} + 2>/dev/null||true
