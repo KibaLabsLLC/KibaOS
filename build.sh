@@ -424,7 +424,6 @@ grep -q 'HandleLidSwitchExternalPower' /etc/systemd/logind.conf||echo 'HandleLid
 grep -q 'HandlePowerKey' /etc/systemd/logind.conf&&sed -i 's/^HandlePowerKey=.*/HandlePowerKey=poweroff/' /etc/systemd/logind.conf
 systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/eb32d69184b0ab434031bdbcf10e7f05230bf04a/assets/wallpapers/914336476_1020081810382353_5994052822657741584_n.webp"
-BOOT_SPLASH_URL="https://github.com/KibaLabsLLC/KibaOS/blob/main/assets/splash/splash.png?raw=true"
 WALLPAPER_DEST="/usr/share/kibaos/wallpaper.jpg"
 LOGO_SRC="/usr/share/kibaos/logo-raw.png"
 LOGO_256="/usr/share/kibaos/logo-256.png"
@@ -432,15 +431,7 @@ LOGO_96="/usr/share/kibaos/logo-96.png"
 LOGO_48="/usr/share/kibaos/logo-48.png"
 LOGO_32="/usr/share/kibaos/logo-32.png"
 INSTALLER_LOGO="/usr/share/kibaos/installer-logo.png"
-BOOT_SPLASH_RAW="/usr/share/kibaos/boot-splash-raw.png"
-BOOT_SPLASH="/usr/share/kibaos/boot-splash.png"
 mkdir -p /usr/share/kibaos /usr/share/pixmaps
-curl -fL --retry 5 --retry-delay 3 -o "$BOOT_SPLASH_RAW" "$BOOT_SPLASH_URL"||true
-if [ -f "$BOOT_SPLASH_RAW" ]&&file "$BOOT_SPLASH_RAW"|grep -qi 'image';then
-magick "$BOOT_SPLASH_RAW" -filter Lanczos -resize '480x480>' "$BOOT_SPLASH"
-cp "$BOOT_SPLASH_RAW" "$LOGO_SRC"
-rm -f "$BOOT_SPLASH_RAW"
-fi
 if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "$WALLPAPER_URL"&&magick /tmp/kiba-wallpaper-src[0] -quality 92 "$WALLPAPER_DEST";then
 :
 else
@@ -457,7 +448,6 @@ else
 for sz in 256 96 48 32;do
 magick -size ${sz}x$sz xc:none \
 -fill '#0099cc' -draw "circle $((sz/2)),$((sz/2)) $((sz/2)),1" \
--fill white -pointsize $((sz/2)) -gravity Center -annotate 0 'K' \
 "/usr/share/kibaos/logo-$sz.png"
 done
 fi
@@ -488,11 +478,7 @@ done
 cp "$BADGE_WHITE_SRC" /usr/share/icons/hicolor/scalable/actions/pane-show-symbolic.png
 cp "$BADGE_WHITE_SRC" /usr/share/icons/hicolor/symbolic/actions/pane-show-symbolic.png
 gtk-update-icon-cache /usr/share/icons/hicolor/ 2>/dev/null||true
-if [ -f "$BOOT_SPLASH" ];then
-cp "$BOOT_SPLASH" "$INSTALLER_LOGO"
-else
 cp "$LOGO_256" "$INSTALLER_LOGO"
-fi
 pacman -Syu --noconfirm git
 set -euo pipefail
 mkdir -p /usr/share/icons/hicolor/scalable/actions
