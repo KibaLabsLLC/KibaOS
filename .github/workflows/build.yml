@@ -54,13 +54,9 @@ jobs:
             *.iso
             *.iso.sha256
           retention-days: 7
-  # Decides which GitHub artifact to ship and whether SourceForge needs it.
-  #  - Build ran this run: ship this run's artifact (always newer than SourceForge).
-  #  - Build skipped: find the newest unexpired artifact from an earlier run and
-  #    only ship it if SourceForge's recorded version is older than that run.
   latest_x86_64:
     needs: build_x86_64
-    if: ${{ !cancelled() && contains(fromJSON('["success","skipped"]'), needs.build_x86_64.result) }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -140,7 +136,6 @@ jobs:
           SF_USER: ${{ secrets.SF_USER }}
           SSHPASS: ${{ secrets.SF_PASS }}
           ART: ${{ steps.pick.outputs.patch_num }}
-          FRESH: ${{ steps.pick.outputs.fresh }}
         run: |
           if [ -z "$SF_USER" ] || [ -z "$SSHPASS" ]; then
             echo "SourceForge credentials not configured. Nothing to push."
@@ -148,19 +143,11 @@ jobs:
             echo "ota_needed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if [ "$FRESH" = "true" ]; then
-            echo "Fresh build #${ART} -- publishing and generating OTA."
-            echo "publish_needed=true" >> "$GITHUB_OUTPUT"
-            echo "ota_needed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           sudo apt-get install -y sshpass rsync
           mkdir -p ~/.ssh
           ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
 
           SF=/home/frs/project/kibaos
-          # Prints the leading integer of a remote file, or 0 if missing/empty.
           read_version() {
             local f v
             f=$(mktemp)
@@ -171,7 +158,6 @@ jobs:
 
           SF_ISO=$(read_version x86_64/last-iso-build-number-x86_64.txt)
           SF_OTA=$(read_version ota/last-ota-build-x86_64.txt)
-          # Older SourceForge layouts only have latest-patch-level.
           [ "$SF_OTA" -eq 0 ] && SF_OTA=$(read_version ota/latest-patch-level)
 
           PUB=false; OTA=false
@@ -180,7 +166,7 @@ jobs:
           echo "publish_needed=${PUB}" >> "$GITHUB_OUTPUT"
           echo "ota_needed=${OTA}" >> "$GITHUB_OUTPUT"
           {
-            echo "### Skipped build: latest artifact vs SourceForge (x86_64)"
+            echo "### Latest GitHub artifact vs SourceForge (x86_64)"
             echo "- Latest GitHub artifact: v${ART}"
             echo "- SourceForge ISO: v${SF_ISO} -> publish ${PUB}"
             echo "- SourceForge OTA: v${SF_OTA} -> OTA ${OTA}"
@@ -324,7 +310,6 @@ jobs:
       matrix:
         fw: [uefi]
     runs-on: ubuntu-24.04
-    # Up to (1 + MAX_RETRIES) attempts x ~(2 x SWITCH_WAIT + boot) each
     timeout-minutes: 45
     permissions:
       actions: read
@@ -369,7 +354,7 @@ jobs:
               sock = socket.socket(socket.AF_UNIX)
               sock.connect("qmp.sock")
               stream = sock.makefile("rw")
-              stream.readline()  # QMP greeting
+              stream.readline()
               def send(cmd):
                   stream.write(json.dumps(cmd) + "\n")
                   stream.flush()
@@ -443,7 +428,6 @@ jobs:
           PYQGA
           mkdir -p attempts
           ISO="$ISO_PATH"
-          # UEFI only: OVMF via pflash.
           cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
           FW=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
 
@@ -464,9 +448,6 @@ jobs:
           capture_probe() {
             python3 qmp.py screendump "$1"
           }
-          # Returns 0 only if the installer was found and killed. A failure just
-          # means "not running right now"; if it never succeeds during an attempt
-          # we assume the VM is sitting at the login screen.
           kill_installer() { python3 qga.py; }
 
           SELECTED=""
@@ -478,21 +459,17 @@ jobs:
             dir="attempts/$(printf '%02d' "$((attempt + 1))")"
             mkdir -p "$dir"
 
-            # Screen switch 1: white splash -> installer. No pixel checks, just wait.
             echo "Waiting ${SWITCH_WAIT}s for the splash to hand over to the installer..."
             sleep "$SWITCH_WAIT"
             vm_alive || { echo "QEMU exited early"; continue; }
             capture_probe "$dir/01-before-kill-${SWITCH_WAIT}s.png" || echo "screendump failed (non-fatal)"
 
-            # Kill the installer if it is running. If it is not, assume the
-            # VM is already past it (login screen / desktop).
             if kill_installer; then
               echo "Installer killed."
             else
               echo "Installer not running -- assuming already past it."
             fi
 
-            # Screen switch 2: installer gone -> login screen / desktop. Wait again.
             echo "Waiting ${SWITCH_WAIT}s for the login screen / desktop..."
             sleep "$SWITCH_WAIT"
             vm_alive || { echo "QEMU exited early"; continue; }
@@ -530,8 +507,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
   vmtest_commit:
-    # One commit job per firmware (UEFI only for now), so screenshots are
-    # uploaded separately and one failing never blocks the other.
     needs: vmtest
     if: ${{ !cancelled() && needs.vmtest.result != 'skipped' }}
     strategy:
@@ -561,14 +536,11 @@ jobs:
             echo "No ${FW} screenshots to commit."
             exit 0
           fi
-          # Stage everything outside the repo tree so it survives a hard reset.
           STAGE="$RUNNER_TEMP/screens-stage"
           rm -rf "$STAGE"; mkdir -p "$STAGE/v${{ github.run_number }}/${FW}"
           cp shots-in/*.png "$STAGE/v${{ github.run_number }}/${FW}/"
-          # Only a screenshot the VM test selected (installer killed, so not the login screen) becomes desktop-<fw>.png.
           if [ -f shots-in/selected.txt ] && [ -f "shots-in/$(cat shots-in/selected.txt)" ]; then
             cp "shots-in/$(cat shots-in/selected.txt)" "$STAGE/desktop-${FW}.png"
-            # Back-compat: desktop.png keeps tracking the UEFI desktop.
             [ "$FW" = "uefi" ] && cp "$STAGE/desktop-${FW}.png" "$STAGE/desktop.png"
           else
             echo "${FW}: no selected desktop screenshot -- not updating desktop-${FW}.png."
@@ -576,10 +548,6 @@ jobs:
 
           git config user.name "KibaOS OTA Bot"
           git config user.email "ota@kibaos.wolftech.tech"
-          # No rebase/merge: binary files can't be merged and a failed rebase wedges
-          # every retry. Each attempt resets to the latest remote tip and re-applies
-          # the staged files on top, so the newest run always wins desktop-<fw>.png and
-          # the per-run v<N>/<fw>/ folders never collide (each firmware touches its own paths).
           for i in 1 2 3 4 5 6; do
             git rebase --abort 2>/dev/null || true
             git fetch --no-tags origin "$GITHUB_REF_NAME"
@@ -713,8 +681,6 @@ jobs:
             echo "No changes for ${ARCH} — only baseline manifest updated."
           fi
           if [ -f latest-patch-level ]; then retry sshpass -e rsync -avP latest-patch-level "$R/"; fi
-          # Record which build SourceForge's OTA is now at, so a skipped-build run
-          # can tell whether the newest GitHub artifact is newer than what's published.
           echo "${PATCH_NUM}" > last-ota-build.txt
           retry sshpass -e rsync -avP last-ota-build.txt "$R/last-ota-build-${ARCH}.txt"
       - name: Tag this build
@@ -722,7 +688,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Tag the commit the artifact was built from (not necessarily the current HEAD).
           gh api "repos/${{ github.repository }}/git/refs" \
             -f ref="refs/tags/ota-patch-${PATCH_NUM}" -f sha="${HEAD_SHA}" >/dev/null 2>&1 \
             && echo "Tagged ota-patch-${PATCH_NUM} at ${HEAD_SHA}." \
