@@ -123,8 +123,6 @@ pyalpm
 parted
 gptfdisk
 pv
-lib32-mesa
-lib32-vulkan-icd-loader
 pkg-config
 greetd
 greetd-tuigreet
@@ -224,7 +222,7 @@ pciutils
 lvm2
 
 tuned
-# --- GPU drivers / Xorg drivers / firmware ---
+# --- GPU drivers / firmware ---
 mesa
 vulkan-radeon
 vulkan-intel
@@ -232,20 +230,6 @@ vulkan-nouveau
 intel-media-driver
 libva-intel-driver
 libva-mesa-driver
-xf86-video-amdgpu
-xf86-video-ati
-xf86-video-intel
-xf86-video-nouveau
-xf86-video-dummy
-xf86-video-fbdev
-xf86-video-vesa
-xf86-video-qxl
-xf86-input-libinput
-xf86-input-evdev
-xf86-input-synaptics
-xf86-input-vmmouse
-xf86-input-void
-xf86-input-wacom
 linux-firmware
 linux-firmware-amd
 linux-firmware-amdgpu
@@ -270,7 +254,6 @@ if [ "$KIBA_ARCH" = "x86_64" ];then
 cat >>"$PROFILE/packages.x86_64" <<'NVIDIAPKGS'
 nvidia-open
 nvidia-utils
-lib32-nvidia-utils
 egl-wayland
 libva-nvidia-driver
 NVIDIAPKGS
