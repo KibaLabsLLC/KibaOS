@@ -173,7 +173,7 @@ jobs:
           } | tee -a "$GITHUB_STEP_SUMMARY"
   publish_x86_64:
     needs: latest_x86_64
-    if: ${{ needs.latest_x86_64.outputs.publish_needed == 'true' }}
+    if: ${{ !cancelled() && needs.latest_x86_64.outputs.publish_needed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -564,7 +564,7 @@ jobs:
           exit 1
   ota_x86_64:
     needs: latest_x86_64
-    if: ${{ !inputs.skip_ota && needs.latest_x86_64.outputs.ota_needed == 'true' }}
+    if: ${{ !cancelled() && !inputs.skip_ota && needs.latest_x86_64.outputs.ota_needed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
