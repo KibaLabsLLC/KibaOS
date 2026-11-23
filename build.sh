@@ -1,12 +1,6 @@
 #!/bin/bash
 set -ex
 KIBA_ARCH="x86_64"
-for _a in "$@";do
-case "$_a" in
---mobile)KIBA_ARCH="mobile"
-esac
-done
-[ "$KIBA_ARCH" = "x86_64" ]&&[ "${KIBA_MOBILE:-0}" = "1" ]&&KIBA_ARCH="mobile"
 export KIBA_ARCH
 echo "=== KibaOS build target: $KIBA_ARCH ==="
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 10/' /etc/pacman.conf
@@ -19,10 +13,6 @@ pacman-key --init
 pacman-key --populate archlinux
 pacman -Syy --noconfirm
 pacman -Su --noconfirm
-if [ "$KIBA_ARCH" = "mobile" ];then
-pacman -S --noconfirm --needed \
-base-devel git arch-install-scripts openssl curl jq e2fsprogs zip unzip imagemagick
-else
 pacman -S --noconfirm --needed \
 base-devel git squashfs-tools libisoburn mtools dosfstools \
 cmake ninja meson \
@@ -30,1839 +20,6 @@ grub \
 arch-install-scripts \
 openssl curl imagemagick jq \
 python-docutils
-fi
-build_kibaos_mobile(){
-local _root="/w/mobile-rootfs"
-local _out="/w/out"
-rm -rf "$_root"
-mkdir -p "$_root" "$_out"
-pacman-key --init
-pacman-key --populate archlinux
-pacman-key --recv-keys 68B3537F39A313B3E574D06777193F152BDBE6A6 \
---keyserver keyserver.ubuntu.com
-pacman-key --lsign-key 68B3537F39A313B3E574D06777193F152BDBE6A6
-cat >/etc/pacman.d/mobile-mirrorlist <<'MIRRORLIST'
-Server = http://mirror.archlinuxarm.org/aarch64/$repo
-MIRRORLIST
-cat >/tmp/mobile-pacman.conf <<'PACMANCONF'
-[options]
-Architecture = aarch64
-CheckSpace
-ParallelDownloads = 10
-SigLevel = Required DatabaseOptional
-
-[core]
-Include = /etc/pacman.d/mobile-mirrorlist
-[extra]
-Include = /etc/pacman.d/mobile-mirrorlist
-[alarm]
-Include = /etc/pacman.d/mobile-mirrorlist
-PACMANCONF
-mkdir -p "$_root/var/lib/pacman"
-pacstrap -C /tmp/mobile-pacman.conf -c -G "$_root" \
-base sudo networkmanager \
-labwc-is-not-used-placeholder 2>/dev/null||true
-pacstrap -C /tmp/mobile-pacman.conf -c -G "$_root" \
-base sudo networkmanager dbus polkit \
-budgie-control-center \
-phoc squeekboard waybar wtype \
-bluez bluez-utils upower \
-wireplumber pipewire pipewire-pulse \
-mesa vulkan-icd-loader \
-openssh git base-devel \
-ell gnome-calls chatty
-awk '
-    /^\[aur\]/ { skip=1; next }
-    skip && /^\[/ { skip=0 }
-    !skip { print }
-  ' "$_root/etc/pacman.conf" >"$_root/etc/pacman.conf.new"&&mv "$_root/etc/pacman.conf.new" "$_root/etc/pacman.conf"
-sed -i 's/^CheckSpace/#CheckSpace/' "$_root/etc/pacman.conf"
-arch-chroot "$_root" pacman-key --init
-arch-chroot "$_root" pacman-key --populate archlinux
-arch-chroot "$_root" pacman-key --recv-keys \
-68B3537F39A313B3E574D06777193F152BDBE6A6 \
---keyserver keyserver.ubuntu.com
-arch-chroot "$_root" pacman-key --lsign-key \
-68B3537F39A313B3E574D06777193F152BDBE6A6
-arch-chroot "$_root" pacman -Syy --noconfirm
-arch-chroot "$_root" useradd -m -G wheel builder||true
-echo 'builder ALL=(ALL) NOPASSWD: ALL' >"$_root/etc/sudoers.d/builder"
-_aur_build(){
-local _pkg="$1"
-local _extra_args="${2:-}"
-arch-chroot "$_root" bash -c "
-      su - builder -c '
-        cd /tmp &&
-        rm -rf $_pkg &&
-        git clone --depth 1 https://aur.archlinux.org/$_pkg.git &&
-        cd $_pkg &&
-        makepkg -si --noconfirm --needed $_extra_args
-      '
-    "
-}
-_aur_build_retry(){
-local _pkg="$1"
-local _extra_args="${2:-}"
-local _tries
-for _tries in 1 2 3 4 5;do
-if _aur_build "$_pkg" "$_extra_args";then
-return 0
-fi
-if [ "$_tries" -lt 5 ];then
-echo "!! $_pkg AUR build attempt $_tries/5 failed -- retrying in 10s (this is usually a transient AUR git/TLS blip, not a real package error)..." >&2
-sleep 10
-fi
-done
-return 1
-}
-_aur_build_retry ofono||{
-echo "ERROR: ofono AUR build failed -- refusing to ship a mobile rootfs with no working telephony stack. Check the makepkg log above." >&2
-rm -f "$_root/etc/sudoers.d/builder"
-arch-chroot "$_root" userdel -r builder||true
-exit 1
-}
-for _pkg in wlrctl;do
-_aur_build_retry "$_pkg"||echo "!! $_pkg AUR build failed -- check the log above, continuing" >&2
-done
-rm -f "$_root/etc/sudoers.d/builder"
-arch-chroot "$_root" userdel -r builder||true
-if ! arch-chroot "$_root" pacman -S --noconfirm --needed sddm;then
-echo "ERROR: sddm not available -- refusing to build a mobile rootfs with no lock/login screen. Check the ALARM [extra] repo/mirror." >&2
-exit 1
-fi
-arch-chroot "$_root" systemctl enable sddm
-arch-chroot "$_root" bash -c "
-    grep -q '^liveuser:' /etc/passwd || \
-      echo 'liveuser:x:1000:1000:KibaOS Live User (Password is live):/home/liveuser:/bin/bash' >> /etc/passwd
-    grep -q '^liveuser:' /etc/group || \
-      echo 'liveuser:x:1000:liveuser' >> /etc/group
-    mkdir -p /home/liveuser
-    chown 1000:1000 /home/liveuser
-  "
-KIBA_WALLPAPER_URL="https://raw.githubusercontent.com/KibaLabsLLC/KibaOS/379e9a72e646ad11ce9ab60106e8f1b105486172/assets/wallpapers/914452461_2654744054977065_9116017112023096619_n.webp"
-KIBA_BOOT_SPLASH_URL="https://github.com/WolfTech-Innovations/Kiba/blob/main/assets/splash/splash.png?raw=true"
-mkdir -p "$_root/usr/share/kibaos"
-if curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-wallpaper-src "$KIBA_WALLPAPER_URL"&&magick /tmp/kiba-wallpaper-src[0] -resize 1080x2400^ -gravity center -extent 1080x2400 -quality 92 \
-"$_root/usr/share/kibaos/wallpaper.jpg";then
-:
-else
-magick -size 1080x2400 gradient:"#003f5c-#0099cc" "$_root/usr/share/kibaos/wallpaper.jpg"
-fi
-rm -f /tmp/kiba-wallpaper-src
-curl -fL --retry 5 --retry-delay 3 -o /tmp/kiba-boot-splash-raw.png "$KIBA_BOOT_SPLASH_URL"||true
-if [ -f /tmp/kiba-boot-splash-raw.png ]&&file /tmp/kiba-boot-splash-raw.png|grep -qi image;then
-magick /tmp/kiba-boot-splash-raw.png -filter Lanczos -resize 256x256 "$_root/usr/share/kibaos/logo-256.png"
-rm -f /tmp/kiba-boot-splash-raw.png
-else
-magick -size 256x256 xc:none \
--fill '#0099cc' -draw 'circle 128,128 128,1' \
--fill white -pointsize 128 -gravity Center -annotate 0 'K' \
-"$_root/usr/share/kibaos/logo-256.png"
-fi
-SDDM_THEME_DIR="$_root/usr/share/sddm/themes/kibaos"
-mkdir -p "$SDDM_THEME_DIR"
-cp "$_root/usr/share/kibaos/wallpaper.jpg" "$SDDM_THEME_DIR/background.png" 2>/dev/null||true
-cp "$_root/usr/share/kibaos/logo-256.png" "$SDDM_THEME_DIR/logo.png" 2>/dev/null||true
-cat >"$SDDM_THEME_DIR/metadata.desktop" <<'SDDMMETA'
-[SddmGreeterTheme]
-Name=KibaOS
-Description=KibaOS frosted-glass greeter
-Author=Kiba Labs, LLC
-Copyright=2026, Kiba Labs, LLC
-License=GPLv3
-Type=sddm-theme
-Version=1.0
-Website=https://kibaos.com
-MainScript=Main.qml
-Font=Nunito
-QuickVersion=6
-SDDMMETA
-cat >"$SDDM_THEME_DIR/Main.qml" <<'SDDMQML'
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-
-// Single shared greeter for both the desktop ISO and KibaOS Mobile --
-// this exact file is written byte-for-byte into both images (see the
-// desktop copy inside install_archiso's customize_airootfs.sh heredoc).
-// Rather than branching into two separate QML files, the layout adapts
-// itself at runtime off Screen.width, so a genuinely single theme
-// covers a 1920x1080 desktop panel and a ~1080x2400 phone panel without
-// drifting out of sync on brand/behavior over time.
-Rectangle {
-    id: root
-    width: Screen.width  > 0 ? Screen.width  : 1920
-    height: Screen.height > 0 ? Screen.height : 1080
-    color: "#0d1b2a"
-    focus: true
-
-    // phoc's own config scales the DSI panel output 2x at the Wayland
-    // protocol level (see phoc.ini's [output:DSI-1] scale=2) -- Qt's
-    // Wayland QPA backend reads that wl_output scale itself and already
-    // renders this file's logical pixels at the right physical density,
-    // so nothing extra is needed here for HiDPI; this width/height check
-    // is purely about aspect ratio/orientation, not pixel density.
-    readonly property bool isPhone: width < 700
-    readonly property int touchH: isPhone ? 56 : 44
-    readonly property int fieldR: isPhone ? 18 : 14
-
-    property int sessionIndex: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
-
-    // ── Background wallpaper, darkened so the glass card pops ──────────────
-    Image {
-        anchors.fill: parent
-        source: "background.png"
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-    }
-    Rectangle {
-        anchors.fill: parent
-        color: "#0d1b2a"
-        opacity: 0.42
-    }
-
-    // ── Clock ────────────────────────────────────────────────────────────
-    // Desktop: small pill, top-right, matches the KibaOS panel style.
-    // Phone: big lockscreen-style clock, top-center, clear of any status
-    // bar / camera-cutout safe area -- Android/iOS lockscreen convention,
-    // and it doubles as a landmark while your thumb finds the card below.
-    Column {
-        id: clockCol
-        anchors {
-            top: parent.top
-            topMargin: isPhone ? 64 : 28
-        }
-        anchors.horizontalCenter: isPhone ? parent.horizontalCenter : undefined
-        anchors.right: isPhone ? undefined : parent.right
-        anchors.rightMargin: isPhone ? 0 : 28
-        spacing: isPhone ? 4 : 0
-        Text {
-            id: clockTime
-            text: Qt.formatTime(new Date(), "h:mm AP")
-            color: "#ffffff"
-            font.pixelSize: isPhone ? 56 : 18
-            font.weight: Font.Medium
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-        Text {
-            text: Qt.formatDate(new Date(), "ddd, MMM d")
-            color: "#aebccd"
-            font.pixelSize: isPhone ? 16 : 11
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-        Timer { interval: 1000; running: true; repeat: true; onTriggered: clockTime.text = Qt.formatTime(new Date(), "h:mm AP") }
-    }
-
-    // ── Central frosted-glass login card ────────────────────────────────────
-    // Desktop: fixed 360px, dead-centered, unchanged from before.
-    // Phone: full-width (minus margins), anchored in the lower half
-    // rather than dead-center -- that's within comfortable one-handed
-    // thumb reach, and critically it leaves the *upper* half of the
-    // screen clear for squeekboard to pop up underneath without ever
-    // covering the password field it's currently focused on.
-    Rectangle {
-        id: card
-        anchors {
-            horizontalCenter: isPhone ? parent.horizontalCenter : undefined
-            centerIn: isPhone ? undefined : parent
-            bottom: isPhone ? parent.bottom : undefined
-            bottomMargin: isPhone ? 96 : 0
-        }
-        width: isPhone ? parent.width - 48 : 360
-        height: cardCol.implicitHeight + (isPhone ? 40 : 56)
-        radius: isPhone ? 32 : 26
-        color: "#101828"
-        opacity: 0.001
-        // emulated glass: just a solid translucent fill, no real blur.
-        // KWin's own Blur effect is real and available in the actual
-        // session, but the SDDM greeter renders on its own standalone
-        // Qt Quick surface before any session (or its compositor) is
-        // even running — see KWIN CONFIG notes for the full story on
-        // why this greeter can't just borrow it — so this fake-glass
-        // approach is doing all the work here now, not just backstopping
-        // a spot where real blur wouldn't reach anyway.
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            color: Qt.rgba(0.063, 0.094, 0.157, 0.72)
-            border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.14)
-        }
-
-        ColumnLayout {
-            id: cardCol
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: isPhone ? 24 : 28 }
-            spacing: isPhone ? 16 : 14
-
-            Image {
-                Layout.alignment: Qt.AlignHCenter
-                source: "logo.png"
-                width: isPhone ? 56 : 64; height: isPhone ? 56 : 64
-                fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: userModel.count > 0 ? userModel.data(userModel.index(userList.currentIndex, 0), 257) : "User"
-                color: "#e8eef5"; font.pixelSize: isPhone ? 19 : 17; font.weight: Font.Medium
-            }
-
-            ListView {
-                id: userList
-                Layout.fillWidth: true
-                height: 0; visible: false  // names shown via combo below instead
-                model: userModel
-                currentIndex: userModel.lastIndex >= 0 ? userModel.lastIndex : 0
-            }
-
-            ComboBox {
-                id: userBox
-                Layout.fillWidth: true
-                Layout.preferredHeight: touchH
-                model: userModel
-                textRole: "name"
-                currentIndex: userModel.lastIndex >= 0 ? userModel.lastIndex : 0
-                font.pixelSize: isPhone ? 16 : 13
-                background: Rectangle { radius: fieldR; color: Qt.rgba(1,1,1,0.07); border.width: 1; border.color: Qt.rgba(1,1,1,0.10) }
-                contentItem: Text { text: userBox.displayText; color: "#e8eef5"; font: userBox.font; padding: 10; verticalAlignment: Text.AlignVCenter }
-            }
-
-            TextField {
-                id: passwordField
-                Layout.fillWidth: true
-                Layout.preferredHeight: touchH
-                placeholderText: "Password"
-                echoMode: TextInput.Password
-                color: "#e8eef5"
-                font.pixelSize: isPhone ? 16 : 13
-                placeholderTextColor: "#8a99ad"
-                background: Rectangle { radius: fieldR; color: Qt.rgba(1,1,1,0.07); border.width: 1; border.color: Qt.rgba(1,1,1,0.10) }
-                onAccepted: sddm.login(userBox.currentText, passwordField.text, root.sessionIndex)
-                Keys.onReturnPressed: sddm.login(userBox.currentText, passwordField.text, root.sessionIndex)
-            }
-
-            Button {
-                id: loginButton
-                Layout.fillWidth: true
-                Layout.preferredHeight: touchH
-                text: "Sign In"
-                onClicked: sddm.login(userBox.currentText, passwordField.text, root.sessionIndex)
-                background: Rectangle { radius: fieldR; color: "#0099cc" }
-                contentItem: Text { text: loginButton.text; color: "#ffffff"; font.pixelSize: isPhone ? 16 : 13; font.weight: Font.DemiBold; horizontalAlignment: Text.AlignHCenter }
-            }
-
-            // Session picker: only worth showing where there's actually
-            // more than one to pick from. Desktop offers Budgie/etc
-            // session choices; the phone image ships exactly one
-            // (kibaos-mobile, Exec=phoc) so this is dead weight there --
-            // one less thing to accidentally fat-finger on a small card.
-            ComboBox {
-                Layout.fillWidth: true
-                Layout.preferredHeight: isPhone ? 0 : undefined
-                visible: !isPhone
-                model: sessionModel
-                textRole: "name"
-                currentIndex: root.sessionIndex
-                onActivated: root.sessionIndex = currentIndex
-                background: Rectangle { radius: fieldR; color: "transparent" }
-                contentItem: Text { text: parent.displayText; color: "#aebccd"; font.pixelSize: 11; padding: 6; horizontalAlignment: Text.AlignHCenter }
-            }
-        }
-    }
-
-    // ── Power row ────────────────────────────────────────────────────────
-    // Desktop: small 44px pills, bottom-right, unchanged.
-    // Phone: bigger 56px targets (comfortable thumb-tap size), moved to
-    // top-right instead -- bottom-right on a phone sits right where the
-    // login card's bottom edge and any on-screen-keyboard region already
-    // are, so it's both more reachable and less likely to be covered.
-    Row {
-        anchors {
-            top: isPhone ? parent.top : undefined
-            bottom: isPhone ? undefined : parent.bottom
-            right: parent.right
-            margins: isPhone ? 24 : 28
-        }
-        spacing: isPhone ? 14 : 10
-        Repeater {
-            model: [
-                { label: "⏻", visible: sddm.canPowerOff, action: function(){ sddm.powerOff() } },
-                { label: "⟲", visible: sddm.canReboot,   action: function(){ sddm.reboot()   } }
-            ]
-            delegate: Rectangle {
-                visible: modelData.visible
-                width: touchH; height: touchH; radius: fieldR
-                color: "#1c2433"; opacity: 0.78
-                Text { anchors.centerIn: parent; text: modelData.label; color: "#e8eef5"; font.pixelSize: isPhone ? 22 : 18 }
-                MouseArea { anchors.fill: parent; onClicked: modelData.action() }
-            }
-        }
-    }
-
-    Connections {
-        target: sddm
-        function onLoginFailed() { passwordField.text = ""; passwordField.placeholderText = "Incorrect password"; }
-    }
-
-    Component.onCompleted: passwordField.forceActiveFocus()
-}
-SDDMQML
-mkdir -p "$_root/usr/share/wayland-sessions"
-cat >"$_root/usr/share/wayland-sessions/kibaos-mobile.desktop" <<'MOBILESESSION'
-[Desktop Entry]
-Name=KibaOS Mobile
-Comment=Budgie panel/raven on phoc
-Exec=phoc
-Type=Application
-DesktopNames=Budgie
-MOBILESESSION
-mkdir -p "$_root/etc/sddm.conf.d"
-cat >"$_root/etc/sddm.conf.d/kibaos-mobile.conf" <<'SDDMMOBILECONF'
-[General]
-DisplayServer=wayland
-
-[Wayland]
-CompositorCommand=phoc
-
-[Theme]
-Current=kibaos
-
-[Autologin]
-User=liveuser
-Session=kibaos-mobile
-SDDMMOBILECONF
-arch-chroot "$_root" bash -c "
-    mkdir -p /var/lib/sddm
-    chown sddm:sddm /var/lib/sddm 2>/dev/null || true
-    chmod 750 /var/lib/sddm
-  "
-install -d -m 755 -o 1000 -g 1000 "$_root/home/liveuser/.config/dconf" 2>/dev/null||true
-cat >"$_root/etc/resolv.conf" <<'RESOLVCONF'
-nameserver 1.1.1.1
-nameserver 1.0.0.1
-RESOLVCONF
-mkdir -p "$_root/etc/phoc"
-cat >"$_root/etc/phoc/phoc.ini" <<'PHOCINI'
-[core]
-xwayland=true
-
-[output:DSI-1]
-scale=2
-PHOCINI
-mkdir -p "$_root/etc/xdg/waybar"
-cat >"$_root/etc/xdg/waybar/config" <<'WAYBARCONFIG'
-{
-    "layer": "top",
-    "position": "bottom",
-    "height": 76,
-    "margin-bottom": 0,
-    "modules-left": ["custom/back"],
-    "modules-center": ["custom/home"],
-    "modules-right": ["custom/recents"],
-
-    "custom/back": {
-        "format": "←",
-        "tooltip": false,
-        "on-click": "wtype -k Escape"
-    },
-    "custom/home": {
-        "format": "⌂",
-        "tooltip": false,
-        "on-click": "budgie-panel --toggle-appswitch 2>/dev/null || pkill -SIGUSR1 budgie-panel"
-    },
-    "custom/recents": {
-        "format": "▦",
-        "tooltip": false,
-        "on-click": "kibaos-mobile-recents"
-    }
-}
-WAYBARCONFIG
-cat >"$_root/etc/xdg/waybar/style.css" <<'WAYBARCSS'
-/* KibaOS Mobile nav bar -- same accent/timing tokens as oobe.css, just
- * applied to the bar that's actually on-screen every day after setup.
- * Sized noticeably above Material's 48dp minimum touch target -- this
- * bar gets tapped constantly, one-handed, often without looking, so
- * bigger/simpler beats dense every time. Plain classic Unicode glyphs
- * (← ⌂ ▦) instead of an icon font dependency -- render everywhere with
- * zero extra packages, and read clearly even at a glance. */
-* {
-    font-family: "Nunito", sans-serif;
-    border: none;
-    border-radius: 0;
-    min-height: 0;
-}
-
-window#waybar {
-    background: rgba(18, 22, 29, 0.92);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-#custom-back, #custom-home, #custom-recents {
-    color: #e2e8f0;
-    font-size: 26px;
-    min-width: 76px;
-    min-height: 56px;
-    margin: 10px 10px;
-    border-radius: 999px;
-    transition: background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
-                transform 90ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-#custom-back:hover, #custom-home:hover, #custom-recents:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-#custom-back:active, #custom-home:active, #custom-recents:active {
-    background: rgba(0, 113, 227, 0.35);
-    transform: scale(0.90);
-}
-
-/* Home gets the accent treatment -- it's the "you are always one tap from
- * a known place" affordance, same role the OOBE's primary button plays:
- * exactly one clearly-weighted action, unmistakable at a glance. */
-#custom-home {
-    color: #ffffff;
-    background: #0071e3;
-    min-width: 84px;
-}
-#custom-home:hover  { background: #0077ed; }
-#custom-home:active { background: #0068d6; }
-WAYBARCSS
-mkdir -p "$_root/etc/xdg/waybar"
-cat >"$_root/etc/xdg/waybar/statusbar-config" <<'STATUSBARCONFIG'
-{
-    "layer": "top",
-    "position": "top",
-    "height": 34,
-    "spacing": 2,
-    "modules-left": ["clock"],
-    "modules-center": [],
-    "modules-right": ["custom/cellular", "network", "bluetooth", "battery"],
-
-    "clock": {
-        "format": "{:%I:%M %p}",
-        "tooltip-format": "{:%A, %B %d}"
-    },
-
-    "custom/cellular": {
-        "exec": "/usr/local/bin/kibaos-mobile-cellular",
-        "interval": 8,
-        "return-type": "json",
-        "tooltip": true
-    },
-
-    "network": {
-        "format-wifi": "{icon}",
-        "format-disconnected": "",
-        "format-icons": ["▁", "▂", "▄", "▆", "█"],
-        "tooltip-format-wifi": "{essid} · {signalStrength}%",
-        "on-click": "budgie-control-center wifi 2>/dev/null || true"
-    },
-
-    "bluetooth": {
-        "format": "◇",
-        "format-connected": "◆",
-        "format-disabled": "",
-        "format-off": "",
-        "tooltip-format": "{controller_alias} ({controller_address})",
-        "tooltip-format-connected": "{device_alias}",
-        "on-click": "budgie-control-center bluetooth 2>/dev/null || true"
-    },
-
-    "battery": {
-        "format": "{icon} {capacity}%",
-        "format-charging": "{icon} {capacity}% ↑",
-        "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"],
-        "states": {
-            "warning": 20,
-            "critical": 10
-        }
-    }
-}
-STATUSBARCONFIG
-cat >"$_root/etc/xdg/waybar/statusbar-style.css" <<'STATUSBARCSS'
-/* KibaOS Mobile status bar -- same tokens as the nav bar/oobe.css, sized
- * for a compact always-on strip instead of a tap target: small text,
- * tight padding, no hover/active states (nothing here is a button except
- * the network/bluetooth quick-launch clicks, and those don't need a
- * press-state animation on a strip this thin). */
-* {
-    font-family: "Nunito", sans-serif;
-    border: none;
-    border-radius: 0;
-    min-height: 0;
-}
-
-window#waybar {
-    background: rgba(18, 22, 29, 0.92);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-#clock {
-    color: #f1f5f9;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 0 12px;
-}
-
-#custom-cellular, #network, #bluetooth, #battery {
-    color: #e2e8f0;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 0 6px;
-}
-
-#bluetooth { font-size: 15px; }
-
-/* Battery warning/critical tint -- same red used for oobe.css's
- * .oobe-error, same amber Material typically reserves for a low-battery
- * state, so a glance at the bar reads consistently with the rest of the
- * UI's color language. */
-#battery.warning  { color: #f59e0b; }
-#battery.critical { color: #f87171; }
-STATUSBARCSS
-cat >"$_root/usr/local/bin/kibaos-mobile-cellular" <<'CELLULARSCRIPT'
-#!/bin/bash
-set -u
-_empty(){ echo '{"text":"","tooltip":"No SIM/modem detected","class":"none"}';}
-command -v gdbus >/dev/null 2>&1||{
-_empty
-exit 0
-}
-_modem_path="$(gdbus call --system --dest org.ofono --object-path / \
---method org.ofono.Manager.GetModems 2>/dev/null|grep -oP "(?<=objpath ')[^']+"|head -n1)"
-[ -z "$_modem_path" ]&&{
-_empty
-exit 0
-}
-_netreg="$(gdbus call --system --dest org.ofono --object-path "$_modem_path" \
---method org.ofono.NetworkRegistration.GetProperties 2>/dev/null)"
-[ -z "$_netreg" ]&&{
-_empty
-exit 0
-}
-_status="$(echo "$_netreg"|grep -oP "'Status': <'\K[^']+")"
-_strength="$(echo "$_netreg"|grep -oP "'Strength': <(uint16 |byte )?\K[0-9]+"|head -n1)"
-_tech="$(echo "$_netreg"|grep -oP "'Technology': <'\K[^']+")"
-_carrier="$(echo "$_netreg"|grep -oP "'Name': <'\K[^']+")"
-if [ "$_status" != "registered" ]&&[ "$_status" != "roaming" ];then
-echo '{"text":"✕","tooltip":"No service","class":"none"}'
-exit 0
-fi
-_strength="${_strength:-0}"
-if [ "$_strength" -ge 80 ];then
-_bar="█"
-elif [ "$_strength" -ge 60 ];then
-_bar="▆"
-elif [ "$_strength" -ge 40 ];then
-_bar="▄"
-elif [ "$_strength" -ge 20 ];then
-_bar="▂"
-else
-_bar="▁"
-fi
-_tech_label="$(echo "$_tech"|tr '[:lower:]' '[:upper:]')"
-_roam_suffix=""
-[ "$_status" = "roaming" ]&&_roam_suffix=" (roaming)"
-echo "{\"text\":\"$_bar $_tech_label\",\"tooltip\":\"$_carrier$_roam_suffix · $_strength%\",\"class\":\"connected\"}"
-CELLULARSCRIPT
-chmod +x "$_root/usr/local/bin/kibaos-mobile-cellular"
-cat >"$_root/usr/local/bin/kibaos-mobile-recents" <<'RECENTSSCRIPT'
-#!/bin/bash
-if command -v wlrctl >/dev/null 2>&1;then
-wlrctl toplevel list
-else
-echo "kibaos-mobile-recents: wlrctl not installed, no toplevel list available" >&2
-fi
-RECENTSSCRIPT
-chmod +x "$_root/usr/local/bin/kibaos-mobile-recents"
-cat >"$_root/etc/xdg/autostart/kibaos-mobile-navbar.desktop" <<'NAVBARAUTOSTART'
-[Desktop Entry]
-Type=Application
-Name=KibaOS Mobile Navigation Bar
-Exec=waybar -c /etc/xdg/waybar/config -s /etc/xdg/waybar/style.css
-X-GNOME-Autostart-enabled=true
-NAVBARAUTOSTART
-cat >"$_root/etc/xdg/autostart/kibaos-mobile-statusbar.desktop" <<'STATUSBARAUTOSTART'
-[Desktop Entry]
-Type=Application
-Name=KibaOS Mobile Status Bar
-Exec=waybar -c /etc/xdg/waybar/statusbar-config -s /etc/xdg/waybar/statusbar-style.css
-X-GNOME-Autostart-enabled=true
-STATUSBARAUTOSTART
-arch-chroot "$_root" systemctl enable bluetooth upower||true
-cat >"$_root/etc/xdg/autostart/kibaos-mobile-shell.desktop" <<'AUTOSTART'
-[Desktop Entry]
-Type=Application
-Name=KibaOS Mobile Shell
-Exec=budgie-panel
-X-GNOME-Autostart-enabled=true
-AUTOSTART
-pacstrap -C /tmp/mobile-pacman.conf -c -G "$_root" \
-gtk4 libadwaita vala meson ninja glib2 networkmanager
-mkdir -p "$_root/root/kibaos-mobile-oobe/src"
-cat >"$_root/root/kibaos-mobile-oobe/meson.build" <<'MESONBUILD'
-project('kibaos-mobile-oobe', 'vala', 'c')
-gtk_dep = dependency('gtk4')
-adw_dep = dependency('libadwaita-1')
-gio_dep = dependency('gio-2.0')
-executable('kibaos-mobile-oobe', 'src/main.vala',
-  dependencies: [gtk_dep, adw_dep, gio_dep],
-  install: true)
-MESONBUILD
-mkdir -p "$_root/usr/share/kibaos-mobile-oobe"
-cat >"$_root/usr/share/kibaos-mobile-oobe/oobe.css" <<'MOBILEOOBECSS'
-/* ═══════════════════════════════════════════════════════════════════════
- * KibaOS Mobile OOBE — desktop oobe.css tokens + Material 3 shape/elevation.
- * Timing: settle cubic-bezier(0.22,1,0.36,1) / spring cubic-bezier(0.34,1.56,0.64,1)
- * ═══════════════════════════════════════════════════════════════════════ */
-
-window.kibaos-oobe-window { background: transparent; }
-
-.oobe-background {
-    background: #ffffff;
-    transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-window.dark .oobe-background { background: #12161d; }
-
-/* ── Top app bar: brand + corner toggles, Material top-app-bar height ── */
-.oobe-topbar { min-height: 56px; padding: 8px 14px; }
-.oobe-brand {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    color: rgba(15,23,42,0.80);
-}
-window.dark .oobe-brand { color: rgba(255,255,255,0.75); }
-
-.oobe-corner-button {
-    background:    rgba(15,23,42,0.05);
-    color:         #334155;
-    border:        1px solid rgba(15,23,42,0.10);
-    border-radius: 999px;
-    min-width:     48px;
-    min-height:    48px;
-    padding:       8px;
-    font-size:     15px;
-    font-weight:   650;
-    transition:
-        background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform         120ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.oobe-corner-button:hover  { background: rgba(15,23,42,0.09); }
-.oobe-corner-button:active { transform: scale(0.92); transition-duration: 70ms; }
-window.dark .oobe-corner-button {
-    background: rgba(30,41,59,0.65);
-    color:      #e2e8f0;
-    border-color: rgba(255,255,255,0.12);
-}
-window.dark .oobe-corner-button:hover { background: rgba(51,65,85,0.85); }
-
-/* ── Top linear progress (Material stepper / Android SetupWizard style) ── */
-.oobe-linear-progress { min-height: 4px; }
-.oobe-linear-progress trough {
-    background:    rgba(15,23,42,0.08);
-    border-radius: 999px;
-    min-height:    4px;
-}
-.oobe-linear-progress progress {
-    background:    linear-gradient(90deg, #0071e3, #409cff);
-    border-radius: 999px;
-    transition:    all 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-window.dark .oobe-linear-progress trough { background: rgba(255,255,255,0.10); }
-
-/* ── Step dots (secondary indicator, sits under the linear track) ──── */
-.oobe-step-dot {
-    min-width: 6px; min-height: 6px;
-    border-radius: 999px;
-    background: rgba(0,0,0,0.15);
-    transition: all 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.oobe-step-dot-active { min-width: 18px; background: #0071e3; }
-window.dark .oobe-step-dot { background: rgba(255,255,255,0.18); }
-window.dark .oobe-step-dot-active { background: #409cff; }
-.oobe-step-label {
-    font-size: 12px; font-weight: 600;
-    color: rgba(0,0,0,0.38); letter-spacing: 0.2px;
-}
-window.dark .oobe-step-label { color: rgba(255,255,255,0.40); }
-
-/* ── Card: Material "extra-large" 28px shape scale, real elevation ──
- * Phones don't get the desktop's borderless full-bleed treatment --
- * there's no cursor/hover state to carry hierarchy on touch, so the
- * card boundary + soft elevation shadow is doing that work instead. */
-.oobe-card {
-    background:    #ffffff;
-    border:        1px solid rgba(15,23,42,0.06);
-    border-radius: 28px;
-    box-shadow:    0 1px 2px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.08);
-    animation: card-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-window.dark .oobe-card {
-    background:    #1a2029;
-    border-color:  rgba(255,255,255,0.06);
-    box-shadow:    0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
-}
-@keyframes card-in {
-    from { opacity: 0; transform: translateY(18px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.oobe-inner { padding: 20px 20px 16px; }
-
-/* ── Page icon: one big, friendly, unmistakable symbolic icon per
- *    screen. A single large icon reads instantly without reading a
- *    word of text -- the whole point of "simple enough for anyone",
- *    so every page gets one before the title, never buried in a
- *    paragraph. Rendered as a themed Gtk.Image (pixel_size set in
- *    code), deliberately not an emoji glyph, so it renders consistently
- *    regardless of what emoji coverage the device's font stack has. ── */
-.oobe-page-icon {
-    color: #0071e3;
-    margin-bottom: 4px;
-    animation: pop-in 480ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-window.dark .oobe-page-icon { color: #4d9fff; }
-
-/* ── Typography -- sized for a hand held at arm's length, not a desk
- *    monitor: bigger everything, shorter lines, nothing squints. ───── */
-.oobe-welcome-greeting {
-    font-size: 36px; font-weight: 750; color: #1d1d1f;
-    letter-spacing: -0.3px; margin-top: 4px; line-height: 1.15;
-    animation: fade-up 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-window.dark .oobe-welcome-greeting { color: #f1f5f9; }
-.oobe-title {
-    font-size: 28px; font-weight: 750; color: #0f172a;
-    letter-spacing: -0.3px; line-height: 1.2; margin-bottom: 4px;
-    animation: fade-up 380ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
-}
-.oobe-subtitle {
-    font-size: 16px; color: #64748b; line-height: 1.5;
-    animation: fade-up 380ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
-}
-@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-window.dark .oobe-title    { color: #f1f5f9; }
-window.dark .oobe-subtitle { color: #94a3b8; }
-.oobe-error {
-    font-size: 15px; color: #dc2626; line-height: 1.5;
-    animation: fade-up 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-window.dark .oobe-error { color: #f87171; }
-
-/* ── Skip: a plain text link, not a bordered button -- there should only
- *    ever be ONE strongly-weighted action on screen (the big accent
- *    button). A second bordered button competes with it visually and
- *    is exactly the kind of "which one do I press" ambiguity a
- *    dog-simple flow can't have. ─────────────────────────────────────── */
-.oobe-skip-link {
-    background: transparent;
-    color: #94a3b8;
-    border: none;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 12px;
-    min-height: 44px;
-}
-.oobe-skip-link:hover { color: #64748b; }
-window.dark .oobe-skip-link { color: #64748b; }
-window.dark .oobe-skip-link:hover { color: #94a3b8; }
-
-/* ── Language rows: code badge + name, one tap, no dropdown. A dropdown
- *    needs opening then a second tap to choose -- two motions where one
- *    obvious list of big rows only needs one, same reasoning as the
- *    Wi-Fi list already uses tap-to-select rows instead of a picker.
- *    Plain-text code badge (EN-US, ES, ...) rather than a flag emoji --
- *    see build_language_page for why. Class name kept as oobe-lang-flag
- *    to avoid churning every reference below; it's just a badge now. ── */
-.oobe-lang-flag { font-size: 15px; font-weight: 700; min-width: 40px; color: #0071e3; }
-window.dark .oobe-lang-flag { color: #4d9fff; }
-.oobe-lang-name { font-size: 17px; font-weight: 600; }
-window.dark .oobe-lang-name { color: #f1f5f9; }
-
-/* ── Wi-Fi list: Material elevated list items, ripple-ish press state ── */
-.oobe-signal-glyph {
-    font-family: monospace; font-size: 15px; font-weight: 700;
-    color: #0071e3; min-width: 32px;
-}
-window.dark .oobe-signal-glyph { color: #409cff; }
-
-.oobe-list row, listview > row {
-    background:    #f8fafc;
-    border:        1px solid rgba(0,0,0,0.06);
-    border-radius: 20px;
-    margin:        6px 0;
-    padding:       18px 18px;
-    color:         #1e293b;
-    transition:
-        background-color 160ms cubic-bezier(0.22, 1, 0.36, 1),
-        border-color     160ms cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow       160ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform         90ms cubic-bezier(0.22, 1, 0.36, 1);
-    animation: fade-up 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.oobe-list row:hover    { background: #f0f9ff; border-color: rgba(0,113,227,0.25); }
-.oobe-list row:active   { transform: scale(0.98); transition-duration: 60ms; }
-.oobe-list row:selected {
-    background:  rgba(0,113,227,0.10);
-    border-color: rgba(0,113,227,0.55);
-    box-shadow:  0 0 0 3px rgba(0,113,227,0.14);
-}
-window.dark .oobe-list row, window.dark listview > row {
-    background: #212836; border-color: rgba(255,255,255,0.07); color: #e2e8f0;
-}
-window.dark .oobe-list row:hover    { background: rgba(0,113,227,0.16); border-color: rgba(0,113,227,0.4); }
-window.dark .oobe-list row:selected { background: rgba(0,113,227,0.22); border-color: rgba(0,113,227,0.6); }
-
-/* ── Done check: pop-in, spring easing. Rendered as a themed Gtk.Image
- *    symbolic icon (pixel_size set in code), not a unicode check
- *    glyph, to stay consistent with the rest of the wizard's icons. ── */
-.oobe-done-check {
-    color: #0071e3;
-    animation: pop-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-window.dark .oobe-done-check { color: #4d9fff; }
-@keyframes pop-in { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
-
-/* ── Buttons: fully-rounded pill, Material state-layer press feedback ── */
-.oobe-primary-button {
-    background:    #0071e3;
-    color:         #ffffff;
-    border:        none;
-    border-radius: 999px;
-    padding:       18px 32px;
-    font-weight:   700;
-    font-size:     17px;
-    min-height:    60px;
-    box-shadow:    0 1px 2px rgba(15,23,42,0.14), 0 3px 8px rgba(0,113,227,0.18);
-    transition:
-        background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow       140ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform          90ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.oobe-primary-button:hover  { background: #0077ed; }
-.oobe-primary-button:active {
-    background: #0068d6; transform: scale(0.97);
-    box-shadow: 0 1px 3px rgba(0,113,227,0.20);
-    transition-duration: 70ms;
-}
-.oobe-primary-button:disabled {
-    background: rgba(15,23,42,0.12); color: rgba(15,23,42,0.35); box-shadow: none;
-}
-window.dark .oobe-primary-button:disabled { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.30); }
-
-.oobe-secondary-button {
-    background:    transparent;
-    color:         #475569;
-    border:        1px solid rgba(0,0,0,0.14);
-    border-radius: 999px;
-    padding:       18px 28px;
-    font-size:     17px;
-    min-height:    60px;
-    transition:
-        background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
-        border-color     140ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform          90ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.oobe-secondary-button:hover  { background: #f1f5f9; border-color: rgba(0,0,0,0.22); }
-.oobe-secondary-button:active { background: #e2e8f0; transform: scale(0.97); transition-duration: 70ms; }
-window.dark .oobe-secondary-button { color: #cbd5e1; border-color: rgba(255,255,255,0.16); }
-window.dark .oobe-secondary-button:hover  { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.26); }
-window.dark .oobe-secondary-button:active { background: rgba(255,255,255,0.14); }
-
-.oobe-nav-row { margin-top: 8px; }
-
-/* ── Form entries: Material filled-field look (tonal fill vs desktop's
- *    outline-first treatment -- reads better against the card's own
- *    28px-radius background on a small screen) ─────────────────────── */
-entry, row.entry {
-    background:    #f1f5f9;
-    border:        1px solid transparent;
-    border-radius: 16px;
-    color:         #0f172a;
-    min-height:    56px;
-    font-size:     17px;
-    transition:
-        border-color     160ms cubic-bezier(0.22, 1, 0.36, 1),
-        background-color 160ms cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow        160ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-entry:focus-within, row.entry:focus-within {
-    border-color: #0071e3;
-    background:   #ffffff;
-    box-shadow:   0 0 0 3px rgba(0,113,227,0.16);
-}
-window.dark entry, window.dark row.entry { background: rgba(255,255,255,0.06); color: #f1f5f9; }
-window.dark entry:focus-within, window.dark row.entry:focus-within { background: rgba(255,255,255,0.09); }
-
-/* ── Bottom-sheet password dialog: Material bottom-sheet shape --
- *    rounded top corners only, flush to the bottom edge, matching how
- *    Android/LineageOS present the Wi-Fi password prompt as a sheet
- *    sliding up rather than a centered desktop-style dialog. ───────── */
-.oobe-sheet {
-    border-radius: 28px 28px 0 0;
-    background: #ffffff;
-}
-window.dark .oobe-sheet { background: #1a2029; }
-MOBILEOOBECSS
-cat >"$_root/root/kibaos-mobile-oobe/src/main.vala" <<'OOBEVALA'
-/*
- * KibaOS Mobile OOBE -- first-boot wizard.
- * Marker-gated (runs once), no disk-partitioning step: this only ever
- * runs after the GSI + rootfs are already flashed onto the phone.
- * Pages: Welcome -> Language/Region -> Wi-Fi -> SIM/Carrier (ofono) ->
- * Account (mandatory) -> Done.
- *
- * Design language: same tokens as the desktop installer's oobe.css
- * (#0071e3 accent, pill buttons, easeOutQuint card-ins, step dots) laid
- * over Material 3 shape + elevation for the touch surface specifically
- * -- 28px "extra-large" card radius instead of desktop's borderless
- * full-bleed page, a top linear progress track like Android/LineageOS
- * SetupWizard use, filled-tonal form fields, and a bottom-sheet Wi-Fi
- * password prompt instead of a centered dialog. See oobe.css for the
- * actual values; this file just wires widgets to those CSS classes.
- */
-public class KibaMobileOobe : Adw.Application {
-    const string MARKER = "/var/lib/kibaos/.oobe-done";
-    const string CSS_PATH = "/usr/share/kibaos-mobile-oobe/oobe.css";
-
-    // Steps shown in the top progress track + dots. "done" is
-    // deliberately excluded -- same convention as the desktop OOBE and
-    // Android's own SetupWizard, where the final celebratory screen
-    // drops the step chrome entirely rather than showing "6 of 6".
-    const string[] STEPS = { "welcome", "language", "wifi", "sim", "account" };
-
-    Adw.ApplicationWindow window;
-    Gtk.Stack stack;
-    Gtk.ProgressBar top_progress;
-    Gtk.Box dots_row;
-    Gtk.Label wifi_status_label;
-    Gtk.Label sim_status_label;
-    bool dark_mode = false;
-    string display_name = "";
-
-    public KibaMobileOobe () {
-        Object (application_id: "com.wolftechinnovations.kibaos.MobileOobe");
-    }
-
-    protected override void activate () {
-        if (FileUtils.test (MARKER, FileTest.EXISTS)) {
-            // already ran -- get out of the way, let the normal session
-            // (budgie-panel) take over instead of showing the wizard again
-            this.quit ();
-            return;
-        }
-
-        var provider = new Gtk.CssProvider ();
-        provider.load_from_path (CSS_PATH);
-        Gtk.StyleContext.add_provider_for_display (
-            Gdk.Display.get_default (), provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-        window = new Adw.ApplicationWindow (this) {
-            default_width = 480,
-            default_height = 854,
-            fullscreened = true,
-            deletable = false
-        };
-        window.add_css_class ("kibaos-oobe-window");
-        // No window-close escape hatch: the account step is mandatory
-        // (see build_account_page), so block any close request until
-        // finish_oobe has actually written the marker file. Without
-        // this, deletable=false alone still leaves things like Alt+F4
-        // or a compositor-level close gesture able to tear the window
-        // down mid-wizard.
-        window.close_request.connect (() => {
-            return !FileUtils.test (MARKER, FileTest.EXISTS);
-        });
-
-        var root = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-        root.add_css_class ("oobe-background");
-
-        // ── top bar: brand + language/dark-mode corner toggles ──────────
-        var topbar = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
-        topbar.add_css_class ("oobe-topbar");
-        var brand = new Gtk.Label ("KIBAOS MOBILE") { xalign = 0, hexpand = true };
-        brand.add_css_class ("oobe-brand");
-        var lang_btn = corner_button ("preferences-desktop-locale-symbolic");
-        lang_btn.clicked.connect (() => stack.visible_child_name = "language");
-        var dark_btn = corner_button ("weather-clear-night-symbolic");
-        dark_btn.clicked.connect (toggle_dark_mode);
-        topbar.append (brand);
-        topbar.append (lang_btn);
-        topbar.append (dark_btn);
-        root.append (topbar);
-
-        // ── linear progress + step dots (Material stepper pairing) ──────
-        top_progress = new Gtk.ProgressBar ();
-        top_progress.add_css_class ("oobe-linear-progress");
-        root.append (top_progress);
-
-        dots_row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6) {
-            halign = Gtk.Align.CENTER, margin_top = 10, margin_bottom = 4
-        };
-        root.append (dots_row);
-
-        stack = new Gtk.Stack () {
-            transition_type = Gtk.StackTransitionType.SLIDE_LEFT_RIGHT,
-            vexpand = true
-        };
-
-        stack.add_named (build_welcome_page (), "welcome");
-        stack.add_named (build_language_page (), "language");
-        stack.add_named (build_wifi_page (), "wifi");
-        stack.add_named (build_sim_page (), "sim");
-        stack.add_named (build_account_page (), "account");
-        stack.add_named (build_done_page (), "done");
-        stack.notify["visible-child-name"].connect (update_progress);
-        stack.visible_child_name = "welcome";
-        update_progress ();
-
-        root.append (stack);
-
-        var toolbar_view = new Adw.ToolbarView ();
-        toolbar_view.content = root;
-        window.content = toolbar_view;
-        window.present ();
-    }
-
-    Gtk.Button corner_button (string icon_name) {
-        var btn = new Gtk.Button ();
-        btn.icon_name = icon_name;
-        btn.add_css_class ("oobe-corner-button");
-        return btn;
-    }
-
-    void toggle_dark_mode () {
-        dark_mode = !dark_mode;
-        if (dark_mode) {
-            window.add_css_class ("dark");
-        } else {
-            window.remove_css_class ("dark");
-        }
-    }
-
-    // Updates both the top linear track and the dot row to reflect
-    // wherever the stack currently is. Pages outside STEPS (just "done")
-    // push the track to full and clear the dots, matching the desktop
-    // OOBE's own summary/done page treatment.
-    void update_progress () {
-        var current = stack.visible_child_name;
-        int idx = -1;
-        for (int i = 0; i < STEPS.length; i++) {
-            if (STEPS[i] == current) { idx = i; break; }
-        }
-
-        while (dots_row.get_first_child () != null) {
-            dots_row.remove (dots_row.get_first_child ());
-        }
-
-        if (idx < 0) {
-            top_progress.fraction = 1.0;
-            return;
-        }
-
-        top_progress.fraction = (double) (idx + 1) / STEPS.length;
-        for (int i = 0; i < STEPS.length; i++) {
-            var dot = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            dot.add_css_class ("oobe-step-dot");
-            if (i == idx) dot.add_css_class ("oobe-step-dot-active");
-            dots_row.append (dot);
-        }
-    }
-
-    // ── page builders ───────────────────────────────────────────────────
-    // Every page follows the same "dog simple" rule: one big icon so the
-    // page reads before any text is parsed, one short line of title, one
-    // short line of subtitle, and exactly one strongly-weighted action.
-    // Selections that can safely auto-advance (language, a successful
-    // Wi-Fi connect) do -- fewer taps beats a technically-more-complete
-    // flow every time here.
-
-    Gtk.Widget build_welcome_page () {
-        var box = wizard_box ("start-here-symbolic", "Welcome to\nKibaOS Mobile",
-            "Switch to simple -- now in your pocket.", true);
-        box.append (nav_row (null, next_button ("Get started", "language")));
-        return box;
-    }
-
-    // Big tap-anywhere rows instead of a dropdown -- picking a language
-    // is a single decision, so it gets a single tap. Selecting a row
-    // both sets the language AND advances to Wi-Fi; Back still works if
-    // someone taps the wrong flag.
-    Gtk.Widget build_language_page () {
-        var box = wizard_box ("preferences-desktop-locale-symbolic", "Language & Region",
-            "Tap the one that feels like home.", false);
-
-        var list = new Gtk.ListBox ();
-        list.add_css_class ("oobe-list");
-        list.selection_mode = Gtk.SelectionMode.NONE;
-
-        // Plain-text language/region codes instead of flag emoji -- a
-        // flag glyph also conflates "country" with "language" (English
-        // isn't only spoken in the US/UK), and emoji flag rendering is
-        // spotty on minimal mobile font stacks. A short code badge reads
-        // reliably everywhere.
-        string[,] langs = {
-            {"EN-US", "English (US)"}, {"EN-UK", "English (UK)"},
-            {"ES", "Español"}, {"FR", "Français"}, {"DE", "Deutsch"}
-        };
-        for (int i = 0; i < langs.length[0]; i++) {
-            var row_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 12) {
-                margin_top = 4, margin_bottom = 4, margin_start = 6, margin_end = 6
-            };
-            var code = new Gtk.Label (langs[i, 0]);
-            code.add_css_class ("oobe-lang-flag");
-            var name = new Gtk.Label (langs[i, 1]) { xalign = 0, hexpand = true };
-            name.add_css_class ("oobe-lang-name");
-            row_box.append (code);
-            row_box.append (name);
-            var row = new Gtk.ListBoxRow () { child = row_box };
-            list.append (row);
-        }
-        list.row_activated.connect ((row) => {
-            // language choice itself isn't wired to a locale backend
-            // yet -- this is a first-boot cosmetic pick until that lands
-            stack.visible_child_name = "wifi";
-        });
-        box.append (list);
-        box.append (nav_row (back_button ("welcome"), null));
-        return box;
-    }
-
-    Gtk.Widget build_wifi_page () {
-        var box = wizard_box ("network-wireless-symbolic", "Connect to Wi-Fi",
-            "Needed for setup and updates.", false);
-
-        var list = new Gtk.ListBox ();
-        list.add_css_class ("oobe-list");
-        list.selection_mode = Gtk.SelectionMode.SINGLE;
-        list.row_activated.connect (on_wifi_row_activated);
-        wifi_status_label = new Gtk.Label ("Scanning...") { xalign = 0 };
-        wifi_status_label.add_css_class ("oobe-step-label");
-        box.append (wifi_status_label);
-        box.append (list);
-        refresh_wifi_list.begin (list);
-
-        var skip = new Gtk.Button.with_label ("Skip for now");
-        skip.add_css_class ("oobe-skip-link");
-        skip.halign = Gtk.Align.CENTER;
-        skip.clicked.connect (() => stack.visible_child_name = "sim");
-        box.append (nav_row (back_button ("language"), null));
-        box.append (skip);
-        return box;
-    }
-
-    async void refresh_wifi_list (Gtk.ListBox list) {
-        // shells out to nmcli rather than talking to NetworkManager's
-        // D-Bus API directly -- nmcli's terse output is plenty for a
-        // pick-a-network list and keeps this file from ballooning with
-        // GDBus proxy boilerplate for a first-boot wizard.
-        try {
-            var proc = new Subprocess (SubprocessFlags.STDOUT_PIPE,
-                "nmcli", "-t", "-f", "SSID,SIGNAL,SECURITY", "device", "wifi", "list");
-            var stdout_pipe = proc.get_stdout_pipe ();
-            var dis = new DataInputStream (stdout_pipe);
-            string? line;
-            wifi_status_label.label = "Available networks:";
-            while ((line = yield dis.read_line_async ()) != null) {
-                if (line.strip () == "") continue;
-                var parts = line.split (":");
-                var ssid = parts.length > 0 && parts[0] != "" ? parts[0] : "(hidden)";
-                var secured = parts.length > 2 && parts[2] != "" && parts[2] != "--";
-
-                var row_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8) {
-                    margin_top = 6, margin_bottom = 6, margin_start = 8, margin_end = 8
-                };
-                row_box.append (new Gtk.Label (ssid) { xalign = 0, hexpand = true });
-                if (secured) {
-                    row_box.append (new Gtk.Image.from_icon_name ("network-wireless-encrypted-symbolic"));
-                }
-                var row = new Gtk.ListBoxRow ();
-                row.child = row_box;
-                row.set_data<string> ("ssid", ssid);
-                row.set_data<bool> ("secured", secured);
-                list.append (row);
-            }
-        } catch (Error e) {
-            wifi_status_label.label = "Couldn't scan for networks: %s".printf (e.message);
-        }
-    }
-
-    void on_wifi_row_activated (Gtk.ListBoxRow row) {
-        var ssid = row.get_data<string> ("ssid");
-        var secured = row.get_data<bool> ("secured");
-        if (secured) {
-            prompt_wifi_password (ssid);
-        } else {
-            connect_wifi.begin (ssid, null);
-        }
-    }
-
-    // Material bottom-sheet shape (rounded top corners only, flush to
-    // the bottom edge via .oobe-sheet) rather than a centered desktop
-    // dialog -- matches how Android/LineageOS present the Wi-Fi password
-    // prompt as a sheet sliding up from the keyboard's own edge.
-    void prompt_wifi_password (string ssid) {
-        var dialog = new Adw.AlertDialog (
-            "Connect to %s".printf (ssid), null);
-        dialog.add_css_class ("oobe-sheet");
-
-        var pw_entry = new Gtk.PasswordEntry () { show_peek_icon = true };
-        pw_entry.add_css_class ("entry");
-        dialog.set_extra_child (pw_entry);
-        dialog.add_response ("cancel", "Cancel");
-        dialog.add_response ("connect", "Connect");
-        dialog.set_response_appearance ("connect", Adw.ResponseAppearance.SUGGESTED);
-        dialog.default_response = "connect";
-        dialog.response.connect ((response) => {
-            if (response == "connect") {
-                connect_wifi.begin (ssid, pw_entry.text);
-            }
-        });
-        dialog.present (window);
-    }
-
-    async void connect_wifi (string ssid, string? password) {
-        wifi_status_label.label = "Connecting to %s...".printf (ssid);
-        try {
-            string[] argv;
-            if (password != null) {
-                argv = { "nmcli", "device", "wifi", "connect", ssid, "password", password };
-            } else {
-                argv = { "nmcli", "device", "wifi", "connect", ssid };
-            }
-            var proc = new Subprocess.newv (argv,
-                SubprocessFlags.STDOUT_PIPE | SubprocessFlags.STDERR_PIPE);
-            yield proc.wait_async ();
-            if (proc.get_successful ()) {
-                wifi_status_label.label = "Connected to %s.".printf (ssid);
-                // auto-advance -- a successful connect needs no further
-                // confirmation tap, same reasoning as the language rows
-                Timeout.add (700, () => {
-                    if (stack.visible_child_name == "wifi") {
-                        stack.visible_child_name = "sim";
-                    }
-                    return false;
-                });
-            } else {
-                wifi_status_label.label = "Couldn't connect to %s -- check the password.".printf (ssid);
-            }
-        } catch (Error e) {
-            wifi_status_label.label = "Connection failed: %s".printf (e.message);
-        }
-    }
-
-    Gtk.Widget build_sim_page () {
-        var box = wizard_box ("network-cellular-symbolic", "SIM & Carrier", "Checking for a SIM.", false);
-        sim_status_label = new Gtk.Label ("Checking...") { xalign = 0 };
-        sim_status_label.add_css_class ("oobe-subtitle");
-        box.append (sim_status_label);
-        check_sim.begin ();
-        box.append (nav_row (back_button ("wifi"), next_button ("Next", "account")));
-        return box;
-    }
-
-    async void check_sim () {
-        // org.ofono.Manager -> GetModems, then org.ofono.SimManager's
-        // Present/SubscriberIdentity properties on whichever modem shows
-        // up. ofono owns telephony here, same as Calls/Chatty use.
-        try {
-            var conn = yield Bus.get (BusType.SYSTEM);
-            var manager = yield conn.get_proxy<OfonoManagerIface> (
-                "org.ofono", "/");
-            var modems = yield manager.get_modems ();
-            if (modems.length == 0) {
-                sim_status_label.label = "No modem detected.";
-                return;
-            }
-            sim_status_label.label = "Modem found: %s".printf (modems[0]);
-            // deeper SIM-present/carrier-name lookup would proxy
-            // org.ofono.SimManager on this modem path; left as a
-            // follow-up once real hardware is available to test against
-        } catch (Error e) {
-            sim_status_label.label = "No SIM/modem available (%s).".printf (e.message);
-        }
-    }
-
-    // Account is mandatory -- no skip link on this page (unlike wifi's),
-    // matching Android's own SetupWizard, where the Google-account step
-    // has no skip option because it's the anchor the rest of first-run
-    // setup (sync, backup, restore) hangs off of. Next stays disabled
-    // until a non-empty name is entered, and the window itself can't be
-    // closed out from under the wizard (see close_request in activate).
-    Gtk.Widget build_account_page () {
-        var box = wizard_box ("avatar-default-symbolic", "What's your name?",
-            "Shown on your lock screen and in Files.", false);
-
-        var entry = new Gtk.Entry () { placeholder_text = "Your name" };
-        entry.add_css_class ("entry");
-        box.append (entry);
-
-        var hint = new Gtk.Label ("") { xalign = 0 };
-        hint.add_css_class ("oobe-error");
-        hint.visible = false;
-        box.append (hint);
-
-        var next = new Gtk.Button.with_label ("Next");
-        next.add_css_class ("oobe-primary-button");
-        next.sensitive = false;
-        entry.changed.connect (() => {
-            next.sensitive = entry.text.strip () != "";
-            hint.visible = false;
-        });
-        next.clicked.connect (() => {
-            var trimmed = entry.text.strip ();
-            if (trimmed == "") {
-                hint.label = "Enter a name to continue.";
-                hint.visible = true;
-                return;
-            }
-            display_name = trimmed;
-            stack.visible_child_name = "done";
-        });
-        box.append (nav_row (back_button ("sim"), next));
-        return box;
-    }
-
-    Gtk.Widget build_done_page () {
-        var box = wizard_box ("", "You're all set!", "Welcome to KibaOS Mobile.", false);
-
-        var check = new Gtk.Image.from_icon_name ("object-select-symbolic") { halign = Gtk.Align.CENTER };
-        check.pixel_size = 72;
-        check.add_css_class ("oobe-done-check");
-        box.append (check);
-
-        var finish = new Gtk.Button.with_label ("Start using KibaOS");
-        finish.add_css_class ("oobe-primary-button");
-        finish.clicked.connect (finish_oobe);
-        box.append (nav_row (null, finish));
-        return box;
-    }
-
-    void finish_oobe () {
-        try {
-            DirUtils.create_with_parents ("/var/lib/kibaos", 0755);
-            FileUtils.set_contents (MARKER, "1\n");
-        } catch (FileError e) {
-            warning ("couldn't write OOBE marker: %s", e.message);
-        }
-        this.quit ();
-    }
-
-    // ── helpers ──────────────────────────────────────────────────────────
-
-    // Wraps every page in the same .oobe-card / .oobe-inner treatment as
-    // the desktop OOBE, just with Material's 28px shape scale + real
-    // elevation instead of desktop's borderless full-bleed page (see
-    // oobe.css for why -- no cursor/hover to carry hierarchy on touch).
-    // is_welcome swaps in the larger .oobe-welcome-greeting title style,
-    // same distinction the desktop installer makes for its first page.
-    // icon_name is a themed/symbolic GTK icon name (e.g.
-    // "network-wireless-symbolic"), never an emoji glyph -- the mobile
-    // OOBE renders every page icon and status mark through Gtk.Image
-    // so the wizard reads cleanly regardless of emoji font support.
-    Gtk.Box wizard_box (string icon_name, string title, string subtitle, bool is_welcome) {
-        var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 14);
-        card.add_css_class ("oobe-card");
-        card.add_css_class ("oobe-inner");
-
-        if (icon_name != "") {
-            var icon_image = new Gtk.Image.from_icon_name (icon_name) { halign = Gtk.Align.START };
-            icon_image.pixel_size = 64;
-            icon_image.add_css_class ("oobe-page-icon");
-            card.append (icon_image);
-        }
-
-        var title_label = new Gtk.Label (title) { xalign = 0, wrap = true };
-        title_label.add_css_class (is_welcome ? "oobe-welcome-greeting" : "oobe-title");
-        var subtitle_label = new Gtk.Label (subtitle) { xalign = 0, wrap = true };
-        subtitle_label.add_css_class ("oobe-subtitle");
-
-        card.append (title_label);
-        card.append (subtitle_label);
-
-        var outer = new Gtk.Box (Gtk.Orientation.VERTICAL, 0) {
-            margin_top = 12, margin_bottom = 24, margin_start = 18, margin_end = 18,
-            vexpand = true, valign = Gtk.Align.FILL
-        };
-        outer.append (card);
-        return outer;
-    }
-
-    // Bottom nav row: back (optional, left) + primary action (right),
-    // pinned to the bottom of the page like Android SetupWizard's own
-    // persistent nav bar rather than inline with the content above it.
-    Gtk.Box nav_row (Gtk.Button? back, Gtk.Button? primary) {
-        var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10) {
-            valign = Gtk.Align.END, vexpand = true, margin_top = 16
-        };
-        row.add_css_class ("oobe-nav-row");
-        if (back != null) {
-            row.append (back);
-        }
-        var spacer = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0) { hexpand = true };
-        row.append (spacer);
-        if (primary != null) {
-            row.append (primary);
-        }
-        return row;
-    }
-
-    Gtk.Button back_button (string target_page) {
-        var btn = new Gtk.Button.with_label ("Back");
-        btn.add_css_class ("oobe-secondary-button");
-        btn.clicked.connect (() => stack.visible_child_name = target_page);
-        return btn;
-    }
-
-    Gtk.Button next_button (string label, string target_page) {
-        var btn = new Gtk.Button.with_label (label);
-        btn.add_css_class ("oobe-primary-button");
-        btn.clicked.connect (() => stack.visible_child_name = target_page);
-        return btn;
-    }
-
-    public static int main (string[] args) {
-        var app = new KibaMobileOobe ();
-        return app.run (args);
-    }
-}
-
-[DBus (name = "org.ofono.Manager")]
-interface OfonoManagerIface : Object {
-    public abstract async string[] get_modems () throws Error;
-}
-OOBEVALA
-arch-chroot "$_root" bash -c "
-    cd /root/kibaos-mobile-oobe &&
-    meson setup build &&
-    ninja -C build &&
-    ninja -C build install
-  "||echo "!! kibaos-mobile-oobe failed to build -- check the meson/ninja log above" >&2
-cat >"$_root/etc/xdg/autostart/kibaos-mobile-oobe.desktop" <<'OOBEAUTOSTART'
-[Desktop Entry]
-Type=Application
-Name=KibaOS Mobile Setup
-Exec=kibaos-mobile-oobe
-X-GNOME-Autostart-enabled=true
-OOBEAUTOSTART
-: "${KIBA_MOBILE_GSI_URL:=https://mirrors.lolinet.com/firmware/halium/GSI/ubports_GSI_installer_v10.zip}"
-if [ "${KIBA_SKIP_GSI_FETCH:-0}" = "1" ];then
-echo "=== KIBA_SKIP_GSI_FETCH=1 -- skipping Halium GSI fetch (see README-INSTALL.md for a manual pointer) ==="
-else
-mkdir -p /w/halium-gsi&&cd /w/halium-gsi
-if curl -fL -o gsi-fetch.zip "$KIBA_MOBILE_GSI_URL";then
-unzip -o gsi-fetch.zip -d extracted >/dev/null
-_gsi_img="$(find extracted -maxdepth 3 \( -iname 'system.img' -o -iname '*.img' \) 2>/dev/null|head -n1)"
-if [ -n "$_gsi_img" ]&&[ -f "$_gsi_img" ];then
-cp "$_gsi_img" "$_out/kibaos-mobile-gsi-arm64.img"
-sha256sum "$_out/kibaos-mobile-gsi-arm64.img" >"$_out/kibaos-mobile-gsi-arm64.img.sha256"
-echo "=== Fetched Halium GSI: $_out/kibaos-mobile-gsi-arm64.img ==="
-else
-echo "ERROR: GSI zip downloaded from $KIBA_MOBILE_GSI_URL but no .img found inside -- check KIBA_MOBILE_GSI_URL / mirror layout. Refusing to continue with a mobile build that has no bundled GSI (the installer zip stage would fail anyway, just later and with a more confusing error). Set KIBA_SKIP_GSI_FETCH=1 if you intend to ship a thin installer and push the GSI manually per README-INSTALL.md." >&2
-cd /w
-return 1
-fi
-else
-echo "ERROR: GSI fetch failed -- curl could not retrieve $KIBA_MOBILE_GSI_URL (bad URL, 404, or network issue). Refusing to continue with a mobile build that has no bundled GSI (the installer zip stage would fail anyway, just later and with a more confusing error). Set KIBA_SKIP_GSI_FETCH=1 if you intend to ship a thin installer and push the GSI manually per README-INSTALL.md." >&2
-cd /w
-return 1
-fi
-cd /w
-fi
-: "${KIBA_MOBILE_HALIUM_RAMDISK_URL:=https://github.com/halium/initramfs-tools-halium/releases/download/continuous/initrd.img-touch-arm64}"
-echo "=== Fetching boot.img repack ingredients (generic Halium ramdisk + magiskboot) ==="
-mkdir -p /w/boot-repack-tools&&cd /w/boot-repack-tools
-curl -fL -o halium-generic-ramdisk.cpio.gz "$KIBA_MOBILE_HALIUM_RAMDISK_URL"||{
-echo "!! Halium generic ramdisk fetch failed ($KIBA_MOBILE_HALIUM_RAMDISK_URL) -- see docs.halium.org for the current generic-ramdisk artifact and re-run with a corrected KIBA_MOBILE_HALIUM_RAMDISK_URL. No fallback -- failing the build." >&2
-exit 1
-}
-_magisk_apk_url="$(curl -fsL https://api.github.com/repos/topjohnwu/Magisk/releases/latest|jq -r '.assets[] | select(.name | test("\\.apk$")) | .browser_download_url'|head -n1)"
-[ -n "$_magisk_apk_url" ]&&[ "$_magisk_apk_url" != "null" ]||{
-echo "!! couldn't resolve the latest Magisk release APK via the GitHub API -- can't fetch magiskboot. No fallback -- failing the build." >&2
-exit 1
-}
-curl -fL -o magisk-latest.apk "$_magisk_apk_url"||{
-echo "!! Magisk release APK fetch failed ($_magisk_apk_url) -- can't fetch magiskboot. No fallback -- failing the build." >&2
-exit 1
-}
-unzip -o -j magisk-latest.apk 'lib/arm64-v8a/libmagiskboot.so' -d .||{
-echo "!! couldn't extract libmagiskboot.so (arm64-v8a) from the Magisk APK -- release layout may have changed. No fallback -- failing the build." >&2
-exit 1
-}
-[ -f libmagiskboot.so ]||{
-echo "!! Magisk APK didn't contain lib/arm64-v8a/libmagiskboot.so -- can't repack boot images on-device. No fallback -- failing the build." >&2
-exit 1
-}
-mv libmagiskboot.so magiskboot
-chmod 0755 magiskboot
-echo "=== Bundled magiskboot + generic Halium ramdisk for on-device boot.img repack ==="
-cd /w
-tar -C "$_root" --numeric-owner -cpf "$_out/kibaos-mobile-rootfs.tar" .
-gzip -9 "$_out/kibaos-mobile-rootfs.tar"
-sha256sum "$_out/kibaos-mobile-rootfs.tar.gz" >"$_out/kibaos-mobile-rootfs.tar.gz.sha256"
-_rootfs_kb="$(du -sk "$_root"|cut -f1)"
-_img_kb=$((_rootfs_kb+(_rootfs_kb / 5)+262144))
-mkfs.ext4 -q -F -L kibaos-rootfs -d "$_root" -m 0 \
-"$_out/kibaos-mobile-rootfs.img" "${_img_kb}K"
-sha256sum "$_out/kibaos-mobile-rootfs.img" >"$_out/kibaos-mobile-rootfs.img.sha256"
-_zip_root="/w/kibaos-mobile-installer-zip"
-rm -rf "$_zip_root"
-mkdir -p "$_zip_root/META-INF/com/google/android"
-cp "$_out/kibaos-mobile-rootfs.img" "$_zip_root/rootfs.img"
-if [ -f "$_out/kibaos-mobile-gsi-arm64.img" ];then
-cp "$_out/kibaos-mobile-gsi-arm64.img" "$_zip_root/android-rootfs.img"
-fi
-cp /w/boot-repack-tools/magiskboot "$_zip_root/magiskboot"
-cp /w/boot-repack-tools/halium-generic-ramdisk.cpio.gz "$_zip_root/halium-generic-ramdisk.cpio.gz"
-echo "# this zip is installed by update-binary directly, not parsed as edify" > \
-"$_zip_root/META-INF/com/google/android/updater-script"
-cat >"$_zip_root/META-INF/com/google/android/update-binary" <<'UPDATEBINARY'
-#!/sbin/sh
-
-OUTFD="$2"
-ZIPFILE="$3"
-
-ui_print() {
-  echo "ui_print $1" >> "/proc/self/fd/${OUTFD}"
-  echo "ui_print" >> "/proc/self/fd/${OUTFD}"
-}
-abort_install() {
-  ui_print "!! $1"
-  exit 1
-}
-
-ui_print "=== KibaOS Mobile installer ==="
-
-_slot=""
-if command -v getprop >/dev/null 2>&1; then
-  _slot="$(getprop ro.boot.slot_suffix 2>/dev/null)"
-fi
-
-_find_by_name() {
-  for _cand in \
-    "/dev/block/bootdevice/by-name/$1${_slot}" \
-    "/dev/block/by-name/$1${_slot}" \
-    "/dev/block/platform/*/by-name/$1${_slot}"; do
-    for _p in ${_cand}; do
-      [ -b "${_p}" ] && echo "${_p}" && return 0
-    done
-  done
-  return 1
-}
-
-_boot_dev="$(_find_by_name boot)"
-_init_boot_dev="$(_find_by_name init_boot)"
-_boot_repacked=0
-
-if [ -z "${_boot_dev}" ] && [ -z "${_init_boot_dev}" ]; then
-  ui_print "!! couldn't find a known boot or init_boot partition path on"
-  ui_print "!! this device -- skipping the boot image repack entirely."
-  ui_print "!! Samsung and some other OEMs don't expose these via"
-  ui_print "!! by-name symlinks in recovery; you'll need to sort out"
-  ui_print "!! halium-boot.img by hand for this device."
-else
-  rm -rf /tmp/kibaos-boot && mkdir -p /tmp/kibaos-boot
-  cd /tmp/kibaos-boot || abort_install "no /tmp to stage the boot repack in"
-  unzip -o "${ZIPFILE}" 'magiskboot' 'halium-generic-ramdisk.cpio.gz' -d /tmp/kibaos-boot >/dev/null 2>&1
-  [ -f magiskboot ] || abort_install "magiskboot missing from zip -- can't repack the boot image"
-  chmod 0755 magiskboot
-  gzip -dc halium-generic-ramdisk.cpio.gz > halium-generic-ramdisk.cpio 2>/dev/null \
-    || abort_install "couldn't decompress the bundled Halium ramdisk"
-
-  mkdir -p /data/kibaos-boot-backup
-
-  if [ -n "${_init_boot_dev}" ]; then
-    _target_dev="${_init_boot_dev}"
-    _target_name="init_boot"
-  else
-    _target_dev="${_boot_dev}"
-    _target_name="boot"
-  fi
-
-  ui_print "backing up stock ${_target_name} to /data/kibaos-boot-backup/..."
-  dd if="${_target_dev}" of="/data/kibaos-boot-backup/${_target_name}${_slot}.img" bs=4M \
-    || abort_install "couldn't back up ${_target_dev} -- refusing to touch it unbacked-up"
-
-  ui_print "unpacking stock ${_target_name} image..."
-  cp "/data/kibaos-boot-backup/${_target_name}${_slot}.img" ./stock.img
-  ./magiskboot unpack -h stock.img
-  _unpack_rc=$?
-  if [ "${_unpack_rc}" = "2" ]; then
-    ui_print "!! ${_target_name} is a ChromeOS-format image -- magiskboot"
-    ui_print "!! can't repack this layout. Skipping the boot repack;"
-    ui_print "!! sort out halium-boot.img by hand for this device."
-  elif [ ! -f ramdisk.cpio ]; then
-    ui_print "!! no generic ramdisk section found in ${_target_name} --"
-    ui_print "!! this device's boot layout isn't one this installer"
-    ui_print "!! recognizes. Skipping the boot repack; sort out"
-    ui_print "!! halium-boot.img by hand for this device."
-  else
-    ui_print "swapping in the generic Halium ramdisk..."
-    cp halium-generic-ramdisk.cpio ramdisk.cpio
-    ./magiskboot repack stock.img new-boot.img \
-      || abort_install "magiskboot repack failed -- ${_target_name} left untouched"
-    ui_print "flashing repacked ${_target_name} to ${_target_dev}..."
-    dd if=new-boot.img of="${_target_dev}" bs=4M \
-      || abort_install "write failed to ${_target_dev} -- restore from /data/kibaos-boot-backup/${_target_name}${_slot}.img via fastboot if this device won't boot"
-    ui_print "${_target_name} repacked and flashed."
-    _boot_repacked=1
-  fi
-  cd /
-  rm -rf /tmp/kibaos-boot
-fi
-
-mount /data 2>/dev/null
-if ! mountpoint -q /data 2>/dev/null && ! grep -q ' /data ' /proc/mounts; then
-  abort_install "couldn't mount /data -- format it ext4 and unencrypted first"
-fi
-
-ui_print "extracting installer payload..."
-rm -rf /tmp/kibaos-installer
-mkdir -p /tmp/kibaos-installer
-cd /tmp/kibaos-installer || abort_install "no /tmp to stage in"
-unzip -o "${ZIPFILE}" 'rootfs.img' 'android-rootfs.img' -d /tmp/kibaos-installer >/dev/null 2>&1
-
-[ -f /tmp/kibaos-installer/rootfs.img ] || abort_install "rootfs.img missing from zip"
-
-ui_print "writing KibaOS Mobile rootfs to /data/rootfs.img..."
-cp /tmp/kibaos-installer/rootfs.img /data/rootfs.img || abort_install "failed writing rootfs.img"
-
-if [ -f /tmp/kibaos-installer/android-rootfs.img ]; then
-  ui_print "writing Halium GSI to /data/android-rootfs.img..."
-  cp /tmp/kibaos-installer/android-rootfs.img /data/android-rootfs.img || abort_install "failed writing android-rootfs.img"
-else
-  ui_print "!! no GSI bundled in this zip -- push a system image to /data/android-rootfs.img yourself before rebooting"
-fi
-
-touch /data/.writable_image /data/.writable_device_image 2>/dev/null
-
-rm -rf /tmp/kibaos-installer
-
-ui_print "=== done -- reboot into KibaOS Mobile ==="
-if [ "${_boot_repacked}" = "1" ]; then
-  ui_print "(${_target_name} was repacked and flashed by this zip --"
-  ui_print " no separate fastboot step needed. Stock backup is at"
-  ui_print " /data/kibaos-boot-backup/ if you ever need to revert.)"
-else
-  ui_print "(this zip didn't touch the boot partition -- make sure a"
-  ui_print " Halium-compatible boot.img is already flashed separately)"
-fi
-exit 0
-UPDATEBINARY
-chmod 0755 "$_zip_root/META-INF/com/google/android/update-binary"
-(cd "$_zip_root"&&zip -r -X "$_out/kibaos-mobile-installer.zip" . >/dev/null)
-sha256sum "$_out/kibaos-mobile-installer.zip" >"$_out/kibaos-mobile-installer.zip.sha256"
-rm -rf "$_zip_root"
-cat >"$_out/README-INSTALL.md" <<'READMEDOC'
-# KibaOS Mobile — install
-
-This is the KibaOS Mobile *userspace only* (Budgie panel/raven on phoc,
-ofono, Calls, Chatty, squeekboard, libgestures, sddm for lock/login),
-shipped in three forms:
-
-- `kibaos-mobile-installer.zip` — flash this from TWRP, easiest path.
-- `kibaos-mobile-rootfs.img` — the same thing pre-built as a raw ext4
-  image (what's inside the zip), if you'd rather push it yourself.
-- `kibaos-mobile-rootfs.tar.gz` — the raw tarball, for
-  `halium-install`/manual use if neither of the above fits your setup.
-
-None of these are bootable by themselves. You still need, per your
-device's Halium port status:
-
-1. `boot.img`/`init_boot.img` — repacked automatically, **on the phone,
-   during install** — not pre-built by this pipeline. The zip carries
-   `magiskboot` (a static unpacker/repacker) and a generic Halium
-   ramdisk; update-binary dumps whatever's actually sitting on this
-   device's own `boot`/`init_boot` partition, swaps in the Halium
-   ramdisk, and flashes the result back — so the kernel, dtb, and header
-   metadata always come from *this exact phone's* stock image instead of
-   being downloaded or guessed from a version string. This works
-   regardless of Android version/GKI status, since magiskboot
-   auto-detects the boot image layout (plain boot.img, GKI header v3/v4
-   with a split `init_boot`, etc.) rather than this pipeline assuming one
-   ahead of time.
-
-   Defensive by design: update-binary only ever touches a `boot`/
-   `init_boot` partition it can positively identify via known by-name
-   symlinks with A/B slot-suffix detection, backs up whatever's already
-   there to `/data/kibaos-boot-backup/` *before* writing anything, and
-   skips the repack outright (rather than guessing) if it can't confirm
-   a safe target, if the image is a layout magiskboot doesn't recognize,
-   or if it can't find a generic-ramdisk section to swap. Samsung devices
-   (no fastboot-flashable boot partition) fall through to the manual
-   step regardless. There's no per-device kernel build required either
-   way — if the automatic repack can't proceed on a given device, you're
-   pointed at building/supplying a `halium-boot.img` yourself rather than
-   this silently shipping a broken one.
-2. The Halium GSI `system.img` (arm64) -- fetched via the Halium-boot
-   porting method (prebuilt, device-agnostic GSI, no AOSP repo sync)
-   unless `KIBA_SKIP_GSI_FETCH=1` was set for this run, and already
-   bundled into the installer zip as `android-rootfs.img` if the fetch
-   succeeded. Standalone copy at `kibaos-mobile-gsi-arm64.img`
-   (+ `.sha256`) alongside these files. Source defaults to the lolinet
-   mirror (build.lolinet.com/file/halium/GSI); override
-   `KIBA_MOBILE_GSI_URL` to pin a specific build/mirror. If the fetch was
-   skipped or failed, grab a GSI build manually from the same mirror or
-   devices.ubuntu-touch.io -- the zip will say so on install if it's
-   missing.
-
-## Install steps (recommended: the zip)
-
-1. Boot (not flash) TWRP or another Busybox-capable recovery, and confirm
-   `/data` is unencrypted and formatted ext4 -- wipe/reformat in recovery
-   if it isn't.
-
-2. Push and flash the zip:
-
-       adb push kibaos-mobile-installer.zip /sdcard/
-       adb shell twrp install /sdcard/kibaos-mobile-installer.zip
-
-   (or do the same from TWRP's own UI: Install → pick the zip → swipe).
-   This repacks and flashes `boot`/`init_boot` in place (see item 1
-   above — it'll say plainly in the TWRP log if it couldn't and you need
-   to sort out a `halium-boot.img` by hand instead), writes `rootfs.img`
-   to `/data/rootfs.img`, and writes the bundled GSI to
-   `/data/android-rootfs.img`.
-
-3. Reboot. boot.img's initramfs mounts `/data`, loop-mounts
-   `/data/rootfs.img`, and `switch_root`s into it -- that's KibaOS
-   Mobile's `kibaos-mobile-oobe` first-boot flow starting up, no separate
-   disk installer involved.
-
-## Alternative: halium-install (if the zip doesn't fit your device)
-
-Some devices/recoveries don't play well with the shell-script
-update-binary trick, or you may want image conversion/renaming handled
-for you instead of doing it by hand. `halium-install`
-(https://github.com/jbruechert/halium-install -- stages everything on
-your host machine first, avoiding old-TWRP/no-busybox headaches) does
-the same job from a PC instead of inside recovery:
-
-    git clone https://github.com/jbruechert/halium-install
-    cd halium-install
-    sudo ./halium-install -p none \
-      kibaos-mobile-rootfs.tar.gz kibaos-mobile-gsi-arm64.img
-
-`-p none` tells it this isn't one of Halium's bundled distros
-(reference/neon/ut/debian-pm/etc.) -- just install the tarball as-is.
-`sudo` is required (the script loop-mounts image files via
-qemu-user-static/simg2img). The official on-device installer
-(https://github.com/Halium/halium-scripts, `halium-install` in that
-repo) works too, but runs its steps over adb shell instead of on the
-host, so it depends on the recovery's own userspace being complete
-enough (working busybox etc.).
-
-Full background: docs.ubports.com/en/latest/porting/build_and_boot/Halium_install.html
-READMEDOC
-echo "╔══════════════════════════════════════╗"
-echo "║  KibaOS Mobile rootfs build complete! ║"
-echo "║  $_out/kibaos-mobile-rootfs.tar.gz  ║"
-echo "╚══════════════════════════════════════╝"
-}
-if [ "$KIBA_ARCH" = "mobile" ];then
-build_kibaos_mobile
-exit 0
-fi
 install_archiso(){
 pacman -S --noconfirm --needed archiso
 }
@@ -1928,8 +85,6 @@ mtools
 base
 linux
 linux-headers
-linux-firmware
-linux-firmware-intel
 amd-ucode
 intel-ucode
 mkinitcpio
@@ -1945,11 +100,9 @@ bash
 irqbalance
 zram-generator
 nano
-gnome-console
 curl
 wget
 git
-mesa
 power-profiles-daemon
 xdg-user-dirs
 noto-fonts
@@ -1977,7 +130,6 @@ greetd
 greetd-tuigreet
 dconf
 gsettings-desktop-schemas
-pcmanfm-qt
 qt6-wayland
 webkit2gtk-4.1
 python-gobject
@@ -1990,13 +142,9 @@ libnotify
 gtklock
 wlopm
 wlr-randr
-nemo
 gvfs
 gvfs-mtp
 gvfs-smb
-gnome-text-editor
-loupe
-evince
 papirus-icon-theme
 adwaita-icon-theme
 accountsservice
@@ -2037,14 +185,12 @@ pipewire-jack
 wireplumber
 networkmanager
 
-chromium
 ntfs-3g
 exfatprogs
 polkit
 udisks2
 upower
 scrot
-xterm
 fastfetch
 flatpak
 xdg-desktop-portal
@@ -2057,13 +203,7 @@ xdotool
 v4l2loopback-dkms
 xdg-utils
 gawk
-totem
-kooha
-malcontent
 gtk4-layer-shell
-file-roller
-gnome-photos
-haruna
 gstreamer
 gst-plugins-base
 gst-plugins-good
@@ -2084,13 +224,53 @@ pciutils
 lvm2
 
 tuned
+# --- GPU drivers / Xorg drivers / firmware ---
+mesa
+vulkan-radeon
+vulkan-intel
+vulkan-nouveau
+intel-media-driver
+libva-intel-driver
+libva-mesa-driver
+xf86-video-amdgpu
+xf86-video-ati
+xf86-video-intel
+xf86-video-nouveau
+xf86-video-dummy
+xf86-video-fbdev
+xf86-video-vesa
+xf86-video-qxl
+xf86-input-libinput
+xf86-input-evdev
+xf86-input-synaptics
+xf86-input-vmmouse
+xf86-input-void
+xf86-input-wacom
+linux-firmware
+linux-firmware-amd
+linux-firmware-amdgpu
+linux-firmware-atheros
+linux-firmware-broadcom
+linux-firmware-cirrus
+linux-firmware-intel
+linux-firmware-mediatek
+linux-firmware-nvidia
+linux-firmware-other
+linux-firmware-radeon
+linux-firmware-realtek
+linux-firmware-ti
+linux-firmware-liquidio
+linux-firmware-marvell
+linux-firmware-mellanox
+linux-firmware-nfp
+linux-firmware-qcom
+linux-firmware-qlogic
 PACKAGES
 if [ "$KIBA_ARCH" = "x86_64" ];then
 cat >>"$PROFILE/packages.x86_64" <<'NVIDIAPKGS'
 nvidia-open
 nvidia-utils
 lib32-nvidia-utils
-nvidia-settings
 egl-wayland
 libva-nvidia-driver
 NVIDIAPKGS
@@ -2457,10 +637,15 @@ Handles what a raw `grep -F | sed` cannot see:
     rebuilt (ids, aliases and entry order unchanged, verified before writing).
   * UTF-16LE strings (Chromium keeps many as char16_t).
   * Only the display spelling "AuraDE" (never AURADE_* env vars or *Aurade* identifiers).
+  * "Arch Linux", "Chromium OS", "ChromiumOS" and "Linux" -> "KibaOS", but ONLY inside the AuraDE
+    trees (AURA_ROOTS: chromiumos-ash incl. the chrome binary, and the greeter), never
+    under /usr/share or /opt generally. Applies to text, pak entries and ELF binaries.
+    Whole-token matches only: identifiers, paths, "GNU/Linux", "Linux-syscall-note" and
+    user-agent strings ("X11; Linux x86_64") are left alone.
 Name swaps are same length (6 chars) so ELF binaries stay valid; the tagline is
 only rewritten in paks and text files, where length may change.
 """
-import gzip, os, struct, sys
+import gzip, os, re, struct, sys
 
 # Display name ONLY. AURADE_* are environment variables read by the session scripts and
 # *Aurade* (requestAuradeNetworkApps, onAuradeUpdateClick_ ...) are identifiers shared
@@ -2474,7 +659,70 @@ try:
 except Exception:
     brotli = None
 
-stats = {"paks": 0, "entries": 0, "files": 0, "skipped": []}
+stats = {"paks": 0, "entries": 0, "files": 0, "skipped": [], "elf_patched": 0, "elf_too_long": {}}
+
+# Terms rewritten to KibaOS inside the AuraDE trees only. ORDER MATTERS: "Arch Linux"
+# must go before "Linux" or it would come out as "Arch KibaOS".
+EXTRA = [("Arch Linux", "KibaOS"), ("Chromium OS", "KibaOS"), ("ChromiumOS", "KibaOS"), ("Linux", "KibaOS")]
+AURA_ROOTS = ("/usr/lib/chromiumos-ash/", "/usr/lib/aurade-greeter/")
+
+def _extra_rx(old, enc, binary):
+    o = re.escape(old.encode(enc))
+    if enc == "utf-8":
+        pre = rb"(?<![A-Za-z0-9_/.\-])"
+        post = rb"(?![A-Za-z0-9_/\-]|\.[a-z])"
+        if old == "Linux":  # leave user-agent style "X11; Linux x86_64" alone
+            pre += rb"(?<!; )"
+            post += rb"(?! (?:x86_64|i[3-6]86|aarch64|armv\d))"
+        Q = rb"[\'\"`]"  # skip a bare quoted 'Linux' (JS platform checks like ua.includes('Linux'))
+        body = rb"(?:(?<!" + Q + rb")" + o + rb"|(?<=" + Q + rb")" + o + rb"(?!" + Q + rb"))"
+        tail = rb"(?=\x00)"
+    else:
+        pre = rb"(?<![A-Za-z0-9_/.\-]\x00)"
+        post = rb"(?![A-Za-z0-9_/\-]\x00|\.\x00[a-z]\x00)"
+        body = o
+        tail = rb"(?=\x00\x00)"
+    # In a binary the replacement is padded with NULs, which is only correct when the
+    # match runs to the end of a NUL-terminated string, so require the terminator.
+    return re.compile(pre + (o if binary else body) + (tail if binary else post))
+
+_RX = {}
+def extra_rx(old, enc, binary):
+    k = (old, enc, binary)
+    if k not in _RX:
+        _RX[k] = _extra_rx(old, enc, binary)
+    return _RX[k]
+
+def has_extra(d):
+    return any(old.encode(e) in d for old, _ in EXTRA for e in ("utf-8", "utf-16-le"))
+
+def in_aura(path):
+    return os.path.abspath(path).startswith(AURA_ROOTS)
+
+def is_text_blob(raw):
+    return b"\x00" not in raw[:8192] and not raw.startswith(
+        (b"\x7fELF", b"\x89PNG", b"GIF8", b"\xff\xd8", b"wOFF", b"wOF2", b"RIFF", b"\x00asm"))
+
+def swap_extra(b, binary, path=""):
+    """Arch Linux / ChromiumOS / Linux -> KibaOS. Text: any length. ELF: only where the
+    replacement is not longer (NUL-padded); longer ones are counted and reported."""
+    out = b
+    for old, new in EXTRA:
+        for enc in ("utf-8", "utf-16-le"):
+            o, n = old.encode(enc), new.encode(enc)
+            if o not in out:
+                continue
+            rx = extra_rx(old, enc, binary)
+            if binary and len(n) > len(o):
+                c = len(rx.findall(out))
+                if c:
+                    stats["elf_too_long"][(path, old)] = stats["elf_too_long"].get((path, old), 0) + c
+                continue
+            rep = n + b"\x00" * (len(o) - len(n)) if binary else n
+            out, c = rx.subn(lambda m, r=rep: r, out)
+            if binary:
+                stats["elf_patched"] += c
+    return out
 
 def swap(b, tagline):
     """Replace in UTF-8 and UTF-16LE; returns (new_bytes, changed)."""
@@ -2568,6 +816,10 @@ def do_pak_bytes(path, d, wrapped):
             continue
         raw2 = welcome_art(raw)
         new, ch = swap(raw2, True)
+        if in_aura(path) and is_text_blob(new) and has_extra(new):
+            new2 = swap_extra(new, False, path)
+            ch = ch or new2 != new
+            new = new2
         ch = ch or raw2 is not raw
         if ch:
             p = pack_entry(kind, new)
@@ -2608,15 +860,20 @@ def do_file(path):
         d = open(path, "rb").read()
     except OSError:
         return
-    if b"AuraDE" not in d and "AuraDE".encode("utf-16-le") not in d and \
+    extra = in_aura(path) and has_extra(d)
+    if b"AuraDE" not in d and "AuraDE".encode("utf-16-le") not in d and not extra and \
        not any(t.encode() in d or t.encode("utf-16-le") in d for t in TAGLINES_OLD):
         if not path.endswith(".pak"):
             return
     if path.endswith(".pak"):
         do_pak(path)
         return
-    is_text = b"\x00" not in d[:8192] and not d.startswith(b"\x7fELF")
+    is_elf = d.startswith(b"\x7fELF")
+    is_text = b"\x00" not in d[:8192] and not is_elf
     new, ch = swap(d, is_text)
+    if extra and (is_text or is_elf):
+        new = swap_extra(new, is_elf, path)
+        ch = new != d
     if ch:
         mode = os.stat(path).st_mode
         open(path, "wb").write(new)
@@ -2665,6 +922,10 @@ def main(roots):
                 do_file(os.path.join(dp, f))
     print("kiba-rebrand: welcome art: page=%(html)d svg=%(svg)d" % art_done)
     print("kiba-rebrand: %(paks)d pak(s) / %(entries)d pak entries / %(files)d file(s) rewritten" % stats)
+    print("kiba-rebrand: %d ELF string(s) patched in place (NUL-padded)" % stats["elf_patched"])
+    for (pth, term), c in sorted(stats["elf_too_long"].items()):
+        print("kiba-rebrand: NOTE %s: %d x \"%s\" not patched in the binary (KibaOS is longer; "
+              "same-length only)" % (pth, c, term), file=sys.stderr)
     for s in stats["skipped"]:
         print("kiba-rebrand: SKIPPED " + s, file=sys.stderr)
     if not verify(roots):
@@ -2837,13 +1098,6 @@ LSWAUTODESK
 echo "=== LSW: first-login auto-install armed ==="
 fi
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install --system --noninteractive flathub re.sonny.Junction
-echo "=== Junction: installed via flatpak (re.sonny.Junction) ==="
-if flatpak install --system --noninteractive flathub io.github.alainm23.planify;then
-echo "=== Planify: installed via flatpak (io.github.alainm23.planify) ==="
-else
-echo "!! Planify flatpak install failed -- continuing without it" >&2
-fi
 ADWAITA_ICONS="/usr/share/icons/Adwaita"
 LAUNCHER_MASTER="/tmp/kibaos-launcher-icon.png"
 if [ -f "$LOGO_256" ];then
@@ -3410,17 +1664,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// Single shared greeter for both the desktop ISO and KibaOS Mobile --
-// this exact file is written byte-for-byte into both images (see the
-// mobile copy inside build_kibaos_mobile(), which carries a comment
-// pointing back here -- keep the two in sync by hand, they can't
-// literally share a bash variable since they run inside two different
-// execution contexts: this one at ISO customize time inside a chroot,
-// the mobile one directly against the target root while build.sh itself
-// runs). Rather than branching into two separate QML files, the layout
-// adapts itself at runtime off Screen.width, so a genuinely single
-// theme covers a 1920x1080 desktop panel and a ~1080x2400 phone panel
-// without drifting out of sync on brand/behavior over time.
+// KibaOS greeter -- written into the image at ISO customize time inside
+// the chroot. The layout adapts itself at runtime off Screen.width, so a
+// single theme covers a 1920x1080 desktop panel as well as small or
+// portrait panels (the isPhone branches below are just the compact layout).
 Rectangle {
     id: root
     width: Screen.width  > 0 ? Screen.width  : 1920
@@ -3585,9 +1832,8 @@ Rectangle {
 
             // Session picker: only worth showing where there's actually
             // more than one to pick from. Desktop offers Budgie/etc
-            // session choices; the phone image ships exactly one
-            // (kibaos-mobile, Exec=phoc) so this is dead weight there --
-            // one less thing to accidentally fat-finger on a small card.
+            // session choices; compact layouts hide it to keep the card
+            // small and avoid accidental taps.
             ComboBox {
                 Layout.fillWidth: true
                 Layout.preferredHeight: isPhone ? 0 : undefined
@@ -4269,25 +2515,6 @@ mkdir -p \
 "$SKEL/.config/gtk-4.0" \
 "$SKEL/.config/autostart" \
 "$SKEL/.config/fastfetch"
-cat >/usr/local/bin/kibaos-desktop-icons <<'DESKTOPICONSWRAP'
-#!/bin/sh
-pcmanfm-qt --desktop&
-PID=$!
-sleep 2
-pcmanfm-qt --wallpaper-mode=stretch -w /usr/share/kibaos/wallpaper.jpg
-wait "$PID"
-DESKTOPICONSWRAP
-chmod +x /usr/local/bin/kibaos-desktop-icons
-cat >"$SKEL/.config/autostart/pcmanfm-qt-desktop.desktop" <<'DESKTOPVIEW'
-[Desktop Entry]
-Type=Application
-Name=PCManFM-Qt Desktop
-Exec=/usr/local/bin/kibaos-desktop-icons
-Hidden=false
-NoDisplay=true
-X-GNOME-Autostart-enabled=true
-X-GNOME-AutoRestart=true
-DESKTOPVIEW
 cat >"$SKEL/.config/gtk-3.0/settings.ini" <<'GTK3SKEL'
 [Settings]
 gtk-theme-name=Adwaita-dark
@@ -4333,10 +2560,6 @@ gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll true
 gsettings set org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled true
 gsettings set org.gnome.desktop.peripherals.mouse natural-scroll false
 gsettings set org.gnome.desktop.peripherals.mouse accel-profile 'adaptive'
-gsettings set org.nemo.preferences show-hidden-files false
-gsettings set org.nemo.preferences default-folder-viewer 'icon-view'
-gsettings set org.nemo.icon-view default-zoom-level 'standard'
-gsettings set org.nemo.preferences show-location-entry false
 touch "$STAMP"
 FIRSTLOGIN
 chmod +x /usr/local/bin/kibaos-first-login
@@ -4476,39 +2699,6 @@ chown -R 1000:1000 /home/liveuser
 chmod 750 /home/liveuser
 mkdir -p /usr/local/bin
 mkdir -p /usr/share/kibaos-welcome
-(set -e
-JOPLIN_TAG=$(curl -fsSIL -o /dev/null -w '%{url_effective}' https://github.com/laurent22/joplin/releases/latest)
-JOPLIN_TAG="${JOPLIN_TAG##*/}"
-JOPLIN_URL="https://github.com/laurent22/joplin/releases/download/$JOPLIN_TAG/Joplin-${JOPLIN_TAG#v}.AppImage"
-[ -n "$JOPLIN_URL" ]
-JOPLIN_TMP="/tmp/joplin-appimage"
-rm -rf "$JOPLIN_TMP"&&mkdir -p "$JOPLIN_TMP"&&cd "$JOPLIN_TMP"
-curl -fL --retry 3 -o Joplin.AppImage "$JOPLIN_URL"
-chmod +x Joplin.AppImage
-./Joplin.AppImage --appimage-extract >/dev/null
-rm -rf /opt/joplin&&mv squashfs-root /opt/joplin
-chmod -R a+rX /opt/joplin
-for _sz in 512 256 128 64 48;do
-_ic="/opt/joplin/usr/share/icons/hicolor/${_sz}x$_sz/apps/joplin.png"
-[ -f "$_ic" ]&&install -Dm644 "$_ic" "/usr/share/icons/hicolor/${_sz}x$_sz/apps/joplin.png"
-done
-cat >/usr/bin/joplin-desktop <<'JOPLINLAUNCH'
-#!/bin/sh
-exec /opt/joplin/AppRun --no-sandbox "$@"
-JOPLINLAUNCH
-chmod 755 /usr/bin/joplin-desktop
-cat >/usr/share/applications/joplin.desktop <<'JOPLINDESKTOP'
-[Desktop Entry]
-Type=Application
-Name=Joplin
-Comment=Note-taking and to-do application with synchronisation
-Exec=joplin-desktop %U
-Icon=joplin
-Terminal=false
-Categories=Office;Utility;
-StartupWMClass=Joplin
-JOPLINDESKTOP
-rm -rf "$JOPLIN_TMP")&&echo "=== Joplin installed ==="||echo "!! Joplin install failed -- continuing without it" >&2
 sed -i 's/GTK_THEME=Adwaita-dark/GTK_THEME=KibaOS/' /etc/environment
 mkdir -p /usr/share/applications /etc/skel/Desktop /etc/skel/Documents \
 /etc/skel/Downloads /etc/skel/Pictures /etc/skel/Music /etc/skel/Videos
@@ -4520,22 +2710,6 @@ XDG_PICTURES_DIR="$HOME/Pictures"
 XDG_MUSIC_DIR="$HOME/Music"
 XDG_VIDEOS_DIR="$HOME/Videos"
 USERDIRS
-cat >/usr/local/bin/kibaos-files <<'FILESWRAP'
-#!/bin/bash
-exec nemo "$HOME"
-FILESWRAP
-chmod +x /usr/local/bin/kibaos-files
-cat >/usr/share/applications/kibaos-files.desktop <<'FILESDESK'
-[Desktop Entry]
-Type=Application
-Name=Files
-Comment=Browse your documents, downloads, and other files
-Icon=nemo
-Exec=/usr/local/bin/kibaos-files
-Terminal=false
-NoDisplay=false
-Categories=System;FileTools;FileManager;
-FILESDESK
 mkdir -p /etc/skel/.config/autostart
 cat >/usr/local/bin/kibaos-first-login-setup <<'FIRSTLOGIN'
 #!/bin/bash
@@ -4890,13 +3064,6 @@ echo 'kernel.sysrq = 0' >/etc/sysctl.d/50-kibaos-disable-sysrq.conf
 grep -q '^NAutoVTs' /etc/systemd/logind.conf&&sed -i 's/^NAutoVTs=.*/NAutoVTs=1/' /etc/systemd/logind.conf||echo 'NAutoVTs=1' >>/etc/systemd/logind.conf
 systemctl mask getty@tty2.service getty@tty3.service getty@tty4.service \
 getty@tty5.service getty@tty6.service
-for _chromium_desk in chromium.desktop;do
-if [ -f "/usr/share/applications/$_chromium_desk" ];then
-sed -i 's/^Name=.*/Name=Browser/' "/usr/share/applications/$_chromium_desk"||true
-sed -i '/^Name\[/d' "/usr/share/applications/$_chromium_desk"||true
-sed -i 's/^Icon=.*/Icon=kibaos-browser/' "/usr/share/applications/$_chromium_desk"||true
-fi
-done
 mkdir -p /home/liveuser/Desktop
 for src_desktop in kibaos-install kibaos-about;do
 cp "/usr/share/applications/$src_desktop.desktop" \
