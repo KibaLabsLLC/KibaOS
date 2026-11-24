@@ -21,7 +21,7 @@ jobs:
   build_x86_64:
     if: ${{ !inputs.skip_build }}
     runs-on: blacksmith-4vcpu-ubuntu-2604
-    timeout-minutes: 360
+    timeout-minutes: 740
     steps:
       - name: Checkout repository
         uses: useblacksmith/checkout@v1
