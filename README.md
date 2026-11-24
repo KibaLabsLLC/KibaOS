@@ -12,9 +12,6 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://github.com/KibaLabsLLC/KibaOS/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/KibaLabsLLC/Kiba/build.yml?branch=main&label=Build&style=for-the-badge&logo=githubactions&logoColor=white" />
-  </a>
   <a href="https://sourceforge.net/projects/kibaos/">
     <img src="https://img.shields.io/sourceforge/dt/kibaos?style=for-the-badge&color=orange&logo=sourceforge&logoColor=white" />
   </a>
@@ -23,10 +20,6 @@
   <a href="https://fluxer.gg/KhLuVJHg">Fluxer</a> ·
   <a href="https://discord.gg/25v2C5mvuv">Discord</a> ·
   <a href="https://matrix.to/#/#kibalabs:matrix.org">Matrix</a>
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/KibaLabsLLC/Kiba/main/branding/oin-member-2-0-horiz-1.png" alt="Open Invention Network Member" width="180" />
 </p>
 
 Meet KibaOS
