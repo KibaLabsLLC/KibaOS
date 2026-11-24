@@ -69,10 +69,10 @@ Options:
   --help          Show this help.
 
 Environment:
+  GPGKEY               Optional. Signing key; a random one is generated per build if unset.
   RUN_NUM              ISO version suffix (default: timestamp).
   KIBAOS_ISO_DEST      Directory the ISO is moved to (default: /w).
   KIBAOS_BUILD_USER    Unprivileged user for the Chromium compile.
-  GPGKEY               Required (package signing).
 EOF
 }
 
@@ -186,7 +186,7 @@ check_full_dependencies() {
     local cmd
 
     for cmd in pacman pacstrap arch-chroot runuser rsync mkarchiso xorriso \
-        pacman-key git makepkg cargo python3 curl bsdtar sha256sum; do
+        pacman-key gpg git makepkg cargo python3 curl bsdtar sha256sum; do
         need "$cmd"
     done
 }
@@ -217,7 +217,8 @@ install_host_dependencies() {
         archiso \
         grub \
         mtools \
-        dosfstools
+        dosfstools \
+        gnupg
 }
 
 bootstrap_chromium() {
@@ -358,9 +359,40 @@ check_full_sources() {
         printf '  %s\n' "${missing[@]}" >&2
         die "Restore the missing package sources before a full build."
     fi
+}
 
-    [[ -n "${GPGKEY:-}" ]] ||
-        die "Full build requires GPGKEY."
+# Throwaway package-signing key, generated fresh on every build. Used only for
+# signing this build's local packages; nothing is published, so no long-lived
+# key is needed. A GPGKEY already in the environment is respected.
+generate_build_signing_key() {
+    [[ -z "${GPGKEY:-}" ]] || {
+        log "Using GPGKEY from environment: $GPGKEY"
+        return 0
+    }
+
+    need gpg
+
+    log "Generating ephemeral build signing key"
+
+    local gnupghome="${WORKDIR}/gnupg"
+
+    rm -rf "$gnupghome"
+    install -d -m 700 "$gnupghome"
+
+    gpg --homedir "$gnupghome" --batch --pinentry-mode loopback \
+        --passphrase '' \
+        --quick-gen-key "KibaOS build $(date -u +%Y%m%d%H%M%S) <build@kibaos.invalid>" \
+        ed25519 sign never >/dev/null 2>&1 ||
+        die "Failed to generate build signing key."
+
+    GPGKEY="$(gpg --homedir "$gnupghome" --with-colons --list-secret-keys |
+        awk -F: '/^fpr:/ {print $10; exit}')"
+
+    [[ -n "$GPGKEY" ]] ||
+        die "Could not read fingerprint of generated build key."
+
+    export GNUPGHOME="$gnupghome"
+    export GPGKEY
 }
 
 run_source_as_builder() {
@@ -380,8 +412,14 @@ run_source_as_builder() {
         -g "$(id -g "$BUILD_USER")" \
         "$WORKDIR"
 
+    if [[ -n "${GNUPGHOME:-}" && -d "$GNUPGHOME" ]]; then
+        chown -R "$(id -u "$BUILD_USER"):$(id -g "$BUILD_USER")" "$GNUPGHOME"
+    fi
+
     runuser -u "$BUILD_USER" -- env \
         KIBAOS_INTERNAL_SOURCE_STAGE=1 \
+        GPGKEY="${GPGKEY:-}" \
+        GNUPGHOME="${GNUPGHOME:-}" \
         KIBAOS_WORKDIR="$WORKDIR" \
         KIBAOS_BOOTSTRAP_JOBS="$JOBS" \
         KIBAOS_DEPOT_TOOLS="$DEPOT_TOOLS" \
@@ -1431,6 +1469,8 @@ full_build() {
     fi
 
     check_full_dependencies
+
+    generate_build_signing_key
 
     run_source_as_builder
 
