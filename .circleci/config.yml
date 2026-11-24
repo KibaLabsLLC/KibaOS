@@ -1,31 +1,607 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/reference/configuration-reference/
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/guides/execution-managed/executor-intro/ & https://circleci.com/docs/reference/configuration-reference/#executor-job
-    docker:
-      # Specify the version you desire here
-      # See: https://circleci.com/developer/images/image/cimg/base
-      - image: cimg/base:current
+# ---------------------------------------------------------------------------
+# Build KibaOS -- CircleCI port of the GitHub Actions "Build KibaOS" workflow.
+#
+# Required CircleCI context: `kibaos` (Organization Settings -> Contexts), holding:
+#   SF_USER, SF_PASS        SourceForge FRS login
+#   OTA_SIGNING_KEY         armored GPG private key for ota@kibaos.wolftech.tech
+#   GITHUB_TOKEN            PAT with contents:write (screenshot commits, OTA tags)
+#   CCI_API_TOKEN           CircleCI personal API token (finds/downloads artifacts
+#                           of earlier pipelines when skip_build=true)
+# Optional: PROJECT_SLUG    override API slug (default gh/<org>/<repo>; GitHub-App
+#                           projects use circleci/<org-id>/<project-id>)
+#
+# Trigger manually (UI "Trigger Pipeline" or API) with `dispatch: true`.
+# ---------------------------------------------------------------------------
 
-    # Add steps to the job
-    # See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#steps-overview & https://circleci.com/docs/reference/configuration-reference/#steps
+parameters:
+  dispatch:
+    description: 'Set true on a manual/API trigger. Replaces workflow_dispatch; pushes do nothing.'
+    type: boolean
+    default: false
+  skip_build:
+    description: 'Skip building; publish + OTA the newest CircleCI build artifact if SourceForge is older'
+    type: boolean
+    default: false
+  skip_ota:
+    description: 'Skip OTA generation and publishing'
+    type: boolean
+    default: false
+  run_vmtest:
+    description: 'Run UEFI VM test using the newest available build artifact'
+    type: boolean
+    default: false
+  build_offset:
+    description: >-
+      Added to the CircleCI pipeline number to make the build/patch number.
+      Set to your last GitHub Actions run number so numbers keep increasing
+      and stay comparable with the markers already on SourceForge.
+    type: integer
+    default: 0
+  vmtest_wait:
+    description: 'Seconds to wait at each VM stage. CircleCI cloud has no KVM (software emulation), so raise this (e.g. 600).'
+    type: integer
+    default: 120
+
+executors:
+  light:
+    docker:
+      - image: cimg/base:current
+    resource_class: medium
+  vm:
+    machine:
+      image: ubuntu-2404:current
+    resource_class: large
+  vm-new:
+    machine:
+      image: ubuntu-2604:current
+    resource_class: large
+  vm-build:
+    machine:
+      image: ubuntu-2404:current
+    resource_class: xlarge
+
+commands:
+  load_state:
+    description: Attach the workflow workspace and export the values chosen by latest_x86_64
     steps:
-      # Checkout the code as the first step.
+      - attach_workspace:
+          at: /tmp/ws
+      - run:
+          name: Load build state
+          command: |
+            cat /tmp/ws/state/state.env | tee -a "$BASH_ENV"
+
+  halt_unless:
+    description: End the job successfully unless the named state variable is "true"
+    parameters:
+      var:
+        type: string
+    steps:
+      - run:
+          name: Check << parameters.var >>
+          command: |
+            if [ "${<< parameters.var >>:-false}" != "true" ]; then
+              echo "<< parameters.var >> is not true -- nothing to do."
+              circleci-agent step halt
+            fi
+
+  fetch_dist:
+    description: Download the ISO from an earlier pipeline when it was not built in this one
+    steps:
+      - run:
+          name: Fetch ISO artifact if needed
+          command: |
+            if [ "$FRESH" = "true" ]; then
+              echo "ISO comes from this pipeline's workspace."
+              exit 0
+            fi
+            mkdir -p /tmp/ws/dist
+            curl -fsS -H "Circle-Token: ${CCI_API_TOKEN}" \
+              "https://circleci.com/api/v2/project/${SLUG}/${SRC_JOB}/artifacts" \
+              | jq -r '.items[] | select((.path|endswith(".iso")) or (.path|endswith(".iso.sha256"))) | .url' \
+              | while read -r u; do
+                  echo "Downloading $u"
+                  curl -fL -H "Circle-Token: ${CCI_API_TOKEN}" -o "/tmp/ws/dist/$(basename "$u")" "$u"
+                done
+            ls -lh /tmp/ws/dist
+
+  sf_setup:
+    description: SSH tooling for SourceForge
+    steps:
+      - run:
+          name: Prepare SSH
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y sshpass rsync
+            mkdir -p ~/.ssh
+            ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+            echo 'export SSHPASS="$SF_PASS"' >> "$BASH_ENV"
+
+jobs:
+  build_x86_64:
+    executor: vm-build
+    steps:
       - checkout
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          name: Run build in Docker
+          no_output_timeout: 300m
+          command: |
+            docker run --rm --privileged \
+              -v "$PWD:/w" \
+              -e RUN_NUM="$(( << pipeline.number >> + << pipeline.parameters.build_offset >> ))" \
+              -e KIBA_ARCH="x86_64" \
+              "archlinux:latest" \
+              /bin/bash /w/build-kibaos.sh
+      - run:
+          name: Collect ISO
+          command: |
+            sudo chown -R "$(id -u):$(id -g)" .
+            mkdir -p dist
+            mv ./*.iso ./*.iso.sha256 dist/
+            ls -lh dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+      - store_artifacts:
+          path: dist
+          destination: .
 
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/guides/orchestrate/workflows/ & https://circleci.com/docs/reference/configuration-reference/#workflows
+  # Picks the build to use (this pipeline's, or the newest earlier one) and
+  # compares it with what is on SourceForge. Results go to state/state.env.
+  latest_x86_64:
+    parameters:
+      fresh:
+        description: true when build_x86_64 ran in this pipeline
+        type: boolean
+    executor: light
+    steps:
+      - run:
+          name: Pick the newest x86_64 build artifact
+          command: |
+            set -euo pipefail
+            sudo apt-get update -qq
+            sudo apt-get install -y jq sshpass rsync
+            mkdir -p state
+            API=https://circleci.com/api/v2
+            SLUG="${PROJECT_SLUG:-gh/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}}"
+            OFFSET=<< pipeline.parameters.build_offset >>
+            CUR_NUM=$(( << pipeline.number >> + OFFSET ))
+            SRC_JOB=""
+
+            api() { curl -fsS -H "Circle-Token: ${CCI_API_TOKEN}" "${API}/$1"; }
+
+            # Echo "<pipeline-number> <sha> <build-job-number>" for the newest earlier
+            # pipeline whose build_x86_64 job succeeded and still has its ISO.
+            find_build() {
+              local token="" url page pid num sha wf job
+              while :; do
+                url="project/${SLUG}/pipeline"
+                if [ -n "${CIRCLE_BRANCH:-}" ]; then url="${url}?branch=${CIRCLE_BRANCH}"; fi
+                if [ -n "$token" ]; then
+                  case "$url" in *\?*) url="${url}&page-token=${token}";; *) url="${url}?page-token=${token}";; esac
+                fi
+                page=$(api "$url")
+                while read -r pid num sha; do
+                  [ "$pid" = "$CIRCLE_PIPELINE_ID" ] && continue
+                  for wf in $(api "pipeline/${pid}/workflow" | jq -r '.items[].id'); do
+                    job=$(api "workflow/${wf}/job" | jq -r '[.items[] | select(.name=="build_x86_64" and .status=="success") | .job_number] | first // empty')
+                    [ -z "$job" ] && continue
+                    if api "project/${SLUG}/${job}/artifacts" | jq -e '.items | any(.path | endswith(".iso"))' >/dev/null; then
+                      echo "${num} ${sha} ${job}"
+                      return 0
+                    fi
+                  done
+                  echo "Pipeline #${num} has no usable x86_64 build artifact; checking older." >&2
+                done < <(echo "$page" | jq -r '.items[] | "\(.id) \(.number) \(.vcs.revision // "none")"')
+                token=$(echo "$page" | jq -r '.next_page_token // empty')
+                [ -n "$token" ] || return 1
+              done
+            }
+
+            if [ "<< parameters.fresh >>" = "true" ]; then
+              echo "Build ran in this pipeline; using it."
+              PATCH_NUM="$CUR_NUM"
+              HEAD_SHA="$CIRCLE_SHA1"
+            else
+              [ -n "${CCI_API_TOKEN:-}" ] || { echo "CCI_API_TOKEN is required when skip_build=true"; exit 1; }
+              read -r NUM HEAD_SHA SRC_JOB < <(find_build) || { echo "No unexpired build artifact found in any earlier pipeline."; exit 1; }
+              PATCH_NUM=$(( NUM + OFFSET ))
+              echo "Found build from pipeline #${NUM} (job ${SRC_JOB}); patch level ${PATCH_NUM}."
+            fi
+            ART="$PATCH_NUM"
+
+            PUB=false; OTA=false
+            if [ -z "${SF_USER:-}" ] || [ -z "${SF_PASS:-}" ]; then
+              echo "SourceForge credentials not configured. Nothing to push."
+            else
+              mkdir -p ~/.ssh
+              ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+              export SSHPASS="$SF_PASS"
+
+              SF=/home/frs/project/kibaos
+              read_version() {
+                local f v
+                f=$(mktemp)
+                sshpass -e rsync -q "$SF_USER@frs.sourceforge.net:${SF}/$1" "$f" 2>/dev/null || true
+                v=$(grep -Eo '^[0-9]+' "$f" | head -1 || true)
+                echo "${v:-0}"
+              }
+
+              SF_ISO=$(read_version x86_64/last-iso-build-number-x86_64.txt)
+              SF_OTA=$(read_version ota/last-ota-build-x86_64.txt)
+              [ "$SF_OTA" -eq 0 ] && SF_OTA=$(read_version ota/latest-patch-level)
+
+              [ "$SF_ISO" -lt "$ART" ] && PUB=true
+              [ "$SF_OTA" -lt "$ART" ] && OTA=true
+              echo "### Latest artifact vs SourceForge (x86_64)"
+              echo "- Latest artifact: v${ART}"
+              echo "- SourceForge ISO: v${SF_ISO} -> publish ${PUB}"
+              echo "- SourceForge OTA: v${SF_OTA} -> OTA ${OTA}"
+            fi
+            [ "<< pipeline.parameters.skip_ota >>" = "true" ] && OTA=false
+
+            {
+              echo "export FRESH=<< parameters.fresh >>"
+              echo "export SLUG=${SLUG}"
+              echo "export SRC_JOB=${SRC_JOB}"
+              echo "export PATCH_NUM=${PATCH_NUM}"
+              echo "export HEAD_SHA=${HEAD_SHA}"
+              echo "export CUR_NUM=${CUR_NUM}"
+              echo "export PUBLISH_NEEDED=${PUB}"
+              echo "export OTA_NEEDED=${OTA}"
+              echo "export RUN_VMTEST=<< pipeline.parameters.run_vmtest >>"
+            } > state/state.env
+            cat state/state.env
+      - persist_to_workspace:
+          root: .
+          paths:
+            - state
+
+  publish_x86_64:
+    executor: vm-new
+    environment:
+      REMOTE_DIR: /home/frs/project/kibaos/x86_64
+      MARKER: last-iso-build-number-x86_64.txt
+    steps:
+      - load_state
+      - halt_unless:
+          var: PUBLISH_NEEDED
+      - fetch_dist
+      - sf_setup
+      - run:
+          name: Remove previous build from SourceForge
+          command: |
+            rm -f "${MARKER}"
+            sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}" "${MARKER}" 2>/dev/null || true
+            if [ -s "${MARKER}" ]; then
+              PREV_ISO="kibaos-v$(cat "${MARKER}").iso"
+              echo "Removing previous x86_64 build: ${PREV_ISO} (+ .sha256)"
+              printf '%s\n' "cd ${REMOTE_DIR}" "rm ${PREV_ISO}" "rm ${PREV_ISO}.sha256" "bye" \
+                | sshpass -e sftp -oStrictHostKeyChecking=no -oBatchMode=no "$SF_USER@frs.sourceforge.net" 2>/dev/null || true
+            else
+              echo "No previous build marker for x86_64 -- nothing to delete."
+            fi
+      - run:
+          name: Upload to SourceForge
+          command: |
+            FILES=()
+            for pat in "*.iso" "*.iso.sha256"; do
+              mapfile -t FOUND < <(find /tmp/ws/dist -type f -name "$pat")
+              if [ "${#FOUND[@]}" -eq 0 ]; then
+                echo "No file matching ${pat} in the x86_64 build artifact" >&2
+                exit 1
+              fi
+              FILES+=("${FOUND[@]}")
+            done
+            printf 'Uploading: %s\n' "${FILES[@]}"
+            sshpass -e rsync -avP --progress "${FILES[@]}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/"
+      - run:
+          name: Record build marker on SourceForge
+          command: |
+            echo "${PATCH_NUM}" > "${MARKER}"
+            sshpass -e rsync -avP "${MARKER}" "$SF_USER@frs.sourceforge.net:${REMOTE_DIR}/${MARKER}"
+
+  ota_x86_64:
+    executor: vm-new
+    environment:
+      ARCH: x86_64
+    steps:
+      - checkout
+      - load_state
+      - halt_unless:
+          var: OTA_NEEDED
+      - fetch_dist
+      - run:
+          name: Install tools
+          command: |
+            sudo install -m 0755 .circleci/scripts/retry.sh /usr/local/bin/retry
+            retry sudo apt-get update -qq
+            retry sudo apt-get install -y squashfs-tools sshpass rsync
+            echo 'export SSHPASS="$SF_PASS"' >> "$BASH_ENV"
+      - run:
+          name: Extract airootfs from ISO for OTA diffing
+          command: |
+            ISO=$(ls /tmp/ws/dist/*.iso | head -1)
+            mkdir -p /tmp/iso-mount /tmp/airootfs-extracted
+            sudo mount -o loop "$ISO" /tmp/iso-mount
+            SFS=$(find /tmp/iso-mount -name 'airootfs.sfs' | head -1)
+            sudo unsquashfs -d /tmp/airootfs-extracted -processors "$(nproc)" "$SFS"
+            sudo umount /tmp/iso-mount
+            echo "Extracted file count: $(find /tmp/airootfs-extracted -type f | wc -l)"
+      - run:
+          name: Download previous build manifest from SourceForge
+          command: |
+            mkdir -p ~/.ssh
+            retry ssh-keyscan -H frs.sourceforge.net >> ~/.ssh/known_hosts
+            retry sshpass -e rsync -avP "$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/ota/last-build-manifest-${ARCH}.txt" ./last-build-manifest.txt || echo "No previous manifest found -- this is a full baseline build."
+      - run:
+          name: Generate current build manifest
+          command: |
+            ROOT="$PWD"
+            cd /tmp/airootfs-extracted
+            sudo find . -type f -print0 | xargs -0 -P "$(nproc)" -n 64 sudo sha256sum 2>/dev/null | sed 's|sudo: ||' > "$ROOT/current-build-manifest.txt" || true
+            cd "$ROOT"
+            echo "Manifest entries: $(wc -l < current-build-manifest.txt)"
+      - run:
+          name: Compute changed files vs previous build
+          command: |
+            if [ ! -f last-build-manifest.txt ]; then
+              echo "No previous manifest -- skipping OTA patch generation for this baseline build."
+              echo 'export HAS_CHANGES=false' >> "$BASH_ENV"
+            else
+              sort -k2 last-build-manifest.txt > prev-sorted.txt
+              sort -k2 current-build-manifest.txt > curr-sorted.txt
+              comm -13 prev-sorted.txt curr-sorted.txt | awk '{print $2}' > changed_files.txt
+              CHANGED=$(wc -l < changed_files.txt)
+              echo "Changed files: $CHANGED"
+              head -20 changed_files.txt
+              if [ "$CHANGED" -eq 0 ]; then echo 'export HAS_CHANGES=false' >> "$BASH_ENV"; else echo 'export HAS_CHANGES=true' >> "$BASH_ENV"; fi
+            fi
+            cp current-build-manifest.txt baseline-manifest.txt
+      - run:
+          name: Bundle OTA patch from extracted airootfs
+          command: |
+            [ "$HAS_CHANGES" = "true" ] || { echo "No changes -- skipping."; exit 0; }
+            PATCH_DIR="ota-patch-${PATCH_NUM}-${ARCH}"
+            mkdir -p "${PATCH_DIR}"
+            sed 's|^\./||' changed_files.txt > changed_files_rel.txt
+            sudo rsync -a --files-from=changed_files_rel.txt --ignore-missing-args /tmp/airootfs-extracted/ "${PATCH_DIR}/"
+            sudo chmod -R a+rX "${PATCH_DIR}"
+            sudo chown -R "$(id -u):$(id -g)" "${PATCH_DIR}" || true
+            mkdir -p "${PATCH_DIR}/etc/kibaos"
+            echo "${PATCH_NUM}" > "${PATCH_DIR}/etc/kibaos/patch-level"
+            cd "${PATCH_DIR}"
+            find . -type f -print0 | xargs -0 -P "$(nproc)" -n 64 sha256sum > "../kibaos-ota-${PATCH_NUM}-${ARCH}-manifest.txt"
+            cd ..
+            tar czf "kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz" "${PATCH_DIR}/"
+            echo "Patch size: $(du -sh kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz | cut -f1)"
+      - run:
+          name: Sign OTA patch
+          command: |
+            [ "$HAS_CHANGES" = "true" ] || { echo "No changes -- skipping."; exit 0; }
+            echo "$OTA_SIGNING_KEY" | gpg --batch --import
+            KEY_FP=$(gpg --list-keys --with-colons ota@kibaos.wolftech.tech | awk -F: '/^fpr/{print $10; exit}')
+            echo "${KEY_FP}:6:" | gpg --import-ownertrust
+            T="kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz"
+            gpg --batch --yes --local-user ota@kibaos.wolftech.tech --detach-sign --armor "$T"
+            gpg --verify "$T.asc" "$T" && echo "Signature verified OK." || { echo "Signature self-check failed!"; exit 1; }
+            echo "${PATCH_NUM}" > latest-patch-level
+      - run:
+          name: Upload OTA artifacts to SourceForge
+          command: |
+            R="$SF_USER@frs.sourceforge.net:/home/frs/project/kibaos/ota"
+            retry sshpass -e rsync -avP baseline-manifest.txt "$R/last-build-manifest-${ARCH}.txt"
+            if [ "$HAS_CHANGES" = "true" ]; then
+              retry sshpass -e rsync -avP "kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz" "kibaos-ota-${PATCH_NUM}-${ARCH}.tar.gz.asc" "kibaos-ota-${PATCH_NUM}-${ARCH}-manifest.txt" "$R/"
+              echo "OTA patch ${PATCH_NUM} (${ARCH}) uploaded."
+            else
+              echo "No changes for ${ARCH} -- only baseline manifest updated."
+            fi
+            if [ -f latest-patch-level ]; then retry sshpass -e rsync -avP latest-patch-level "$R/"; fi
+            echo "${PATCH_NUM}" > last-ota-build.txt
+            retry sshpass -e rsync -avP last-ota-build.txt "$R/last-ota-build-${ARCH}.txt"
+      - run:
+          name: Tag this build
+          command: |
+            [ "$HAS_CHANGES" = "true" ] || { echo "No changes -- not tagging."; exit 0; }
+            curl -fsS -X POST \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/git/refs" \
+              -d "{\"ref\":\"refs/tags/ota-patch-${PATCH_NUM}\",\"sha\":\"${HEAD_SHA}\"}" >/dev/null \
+              && echo "Tagged ota-patch-${PATCH_NUM} at ${HEAD_SHA}." \
+              || echo "Tag ota-patch-${PATCH_NUM} already exists or could not be created."
+
+  vmtest_uefi:
+    executor: vm
+    environment:
+      MAX_RETRIES: 2
+      FW: uefi
+    steps:
+      - checkout
+      - load_state
+      - halt_unless:
+          var: RUN_VMTEST
+      - fetch_dist
+      - run:
+          name: Locate ISO
+          command: |
+            ISO_PATH="$(find /tmp/ws/dist -type f -name '*.iso' -print -quit)"
+            if [ -z "$ISO_PATH" ]; then
+              echo "The build artifact did not contain an ISO file."
+              find /tmp/ws -maxdepth 4 -type f -print || true
+              exit 1
+            fi
+            test -s "$ISO_PATH" || { echo "Downloaded ISO is empty: $ISO_PATH"; exit 1; }
+            echo "export ISO_PATH=$ISO_PATH" >> "$BASH_ENV"
+            echo "Using ISO: $ISO_PATH ($(du -h "$ISO_PATH" | cut -f1))"
+      - run:
+          name: Boot ISO in QEMU and capture desktop screenshots
+          no_output_timeout: 60m
+          command: |
+            export SWITCH_WAIT=<< pipeline.parameters.vmtest_wait >>
+            if [ -e /dev/kvm ]; then
+              sudo chmod 666 /dev/kvm
+              echo "KVM available."
+            else
+              echo "No /dev/kvm on this executor -- QEMU will fall back to TCG (slow). Consider raising vmtest_wait."
+            fi
+            sudo apt-get update -qq
+            sudo apt-get install -y qemu-system-x86 ovmf netcat-openbsd
+
+            mkdir -p attempts
+            ISO="$ISO_PATH"
+            cp /usr/share/OVMF/OVMF_VARS_4M.fd vars.fd
+            FW_ARGS=(-drive if=pflash,format=raw,readonly=on,file=/usr/share/OVMF/OVMF_CODE_4M.fd -drive if=pflash,format=raw,file=vars.fd)
+
+            vm_alive() { [ -f qemu.pid ] && kill -0 "$(cat qemu.pid)" 2>/dev/null; }
+            start_vm() {
+              rm -f qmp.sock qga.sock qemu.pid
+              qemu-system-x86_64 -machine q35,accel=kvm:tcg -cpu max -smp 2 -m 4G "${FW_ARGS[@]}" -cdrom "$ISO" -vga std -nic user -display none -device qemu-xhci -device usb-tablet -device virtio-serial-pci -chardev socket,id=qga0,path=qga.sock,server=on,wait=off -device virtserialport,chardev=qga0,name=org.qemu.guest_agent.0 -qmp unix:qmp.sock,server,nowait -pidfile qemu.pid -daemonize
+              for i in $(seq 1 30); do [ -S qmp.sock ] && [ -S qga.sock ] && break; sleep 1; done
+            }
+            stop_vm() {
+              if vm_alive; then
+                kill -TERM "$(cat qemu.pid)" 2>/dev/null || true
+                sleep 2
+                kill -KILL "$(cat qemu.pid)" 2>/dev/null || true
+              fi
+              rm -f qemu.pid
+            }
+            capture_probe() { python3 .circleci/scripts/qmp.py screendump "$1"; }
+            kill_installer() { python3 .circleci/scripts/qga.py; }
+
+            SELECTED=""
+            dir=""
+            for attempt in $(seq 0 "$MAX_RETRIES"); do
+              echo "=== ${FW}: attempt $((attempt + 1))/$((MAX_RETRIES + 1)) ==="
+              stop_vm
+              start_vm
+              dir="attempts/$(printf '%02d' "$((attempt + 1))")"
+              mkdir -p "$dir"
+
+              echo "Waiting ${SWITCH_WAIT}s for the splash to hand over to the installer..."
+              sleep "$SWITCH_WAIT"
+              vm_alive || { echo "QEMU exited early"; continue; }
+              capture_probe "$dir/01-before-kill-${SWITCH_WAIT}s.png" || echo "screendump failed (non-fatal)"
+
+              if kill_installer; then
+                echo "Installer killed."
+              else
+                echo "Installer not running -- assuming already past it."
+              fi
+
+              echo "Waiting ${SWITCH_WAIT}s for the login screen / desktop..."
+              sleep "$SWITCH_WAIT"
+              vm_alive || { echo "QEMU exited early"; continue; }
+              final="$dir/02-final-$((SWITCH_WAIT * 2))s.png"
+              if capture_probe "$final" && [ -s "$final" ]; then
+                SELECTED="$final"
+                echo "Attempt $((attempt + 1)): selected $SELECTED"
+                break
+              fi
+              echo "Attempt $((attempt + 1)): final screendump failed."
+            done
+            stop_vm
+
+            mkdir -p shots
+            cp "$dir"/*.png shots/ 2>/dev/null || true
+            if [ -z "$SELECTED" ]; then
+              echo "${FW}: no desktop screenshot after $((MAX_RETRIES + 1)) attempts"
+              exit 1
+            fi
+            basename "$SELECTED" > shots/selected.txt
+      - store_artifacts:
+          path: shots
+          destination: vmtest-shots-uefi
+      - store_artifacts:
+          path: attempts
+          destination: vmtest-attempts-uefi
+      - run:
+          name: Commit screenshots to assets/screenshots
+          when: always
+          command: |
+            if ! compgen -G 'shots/*.png' >/dev/null; then
+              echo "No ${FW} screenshots to commit."
+              exit 0
+            fi
+            if [ -z "${CIRCLE_BRANCH:-}" ]; then
+              echo "Not on a branch -- not committing screenshots."
+              exit 0
+            fi
+            STAGE="$(mktemp -d)"
+            mkdir -p "$STAGE/v${CUR_NUM}/${FW}"
+            cp shots/*.png "$STAGE/v${CUR_NUM}/${FW}/"
+            if [ -f shots/selected.txt ] && [ -f "shots/$(cat shots/selected.txt)" ]; then
+              cp "shots/$(cat shots/selected.txt)" "$STAGE/desktop-${FW}.png"
+              [ "$FW" = "uefi" ] && cp "$STAGE/desktop-${FW}.png" "$STAGE/desktop.png"
+            else
+              echo "${FW}: no selected desktop screenshot -- not updating desktop-${FW}.png."
+            fi
+
+            git config user.name "KibaOS OTA Bot"
+            git config user.email "ota@kibaos.wolftech.tech"
+            git remote set-url --push origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+            for i in 1 2 3 4 5 6; do
+              git rebase --abort 2>/dev/null || true
+              git fetch --no-tags origin "$CIRCLE_BRANCH"
+              git reset --hard "origin/$CIRCLE_BRANCH"
+              mkdir -p assets/screenshots
+              cp -r "$STAGE"/. assets/screenshots/
+              git add assets/screenshots
+              if git diff --cached --quiet; then echo "Nothing new to commit."; exit 0; fi
+              git commit -m "Add ${FW} VM screenshots for build v${CUR_NUM} [skip ci]"
+              if git push origin "HEAD:$CIRCLE_BRANCH"; then exit 0; fi
+              echo "Push raced with another commit (attempt $i); retrying on the new tip..."
+              sleep $((i * 5))
+            done
+            exit 1
+
 workflows:
-  say-hello-workflow: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  # Normal run: build, then publish/OTA/vmtest as needed.
+  build_kibaos:
+    when:
+      and:
+        - << pipeline.parameters.dispatch >>
+        - not: << pipeline.parameters.skip_build >>
     jobs:
-      - say-hello
+      - build_x86_64:
+          context: kibaos
+      - latest_x86_64:
+          name: latest_x86_64
+          fresh: true
+          context: kibaos
+          requires: [build_x86_64]
+      - publish_x86_64:
+          context: kibaos
+          requires: [latest_x86_64]
+      - ota_x86_64:
+          context: kibaos
+          requires: [latest_x86_64]
+      - vmtest_uefi:
+          context: kibaos
+          requires: [latest_x86_64]
+
+  # skip_build=true: reuse the newest earlier build artifact.
+  release_existing_build:
+    when:
+      and:
+        - << pipeline.parameters.dispatch >>
+        - << pipeline.parameters.skip_build >>
+    jobs:
+      - latest_x86_64:
+          name: latest_x86_64
+          fresh: false
+          context: kibaos
+      - publish_x86_64:
+          context: kibaos
+          requires: [latest_x86_64]
+      - ota_x86_64:
+          context: kibaos
+          requires: [latest_x86_64]
+      - vmtest_uefi:
+          context: kibaos
+          requires: [latest_x86_64]
