@@ -20,7 +20,7 @@ on:
 jobs:
   build_x86_64:
     if: ${{ !inputs.skip_build }}
-    runs-on: blacksmith-32vcpu-ubuntu-2604
+    runs-on: avrea-ubuntu-26.04-32-vcpu
     timeout-minutes: 740
     steps:
       - name: Checkout repository
@@ -81,7 +81,7 @@ jobs:
   latest_x86_64:
     needs: build_x86_64
     if: ${{ !cancelled() }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: avrea-ubuntu-24.04-4-vcpu
     timeout-minutes: 10
     permissions:
       actions: read
@@ -198,7 +198,7 @@ jobs:
   publish_x86_64:
     needs: latest_x86_64
     if: ${{ !cancelled() && needs.latest_x86_64.outputs.publish_needed == 'true' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2604
+    runs-on: avrea-ubuntu-26.04-4-vcpu
     timeout-minutes: 60
     permissions:
       actions: read
@@ -253,7 +253,7 @@ jobs:
   vmtest_find:
     needs: build_x86_64
     if: ${{ always() && inputs.run_vmtest }}
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: avrea-ubuntu-24.04-4-vcpu
     timeout-minutes: 10
     permissions:
       actions: read
@@ -333,7 +333,7 @@ jobs:
       fail-fast: false
       matrix:
         fw: [uefi]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: avrea-ubuntu-24.04-4-vcpu
     timeout-minutes: 45
     permissions:
       actions: read
@@ -537,7 +537,7 @@ jobs:
       fail-fast: false
       matrix:
         fw: [uefi]
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: avrea-ubuntu-24.04-4-vcpu
     timeout-minutes: 10
     permissions:
       contents: write
@@ -589,7 +589,7 @@ jobs:
   ota_x86_64:
     needs: latest_x86_64
     if: ${{ !cancelled() && !inputs.skip_ota && needs.latest_x86_64.outputs.ota_needed == 'true' }}
-    runs-on: blacksmith-4vcpu-ubuntu-2604
+    runs-on: avrea-ubuntu-26.04-4-vcpu
     timeout-minutes: 60
     permissions:
       actions: read
