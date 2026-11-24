@@ -226,19 +226,12 @@ jobs:
               }
 
               SF_ISO=$(read_version x86_64/last-iso-build-number-x86_64.txt)
-              SF_OTA=$(read_version ota/last-ota-build-x86_64.txt)
-              [ "$SF_OTA" -eq 0 ] && SF_OTA=$(read_version ota/latest-patch-level)
-
+              
               [ "$SF_ISO" -lt "$ART" ] && PUB=true
-              [ "$SF_OTA" -lt "$ART" ] && OTA=true
               echo "### Latest artifact vs SourceForge (x86_64)"
               echo "- Latest artifact: v${ART}"
               echo "- SourceForge ISO: v${SF_ISO} -> publish ${PUB}"
-              echo "- SourceForge OTA: v${SF_OTA} -> OTA ${OTA}"
-            fi
-            [ "<< pipeline.parameters.skip_ota >>" = "true" ] && OTA=false
-
-            {
+      
               echo "export FRESH=<< parameters.fresh >>"
               echo "export SLUG=${SLUG}"
               echo "export SRC_JOB=${SRC_JOB}"
@@ -246,7 +239,6 @@ jobs:
               echo "export HEAD_SHA=${HEAD_SHA}"
               echo "export CUR_NUM=${CUR_NUM}"
               echo "export PUBLISH_NEEDED=${PUB}"
-              echo "export OTA_NEEDED=${OTA}"
               echo "export RUN_VMTEST=<< pipeline.parameters.run_vmtest >>"
             } > state/state.env
             cat state/state.env
@@ -461,9 +453,6 @@ workflows:
       - publish_x86_64:
           context: kibaos
           requires: [latest_x86_64]
-      - ota_x86_64:
-          context: kibaos
-          requires: [latest_x86_64]
       - vmtest_uefi:
           context: kibaos
           requires: [latest_x86_64]
@@ -480,9 +469,6 @@ workflows:
           fresh: false
           context: kibaos
       - publish_x86_64:
-          context: kibaos
-          requires: [latest_x86_64]
-      - ota_x86_64:
           context: kibaos
           requires: [latest_x86_64]
       - vmtest_uefi:
