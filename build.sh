@@ -547,7 +547,7 @@ echo "=== Building KibaDE from $KIBADE_REPO_URL ==="
 _pre_pkgs="$(pacman -Qq)"
 pacman -Syu --noconfirm --needed \
 base-devel git python python-pip nodejs ninja gn pkgconf clang lld bison flex gperf patch \
-rust cargo rsync libarchive file weston pam wayland wayland-protocols greetd greetd-tuigreet
+rust cargo rsync libarchive file weston xorg-xwayland pam wayland wayland-protocols greetd greetd-tuigreet
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
@@ -568,6 +568,13 @@ sleep 10
 done
 [ "$_ok" -eq 1 ]||{ echo "ERROR: could not clone KibaLabsLLC/KibaDE" >&2;exit 1; }
 [ -x "$KIBADE/build-chromeos-ash.sh" ]||chmod +x "$KIBADE/build-chromeos-ash.sh"
+# The Wayland Ozone platform does not build for target_os="chromeos"; Ash uses the default ChromeOS Ozone
+# platforms and runs on X11 (Xwayland) inside weston.
+sed -i -E 's/ozone_platform_wayland[[:space:]]*=[[:space:]]*true/ozone_platform_wayland=false/g' "$KIBADE/build-chromeos-ash.sh"
+if grep -qE 'ozone_platform_wayland[[:space:]]*=[[:space:]]*true' "$KIBADE/build-chromeos-ash.sh";then
+echo "ERROR: build-chromeos-ash.sh still enables ozone_platform_wayland" >&2;exit 1
+fi
+grep -nE 'ozone_platform|ozone_auto' "$KIBADE/build-chromeos-ash.sh" >&2||echo "!! build-chromeos-ash.sh sets no ozone args at all" >&2
 # depot_tools + the pinned Chromium checkout, with the KibaDE patch series verified
 [ -d "$B/depot_tools/.git" ]||git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$B/depot_tools"
 export PATH="$B/depot_tools:$PATH"
@@ -613,6 +620,22 @@ else
 echo "ERROR: KibaDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 exit 1
 fi
+# Ash runs on X11 (Xwayland) inside weston: weston must load the Xwayland module and Ash must use the x11 Ozone platform.
+mkdir -p /etc/xdg/weston
+_wc=/etc/xdg/weston/weston.ini
+[ -f "$_wc" ]||: >"$_wc"
+if grep -qE '^[[:space:]]*xwayland[[:space:]]*=' "$_wc";then
+sed -i -E 's/^[[:space:]]*xwayland[[:space:]]*=.*/xwayland=true/' "$_wc"
+elif grep -q '^\[core\]' "$_wc";then
+sed -i '/^\[core\]/a xwayland=true' "$_wc"
+else
+printf '[core]\nxwayland=true\n' >>"$_wc"
+fi
+for _f in /usr/bin/chromiumos-ash /usr/bin/chromiumos-ash-session /usr/bin/kibaos-session-supervisor;do
+[ -f "$_f" ]&&[ ! -L "$_f" ]&&! head -c4 "$_f"|grep -q ELF&&sed -i 's/--ozone-platform=wayland/--ozone-platform=x11/g' "$_f"||true
+done
+echo "=== Ash launch flags mentioning ozone/DISPLAY (check these) ===" >&2
+grep -n 'ozone-platform\|DISPLAY' /usr/bin/chromiumos-ash /usr/bin/chromiumos-ash-session /usr/bin/kibaos-session-supervisor >&2 2>/dev/null||echo "!! no ozone-platform/DISPLAY handling found in the Ash launchers" >&2
 # The build tree (Chromium checkout + out/) must never reach the squashfs; drop build-only toolchain packages too.
 rm -rf "$KIBADE_BUILD" "$KIBADE_HOME/kibade-build.sh"
 rm -f /etc/sudoers.d/kibabuild
