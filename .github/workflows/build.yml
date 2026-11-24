@@ -38,14 +38,6 @@ jobs:
           remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell"
           rm_cmd: "rmz"
           rmz_version: "3.1.1"
-      - name: Restore Chromium ccache
-        id: ccache-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/kibaos-chromium-ccache
-          key: chromium-ccache-x86_64-${{ github.run_id }}
-          restore-keys: |
-            chromium-ccache-x86_64-
       - name: Run build in Docker
         run: |
           CCACHE_HOST_DIR="$HOME/.cache/kibaos-chromium-ccache"
