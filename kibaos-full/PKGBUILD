@@ -6,7 +6,7 @@ pkgrel=1
 pkgdesc="Complete KibaDE desktop environment meta package with local AI"
 arch=('any')
 url="https://kibaos.com"
-license=('BSD-3-Clause')
+license=('GPL')
 depends=(
     "kibaos>=${pkgver}"
     "kibaos-kai"
