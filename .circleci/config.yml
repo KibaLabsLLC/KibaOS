@@ -5,7 +5,6 @@ version: 2.1
 #
 # Required CircleCI context: `kibaos` (Organization Settings -> Contexts), holding:
 #   SF_USER, SF_PASS        SourceForge FRS login
-#   OTA_SIGNING_KEY         armored GPG private key for ota@kibaos.wolftech.tech
 #   GITHUB_TOKEN            PAT with contents:write (screenshot commits, OTA tags)
 #   CCI_API_TOKEN           CircleCI personal API token (finds/downloads artifacts
 #                           of earlier pipelines when skip_build=true)
