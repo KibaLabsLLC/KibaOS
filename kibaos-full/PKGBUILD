@@ -1,0 +1,21 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-full
+pkgver=158.0.8115.0
+pkgrel=1
+pkgdesc="Complete KibaDE desktop environment meta package with local AI"
+arch=('any')
+url="https://kibaos.com"
+license=('BSD-3-Clause')
+depends=(
+    "kibaos>=${pkgver}"
+    "kibaos-kai>=${pkgver}"
+    'bluez'
+)
+source=('LICENSE')
+sha256sums=('SKIP')
+
+package() {
+    install -Dm644 "${srcdir}/LICENSE" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
