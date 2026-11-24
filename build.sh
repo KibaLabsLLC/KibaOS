@@ -571,6 +571,13 @@ done
 # depot_tools + the pinned Chromium checkout, with the KibaDE patch series verified
 [ -d "$B/depot_tools/.git" ]||git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$B/depot_tools"
 export PATH="$B/depot_tools:$PATH"
+# A fresh depot_tools clone is not usable until it has bootstrapped its own CIPD python (that writes
+# python3_bin_reldir.txt); gn/gclient/autoninja all die with "python3_bin_reldir.txt not found" without it.
+unset DEPOT_TOOLS_UPDATE
+export DEPOT_TOOLS_UPDATE=1
+[ -f "$B/depot_tools/python3_bin_reldir.txt" ]||"$B/depot_tools/ensure_bootstrap"||"$B/depot_tools/update_depot_tools"||true
+[ -f "$B/depot_tools/python3_bin_reldir.txt" ]||{ echo "ERROR: depot_tools bootstrap failed (no python3_bin_reldir.txt) -- needs network access to chrome-infra-packages.appspot.com" >&2;exit 1; }
+gclient --version
 REV="$(tr -d '[:space:]' <"$KIBADE/pins/chromium.sha")"
 [[ "$REV" =~ ^[0-9a-fA-F]{40}$ ]]||{ echo "ERROR: bad pins/chromium.sha: $REV" >&2;exit 1; }
 export KIBAOS_WORKDIR="$B" KIBAOS_DEPOT_TOOLS="$B/depot_tools" KIBAOS_BOOTSTRAP_JOBS="$(nproc)"
