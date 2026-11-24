@@ -546,12 +546,20 @@ KIBADE_BUILD="$KIBADE_HOME/kibade-build"
 echo "=== Building KibaDE from $KIBADE_REPO_URL ==="
 _pre_pkgs="$(pacman -Qq)"
 pacman -Syu --noconfirm --needed \
-base-devel git python python-pip nodejs ninja gn pkgconf clang lld bison flex gperf patch \
+base-devel git python python-pip nodejs ninja gn pkgconf clang lld bison flex gperf patch ccache \
 rust cargo rsync libarchive file weston xorg-xwayland pam wayland wayland-protocols greetd greetd-tuigreet
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
 install -d -o kibabuild -g kibabuild "$KIBADE_BUILD" "$KIBADE_BUILD/pkgdest"
+# su - drops the container env, so carry the CCACHE_* settings in a file the build script sources.
+if [ -n "${CCACHE_DIR:-}" ]&&[ -d "$CCACHE_DIR" ];then
+chown -R kibabuild:kibabuild "$CCACHE_DIR"
+{ for _v in CCACHE_DIR CCACHE_MAXSIZE CCACHE_COMPRESS CCACHE_SLOPPINESS CCACHE_COMPILERCHECK CCACHE_CPP2;do
+[ -n "${!_v:-}" ]&&printf 'export %s=%q\n' "$_v" "${!_v}"
+done; }>"$KIBADE_HOME/ccache.env"
+chown kibabuild:kibabuild "$KIBADE_HOME/ccache.env"
+fi
 cat >"$KIBADE_HOME/kibade-build.sh" <<'KIBADEBUILD'
 #!/bin/bash
 set -euo pipefail
@@ -575,6 +583,15 @@ if grep -qE 'ozone_platform_wayland[[:space:]]*=[[:space:]]*true' "$KIBADE/build
 echo "ERROR: build-chromeos-ash.sh still enables ozone_platform_wayland" >&2;exit 1
 fi
 grep -nE 'ozone_platform|ozone_auto' "$KIBADE/build-chromeos-ash.sh" >&2||echo "!! build-chromeos-ash.sh sets no ozone args at all" >&2
+# Compiler cache for the Chromium build (object files persist across runs via the workflow's actions/cache).
+if [ -f "$HOME/ccache.env" ]&&command -v ccache >/dev/null 2>&1;then
+. "$HOME/ccache.env"
+export CCACHE_BASEDIR="$B"
+sed -i -E 's/^([[:space:]]*)use_goma = false$/\1use_goma = false\n\1cc_wrapper = \\"ccache\\"/' "$KIBADE/build-chromeos-ash.sh"
+grep -q 'cc_wrapper = \\"ccache\\"' "$KIBADE/build-chromeos-ash.sh"||{ echo "!! could not inject cc_wrapper into build-chromeos-ash.sh -- building without ccache" >&2; }
+ccache -z >/dev/null||true
+ccache -s||true
+fi
 # depot_tools + the pinned Chromium checkout, with the KibaDE patch series verified
 [ -d "$B/depot_tools/.git" ]||git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$B/depot_tools"
 export PATH="$B/depot_tools:$PATH"
@@ -596,6 +613,7 @@ export CHROME_SRC="$B/chromium-bootstrap/src"
 export CHROMIUMOS_DIR="$B/chromium-bootstrap" DEPOT_TOOLS_DIR="$B/depot_tools" OUTPUT_DIR="$CHROME_SRC/out/Ash" JOBS="$(nproc)"
 cd "$KIBADE"
 bash ./build-chromeos-ash.sh build||echo "!! build-chromeos-ash.sh exited non-zero (checking the build output anyway)" >&2
+command -v ccache >/dev/null 2>&1&&[ -n "${CCACHE_DIR:-}" ]&&{ echo "=== ccache stats ===";ccache -s||true; }
 [ -x "$OUTPUT_DIR/chrome" ]&&[ -x "$OUTPUT_DIR/chrome_sandbox" ]||{ echo "ERROR: build-chromeos-ash.sh did not produce chrome + chrome_sandbox in $OUTPUT_DIR" >&2;exit 1; }
 # Package that build output (complete runtime tree, session scripts, setuid sandbox) with the repo's PKGBUILD.
 cd "$KIBADE/chromiumos-ash"
@@ -641,7 +659,7 @@ rm -rf "$KIBADE_BUILD" "$KIBADE_HOME/kibade-build.sh"
 rm -f /etc/sudoers.d/kibabuild
 userdel -r kibabuild 2>/dev/null||true
 _drop=""
-for _t in clang lld gn bison flex gperf nodejs patch python-pip;do
+for _t in clang lld gn bison flex gperf nodejs patch python-pip ccache;do
 if ! printf '%s\n' "$_pre_pkgs"|grep -qx "$_t"&&pacman -Q "$_t" >/dev/null 2>&1;then _drop="$_drop $_t";fi
 done
 [ -n "$_drop" ]&&{ pacman -Rns --noconfirm $_drop||echo "!! could not remove build-only packages:$_drop" >&2; }
