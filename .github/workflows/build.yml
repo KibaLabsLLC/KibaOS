@@ -45,23 +45,10 @@ jobs:
           sudo chmod 777 "$CCACHE_HOST_DIR"
           docker run --rm --privileged \
             -v "$PWD:/w" \
-            -v "$CCACHE_HOST_DIR:/ccache" \
-            -e CCACHE_DIR="/ccache" \
-            -e CCACHE_MAXSIZE="8G" \
-            -e CCACHE_COMPRESS="1" \
-            -e CCACHE_SLOPPINESS="time_macros,include_file_mtime,include_file_ctime,pch_defines,locale" \
-            -e CCACHE_COMPILERCHECK="content" \
-            -e CCACHE_CPP2="yes" \
             -e RUN_NUM="${{ github.run_number }}" \
             -e KIBA_ARCH="x86_64" \
             "archlinux:latest" \
             /bin/bash /w/build.sh
-      - name: Save Chromium ccache
-        if: ${{ always() && !cancelled() }}
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/kibaos-chromium-ccache
-          key: chromium-ccache-x86_64-${{ github.run_id }}
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
