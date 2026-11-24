@@ -1,0 +1,91 @@
+name: Sync KibaDE
+
+# Put this workflow in the repo you want the KibaDE files committed to.
+# It clones KibaDE (public, no token needed), copies everything except the
+# top-level Markdown files, and pushes the result to a branch of THIS repo
+# using the built-in GITHUB_TOKEN. Open a PR from that branch into main.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "KibaDE branch/tag/SHA to import"
+        default: "main"
+      target_branch:
+        description: "Branch to push in this repo"
+        default: "kibade-sync"
+
+permissions:
+  contents: write
+
+env:
+  SOURCE_REPO: KibaLabsLLC/KibaDE
+  # Optional repository variable KIBADE_TARGET_SUBDIR: put the files in a subfolder instead of the repo root.
+  TARGET_SUBDIR: ${{ vars.KIBADE_TARGET_SUBDIR }}
+
+concurrency:
+  group: sync-kibade
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone KibaDE
+        run: |
+          git clone --depth 1 --branch "${{ inputs.source_ref || 'main' }}" \
+            "https://github.com/${SOURCE_REPO}.git" source
+
+      - name: Check out this repo
+        uses: actions/checkout@v4
+        with:
+          path: target
+          fetch-depth: 0
+
+      - name: Copy files (excluding top-level Markdown)
+        env:
+          BRANCH: ${{ inputs.target_branch || 'kibade-sync' }}
+        run: |
+          set -euo pipefail
+          cd target
+
+          # Continue the sync branch if it exists, otherwise start a new one.
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH"
+          fi
+
+          DEST="."
+          if [ -n "${TARGET_SUBDIR:-}" ]; then
+            DEST="${TARGET_SUBDIR%/}"
+            mkdir -p "$DEST"
+          fi
+
+          # Top-level *.md are skipped (nested Markdown is kept). --delete mirrors
+          # upstream removals; this repo's own .git and .github are protected.
+          rsync -a --delete \
+            --exclude='/.git' \
+            --exclude='/.github' \
+            --exclude='/*.md' --exclude='/*.MD' --exclude='/*.markdown' \
+            "../source/" "$DEST/"
+
+      - name: Commit and push
+        env:
+          BRANCH: ${{ inputs.target_branch || 'kibade-sync' }}
+        run: |
+          set -euo pipefail
+          cd target
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          SRC_SHA="$(git -C ../source rev-parse --short HEAD)"
+          git commit -m "Sync KibaDE @ ${SRC_SHA}" \
+                     -m "Imported from ${SOURCE_REPO} (top-level Markdown files excluded)."
+          git push origin "HEAD:${BRANCH}"
