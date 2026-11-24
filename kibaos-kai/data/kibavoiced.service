@@ -1,0 +1,25 @@
+[Unit]
+Description=Kiba assistant (listens for "Hey Kiba")
+After=graphical-session.target pipewire.service pipewire-pulse.service sound.target
+PartOf=graphical-session.target
+StartLimitIntervalSec=120
+StartLimitBurst=8
+
+[Service]
+Type=dbus
+BusName=org.kibaos.Kiba
+ExecStart=/usr/bin/kibavoiced
+# A clean exit (kibavoiced --quit) stays stopped; crashes restart.
+Restart=on-failure
+RestartSec=3
+Nice=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/kibavoice %h/.config/kibavoice
+PrivateTmp=true
+RestrictRealtime=true
+LockPersonality=true
+
+[Install]
+WantedBy=graphical-session.target

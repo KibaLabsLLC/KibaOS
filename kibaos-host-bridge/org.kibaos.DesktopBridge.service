@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.kibaos.DesktopBridge
+Exec=/usr/bin/kibaos-desktop-bridge
+

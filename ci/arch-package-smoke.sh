@@ -1,0 +1,87 @@
+#!/bin/bash
+# Arch-native package smoke checks for KibaOS package directories.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_DIR="${REPO_DIR:-${REPO_ROOT}/private-repo}"
+KIBAOS_PACKAGES="${KIBAOS_PACKAGES:-kibaos-account-helper kibaos-system-helper shill-nm-adapter kibaos-power kibaos-hardware kibaos-host-bridge kibaos-login kibaos-greeter kibaos-ai kibaos-webapp-shortcuts kibaos kibaos-full}"
+MAKEPKG_FLAGS="${MAKEPKG_FLAGS:---force --noconfirm --clean}"
+
+need() {
+  command -v "$1" >/dev/null 2>&1 || {
+    echo "Missing required command: $1" >&2
+    exit 1
+  }
+}
+
+need makepkg
+need repo-add
+need namcap
+need pacman
+need python
+need bsdtar
+
+# CI runs the installer suite in jobs of its own.
+if [[ "${KIBAOS_SKIP_INSTALLER_TESTS:-0}" != 1 ]]; then
+  "${REPO_ROOT}/installer/tests/run.sh"
+fi
+
+export KIBAOS_PACKAGES
+export MAKEPKG_FLAGS
+export REPO_DIR
+
+"${SCRIPT_DIR}/build-private-repo.sh"
+
+read -r -a package_dirs <<<"${KIBAOS_PACKAGES}"
+for pkgdir in "${package_dirs[@]}"; do
+  namcap "${REPO_ROOT}/${pkgdir}/PKGBUILD"
+done
+
+mapfile -t package_files < <(find "${REPO_DIR}" -maxdepth 1 -type f \
+  -name '*.pkg.tar.*' ! -name '*.sig' | sort)
+if [[ "${#package_files[@]}" -eq 0 ]]; then
+  echo "No built package files found in ${REPO_DIR}" >&2
+  exit 1
+fi
+
+namcap "${package_files[@]}"
+pacman -Qip "${package_files[@]}" >/dev/null
+pacman -Qlp "${package_files[@]}" >/dev/null
+python -B -m py_compile "${REPO_ROOT}/shill-nm-adapter/shill_nm_adapter.py"
+python -B "${REPO_ROOT}/shill-nm-adapter/test_shill_nm_adapter.py"
+bash -n "${REPO_ROOT}/shill-nm-adapter/shill-nm-adapter.install"
+python -B -m py_compile \
+  "${REPO_ROOT}/kibaos-power/kibaos-powerd" \
+  "${REPO_ROOT}/kibaos-host-bridge/kibaos_host_bridge_core.py" \
+  "${REPO_ROOT}/kibaos-host-bridge/kibaos_host_bridge.py" \
+  "${REPO_ROOT}/kibaos-host-bridge/kibaos_desktop_bridge.py"
+
+# CI verifies the units after installing them, where their commands exist.
+if [[ "${KIBAOS_SKIP_UNIT_VERIFY:-0}" != 1 ]] && command -v systemd-analyze >/dev/null 2>&1; then
+  systemd-analyze verify \
+    "${REPO_ROOT}/shill-nm-adapter/shill-nm-adapter.service" \
+    "${REPO_ROOT}/kibaos-power/kibaos-powerd.service" \
+    "${REPO_ROOT}/kibaos-host-bridge/kibaos-host-bridge.service" \
+    "${REPO_ROOT}/kibaos-login/kibaos-greetd.service"
+fi
+
+if [[ "${KIBAOS_VERIFY_CHROMIUMOS_ASH:-1}" = "1" ]]; then
+  (
+    cd "${REPO_ROOT}/chromiumos-ash"
+    bash ./test-google-api-config.sh
+    bash ./test-local-account-flags.sh
+    makepkg --verifysource --noconfirm
+    namcap PKGBUILD
+  )
+fi
+
+if [[ "${KIBAOS_INSTALL_SMOKE:-0}" = "1" ]]; then
+  if [[ "$(id -u)" -ne 0 ]]; then
+    echo "KIBAOS_INSTALL_SMOKE=1 requires root." >&2
+    exit 1
+  fi
+  pacman -U --noconfirm "${package_files[@]}"
+  pacman -Qk kibaos-account-helper kibaos-system-helper shill-nm-adapter \
+    kibaos-power kibaos-hardware kibaos-host-bridge kibaos-login
+fi

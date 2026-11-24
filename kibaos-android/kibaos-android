@@ -1,0 +1,1883 @@
+#!/usr/bin/env python3
+"""The KibaOS Android service: starts and stops the Android container for Ash.
+
+Ash (the KibaOS desktop) asks for Android over the system bus. This service
+is the part that has root, so Ash does not need it:
+
+  org.kibaos.Android1 at /org/kibaos/Android1
+    Start(s locale)   brings up the container and the user's Android session
+    Stop()            stops them
+    signal Stopped()  the session ended, whoever ended it
+    ListApps()        a(sssb) of (label, package, activity, is_system) for launchable apps
+    GetIcon(s pkg)    ay, the app's PNG icon ("" bytes when unknown)
+    Launch(s pkg, s activity)   opens the app in its own window
+    Uninstall(s pkg)  removes an app
+    CloseTask(i id)   closes one window
+    Provision()       downloads and checks the Android image, then sets Waydroid up
+    Status()          s: "absent", "provisioning" or "ready"
+    signal Progress(s stage, i percent)   while Provision runs
+    signal AppsChanged()                the app list changed
+    signal TaskCreated(i id, s pkg, s activity) and TaskDestroyed(i id)
+
+It runs on the same machine as Ash and trusts only a caller that is a real
+user with a running login session. The Android session itself runs as that
+user, under its own session bus, because Waydroid's tools speak D-Bus
+to each other and Ash's private bus is not shared.
+"""
+import ctypes
+import fcntl
+import hashlib
+import json
+import uuid
+import mimetypes
+import glob
+import os
+import pwd
+import re
+import shutil
+import signal
+import struct
+import subprocess
+import sys
+import threading
+import time
+import urllib.parse
+import urllib.request
+
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+from gi.repository import GLib
+
+NAME = "org.kibaos.Android1"
+PATH = "/org/kibaos/Android1"
+CONTAINER_UNIT = "waydroid-container.service"
+DROP_MAX_BYTES = 512 << 20
+LXC = ["lxc-attach", "-P", "/var/lib/waydroid/lxc", "-n", "waydroid", "--clear-env", "--"]
+LXC_PATH = ["/var/lib/waydroid/lxc"]
+
+
+def log(msg):
+    print(f"kibaos-android: {msg}", file=sys.stderr, flush=True)
+
+
+class Adopted:
+    """A waydroid session this service did not start itself (it survived a
+    service restart). Looks enough like a Popen for the rest of the code."""
+
+    def __init__(self, pid):
+        self.pid = pid
+
+    def poll(self):
+        try:
+            with open(f"/proc/{self.pid}/stat") as f:
+                return 0 if f.read().rsplit(")", 1)[1].split()[0] == "Z" else None
+        except OSError:
+            return 0
+
+    def send_signal(self, sig):
+        try:
+            os.kill(self.pid, sig)
+        except OSError:
+            pass
+
+
+def find_session():
+    """(uid, pid) of a running 'waydroid session start', or None."""
+    for d in os.listdir("/proc"):
+        if not d.isdigit():
+            continue
+        try:
+            with open(f"/proc/{d}/cmdline", "rb") as f:
+                argv = f.read().split(b"\0")
+            if b"waydroid" in b" ".join(argv[:3]) and argv[-3:-1] == [b"session", b"start"]:
+                return os.stat(f"/proc/{d}").st_uid, int(d)
+        except OSError:
+            continue
+    return None
+
+
+class Android(dbus.service.Object):
+    def __init__(self, bus, loop):
+        super().__init__(bus, PATH)
+        self.bus = bus
+        self.loop = loop
+        self.session = None  # (uid, Popen)
+        self.waiting = []  # Start calls waiting for a download already running
+        self.logcat = None
+
+    def adopt_session(self):
+        found = find_session()
+        if not found or found[0] < 1000:
+            return
+        uid, pid = found
+        log(f"adopting running session {pid}")
+        self.session = (uid, Adopted(pid))
+        self.start_watchers(uid)
+
+        def watch():
+            if self.session and self.session[1].poll() is None:
+                return True
+            self.on_exit(pid, 0)
+            return False
+        GLib.timeout_add_seconds(2, watch)
+
+    def caller_uid(self, sender):
+        proxy = self.bus.get_object("org.freedesktop.DBus", "/org/freedesktop/DBus")
+        return int(proxy.GetConnectionUnixUser(sender, dbus_interface="org.freedesktop.DBus"))
+
+    def check_caller(self, sender):
+        uid = self.caller_uid(sender)
+        if uid < 1000 or not os.path.isdir(f"/run/user/{uid}"):
+            raise dbus.exceptions.DBusException(
+                "org.kibaos.Android1.NotAllowed",
+                "only a logged-in user can start Android")
+        return uid
+
+    @dbus.service.method(NAME, in_signature="s", out_signature="", sender_keyword="sender",
+                         async_callbacks=("ok", "fail"))
+    def Start(self, locale, ok, fail, sender=None):
+        try:
+            uid = self.check_caller(sender)
+        except dbus.exceptions.DBusException as e:
+            fail(e)
+            return
+        if self.session and self.session[1].poll() is None:
+            # Android outlived the Ash that started it; this Ash has a new
+            # window socket the container does not know about yet.
+            if self.ensure_wayland(uid):
+                self.restart_session(uid, locale, ok, fail)
+                return
+            ok()
+            return
+        if self.image_ready():
+            self.do_start(uid, locale, ok, fail)
+            return
+        # Turning Android on for the first time: fetch the image, then start.
+        if not os.path.exists(self.manifest_file()):
+            fail(dbus.exceptions.DBusException(
+                "org.kibaos.Android1.NoImage", "no Android image is available"))
+            return
+
+        def after(good):
+            if good:
+                self.do_start(uid, locale, ok, fail)
+            else:
+                fail(dbus.exceptions.DBusException(
+                    "org.kibaos.Android1.Failed", "the Android image could not be downloaded"))
+
+        if not getattr(self, "provisioning", False):
+            self.provisioning = True
+            threading.Thread(target=self.provision_worker, args=(after,), daemon=True).start()
+        else:
+            self.waiting.append(after)
+
+    def do_start(self, uid, locale, ok, fail):
+        try:
+            ensure_props()
+            # Android restores its recent tasks at boot, and each becomes a
+            # shelf item and window on the desktop with nothing behind it.
+            recents = os.path.join(pwd.getpwuid(uid).pw_dir,
+                                   ".local/share/waydroid/data/system_ce/0/recent_tasks")
+            try:
+                for n in os.listdir(recents):
+                    if n.endswith("_task.xml"):
+                        self.unlink_quiet(os.path.join(recents, n))
+            except OSError:
+                pass
+            subprocess.run(["systemctl", "start", CONTAINER_UNIT], check=True, timeout=60)
+            user = pwd.getpwuid(uid).pw_name
+            env = {
+                "XDG_RUNTIME_DIR": f"/run/user/{uid}",
+                "WAYLAND_DISPLAY": "wayland-0",
+                "HOME": pwd.getpwuid(uid).pw_dir,
+                "PATH": "/usr/local/bin:/usr/bin",
+            }
+            if locale:
+                env["LANG"] = locale
+            bus = session_bus(uid)
+            if bus:
+                env["DBUS_SESSION_BUS_ADDRESS"] = bus
+                tail = ["waydroid", "session", "start"]
+            else:
+                tail = ["dbus-run-session", "--", "waydroid", "session", "start"]
+            cmd = ["runuser", "-u", user, "--", "env"] + [f"{k}={v}" for k, v in env.items()] + tail
+            # The session outlives this service (KillMode=process), so its
+            # output goes to a file rather than the journal pipe.
+            os.makedirs("/run/kibaos-android", exist_ok=True)
+            with open("/run/kibaos-android/session.log", "ab") as out:
+                proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=out, stderr=out,
+                                        start_new_session=True)
+        except Exception as e:  # noqa: BLE001
+            log(f"start failed: {e}")
+            fail(dbus.exceptions.DBusException("org.kibaos.Android1.Failed", str(e)))
+            return
+        self.session = (uid, proc)
+        GLib.child_watch_add(proc.pid, self.on_exit)
+        self.start_watchers(uid)
+        threading.Thread(target=self.grant_when_ready, args=(uid,), daemon=True).start()
+        ok()
+
+    def ensure_wayland(self, uid):
+        """The container binds Ash's window socket into itself when it starts.
+        Ash makes a new socket every time it starts, so a container that
+        outlived an Ash holds a dead one and no Android window can open. Bind
+        the current socket over it, inside the container, without a restart."""
+        host = f"/run/user/{uid}/wayland-0"
+        try:
+            res = subprocess.run(["lxc-info", "-P", LXC_PATH[0], "-n", "waydroid", "-p", "-H"],
+                                 capture_output=True, text=True, timeout=10, check=False)
+            pid = int(res.stdout.strip())
+            if os.stat(host).st_ino == os.stat(f"/proc/{pid}/root{CONTAINER_WAYLAND}").st_ino:
+                return False
+            res = subprocess.run([sys.executable, "-I", os.path.abspath(__file__), "--rebind",
+                                  str(pid), host, CONTAINER_WAYLAND],
+                                 capture_output=True, text=True, timeout=20, check=False)
+            if res.returncode == 0:
+                log("bound this Ash's window socket into the running container")
+                self.clear_stale_tasks()
+                return True
+            log(f"could not bind the window socket: {res.stderr.strip()[-200:]}")
+        except (OSError, ValueError, subprocess.SubprocessError) as e:
+            log(f"window socket check skipped: {e}")
+        return False
+
+    def restart_session(self, uid, locale, ok, fail):
+        """Starts Android's session again for this Ash. The session holds the
+        address of the previous Ash's notification server, so after an Ash
+        restart it can no longer show a notification or take an action. The
+        container and the apps' processes keep running; only the session,
+        which carries the notifications, clipboard and windows, is new."""
+        log("Android's session belongs to an older Ash, restarting it")
+        self.restarting = True
+        proc = self.session[1]
+        proc.send_signal(signal.SIGTERM)
+
+        def wait():
+            for _ in range(100):
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+            GLib.idle_add(finish)
+
+        def finish():
+            self.restarting = False
+            self.session = None
+            self.stop_watchers()
+            self.do_start(uid, locale, ok, fail)
+            return False
+        threading.Thread(target=wait, daemon=True).start()
+
+    def clear_stale_tasks(self):
+        """Apps that were open under the previous Ash have no window any more
+        and cannot get one back; stopping them lets the next launch start a
+        task with a window on the current Ash."""
+        res = self.guest("/system/bin/cmd", "package", "query-activities", "--brief",
+                         "-a", "android.intent.action.MAIN", "-c", "android.intent.category.LAUNCHER")
+        pkgs = {line.split("/")[0] for line in res.stdout.splitlines() if "/" in line}
+        pkgs.add("com.android.settings")
+        for pkg in sorted(pkgs):
+            if re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+                self.guest("/system/bin/am", "force-stop", pkg, timeout=10)
+
+    def on_exit(self, pid, status):
+        log(f"session {pid} ended with status {status}")
+        if getattr(self, "restarting", False):
+            return
+        if self.session and self.session[1].pid != pid:
+            return  # the end of an older session this one replaced
+        self.session = None
+        self.stop_watchers()
+        self.Stopped()
+
+    @dbus.service.method(NAME, in_signature="", out_signature="", sender_keyword="sender")
+    def Stop(self, sender=None):
+        self.check_caller(sender)
+        log(f"Stop requested by {sender}")
+        if self.session and self.session[1].poll() is None:
+            self.session[1].send_signal(signal.SIGTERM)
+        subprocess.run(["systemctl", "stop", CONTAINER_UNIT], timeout=60, check=False)
+
+    @dbus.service.signal(NAME, signature="")
+    def Stopped(self):
+        pass
+
+    # ---- the Android image ------------------------------------------------
+    #
+    # The image is about 1 GB, so it is not in the package: it is fetched and
+    # checked when the user turns Android on. The manifest names where from and
+    # the sha256 each file must have; a file that does not match is discarded.
+
+    def image_ready(self):
+        return all(os.path.exists(os.path.join(IMAGE_DIR, n)) for n in ("system.img", "vendor.img")) \
+            and os.path.exists(WAYDROID_CFG)
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def Status(self, sender=None):
+        self.check_caller(sender)
+        if getattr(self, "provisioning", False):
+            return "provisioning"
+        return "ready" if self.image_ready() else "absent"
+
+    @dbus.service.signal(NAME, signature="si")
+    def Progress(self, stage, percent):
+        pass
+
+    @dbus.service.method(NAME, in_signature="", out_signature="", sender_keyword="sender")
+    def Provision(self, sender=None):
+        self.check_caller(sender)
+        if getattr(self, "provisioning", False) or self.image_ready():
+            return
+        self.provisioning = True
+        threading.Thread(target=self.provision_worker, daemon=True).start()
+
+    @dbus.service.method(NAME, in_signature="", out_signature="", sender_keyword="sender")
+    def Update(self, sender=None):
+        """Fetches the images the manifest names when they differ from the
+        installed ones. Android is stopped first; the user's apps and data stay."""
+        self.check_caller(sender)
+        if getattr(self, "provisioning", False):
+            return
+        if self.session and self.session[1].poll() is None:
+            self.session[1].send_signal(signal.SIGTERM)
+        subprocess.run(["systemctl", "stop", CONTAINER_UNIT], timeout=60, check=False)
+        self.provisioning = True
+        threading.Thread(target=self.provision_worker, daemon=True).start()
+
+    def emit(self, stage, percent):
+        GLib.idle_add(lambda: (self.Progress(stage, percent), False)[1])
+
+    def manifest_file(self):
+        """The manifest to use: a fetched one when there is one, else the one
+        the package shipped."""
+        if "KIBAOS_ANDROID_MANIFEST" not in os.environ and os.path.exists(MANIFEST_CACHE):
+            return MANIFEST_CACHE
+        return MANIFEST
+
+    @staticmethod
+    def valid_manifest(man):
+        try:
+            base = man["base_url"]
+            files = man["files"]
+            return (isinstance(base, str) and base.startswith("https://") and files
+                    and all(re.fullmatch(r"[A-Za-z0-9_.-]+", x["name"])
+                            and re.fullmatch(r"[0-9a-f]{64}", x["sha256"])
+                            and int(x["size"]) > 0 for x in files))
+        except (KeyError, TypeError, ValueError):
+            return False
+
+    @staticmethod
+    def keyrings():
+        rings = [RELEASE_KEYRING] if os.path.exists(RELEASE_KEYRING) else []
+        if os.path.isdir(TRUSTED_DIR):
+            rings += sorted(os.path.join(TRUSTED_DIR, f) for f in os.listdir(TRUSTED_DIR)
+                            if f.endswith(".gpg"))
+        return rings
+
+    @staticmethod
+    def signature_ok(raw, sig, rings):
+        """True when sig is a good detached signature over raw by a key in rings."""
+        if not rings or not sig:
+            return False
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            mp, sp = os.path.join(d, "images.json"), os.path.join(d, "images.json.sig")
+            with open(mp, "wb") as f:
+                f.write(raw)
+            with open(sp, "wb") as f:
+                f.write(sig)
+            cmd = ["gpgv", "--quiet"]
+            for r in rings:
+                cmd += ["--keyring", r]
+            try:
+                return subprocess.run(cmd + [sp, mp], capture_output=True, timeout=30,
+                                      check=False).returncode == 0
+            except (OSError, subprocess.SubprocessError):
+                return False
+
+    @classmethod
+    def accept_manifest(cls, raw, sig, rings, current_version=""):
+        """The parsed manifest when raw is signed, well formed and not older
+        than current_version (versions are date stamps, so they sort as text);
+        None otherwise."""
+        if not cls.signature_ok(raw, sig, rings):
+            log("fetched manifest is not signed by a trusted key, ignored")
+            return None
+        try:
+            man = json.loads(raw)
+        except ValueError:
+            return None
+        if not cls.valid_manifest(man):
+            log("fetched manifest is not valid, ignored")
+            return None
+        if str(man.get("version", "")) < current_version:
+            log("fetched manifest is older than the one in use, ignored")
+            return None
+        return man
+
+    def manifest_version(self):
+        try:
+            with open(self.manifest_file(), encoding="utf-8") as f:
+                return str(json.load(f).get("version", ""))
+        except (OSError, ValueError):
+            return ""
+
+    def refresh_manifest(self):
+        """Fetches the latest image manifest and its signature. Quiet when offline."""
+        if "KIBAOS_ANDROID_MANIFEST" in os.environ:
+            return
+        try:
+            with urllib.request.urlopen(MANIFEST_URL, timeout=15) as resp:
+                raw = resp.read(1 << 20)
+            with urllib.request.urlopen(MANIFEST_URL + ".sig", timeout=15) as resp:
+                sig = resp.read(1 << 14)
+            if self.accept_manifest(raw, sig, self.keyrings(), self.manifest_version()) is None:
+                return
+            os.makedirs(os.path.dirname(MANIFEST_CACHE), exist_ok=True)
+            tmp = MANIFEST_CACHE + ".tmp"
+            with open(tmp, "wb") as f:
+                f.write(raw)
+            os.replace(tmp, MANIFEST_CACHE)
+            with open(MANIFEST_CACHE + ".sig", "wb") as f:
+                f.write(sig)
+        except Exception as e:  # noqa: BLE001
+            log(f"manifest refresh skipped: {e}")
+
+    def provision_worker(self, after=None):
+        good = False
+        try:
+            self.refresh_manifest()
+            with open(self.manifest_file(), encoding="utf-8") as f:
+                man = json.load(f)
+            base = man["base_url"].rstrip("/") + "/"
+            files = man["files"]
+            os.makedirs(IMAGE_DIR, exist_ok=True)
+            total = sum(int(x["size"]) for x in files)
+            # Say so up front instead of failing on a write halfway through: a
+            # file that is already here (and so not downloaded again) counts
+            # for nothing, and the old image is kept until the new one is whole.
+            need = sum(int(x["size"]) for x in files
+                       if not (os.path.exists(os.path.join(IMAGE_DIR, x["name"]))
+                               and self.sha256_of(os.path.join(IMAGE_DIR, x["name"])) == x["sha256"]))
+            st = os.statvfs(IMAGE_DIR)
+            free = st.f_bavail * st.f_frsize
+            if need + (256 << 20) > free:
+                raise ValueError(f"not enough free disk space: Android needs {need >> 20} MB "
+                                 f"and {free >> 20} MB is free")
+            done_before = 0
+            for item in files:
+                name, want, size = item["name"], item["sha256"], int(item["size"])
+                if not re.fullmatch(r"[A-Za-z0-9_.-]+", name):
+                    raise ValueError(f"bad file name {name!r}")
+                final = os.path.join(IMAGE_DIR, name)
+                part = final + ".part"
+                if os.path.exists(final) and self.sha256_of(final) == want:
+                    done_before += size
+                    continue
+                have = os.path.getsize(part) if os.path.exists(part) else 0
+                req = urllib.request.Request(base + name)
+                if have:
+                    req.add_header("Range", f"bytes={have}-")
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    if have and resp.status != 206:
+                        have = 0
+                    with open(part, "ab" if have else "wb") as out:
+                        got = have
+                        while True:
+                            chunk = resp.read(1 << 20)
+                            if not chunk:
+                                break
+                            out.write(chunk)
+                            got += len(chunk)
+                            self.emit("download", int((done_before + got) * 90 / max(total, 1)))
+                self.emit("verify", 90)
+                if self.sha256_of(part) != want:
+                    os.unlink(part)
+                    raise ValueError(f"{name} does not match its checksum")
+                if os.path.exists(final):
+                    # Keep the image this one replaces, so Rollback can go back.
+                    os.replace(final, final + ".prev")
+                    self.keep_prev_record = True
+                os.replace(part, final)
+                done_before += size
+            self.emit("setup", 95)
+            if getattr(self, "keep_prev_record", False) and os.path.exists(INSTALLED):
+                shutil.copyfile(INSTALLED, INSTALLED + ".prev")
+            self.keep_prev_record = False
+            with open(INSTALLED, "w", encoding="utf-8") as f:
+                json.dump({"version": man.get("version", ""),
+                           "files": {x["name"]: x["sha256"] for x in files}}, f)
+            subprocess.run(["waydroid", "init", "-f"], check=True, timeout=300,
+                           capture_output=True)
+            ensure_props()
+            self.emit("done", 100)
+            good = True
+        except Exception as e:  # noqa: BLE001
+            log(f"provisioning failed: {e}")
+            self.emit("failed", 0)
+        finally:
+            self.provisioning = False
+            waiting, self.waiting = self.waiting, []
+            for cb in ([after] if after else []) + waiting:
+                GLib.idle_add(lambda cb=cb: (cb(good), False)[1])
+
+    @staticmethod
+    def sha256_of(path):
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        return h.hexdigest()
+
+    # ---- what the Settings page shows ----------------------------------------
+
+    @staticmethod
+    def tree_bytes(path):
+        total = 0
+        for base, dirs, names in os.walk(path, followlinks=False):
+            for n in names:
+                try:
+                    total += os.lstat(os.path.join(base, n)).st_size
+                except OSError:
+                    pass
+        return total
+
+    @dbus.service.method(NAME, in_signature="", out_signature="", sender_keyword="sender")
+    def Rollback(self, sender=None):
+        """Goes back to the image the last update replaced. Apps and their data
+        stay. Android stops; the next start uses the older image."""
+        self.check_caller(sender)
+        names = [n for n in ("system.img", "vendor.img")
+                 if os.path.exists(os.path.join(IMAGE_DIR, n + ".prev"))]
+        if not names or not os.path.exists(INSTALLED + ".prev"):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed",
+                                                "there is no earlier image to go back to")
+        if self.session and self.session[1].poll() is None:
+            self.session[1].send_signal(signal.SIGTERM)
+        subprocess.run(["systemctl", "stop", CONTAINER_UNIT], timeout=60, check=False)
+        for n in names:
+            cur = os.path.join(IMAGE_DIR, n)
+            tmp = cur + ".swap"
+            os.replace(cur, tmp)
+            os.replace(cur + ".prev", cur)
+            os.replace(tmp, cur + ".prev")
+        tmp = INSTALLED + ".swap"
+        os.replace(INSTALLED, tmp)
+        os.replace(INSTALLED + ".prev", INSTALLED)
+        os.replace(tmp, INSTALLED + ".prev")
+        subprocess.run(["waydroid", "init", "-f"], check=True, timeout=300, capture_output=True)
+        ensure_props()
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def Info(self, sender=None):
+        """One JSON object: whether Android is installed, running, how much disk
+        it uses, which image is installed and whether the manifest has a newer
+        one. The Settings page reads this and nothing else."""
+        uid = self.check_caller(sender)
+        home = pwd.getpwuid(uid).pw_dir
+        installed, wanted = {}, {}
+        version = ""
+        try:
+            with open(INSTALLED, encoding="utf-8") as f:
+                rec = json.load(f)
+            installed, version = rec.get("files", {}), rec.get("version", "")
+        except (OSError, ValueError):
+            pass
+        have_manifest = False
+        try:
+            with open(self.manifest_file(), encoding="utf-8") as f:
+                man = json.load(f)
+            have_manifest = True
+            wanted = {x["name"]: x["sha256"] for x in man["files"]}
+            new_version = man.get("version", "")
+        except (OSError, ValueError, KeyError):
+            new_version = ""
+        ready = self.image_ready()
+        image_bytes = sum(os.path.getsize(os.path.join(IMAGE_DIR, n))
+                          for n in ("system.img", "vendor.img")
+                          if os.path.exists(os.path.join(IMAGE_DIR, n)))
+        data_bytes = self.tree_bytes(os.path.join(home, ".local/share/waydroid/data"))
+        data_bytes += self.tree_bytes("/var/lib/waydroid/overlay_rw")
+        st = os.statvfs(os.path.dirname(IMAGE_DIR))
+        running = subprocess.run(["systemctl", "is-active", "--quiet", CONTAINER_UNIT],
+                                 check=False).returncode == 0
+        return json.dumps({
+            "state": "provisioning" if getattr(self, "provisioning", False)
+                     else ("ready" if ready else "absent"),
+            "running": running and bool(self.session and self.session[1].poll() is None),
+            "imageBytes": image_bytes,
+            "dataBytes": data_bytes,
+            "freeBytes": st.f_bavail * st.f_frsize,
+            "version": version,
+            "newVersion": new_version,
+            "canRollback": any(os.path.exists(os.path.join(IMAGE_DIR, n + ".prev"))
+                               for n in ("system.img", "vendor.img"))
+                           and os.path.exists(INSTALLED + ".prev"),
+            "updateAvailable": bool(ready and installed and wanted and wanted != installed),
+            "canDownload": have_manifest,
+        })
+
+    @dbus.service.method(NAME, in_signature="", out_signature="", sender_keyword="sender")
+    def Remove(self, sender=None):
+        """Takes Android off the computer: stops it, deletes the image, the
+        system's overlay and this user's Android data. Apps and their data are
+        gone; nothing outside Android's own folders is touched."""
+        uid = self.check_caller(sender)
+        home = pwd.getpwuid(uid).pw_dir
+        if self.session and self.session[1].poll() is None:
+            self.session[1].send_signal(signal.SIGTERM)
+        subprocess.run(["systemctl", "stop", CONTAINER_UNIT], timeout=60, check=False)
+        for name in ("system.img", "vendor.img", "installed.json", "system.img.prev",
+                     "vendor.img.prev", "installed.json.prev"):
+            self.unlink_quiet(os.path.join(IMAGE_DIR, name))
+        for d in ("overlay_rw", "overlay_work", "cache_http"):
+            shutil.rmtree(os.path.join("/var/lib/waydroid", d), ignore_errors=True)
+        for f in (WAYDROID_CFG, "/var/lib/waydroid/waydroid.prop"):
+            self.unlink_quiet(f)
+        shutil.rmtree(os.path.join(home, ".local/share/waydroid/data"), ignore_errors=True)
+        appdir = os.path.join(home, ".local/share/applications")
+        try:
+            for n in os.listdir(appdir):
+                if n.startswith("waydroid."):
+                    self.unlink_quiet(os.path.join(appdir, n))
+        except OSError:
+            pass
+        self.AppsChanged()
+
+    @staticmethod
+    def unlink_quiet(path):
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
+
+    # ---- installing an APK ------------------------------------------------
+
+    NOTIFY_SNIPPET = (
+        "import sys, dbus\n"
+        "bus = dbus.bus.BusConnection(sys.argv[1])\n"
+        "o = bus.get_object('org.freedesktop.Notifications', '/org/freedesktop/Notifications')\n"
+        "o.Notify('KibaOS Android', dbus.UInt32(0), '', sys.argv[2], sys.argv[3], dbus.Array([], signature='s'),\n"
+        "         dbus.Dictionary({}, signature='sv'), dbus.Int32(6000),\n"
+        "         dbus_interface='org.freedesktop.Notifications')\n"
+    )
+
+    def notify(self, uid, title, body):
+        """Shows a message in Ash's message center. It is sent as the user,
+        because the user's bus only accepts that user. Best effort: a missing
+        notification server must not fail an install."""
+        addr = session_bus(uid)
+        if not addr:
+            return
+        try:
+            subprocess.run(["runuser", "-u", pwd.getpwuid(uid).pw_name, "--", "python3", "-c",
+                            self.NOTIFY_SNIPPET, addr, title, body],
+                           capture_output=True, timeout=15, check=False)
+        except Exception as e:  # noqa: BLE001
+            log(f"notify failed: {e}")
+
+    @dbus.service.method(NAME, in_signature="s", out_signature="", sender_keyword="sender")
+    def Install(self, path, sender=None):
+        """Installs an APK the caller can read. Returns at once; Installed says
+        how it went and the message center shows the same."""
+        uid = self.check_caller(sender)
+        if not os.path.isabs(path) or not path.lower().endswith(".apk"):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "not an APK path")
+        user = pwd.getpwuid(uid).pw_name
+        if subprocess.run(["runuser", "-u", user, "--", "test", "-r", path],
+                          check=False).returncode != 0:
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "cannot read that file")
+        threading.Thread(target=self.install_worker, args=(uid, path), daemon=True).start()
+
+    def install_worker(self, uid, path):
+        name = os.path.basename(path)
+        ok, msg = False, ""
+        try:
+            checker = "/usr/bin/kibaos-apk-check"
+            note = ""
+            if os.path.exists(checker):
+                res = subprocess.run([checker, "--json", path], capture_output=True,
+                                     text=True, timeout=60, check=False)
+                try:
+                    info = json.loads(res.stdout)[0]
+                except (ValueError, IndexError, TypeError):
+                    info = {}
+                reasons = "; ".join(info.get("reasons", []))
+                if info.get("cpu") in ("arm64", "arm", "other") or "not an APK" in reasons:
+                    msg = "This app " + reasons + "." if reasons else "This app cannot run here."
+                    return
+                if info.get("asks_play_integrity"):
+                    note = " Note: it " + reasons + "."
+                elif info.get("uses_google_services"):
+                    note = " Some Google features may be missing."
+            if not (self.session and self.session[1].poll() is None):
+                msg = "Turn on Android in Settings, then try again."
+                return
+            self.notify(uid, "Installing " + name, "Android is installing the app.")
+            home = pwd.getpwuid(uid).pw_dir
+            tmpdir = os.path.join(home, ".local/share/waydroid/data/local/tmp")
+            os.makedirs(tmpdir, exist_ok=True)
+            tmp = os.path.join(tmpdir, f"kibaos-install-{os.getpid()}-{int(time.time())}.apk")
+            try:
+                shutil.copyfile(path, tmp)
+                os.chmod(tmp, 0o644)
+                res = self.guest("/system/bin/pm", "install", "-r",
+                                 "/data/local/tmp/" + os.path.basename(tmp), timeout=300)
+            finally:
+                self.unlink_quiet(tmp)
+            out = (res.stdout + res.stderr).strip()
+            if "Success" in out:
+                ok, msg = True, name + " is installed." + note
+            else:
+                m = re.search(r"Failure \[([^\]]+)\]", out)
+                msg = "Android could not install it: " + (m.group(1) if m else out[-200:] or "unknown error")
+        except Exception as e:  # noqa: BLE001
+            msg = f"Install failed: {e}"
+        finally:
+            log(f"install {name}: ok={ok} {msg}")
+            self.notify(uid, ("Installed " if ok else "Could not install ") + name, msg)
+            GLib.idle_add(lambda: (self.Installed(path, ok, msg), False)[1])
+
+    @dbus.service.signal(NAME, signature="sbs")
+    def Installed(self, path, ok, message):
+        pass
+
+    # ---- opening desktop files in Android apps ------------------------------
+
+    ACTIVITY_RE = re.compile(r"^\s*([A-Za-z0-9_.]+)/(\S+)\s*$")
+
+    def handlers(self, mime):
+        """(package, label, activity) of the apps that can view this type."""
+        found, seen = [], set()
+        res = self.guest("/system/bin/pm", "query-activities", "--brief", "-a",
+                         "android.intent.action.VIEW", "-t", mime, "-d",
+                         "content://org.kibaos.bridge.inbox/x/file", timeout=30)
+        labels = getattr(self, "labels", None)
+        if not labels and getattr(self, "watch_uid", None) is not None:
+            self.read_apps(self.watch_uid)
+            labels = getattr(self, "labels", {})
+        labels = labels or {}
+        for line in res.stdout.splitlines():
+            m = self.ACTIVITY_RE.match(line)
+            if not m or m.group(1) in seen or m.group(1) in (BRIDGE_PKG, "android"):
+                continue
+            seen.add(m.group(1))
+            found.append((m.group(1), labels.get(m.group(1)) or m.group(1).split(".")[-1].capitalize(), m.group(2)))
+        return found
+
+    @dbus.service.method(NAME, in_signature="s", out_signature="a(ss)", sender_keyword="sender")
+    def HandlersFor(self, mime, sender=None):
+        """Android apps that can open a file of this type, as (package, label)."""
+        self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9.+-]+/[A-Za-z0-9.+*-]+", mime):
+            return []
+        if not (self.session and self.session[1].poll() is None):
+            return []
+        return [(p, l) for p, l, _ in self.handlers(mime)]
+
+    @dbus.service.method(NAME, in_signature="ss", out_signature="", sender_keyword="sender")
+    def OpenFile(self, pkg, path, sender=None):
+        """Opens a desktop file in an Android app. The file is copied into the
+        bridge app's inbox, which the app reads through a content address."""
+        uid = self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg) or not os.path.isabs(path):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad request")
+        pw = pwd.getpwuid(uid)
+        if subprocess.run(["runuser", "-u", pw.pw_name, "--", "test", "-f", path, "-a", "-r", path],
+                          check=False).returncode != 0:
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "cannot read that file")
+        if not (self.session and self.session[1].poll() is None):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "Android is off")
+        mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
+        match = [h for h in self.handlers(mime) if h[0] == pkg]
+        if not match:
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "that app cannot open this file")
+        activity = match[0][2]
+        token, name = self.stage_inbox(uid, path)
+        self.Launch(pkg, "", sender=sender)
+        time.sleep(1.5)
+        self.guest("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "-d",
+                   f"content://org.kibaos.bridge.inbox/{token}/{name}", "-t", mime,
+                   "-n", f"{pkg}/{activity}", "--grant-read-uri-permission", timeout=30)
+
+    def stage_inbox(self, uid, path):
+        """Copies a desktop file into the bridge app's inbox, where Android can
+        read it through a content address for half an hour. Returns the folder
+        token and the file name in it."""
+        token = uuid.uuid4().hex
+        name = re.sub(r"[^A-Za-z0-9._-]", "_", os.path.basename(path)) or "file"
+        inbox = os.path.join(self.outbox_dir(uid), "..", "inbox")
+        inbox = os.path.normpath(inbox)
+        box = os.path.join(inbox, token)
+        os.makedirs(box, exist_ok=True)
+        ref = os.path.dirname(inbox)
+        for d in (inbox, box):
+            os.chmod(d, 0o777)
+            st = os.stat(ref)
+            os.chown(d, st.st_uid, st.st_gid)
+        dest = os.path.join(box, name)
+        shutil.copyfile(path, dest)
+        os.chmod(dest, 0o666)
+        st = os.stat(ref)
+        os.chown(dest, st.st_uid, st.st_gid)
+        GLib.timeout_add_seconds(1800, lambda: (shutil.rmtree(box, ignore_errors=True), False)[1])
+        return token, name
+
+    def hwc_pid(self):
+        """Process id of the window layer in the container, which alone can be
+        believed about what the user dropped on a window: any app can write a
+        line to the log, but not under another process's id."""
+        res = self.guest("/system/bin/ps", "-A", "-o", "PID,NAME", timeout=10)
+        for line in res.stdout.splitlines():
+            parts = line.split(None, 1)
+            if len(parts) == 2 and "graphics.composer" in parts[1] and parts[0].isdigit():
+                return int(parts[0])
+        return None
+
+    def dropped_files(self, app, uris):
+        """Files dragged from the desktop onto a window of an Android app are
+        handed to that app, as if shared to it."""
+        if not (self.session and self.session[1].poll() is None) or not app:
+            return
+        uid = self.session[0]
+        pw = pwd.getpwuid(uid)
+        for uri in uris:
+            parts = urllib.parse.urlsplit(uri)
+            path = urllib.parse.unquote(parts.path)
+            if parts.scheme != "file" or parts.netloc not in ("", "localhost") or not os.path.isabs(path):
+                log(f"drop: not a local file: {uri[:80]}")
+                continue
+            # The user's own permissions decide what can be handed over.
+            if subprocess.run(["runuser", "-u", pw.pw_name, "--", "test", "-f", path, "-a", "-r", path],
+                              check=False).returncode != 0:
+                log(f"drop: cannot read {path}")
+                continue
+            if os.path.getsize(path) > DROP_MAX_BYTES:
+                log(f"drop: {path} is too big")
+                continue
+            mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
+            token, name = self.stage_inbox(uid, path)
+            content = f"content://org.kibaos.bridge.inbox/{token}/{name}"
+            res = self.guest("/system/bin/am", "start", "-a", "android.intent.action.SEND", "-t", mime,
+                             "--eu", "android.intent.extra.STREAM", content, "-p", app,
+                             "--grant-read-uri-permission", timeout=30)
+            if "Error" in res.stdout + res.stderr:
+                res = self.guest("/system/bin/am", "start", "-a", "android.intent.action.VIEW", "-d", content,
+                                 "-t", mime, "-p", app, "--grant-read-uri-permission", timeout=30)
+            log(f"drop: {name} to {app}: {(res.stdout + res.stderr).strip()[-80:]}")
+
+    # ---- permissions and the network switch --------------------------------
+
+    CATEGORIES = {
+        "CAMERA": ("android.permission.CAMERA",),
+        "MICROPHONE": ("android.permission.RECORD_AUDIO",),
+        "LOCATION": ("android.permission.ACCESS_FINE_LOCATION",
+                     "android.permission.ACCESS_COARSE_LOCATION",
+                     "android.permission.ACCESS_BACKGROUND_LOCATION"),
+        "CONTACTS": ("android.permission.READ_CONTACTS", "android.permission.WRITE_CONTACTS"),
+        "STORAGE": ("android.permission.READ_EXTERNAL_STORAGE",
+                    "android.permission.WRITE_EXTERNAL_STORAGE",
+                    "android.permission.READ_MEDIA_AUDIO",
+                    "android.permission.READ_MEDIA_IMAGES",
+                    "android.permission.READ_MEDIA_VIDEO"),
+        "NOTIFICATIONS": ("android.permission.POST_NOTIFICATIONS",),
+    }
+
+    def scan_permissions(self):
+        """{package: {category: granted}} for the permissions a user can decide.
+        A category is listed only for apps that ask for something in it."""
+        res = self.guest("/system/bin/dumpsys", "package", timeout=60)
+        out, cur, section = {}, None, None
+        asked, granted = set(), {}
+
+        def flush():
+            if cur is None:
+                return
+            cats = {}
+            for cat, perms in self.CATEGORIES.items():
+                mine = [p for p in perms if p in asked]
+                if mine:
+                    cats[cat] = any(granted.get(p) for p in mine)
+            if cats:
+                out[cur] = cats
+
+        in_packages = False
+        for line in res.stdout.splitlines():
+            if line == "Packages:":
+                in_packages = True
+                continue
+            if not in_packages:
+                continue
+            m = re.match(r"^  Package \[([^\]]+)\]", line)
+            if m:
+                flush()
+                cur, section = m.group(1), None
+                asked, granted = set(), {}
+                continue
+            if line and not line.startswith(" "):
+                flush()
+                cur = None
+                in_packages = line == "Packages:"
+                continue
+            if cur is None:
+                continue
+            stripped = line.strip()
+            if stripped == "requested permissions:":
+                section = "asked"
+            elif stripped == "runtime permissions:":
+                section = "runtime"
+            elif stripped.endswith(":") and not stripped.startswith("android.") and line.startswith("    ") \
+                    and not line.startswith("      "):
+                section = None
+            elif section == "asked" and line.startswith("      android."):
+                asked.add(stripped)
+            elif section == "runtime":
+                m2 = re.match(r"^(\S+): granted=(true|false)", stripped)
+                if m2:
+                    # The full dump lists only the permissions an app asked
+                    # for, with their state, so this is also the "asked" set.
+                    asked.add(m2.group(1))
+                    granted[m2.group(1)] = m2.group(2) == "true"
+        flush()
+        return out
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def Permissions(self, sender=None):
+        """JSON {package: {CAMERA|MICROPHONE|LOCATION|CONTACTS|STORAGE|NOTIFICATIONS: granted}}."""
+        self.check_caller(sender)
+        if not (self.session and self.session[1].poll() is None):
+            return "{}"
+        now = time.monotonic()
+        cached = getattr(self, "perm_cache", None)
+        if cached and now - cached[0] < 20:
+            return cached[1]
+        data = json.dumps(self.scan_permissions())
+        self.perm_cache = (now, data)
+        return data
+
+    @dbus.service.method(NAME, in_signature="ssb", out_signature="", sender_keyword="sender")
+    def SetPermission(self, pkg, category, granted, sender=None):
+        self.check_caller(sender)
+        perms = self.CATEGORIES.get(category)
+        if not perms or not re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad request")
+        verb = "grant" if granted else "revoke"
+        for perm in perms:
+            self.guest("/system/bin/pm", verb, pkg, perm, timeout=20)
+        self.perm_cache = None
+
+    @dbus.service.method(NAME, in_signature="sb", out_signature="", sender_keyword="sender")
+    def SetNotificationsEnabled(self, pkg, enabled, sender=None):
+        """The per-app switch in Manage your apps: Android's own app-ops
+        switch for posting notifications, which its notification service
+        honours for every app, whatever Android version the app targets."""
+        self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad request")
+        self.guest("/system/bin/cmd", "appops", "set", pkg, "POST_NOTIFICATION",
+                   "allow" if enabled else "deny", timeout=20)
+        # Apps made for Android 13 and later are held back by the runtime
+        # permission instead; older ones by the switch above.
+        self.guest("/system/bin/pm", "grant" if enabled else "revoke", pkg,
+                   "android.permission.POST_NOTIFICATIONS", timeout=20)
+        if not enabled:
+            self.guest("/system/bin/am", "force-stop", pkg, timeout=20)
+        self.perm_cache = None
+
+    NETWORK_STATE = "/var/lib/kibaos-android/network-deny.json"
+
+    def denied_packages(self):
+        try:
+            with open(self.NETWORK_STATE, encoding="utf-8") as f:
+                return sorted(set(json.load(f)))
+        except (OSError, ValueError):
+            return []
+
+    def apply_network(self):
+        denied = self.denied_packages()
+        self.guest("/system/bin/cmd", "connectivity", "set-chain3-enabled",
+                   "true" if denied else "false", timeout=20)
+        for pkg in denied:
+            self.guest("/system/bin/cmd", "connectivity", "set-package-networking-enabled",
+                       "false", pkg, timeout=20)
+
+    @dbus.service.method(NAME, in_signature="", out_signature="as", sender_keyword="sender")
+    def NetworkDenied(self, sender=None):
+        """Packages that are not allowed to use the network."""
+        self.check_caller(sender)
+        return self.denied_packages()
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def NetworkApps(self, sender=None):
+        """JSON list of installed apps (not system ones) with whether each may
+        use the network, for the Settings page."""
+        uid = self.check_caller(sender)
+        denied = set(self.denied_packages())
+        out = [{"pkg": pkg, "label": label, "allowed": pkg not in denied}
+               for label, pkg, _act, system in self.read_apps(uid) if not system]
+        return json.dumps(out)
+
+    @dbus.service.method(NAME, in_signature="sb", out_signature="", sender_keyword="sender")
+    def SetNetworkAllowed(self, pkg, allowed, sender=None):
+        self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad package")
+        denied = set(self.denied_packages())
+        if allowed:
+            denied.discard(pkg)
+            self.guest("/system/bin/cmd", "connectivity", "set-package-networking-enabled",
+                       "true", pkg, timeout=20)
+        else:
+            denied.add(pkg)
+        os.makedirs(os.path.dirname(self.NETWORK_STATE), exist_ok=True)
+        with open(self.NETWORK_STATE, "w", encoding="utf-8") as f:
+            json.dump(sorted(denied), f)
+        self.apply_network()
+
+    # ---- the KibaOS bridge app: links and sharing -----------------------------
+    #
+    # Android has no way to open a link in the computer's browser, so a small
+    # app (bridge/) is the default browser and a share target inside Android.
+    # It drops a JSON file into its own folder of shared storage; the code here
+    # reads and removes it and does the thing on the desktop.
+
+    def ensure_bridge(self, uid):
+        """Installs the bridge app and makes it the default browser. Waits for
+        Android to finish booting; runs once per start."""
+        apk = BRIDGE_APK
+        if not os.path.exists(apk):
+            return
+        for _ in range(90):
+            res = self.guest("/system/bin/getprop", "sys.boot_completed", timeout=10)
+            if res.stdout.strip() == "1":
+                break
+            time.sleep(2)
+        else:
+            return
+        self.skip_setup_wizard()
+        self.hide_error_dialogs()
+        self.sync_time_zone()
+        want = str(BRIDGE_VERSION)
+        res = self.guest("/system/bin/pm", "list", "packages", "--show-versioncode", BRIDGE_PKG)
+        if f"versionCode:{want}" not in res.stdout:
+            home = pwd.getpwuid(uid).pw_dir
+            tmpdir = os.path.join(home, ".local/share/waydroid/data/local/tmp")
+            os.makedirs(tmpdir, exist_ok=True)
+            tmp = os.path.join(tmpdir, "kibaos-bridge.apk")
+            try:
+                shutil.copyfile(apk, tmp)
+                os.chmod(tmp, 0o644)
+                res = self.guest("/system/bin/pm", "install", "-r", "/data/local/tmp/kibaos-bridge.apk",
+                                 timeout=120)
+            finally:
+                self.unlink_quiet(tmp)
+            log(f"bridge install: {(res.stdout + res.stderr).strip()[-120:]}")
+        self.guest("/system/bin/cmd", "role", "add-role-holder", "--user", "0",
+                   "android.app.role.BROWSER", BRIDGE_PKG, timeout=20)
+        self.guest("/system/bin/cmd", "notification", "allow_listener",
+                   f"{BRIDGE_PKG}/{BRIDGE_PKG}.DismissService", timeout=20)
+        self.apply_network()
+
+    def skip_setup_wizard(self):
+        """LineageOS starts a setup wizard (account, network, and so on) on a
+        fresh data folder, and while it is up it covers every app. KibaOS needs
+        none of it: mark the device set up and turn the wizard off."""
+        done = self.guest("/system/bin/settings", "get", "secure", "user_setup_complete", timeout=20)
+        if done.stdout.strip() == "1":
+            return
+        self.guest("/system/bin/settings", "put", "global", "device_provisioned", "1", timeout=20)
+        self.guest("/system/bin/settings", "put", "secure", "user_setup_complete", "1", timeout=20)
+        self.guest("/system/bin/pm", "disable-user", "--user", "0", "org.lineageos.setupwizard", timeout=20)
+        self.guest("/system/bin/am", "force-stop", "org.lineageos.setupwizard", timeout=20)
+        log("Android setup wizard turned off")
+
+    def hide_error_dialogs(self):
+        """Android asks what to do about an app that stopped responding in a
+        dialog of its own, which is not an app window and so never reaches the
+        desktop. Unseen, it still takes every click and key from every Android
+        app until it is answered. With the dialogs off Android closes the app
+        instead, and its window goes away on the desktop."""
+        res = self.guest("/system/bin/settings", "get", "global", "hide_error_dialogs", timeout=20)
+        if res.stdout.strip() != "1":
+            self.guest("/system/bin/settings", "put", "global", "hide_error_dialogs", "1", timeout=20)
+            log("Android error dialogs turned off")
+
+    def sync_time_zone(self, zone=None):
+        """Android keeps its own time zone and, with no phone network or
+        location to detect one from, leaves it at GMT. Give it the desktop's
+        and turn its own detection off so nothing moves it back."""
+        zone = zone or host_time_zone()
+        if not zone:
+            return
+        cur = self.guest("/system/bin/getprop", "persist.sys.timezone", timeout=10)
+        auto = self.guest("/system/bin/settings", "get", "global", "auto_time_zone", timeout=20)
+        if cur.stdout.strip() == zone and auto.stdout.strip() == "0":
+            return
+        self.guest("/system/bin/settings", "put", "global", "auto_time_zone", "0", timeout=20)
+        self.guest("/system/bin/cmd", "alarm", "set-timezone", zone, timeout=20)
+        log(f"Android time zone set to {zone}")
+
+    def on_timedate(self, iface, changed, invalidated):
+        """The desktop's time zone changed (KibaOS's Settings go through
+        timedated); a running Android follows it."""
+        if "Timezone" not in changed and "Timezone" not in invalidated:
+            return
+        if not (self.session and self.session[1].poll() is None):
+            return
+        zone = str(changed.get("Timezone", "")) or None
+        if zone and not TIME_ZONE_RE.fullmatch(zone):
+            return
+        threading.Thread(target=self.sync_time_zone, args=(zone,), daemon=True).start()
+
+    def outbox_dir(self, uid):
+        return os.path.join(pwd.getpwuid(uid).pw_dir, ".local/share/waydroid/data/media/0",
+                            "Android/data", BRIDGE_PKG, "files/outbox")
+
+    def user_env(self, uid):
+        pw = pwd.getpwuid(uid)
+        env = {"HOME": pw.pw_dir, "XDG_RUNTIME_DIR": f"/run/user/{uid}",
+               "WAYLAND_DISPLAY": "wayland-0", "PATH": "/usr/local/bin:/usr/bin"}
+        addr = session_bus(uid)
+        if addr:
+            env["DBUS_SESSION_BUS_ADDRESS"] = addr
+        return env
+
+    def run_as_user(self, uid, argv, stdin=None):
+        pw = pwd.getpwuid(uid)
+        cmd = ["runuser", "-u", pw.pw_name, "--", "env"] + \
+              [f"{k}={v}" for k, v in self.user_env(uid).items()] + argv
+        return subprocess.Popen(cmd, stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def poll_outbox(self):
+        uid = getattr(self, "watch_uid", None)
+        if uid is None:
+            return False
+        box = self.outbox_dir(uid)
+        try:
+            names = sorted(n for n in os.listdir(box) if n.endswith(".json"))
+        except OSError:
+            return True
+        for n in names[:20]:
+            path = os.path.join(box, n)
+            try:
+                with open(path, encoding="utf-8") as f:
+                    req = json.load(f)
+            except (OSError, ValueError):
+                req = {}
+            self.unlink_quiet(path)
+            try:
+                self.handle_request(uid, box, req)
+            except Exception as e:  # noqa: BLE001
+                log(f"outbox request failed: {e}")
+        return True
+
+    URL_RE = re.compile(r"(?:https?://|mailto:)[^\s<>\"]+\Z")
+
+    def handle_request(self, uid, box, req):
+        kind = req.get("type")
+        if kind == "view":
+            url = str(req.get("url", ""))
+            if self.URL_RE.match(url):
+                self.run_as_user(uid, ["xdg-open", url])
+            return
+        if kind != "send":
+            return
+        pw = pwd.getpwuid(uid)
+        text = str(req.get("text", "")).strip()
+        saved = []
+        for name in req.get("files", []) or []:
+            if not re.fullmatch(r"[A-Za-z0-9._ -]+", str(name)):
+                continue
+            src = os.path.join(box, "files", name)
+            if not os.path.isfile(src):
+                continue
+            downloads = os.path.join(pw.pw_dir, "Downloads")
+            os.makedirs(downloads, exist_ok=True)
+            os.chown(downloads, uid, pw.pw_gid) if os.stat(downloads).st_uid == 0 else None
+            # strip the timestamp prefix the app added
+            clean = re.sub(r"^\d+-\d+-", "", name)
+            dest = os.path.join(downloads, clean)
+            base, ext = os.path.splitext(dest)
+            i = 1
+            while os.path.exists(dest):
+                dest = f"{base} ({i}){ext}"
+                i += 1
+            shutil.move(src, dest)
+            os.chown(dest, uid, pw.pw_gid)
+            saved.append(os.path.basename(dest))
+        if saved:
+            self.notify(uid, "Received from Android",
+                        ", ".join(saved) + " saved to Downloads.")
+        if text:
+            if self.URL_RE.match(text) and not saved:
+                self.run_as_user(uid, ["xdg-open", text])
+            else:
+                proc = self.run_as_user(uid, ["wl-copy"], stdin=True)
+                try:
+                    proc.communicate(text.encode("utf-8"), timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                if not saved:
+                    self.notify(uid, "Copied from Android", "The shared text is on the clipboard.")
+
+    # ---- apps -----------------------------------------------------------
+
+    def guest(self, *args, timeout=20):
+        """Runs a command inside the container; the container freezes when no
+        window is open, so it is thawed first."""
+        subprocess.run(["lxc-unfreeze", "-P", LXC_PATH[0], "-n", "waydroid"],
+                       capture_output=True, timeout=10, check=False)
+        return subprocess.run(LXC + list(args), capture_output=True, text=True,
+                              timeout=timeout, check=False)
+
+    # Android's own screens behind the windows: the window layer never shows
+    # them (hwcomposer.cpp blacklisted_apps), so the shelf must not either, or
+    # it gets an app with no icon and no window. None means every activity.
+    HIDDEN_TASKS = {
+        "com.android.launcher3": None,
+        "com.android.settings": {"com.android.settings.FallbackHome"},
+        "com.android.systemui": {"com.android.wm.shell.desktopmode.DesktopWallpaperActivity"},
+    }
+
+    @classmethod
+    def hidden_task(cls, pkg, activity):
+        if pkg not in cls.HIDDEN_TASKS:
+            return False
+        acts = cls.HIDDEN_TASKS[pkg]
+        return acts is None or activity in acts
+
+    @staticmethod
+    def full_activity(pkg, act):
+        if act.startswith("."):
+            return pkg + act
+        if "." not in act:
+            return pkg + "." + act
+        return act
+
+    def read_apps(self, uid):
+        home = pwd.getpwuid(uid).pw_dir
+        labels = {}
+        appdir = os.path.join(home, ".local/share/applications")
+        try:
+            names = os.listdir(appdir)
+        except OSError:
+            names = []
+        for n in names:
+            if not (n.startswith("waydroid.") and n.endswith(".desktop")):
+                continue
+            pkg = n[len("waydroid."):-len(".desktop")]
+            try:
+                for line in open(os.path.join(appdir, n), encoding="utf-8"):
+                    if line.startswith("Name="):
+                        labels[pkg] = line[5:].strip()
+                        break
+            except OSError:
+                pass
+        # waydroid's own list knows every app's label, and asking for it also
+        # makes the guest write any icon that is missing.
+        bus = session_bus(uid)
+        if bus:
+            try:
+                res = subprocess.run(
+                    ["runuser", "-u", pwd.getpwuid(uid).pw_name, "--", "env",
+                     f"XDG_RUNTIME_DIR=/run/user/{uid}", f"DBUS_SESSION_BUS_ADDRESS={bus}",
+                     f"HOME={home}", "PATH=/usr/local/bin:/usr/bin", "waydroid", "app", "list"],
+                    capture_output=True, text=True, timeout=20, check=False)
+                name = None
+                for line in res.stdout.splitlines():
+                    if line.startswith("Name: "):
+                        name = line[6:].strip()
+                    elif line.startswith("packageName: ") and name is not None:
+                        labels[line[13:].strip()] = name
+                        name = None
+            except (OSError, subprocess.TimeoutExpired) as e:
+                log(f"waydroid app list failed: {e}")
+        self.labels = dict(labels)
+        out = []
+        res = self.guest("/system/bin/pm", "query-activities", "--components",
+                         "-a", "android.intent.action.MAIN",
+                         "-c", "android.intent.category.LAUNCHER")
+        sysres = self.guest("/system/bin/pm", "list", "packages", "-s")
+        system = {l.split(":", 1)[1].strip() for l in sysres.stdout.splitlines() if l.startswith("package:")}
+        seen = set()
+        # A stable order, so a package with several launcher entries (an
+        # icon alias, for one) is always listed under the same activity.
+        for line in sorted(l.strip() for l in res.stdout.splitlines()):
+            line = line.strip()
+            if "/" not in line:
+                continue
+            pkg, act = line.split("/", 1)
+            if pkg in seen or pkg == BRIDGE_PKG:
+                continue
+            seen.add(pkg)
+            out.append((labels.get(pkg, pkg), pkg, self.full_activity(pkg, act), pkg in system))
+        return out
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def Diagnostics(self, sender=None):
+        """Writes a report (service state, container, guest log tail, image
+        record) to the user's Downloads and returns its path."""
+        uid = self.check_caller(sender)
+        home = pwd.getpwuid(uid).pw_dir
+        parts = []
+
+        def run(title, cmd, timeout=20):
+            try:
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
+                out = (r.stdout + r.stderr).strip()
+            except (OSError, subprocess.TimeoutExpired) as e:
+                out = f"failed: {e}"
+            parts.append(f"=== {title} ===\n{out}\n")
+
+        run("service", ["systemctl", "status", "kibaos-android", "--no-pager", "-n", "30"])
+        run("container", ["systemctl", "is-active", CONTAINER_UNIT])
+        run("lxc", ["lxc-info", "-P", LXC_PATH[0], "-n", "waydroid"])
+        run("processes", ["ps", "-eo", "pid,stat,etime,args", "--sort=pid"])
+        run("session log", ["tail", "-n", "60", "/run/kibaos-android/session.log"])
+        try:
+            parts.append("=== installed ===\n" + open(os.path.join(IMAGE_DIR, "installed.json")).read() + "\n")
+        except OSError:
+            parts.append("=== installed ===\nnone\n")
+        g = self.guest("/system/bin/logcat", "-d", "-t", "300", timeout=30)
+        parts.append("=== logcat (last 300) ===\n" + (g.stdout or g.stderr) + "\n")
+        run("disk", ["df", "-h", "/var/lib/waydroid", home])
+        d = os.path.join(home, "Downloads")
+        os.makedirs(d, exist_ok=True)
+        path = os.path.join(d, "kibaos-android-diagnostics.txt")
+        with open(path, "w") as f:
+            f.write("\n".join(parts))
+        os.chown(path, uid, os.stat(home).st_gid)
+        self.notify(uid, "Android report saved", "The report is in Downloads: kibaos-android-diagnostics.txt")
+        return path
+
+    @dbus.service.method(NAME, in_signature="", out_signature="a(sssb)", sender_keyword="sender")
+    def ListApps(self, sender=None):
+        uid = self.check_caller(sender)
+        return dbus.Array([dbus.Struct((a[0], a[1], a[2], dbus.Boolean(a[3])), signature="sssb")
+                           for a in self.read_apps(uid)], signature="(sssb)")
+
+    @dbus.service.method(NAME, in_signature="s", out_signature="ay", sender_keyword="sender")
+    def GetIcon(self, pkg, sender=None):
+        uid = self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+            return dbus.Array([], signature="y")
+        path = os.path.join(pwd.getpwuid(uid).pw_dir, ".local/share/waydroid/data/icons", pkg + ".png")
+        try:
+            with open(path, "rb") as f:
+                return dbus.Array(f.read(), signature="y")
+        except OSError:
+            return dbus.Array([], signature="y")
+
+    @dbus.service.method(NAME, in_signature="ss", out_signature="", sender_keyword="sender")
+    def Launch(self, pkg, activity, sender=None):
+        uid = self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg) or not re.fullmatch(r"[A-Za-z0-9_.$]*", activity):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad name")
+        # waydroid's own launch sets the active-app property the window layer
+        # keys on, so it is preferred when the user's session bus is there.
+        bus = session_bus(uid)
+        if bus:
+            user = pwd.getpwuid(uid).pw_name
+            env = ["XDG_RUNTIME_DIR=" + f"/run/user/{uid}", "WAYLAND_DISPLAY=wayland-0",
+                   "DBUS_SESSION_BUS_ADDRESS=" + bus, "HOME=" + pwd.getpwuid(uid).pw_dir,
+                   "PATH=/usr/local/bin:/usr/bin"]
+            subprocess.run(["lxc-unfreeze", "-P", LXC_PATH[0], "-n", "waydroid"],
+                           capture_output=True, timeout=10, check=False)
+            subprocess.run(["runuser", "-u", user, "--", "env"] + env + ["waydroid", "app", "launch", pkg],
+                           capture_output=True, timeout=30, check=False)
+            return
+        if not activity:
+            res = self.guest("/system/bin/cmd", "package", "resolve-activity", "--brief",
+                             "-c", "android.intent.category.LAUNCHER", pkg)
+            lines = [l for l in res.stdout.splitlines() if "/" in l]
+            if not lines:
+                raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "no launcher activity")
+            comp = lines[-1].strip()
+        else:
+            comp = f"{pkg}/{activity}"
+        self.guest("/system/bin/am", "start", "-n", comp)
+
+    @dbus.service.method(NAME, in_signature="ss", out_signature="", sender_keyword="sender")
+    def ShowAppInfo(self, pkg, page, sender=None):
+        """Opens Android's own screen for an app (its details, which lead on to
+        its permissions) in a window. page is "main" or "permissions"."""
+        uid = self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg) or page not in ("main", "permissions"):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad name")
+        bus = session_bus(uid)
+        if not (self.session and self.session[1].poll() is None) or not bus:
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "Android is not running")
+        subprocess.run(["lxc-unfreeze", "-P", LXC_PATH[0], "-n", "waydroid"],
+                       capture_output=True, timeout=10, check=False)
+        user = pwd.getpwuid(uid).pw_name
+        env = ["XDG_RUNTIME_DIR=" + f"/run/user/{uid}", "WAYLAND_DISPLAY=wayland-0",
+               "DBUS_SESSION_BUS_ADDRESS=" + bus, "HOME=" + pwd.getpwuid(uid).pw_dir,
+               "PATH=/usr/local/bin:/usr/bin"]
+        self.guest("/system/bin/am", "force-stop", "com.android.settings")  # open on this app, not the last page
+        subprocess.run(["runuser", "-u", user, "--", "env"] + env +
+                       ["waydroid", "app", "intent", "android.settings.APPLICATION_DETAILS_SETTINGS",
+                        "package:" + pkg], capture_output=True, timeout=30, check=False)
+
+    def media_dir(self, uid):
+        return os.path.join(pwd.getpwuid(uid).pw_dir, ".local/share/waydroid/data/media")
+
+    def grant_storage(self, uid):
+        """Let the user read and write Android's shared storage.
+
+        The files belong to Android's own ids and the directory is closed to
+        everyone else, so the host user could not see their own phone files.
+        An ACL for that one user opens it without changing the owner Android
+        sees, and the default ACL carries it to files Android makes later.
+        """
+        media = self.media_dir(uid)
+        root = os.path.join(media, "0")
+        if not os.path.isdir(root):
+            return
+        acl = f"u:{uid}:rwX"
+        subprocess.run(["setfacl", "-m", f"u:{uid}:rx", media], timeout=20, check=False)
+        subprocess.run(["setfacl", "-R", "-m", acl, root], timeout=600, check=False)
+        subprocess.run(["setfacl", "-R", "-d", "-m", acl, root], timeout=600, check=False)
+
+    def grant_when_ready(self, uid):
+        # Android makes its storage a little after the container starts.
+        for _ in range(120):
+            if os.path.isdir(os.path.join(self.media_dir(uid), "0")):
+                self.grant_storage(uid)
+                return
+            time.sleep(2)
+
+    @dbus.service.method(NAME, in_signature="", out_signature="s", sender_keyword="sender")
+    def StorageDir(self, sender=None):
+        """Path of Android's shared storage, readable by the caller. Empty when
+        Android has not made it yet."""
+        uid = self.check_caller(sender)
+        root = os.path.join(self.media_dir(uid), "0")
+        if not os.path.isdir(root):
+            return ""
+        threading.Thread(target=self.grant_storage, args=(uid,), daemon=True).start()
+        return root
+
+    @dbus.service.method(NAME, in_signature="s", out_signature="", sender_keyword="sender")
+    def Uninstall(self, pkg, sender=None):
+        self.check_caller(sender)
+        if not re.fullmatch(r"[A-Za-z0-9_.]+", pkg):
+            raise dbus.exceptions.DBusException("org.kibaos.Android1.Failed", "bad name")
+        self.guest("/system/bin/pm", "uninstall", pkg, timeout=60)
+
+    @dbus.service.method(NAME, in_signature="i", out_signature="", sender_keyword="sender")
+    def CloseTask(self, task_id, sender=None):
+        self.check_caller(sender)
+        # `am` removes whole root tasks, so find the one holding this task.
+        res = self.guest("/system/bin/am", "stack", "list")
+        root = None
+        for line in res.stdout.splitlines():
+            m = re.match(r"RootTask id=(\d+)", line)
+            if m:
+                root = m.group(1)
+                continue
+            if root and re.match(rf"\s+taskId={int(task_id)}:", line):
+                self.guest("/system/bin/am", "stack", "remove", root)
+                return
+
+    @dbus.service.signal(NAME, signature="")
+    def AppsChanged(self):
+        pass
+
+    @dbus.service.signal(NAME, signature="iss")
+    def TaskCreated(self, task_id, pkg, activity):
+        pass
+
+    @dbus.service.signal(NAME, signature="i")
+    def TaskDestroyed(self, task_id):
+        pass
+
+    # ---- watchers: tasks from the guest log, app list by polling ----------
+
+    def start_watchers(self, uid):
+        self.stop_watchers()
+        self.watch_uid = uid
+        self.apps_seen = None
+        self.apps_booted = False
+        self.log_buf = ""
+        self.start_logcat()
+        self.poll_src = GLib.timeout_add_seconds(5, self.poll_apps)
+        self.outbox_src = GLib.timeout_add_seconds(1, self.poll_outbox)
+        threading.Thread(target=self.ensure_bridge, args=(uid,), daemon=True).start()
+
+    def start_logcat(self):
+        """The guest log carries the window layer's task events. The container
+        may not be up yet right after Start, so this is retried from the poll."""
+        self.drop_logcat()
+        try:
+            self.logcat = subprocess.Popen(
+                LXC + ["/system/bin/logcat", "-v", "brief", "-T", "1", "WayDroidService:I", "KibaOSDnd:I", "*:S"],
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1)
+        except OSError as e:
+            log(f"logcat failed: {e}")
+            self.logcat = None
+            return
+        os.set_blocking(self.logcat.stdout.fileno(), False)
+        self.log_src = GLib.io_add_watch(self.logcat.stdout.fileno(), GLib.IO_IN | GLib.IO_HUP,
+                                         self.on_log)
+
+    def drop_logcat(self):
+        src = getattr(self, "log_src", None)
+        if src:
+            GLib.source_remove(src)
+            self.log_src = None
+        lc = getattr(self, "logcat", None)
+        if lc:
+            if lc.poll() is None:
+                lc.terminate()
+            lc.wait()
+        self.logcat = None
+
+    def stop_watchers(self):
+        src = getattr(self, "poll_src", None)
+        if src:
+            GLib.source_remove(src)
+            self.poll_src = None
+        src = getattr(self, "outbox_src", None)
+        if src:
+            GLib.source_remove(src)
+            self.outbox_src = None
+        self.drop_logcat()
+
+    def on_log(self, fd, cond):
+        try:
+            data = os.read(fd, 65536).decode("utf-8", "replace")
+        except (BlockingIOError, OSError):
+            data = ""
+        if not data:
+            if cond & GLib.IO_HUP or not (self.logcat and self.logcat.poll() is None):
+                self.log_src = None
+                return False
+            return True
+        self.log_buf += data
+        *lines, self.log_buf = self.log_buf.split("\n")
+        for line in lines:
+            m = re.search(r"taskCreated (\d+) (\S+)/(\S+)", line)
+            if m:
+                tid, pkg, act = int(m.group(1)), m.group(2), self.full_activity(m.group(2), m.group(3))
+                if not self.hidden_task(pkg, act):
+                    self.TaskCreated(tid, pkg, act)
+                continue
+            m = re.search(r"taskRemoved (\d+)", line)
+            if m:
+                self.TaskDestroyed(int(m.group(1)))
+                continue
+            m = re.match(r"I/KibaOSDnd\(\s*(\d+)\): files app=(\S*) (.*)$", line)
+            if m:
+                if int(m.group(1)) == self.hwc_pid():
+                    GLib.idle_add(lambda a=m.group(2), u=m.group(3).split(): (self.dropped_files(a, u), False)[1])
+                else:
+                    log("drop: ignored a log line that did not come from the window layer")
+        return True
+
+    def host_gamepads(self):
+        """Event nodes of gamepads and joysticks on the host: name -> major:minor."""
+        pads = {}
+        for dev in glob.glob("/sys/class/input/event*"):
+            try:
+                words = open(f"{dev}/device/capabilities/key").read().split()
+                bits = int("".join(w.zfill(16) for w in words) or "0", 16)
+                # BTN_GAMEPAD (BTN_SOUTH) is key 0x130: a keyboard never has it.
+                if not bits >> 0x130 & 1:
+                    continue
+                pads[os.path.basename(dev)] = open(f"{dev}/dev").read().strip()
+            except (OSError, ValueError):
+                continue
+        return pads
+
+    def host_cameras(self):
+        """Capture nodes of cameras on the host that are producing pictures:
+        name -> major:minor. Only a device's first node is the picture, the
+        others carry metadata. Android's camera provider reads a node's
+        formats once, as it appears, so a node with none yet (a virtual camera
+        nobody is feeding) is left out until it has some."""
+        cams = {}
+        for dev in glob.glob("/sys/class/video4linux/video*"):
+            name = os.path.basename(dev)
+            try:
+                if int(open(f"{dev}/index").read()) != 0:
+                    continue
+                majmin = open(f"{dev}/dev").read().strip()
+                fd = os.open(f"/dev/{name}", os.O_RDONLY | os.O_NONBLOCK)
+                try:
+                    # VIDIOC_ENUM_FMT of the first capture format.
+                    fcntl.ioctl(fd, 0xC0405602, struct.pack("<II56x", 0, 1))
+                finally:
+                    os.close(fd)
+                cams[name] = majmin
+            except (OSError, ValueError):
+                continue
+        return cams
+
+    def sync_gamepads(self):
+        """Gamepads and cameras plugged into the host show up in Android. The
+        container has no view of the host's devices, so each node is made
+        inside it as the device appears and removed as it goes."""
+        try:
+            res = subprocess.run(["lxc-info", "-P", LXC_PATH[0], "-n", "waydroid", "-p", "-H"],
+                                 capture_output=True, text=True, timeout=10, check=False)
+            pid = int(res.stdout.strip())
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return
+        # A container that restarted has a fresh /dev with none of the nodes.
+        if getattr(self, "pads_pid", None) != pid:
+            self.pads_in_container = {}
+            self.pads_pid = pid
+        have = self.pads_in_container
+        want = {f"input/{n}": m for n, m in self.host_gamepads().items()}
+        want.update({n: m for n, m in self.host_cameras().items()})
+        toybox = ["nsenter", "-t", str(pid), "-m", "--", "/system/bin/toybox"]
+        try:
+            for name, majmin in want.items():
+                if have.get(name) == majmin:
+                    continue
+                major, minor = majmin.split(":")
+                # World readable: neither Android's input reader nor its camera
+                # service is in the device's group.
+                subprocess.run(toybox + ["rm", "-f", f"/dev/{name}"], timeout=10, check=False)
+                subprocess.run(toybox + ["mknod", "-m", "666", f"/dev/{name}", "c", major, minor],
+                               timeout=10, check=True, capture_output=True)
+                have[name] = majmin
+                log(f"{name} is now in Android")
+            for name in [n for n in have if n not in want]:
+                subprocess.run(toybox + ["rm", "-f", f"/dev/{name}"], timeout=10, check=False)
+                del have[name]
+                log(f"{name} left Android")
+        except (OSError, subprocess.SubprocessError) as e:
+            log(f"device sync failed: {e}")
+        self.pads_in_container = have
+
+    def poll_apps(self):
+        if not (self.session and self.session[1].poll() is None):
+            return True
+        self.sync_gamepads()
+        if self.logcat is None or self.logcat.poll() is not None or not getattr(self, "log_src", None):
+            self.start_logcat()
+        # One cheap guest command decides whether the real list is worth asking
+        # for; the list itself starts several processes.
+        try:
+            # The package manager answers before Android has finished booting,
+            # while the launcher activities Ash's list is made of are not
+            # there yet. A list read then is empty, so nothing counts as seen
+            # until the boot is done.
+            if not self.apps_booted:
+                boot = self.guest("/system/bin/getprop", "sys.boot_completed")
+                if boot.stdout.strip() != "1":
+                    return True
+                self.apps_booted = True
+            res = self.guest("/system/bin/pm", "list", "packages", "--show-versioncode")
+        except Exception as e:  # noqa: BLE001
+            log(f"app poll failed: {e}")
+            return True
+        key = hash(res.stdout)
+        # The first answer counts as a change too: Ash asks for the app list
+        # as soon as it turns Android on, while Android is still starting, gets
+        # nothing, and would otherwise never hear that the apps showed up.
+        if key != self.apps_seen:
+            self.AppsChanged()
+        self.apps_seen = key
+        return True
+
+
+# Properties the window layer needs: per-app windows, one stream per task, and
+# the window ids Ash's ARC code expects (org.chromium.arc.<task id>).
+WAYDROID_PROPS = {
+    "persist.waydroid.multi_windows": "true",
+    "persist.waydroid.task_streams": "true",
+    "persist.kibaos.arc_app_ids": "1",
+    "persist.waydroid.forward_notifications": "true",
+}
+# From this image on every Android window is a freeform task of its own on a
+# big fixed display, so each keeps its own size while others are in front. An
+# older image knows nothing of it and must keep following the focused window.
+MULTIWIN_PROPS = {
+    "persist.kibaos.multiwin": "true",
+    "persist.waydroid.width": "3840",
+    "persist.waydroid.height": "2160",
+}
+MULTIWIN_MIN_VERSION = "2026-10-20"
+# PCI vendors of virtual GPUs (VMware, virtio, Bochs/QEMU). Their drivers have no
+# planar YUV buffers, so the camera preview needs RGBA buffers from the camera HAL.
+VIRTUAL_GPU_VENDORS = ("0x15ad", "0x1af4", "0x1234", "0x1b36")
+WAYDROID_CFG = "/var/lib/waydroid/waydroid.cfg"
+CONTAINER_WAYLAND = "/run/xdg/wayland-0"
+IMAGE_DIR = "/etc/waydroid-extra/images"
+BRIDGE_APK = "/usr/share/kibaos-android/kibaos-bridge.apk"
+BRIDGE_PKG = "org.kibaos.bridge"
+BRIDGE_VERSION = 4
+INSTALLED = os.path.join(IMAGE_DIR, "installed.json")
+MANIFEST = os.environ.get("KIBAOS_ANDROID_MANIFEST", "/etc/kibaos-android/images.json")
+# The manifest that ships with the package is the floor. A newer one is fetched
+# from here (Android images update on their own, not with the OS package) and
+# kept in /var/lib; when there is one it wins.
+MANIFEST_URL = os.environ.get(
+    "KIBAOS_ANDROID_MANIFEST_URL",
+    "https://github.com/KibaLabsLLC/KibaDE/releases/download/android-images/images.json")
+MANIFEST_CACHE = "/var/lib/kibaos-android/images.json"
+# A fetched manifest is only used when it carries a detached OpenPGP signature
+# (images.json.sig next to it) made by a key in one of these keyrings: the
+# release key the package ships, plus any a machine's owner drops in trusted.d.
+RELEASE_KEYRING = "/usr/share/kibaos-android/release.gpg"
+TRUSTED_DIR = "/etc/kibaos-android/trusted.d"
+
+
+TIME_ZONE_RE = re.compile(r"[A-Za-z0-9_+-]+(?:/[A-Za-z0-9_+-]+)*")
+
+
+def host_time_zone():
+    """The desktop's time zone as an Olson id, from where /etc/localtime
+    points; None when it is not a link into the zone database."""
+    try:
+        target = os.readlink("/etc/localtime")
+    except OSError:
+        return None
+    zone = target.split("zoneinfo/", 1)[1] if "zoneinfo/" in target else ""
+    if zone.startswith(("posix/", "right/")):
+        zone = zone.split("/", 1)[1]
+    return zone if TIME_ZONE_RE.fullmatch(zone) else None
+
+
+def virtual_gpu():
+    for dev in glob.glob("/sys/class/drm/card*/device/vendor"):
+        try:
+            with open(dev, encoding="utf-8") as f:
+                if f.read().strip() in VIRTUAL_GPU_VENDORS:
+                    return True
+        except OSError:
+            continue
+    return False
+
+
+def ensure_props():
+    import configparser
+    cfg = configparser.ConfigParser(interpolation=None)
+    cfg.optionxform = str
+    try:
+        cfg.read(WAYDROID_CFG)
+    except configparser.Error as e:
+        log(f"cannot read {WAYDROID_CFG}: {e}")
+        return
+    if not cfg.has_section("properties"):
+        cfg.add_section("properties")
+    changed = False
+    try:
+        with open(INSTALLED, encoding="utf-8") as f:
+            multiwin = str(json.load(f).get("version", "")) >= MULTIWIN_MIN_VERSION
+    except (OSError, ValueError):
+        multiwin = False
+    props = dict(WAYDROID_PROPS)
+    if virtual_gpu():
+        props["persist.kibaos.camera_rgba"] = "1"
+    elif cfg.has_option("properties", "persist.kibaos.camera_rgba"):
+        cfg.remove_option("properties", "persist.kibaos.camera_rgba")
+        changed = True
+    for k, v in props.items():
+        if cfg.get("properties", k, fallback=None) != v:
+            cfg.set("properties", k, v)
+            changed = True
+    for k, v in MULTIWIN_PROPS.items():
+        if multiwin and cfg.get("properties", k, fallback=None) != v:
+            cfg.set("properties", k, v)
+            changed = True
+        elif not multiwin and cfg.has_option("properties", k):
+            cfg.remove_option("properties", k)
+            changed = True
+    if changed:
+        with open(WAYDROID_CFG, "w", encoding="utf-8") as f:
+            cfg.write(f)
+        # Waydroid only folds the config into the Android property files when
+        # it upgrades itself, so do that now, without touching the network.
+        subprocess.run(["waydroid", "upgrade", "-o"], capture_output=True, timeout=120,
+                       check=False)
+
+
+def session_bus(uid):
+    """The bus the user's desktop lives on. Ash and its notification server,
+    portals and file manager are on the bus that dbus-run-session made for the
+    compositor, not on the user's systemd bus, so Android's session talks
+    there when it can; the systemd bus is the fallback."""
+    for pid in filter(str.isdigit, os.listdir("/proc")):
+        try:
+            with open(f"/proc/{pid}/status", encoding="utf-8") as f:
+                if f"Uid:\t{uid}\t" not in f.read():
+                    continue
+            with open(f"/proc/{pid}/comm", encoding="utf-8") as f:
+                comm = f.read().strip()
+            if comm != "weston":
+                continue
+            with open(f"/proc/{pid}/environ", "rb") as f:
+                for kv in f.read().split(b"\0"):
+                    if kv.startswith(b"DBUS_SESSION_BUS_ADDRESS="):
+                        return kv.split(b"=", 1)[1].decode()
+        except OSError:
+            continue
+    path = f"/run/user/{uid}/bus"
+    return f"unix:path={path}" if os.path.exists(path) else None
+
+
+def write_host_generated():
+    """Ash reads the board name from here when it builds the default app list."""
+    d = "/run/arc/host_generated"
+    os.makedirs(d, mode=0o755, exist_ok=True)
+    with open(os.path.join(d, "build.prop"), "w", encoding="utf-8") as f:
+        f.write("ro.product.board=kibaos\nro.product.device=kibaos\n")
+    os.chmod(os.path.join(d, "build.prop"), 0o644)
+
+
+def rebind(pid, src, dst):
+    """--rebind PID SRC DST: bind the file SRC over DST in the mount namespace
+    of process PID. open_tree takes a private copy of SRC here, setns moves
+    this (single threaded) process into the container, and move_mount puts the
+    copy at DST, so the container never needs to see the host's paths."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.syscall.restype = ctypes.c_long
+    open_tree, move_mount = 428, 429
+    at_fdcwd, clone, cloexec, empty_path = -100, 0x1, 0x80000, 0x4
+    tree = libc.syscall(open_tree, at_fdcwd, src.encode(), clone | cloexec)
+    if tree < 0:
+        raise OSError(ctypes.get_errno(), "open_tree " + src)
+    root = os.open(f"/proc/{int(pid)}/root", os.O_RDONLY | os.O_DIRECTORY)
+    os.setns(os.open(f"/proc/{int(pid)}/ns/mnt", os.O_RDONLY), os.CLONE_NEWNS)
+    os.fchdir(root)
+    os.chroot(".")
+    libc.umount2(dst.encode(), 2)  # MNT_DETACH: the old socket is gone, its mount is dead weight
+    if libc.syscall(move_mount, tree, b"", at_fdcwd, dst.encode(), empty_path) < 0:
+        raise OSError(ctypes.get_errno(), "move_mount " + dst)
+
+
+def main():
+    if len(sys.argv) == 5 and sys.argv[1] == "--rebind":
+        try:
+            rebind(*sys.argv[2:])
+        except OSError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
+        return
+    write_host_generated()
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    bus_name = dbus.service.BusName(NAME, bus)  # kept alive: dropping it releases the name
+    loop = GLib.MainLoop()
+    svc = Android(bus, loop)
+    svc.bus_name = bus_name
+    svc.adopt_session()
+    bus.add_signal_receiver(svc.on_timedate, signal_name="PropertiesChanged",
+                            dbus_interface="org.freedesktop.DBus.Properties",
+                            path="/org/freedesktop/timedate1")
+    def refresh_later():
+        threading.Thread(target=svc.refresh_manifest, daemon=True).start()
+        return True
+    GLib.timeout_add_seconds(30, lambda: (refresh_later(), False)[1])
+    GLib.timeout_add_seconds(6 * 3600, refresh_later)
+    GLib.unix_signal_add(GLib.PRIORITY_HIGH, signal.SIGTERM, lambda *_: loop.quit())
+    log("ready")
+    loop.run()
+
+
+if __name__ == "__main__":
+    main()

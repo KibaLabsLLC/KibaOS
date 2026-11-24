@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Exercise the signed repository staging path with a disposable fixture key.
+set -Eeuo pipefail
+# These assertions are bare `grep -Fq` under `set -e`, so a stale expectation
+# ends the run with an exit code and not one word about where. This makes each
+# of them name itself on the way out. Guarded on errexit still being on,
+# because a non-zero exit inside a deliberate `set +e` block is an expected
+# result being collected, not an assertion giving up.
+trap 'case $- in *e*) printf "%s: line %s gave up: %s\n" "${0##*/}" "$LINENO" "$BASH_COMMAND" >&2 ;; esac' ERR
+# shellcheck source=assert.sh
+. "$(dirname -- "$0")/assert.sh"
+
+
+ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd -P)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+install -d -m 0700 "$TMP/gnupg" "$TMP/repo" "$TMP/package"
+export GNUPGHOME="$TMP/gnupg"
+
+gpg --batch --quiet --homedir "$TMP/gnupg" --passphrase '' \
+  --quick-gen-key 'KibaOS test fixture <fixture@example.invalid>' rsa2048 sign 1d \
+  >/dev/null 2>&1
+fingerprint=$(gpg --batch --homedir "$TMP/gnupg" --with-colons --list-secret-keys |
+  awk -F: '$1 == "fpr" {print $10; exit}')
+[[ $fingerprint =~ ^[0-9A-Fa-f]{40}$ ]]
+gpg --batch --quiet --homedir "$TMP/gnupg" --export "$fingerprint" >"$TMP/test-key.gpg"
+
+while IFS= read -r name; do
+  [[ -n $name ]] || continue
+  printf 'pkgname = %s\npkgver = 1.0-1\narch = any\n' "$name" >"$TMP/package/.PKGINFO"
+  package="$TMP/repo/${name}-1.0-1-any.pkg.tar.zst"
+  bsdtar -cf "$package" -C "$TMP/package" .PKGINFO
+  gpg --batch --quiet --homedir "$TMP/gnupg" --passphrase '' \
+    --local-user "$fingerprint" --detach-sign --output "$package.sig" "$package"
+done <"$ROOT/installer/expected-packages.txt"
+
+env \
+  KIBAOS_ARCH_SNAPSHOT=2026/07/12 \
+  KIBAOS_REPO_DIR="$TMP/repo" \
+  KIBAOS_REPO_KEY="$TMP/test-key.gpg" \
+  KIBAOS_REPO_FINGERPRINT="$fingerprint" \
+  KIBAOS_INSTALLER_WORK_ROOT="$TMP/work" \
+  "$ROOT/installer/build-iso.sh" --stage-only >"$TMP/stage.out"
+
+staged=$TMP/work/profile/airootfs/opt/kibaos/repo
+expected=$(grep -Evc '^[[:space:]]*(#|$)' "$ROOT/installer/expected-packages.txt")
+actual=$(find "$staged" -maxdepth 1 -type f -name '*.pkg.tar.*.sig' | wc -l)
+[[ $actual -eq $expected ]]
+[[ -r $staged/kibaos-repository.gpg ]]
+grep -Fxq "$fingerprint" "$TMP/work/profile/airootfs/etc/kibaos-installer/repo-fingerprint"
+refute grep -Fq 'development-unsigned' "$TMP/work/profile/airootfs/etc/kibaos-installer/repo-fingerprint"
+
+# A detached signature that is present but corrupted must fail closed before
+# the profile is accepted. This exercises the real gpgv path with only the
+# disposable fixture key.
+first_package=$(find "$TMP/repo" -maxdepth 1 -type f -name '*.pkg.tar.zst.sig' -print -quit)
+printf '%s\n' 'corrupted signature' >>"$first_package"
+if env \
+  KIBAOS_ARCH_SNAPSHOT=2026/07/12 \
+  KIBAOS_REPO_DIR="$TMP/repo" \
+  KIBAOS_REPO_KEY="$TMP/test-key.gpg" \
+  KIBAOS_REPO_FINGERPRINT="$fingerprint" \
+  KIBAOS_INSTALLER_WORK_ROOT="$TMP/work-invalid-signature" \
+  "$ROOT/installer/build-iso.sh" --stage-only >"$TMP/invalid-signature.out" 2>&1; then
+  echo 'corrupted package signature unexpectedly staged' >&2
+  exit 1
+fi
+grep -Fq 'invalid signature' "$TMP/invalid-signature.out"
+
+echo 'signed ISO staging test: PASS'

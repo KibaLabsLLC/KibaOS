@@ -1,0 +1,160 @@
+diff --git a/ui/file_manager/file_manager/foreground/js/empty_folder_controller.ts b/ui/file_manager/file_manager/foreground/js/empty_folder_controller.ts
+index 23fdca4a8752..4ab50bf0b34c 100644
+--- a/ui/file_manager/file_manager/foreground/js/empty_folder_controller.ts
++++ b/ui/file_manager/file_manager/foreground/js/empty_folder_controller.ts
+@@ -53,6 +53,83 @@ const ODFS_REAUTHENTICATION_REQUIRED = 'foreground/images/files/ui/' +
+ const ODFS_FROZEN_ACCOUNT = 'foreground/images/files/ui/' +
+     'odfs_frozen_account.svg#odfs_frozen_account';
+ 
++/**
++ * KibaOS: the empty state for an ordinary folder.
++ *
++ * Upstream leaves svgRef null for a plain directory, so updateUi_ returns
++ * before it ever unhides the panel and an empty folder renders as blank space
++ * with nothing in it at all. Recents, Trash and search each got a considered
++ * empty state and the folder people actually open the most got none. This
++ * reuses the existing illustration rather than adding an asset.
++ */
++const KIBAOS_EMPTY_FOLDER =
++    'foreground/images/files/ui/empty_folder.svg#empty_folder';
++
++/**
++ * KibaOS: what an empty folder says, chosen by which folder it is.
++ *
++ * The second line of each pair is the one doing the work. "This folder is
++ * empty" tells somebody what they can already see; saying what the folder is
++ * for tells them something they might not know, and it is the difference
++ * between a dead end and a place that is simply waiting.
++ */
++const KIBAOS_EMPTY_MESSAGES: Record<string, Array<[string, string]>> = {
++  [RootType.DOWNLOADS]: [
++    ['Nothing downloaded yet', 'Files you save from the web arrive here.'],
++    ['Nothing downloaded yet', 'This is where the web leaves things for you.'],
++  ],
++  [RootType.MY_FILES]: [
++    ['Nothing here yet', 'This is your space. Anything you keep lives here.'],
++    ['Nothing here yet', 'An empty desk, which is not the worst way to start.'],
++  ],
++  [RootType.REMOVABLE]: [
++    ['This drive is empty', 'Nothing has been written to it yet.'],
++    ['This drive is empty', 'Drag something across and it will be yours to carry.'],
++  ],
++  [RootType.ARCHIVE]: [
++    ['This archive is empty', 'There is nothing packed inside it.'],
++  ],
++  [RootType.CROSTINI]: [
++    ['Nothing here yet', 'Files you share with Linux appear in this folder.'],
++  ],
++};
++
++const KIBAOS_EMPTY_FALLBACK: Array<[string, string]> = [
++  ['This folder is empty', 'Nothing has been put here yet.'],
++  ['This folder is empty', 'Empty, and ready when you are.'],
++];
++
++/**
++ * KibaOS: pick one line and keep picking the same one.
++ *
++ * A folder that reworded itself on every redraw would read as a glitch rather
++ * than a flourish, so the choice is derived from the folder's own key and the
++ * calendar day. The same folder says the same thing all day and quietly says
++ * something else tomorrow, which is the only way a variant is ever noticed
++ * without being irritating.
++ */
++function kibaOsVariantIndex(seed: string, count: number): number {
++  if (count <= 1) {
++    return 0;
++  }
++  const day = Math.floor(Date.now() / 86400000);
++  let hash = day % 1024;
++  for (let i = 0; i < seed.length; i++) {
++    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
++  }
++  return Math.abs(hash) % count;
++}
++
++/**
++ * KibaOS: the title and description for an empty ordinary folder.
++ */
++export function kibaOsEmptyFolderMessage(
++    rootType: string|null, fileKey: string|undefined): [string, string] {
++  const options = (rootType && KIBAOS_EMPTY_MESSAGES[rootType]) ||
++      KIBAOS_EMPTY_FALLBACK;
++  return options[kibaOsVariantIndex(fileKey || String(rootType), options.length)]!;
++}
++
+ /**
+  * The state of the user's OneDrive account. Matches the enum in ODFS.
+  */
+@@ -399,6 +476,7 @@ export class EmptyFolderController {
+       return;
+     }
+     const currentRootType = this.directoryModel_.getCurrentRootType();
++    let kibaOsEmptyFolder = false;
+ 
+     if (isRecentRootType(currentRootType)) {
+       svgRef = RECENTS_EMPTY_FOLDER;
+@@ -411,6 +489,13 @@ export class EmptyFolderController {
+       const {search} = getStore().getState();
+       if (search && search.query) {
+         svgRef = SEARCH_EMPTY_RESULTS;
++      } else {
++        // KibaOS: an ordinary folder gets an empty state too. Tracked with its
++        // own flag rather than by comparing svgRef, because this reuses the
++        // Recents illustration and comparing the two by value would answer for
++        // Recents as well.
++        svgRef = KIBAOS_EMPTY_FOLDER;
++        kibaOsEmptyFolder = true;
+       }
+     }
+ 
+@@ -445,12 +530,29 @@ export class EmptyFolderController {
+     }
+ 
+     if (svgRef === SEARCH_EMPTY_RESULTS) {
++      // KibaOS: a search that finds nothing is the one place somebody types a
++      // word and gets told nothing came back, so it is the right place to
++      // answer the oldest one. Colossal Cave has replied "Nothing happens."
++      // to xyzzy since 1977, and anybody who types it here already knows that.
++      const {search} = getStore().getState();
++      const query = (search && search.query || '').trim().toLowerCase();
++      if (query === 'xyzzy') {
++        this.showMessage_('Nothing happens.', 'Nothing happens here either.');
++        return;
++      }
+       this.showMessage_(
+           str('SEARCH_NO_MATCHING_RESULTS_TITLE'),
+           str('SEARCH_NO_MATCHING_RESULTS_DESC'));
+       return;
+     }
+ 
++    if (kibaOsEmptyFolder) {
++      const [title, description] = kibaOsEmptyFolderMessage(
++          currentRootType, this.directoryModel_.getCurrentFileKey());
++      this.showMessage_(title, description);
++      return;
++    }
++
+     switch (this.recentEntry_.fileCategory) {
+       case chrome.fileManagerPrivate.FileCategory.AUDIO:
+         this.showMessage_(str('RECENT_EMPTY_AUDIO_FOLDER'));
+diff --git a/ui/file_manager/file_manager/main.html b/ui/file_manager/file_manager/main.html
+index b0bf9471f3c1..da362c9395cb 100644
+--- a/ui/file_manager/file_manager/main.html
++++ b/ui/file_manager/file_manager/main.html
+@@ -96,9 +96,14 @@ found in the LICENSE file.
+                label="$i18n{DRIVE_VISIT_DRIVE_GOOGLE_COM}">
+ 
+       <command id="toggle-pinned" label="$i18n{OFFLINE_COLUMN_LABEL}">
++      <!-- KibaOS: Ctrl+H alongside Ctrl+period. Every Linux file manager has
++           bound Ctrl+H to hidden files for twenty years, so it is the key
++           people already press here, and dotfiles are ordinary on this system
++           rather than an oddity. The shortcut text is no longer hidden either:
++           a toggle nobody can find is a toggle nobody uses. -->
+       <command id="toggle-hidden-files"
+                label="$i18n{TOGGLE_HIDDEN_FILES_COMMAND_LABEL}"
+-               shortcut=".|Ctrl" hide-shortcut-text>
++               shortcut=".|Ctrl h|Ctrl">
+       <command id="toggle-hidden-android-folders"
+                label="$i18n{SHOW_ALL_ANDROID_FOLDERS_OPTION}">
+ 

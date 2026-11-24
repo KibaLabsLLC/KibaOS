@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!--
+  org.kibaos.Kiba1: the contract between kibavoiced (the Kiba assistant
+  daemon) and the KibaDE shell. kibavoiced owns org.kibaos.Kiba on the
+  user's session bus, at /org/kibaos/Kiba. The shell draws the assistant;
+  the daemon owns the microphone, the wake phrase, the model and the voice.
+
+  State strings, in the order a request normally moves through them:
+    setup          first run: models are still being downloaded
+    idle           listening for "Hey Kiba" (or muted, see Muted)
+    listening      capturing the request after the wake phrase or Talk()
+    transcribing   turning the request into text
+    thinking       the language model is answering
+    speaking       the answer is being read aloud
+    unavailable    no usable microphone or the engine is missing; Status says why
+
+  Text from the microphone, the model and the web is untrusted. Nothing in
+  this interface takes a command line, a path or a shell string.
+-->
+<node>
+  <interface name="org.kibaos.Kiba1">
+
+    <!-- Start capturing a request now, without the wake phrase. -->
+    <method name="Talk"/>
+
+    <!-- Stop speaking, or give up on the request being captured. -->
+    <method name="Stop"/>
+
+    <!-- Ask a typed question. The answer arrives as Answered and is read
+         aloud unless Muted. Rejected while the daemon is already busy. -->
+    <method name="Ask">
+      <arg name="text" type="s" direction="in"/>
+    </method>
+
+    <!-- Mute the microphone (no wake phrase) and the voice. -->
+    <method name="SetMuted">
+      <arg name="muted" type="b" direction="in"/>
+    </method>
+
+    <!-- The shell turns the level stream on while its bubble is visible and
+         off again afterwards, so an idle desktop sends no 30 Hz traffic. -->
+    <method name="SetLevelStream">
+      <arg name="enabled" type="b" direction="in"/>
+    </method>
+
+    <property name="State" type="s" access="read"/>
+    <property name="Status" type="s" access="read"/>
+    <property name="Muted" type="b" access="read"/>
+    <!-- True once the language model and speech models are on disk. -->
+    <property name="Ready" type="b" access="read"/>
+
+    <signal name="StateChanged">
+      <arg name="state" type="s"/>
+      <arg name="status" type="s"/>
+    </signal>
+
+    <!-- The wake phrase was heard. The shell shows its bubble. -->
+    <signal name="WakeHeard"/>
+
+    <signal name="Transcribed">
+      <arg name="text" type="s"/>
+    </signal>
+
+    <signal name="Answered">
+      <arg name="question" type="s"/>
+      <arg name="answer" type="s"/>
+    </signal>
+
+    <!-- Only while SetLevelStream(true), about 30 times a second.
+         rms is 0..1; low, mid and high are spectral weights summing to ~1. -->
+    <signal name="Level">
+      <arg name="rms" type="d"/>
+      <arg name="low" type="d"/>
+      <arg name="mid" type="d"/>
+      <arg name="high" type="d"/>
+    </signal>
+  </interface>
+</node>

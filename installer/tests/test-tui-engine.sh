@@ -1,0 +1,410 @@
+#!/usr/bin/env bash
+# The whole front end, end to end, against a recording stub engine.
+#
+# The flow test checks what the state machine records. This one checks what
+# actually reaches the engine, which is the question that matters: the engine
+# is the program that erases disks, and every safety property of this front end
+# is a statement about the arguments it does or does not pass.
+#
+# So the stub records its argv and its environment, and the assertions are
+# about ordering and refusal:
+#
+#   the dry run happens before the erase gate, so the plan the user approves is
+#   the plan the engine produced;
+#   `--execute` is never passed without a confirmation token that matches the
+#   selected disk exactly;
+#   leaving the gate by any route other than typing that token means the engine
+#   is never invoked with `--execute` at all;
+#   no secret is ever passed as an argument or written to the raw log.
+set -Eeuo pipefail
+
+ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd -P)
+
+# The frame grows with the terminal, so the width is pinned here the way the
+# height already is. Without it a screen rendered on a build machine with a
+# wide terminal and the same screen rendered in CI are different screens, and
+# every column measurement below is measuring the margin.
+export KIBAOS_TUI_COLUMNS=68
+
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+fail() { echo "test-tui-engine: $*" >&2; exit 1; }
+
+command -v openssl >/dev/null 2>&1 || {
+  echo 'installer TUI engine test: SKIP (openssl not available)'
+  exit 0
+}
+
+install -d "$TMP/zoneinfo" "$TMP/locales" "$TMP/keymaps/i386/qwerty" \
+  "$TMP/block/sda" "$TMP/block/sdb" "$TMP/dri" "$TMP/stub" \
+  "$TMP/bundle" "$TMP/installer-meta"
+: >"$TMP/zoneinfo/UTC"; : >"$TMP/locales/en_US"
+: >"$TMP/keymaps/i386/qwerty/us.map.gz"; : >"$TMP/dri/renderD128"
+cat >"$TMP/stub/loadkeys" <<'STUB'
+#!/usr/bin/env bash
+exit 0
+STUB
+chmod +x "$TMP/stub/loadkeys"
+# Nothing in this test may restart the machine running it. The done screen and
+# the failure menu both offer a restart, and an earlier version of this test
+# pressed enter on one as root and rebooted the developer's computer. So the
+# restart is a stand in that writes a line, systemctl is a stub that refuses,
+# and the live medium marker points somewhere that does not exist.
+cat >"$TMP/stub/systemctl" <<'STUB'
+#!/usr/bin/env bash
+echo "systemctl $*" >>"${KIBAOS_TEST_SYSTEMCTL_LOG:-/dev/null}"
+exit 1
+STUB
+cat >"$TMP/stub/reboot-stand-in" <<'STUB'
+#!/usr/bin/env bash
+echo reboot >>"${KIBAOS_TEST_REBOOT_LOG:?}"
+STUB
+chmod +x "$TMP/stub/systemctl" "$TMP/stub/reboot-stand-in"
+export PATH="$TMP/stub:$PATH"
+export KIBAOS_REBOOT_CMD="$TMP/stub/reboot-stand-in"
+export KIBAOS_TEST_REBOOT_LOG="$TMP/reboots"
+export KIBAOS_TEST_SYSTEMCTL_LOG="$TMP/systemctl"
+export KIBAOS_LIVE_MARKER="$TMP/not-a-live-medium"
+printf '%s\n' '2026/07/12' >"$TMP/snapshot"
+printf 'MemAvailable:   16000000 kB\n' >"$TMP/meminfo"
+printf '%s\n' \
+  '/dev/sda|931.5G|WDC WD10EZEX|sata|WD-WCC6Y4KP1234' \
+  '/dev/sdb|28.7G|SanDisk Ultra|usb|4C5300011212' >"$TMP/disks"
+
+PASSWORD='correct horse battery staple'
+PASSPHRASE='a passphrase with spaces'
+
+# A stub engine that records every invocation and writes journal records for
+# the stages it claims to have run. KIBAOS_STUB_FAIL_AT names a stage to fail.
+cat >"$TMP/stub-engine" <<'STUB'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+printf '%s\n' "$*" >>"$KIBAOS_STUB_CALLS"
+mode=dry-run
+for arg in "$@"; do [[ $arg != --execute ]] || mode=execute; done
+printf 'stub engine invoked in %s mode\n' "$mode"
+[[ $mode == execute ]] || exit "${KIBAOS_STUB_DRYRUN_STATUS:-0}"
+
+. "${KIBAOS_JOURNAL_LIB}"
+target=''
+previous=''
+for arg in "$@"; do
+  [[ $previous != --target ]] || target=$arg
+  previous=$arg
+done
+kibaos_journal_init execute "$target"
+printf 'stub engine running stages\n'
+for stage in preflight package-check; do
+  kibaos_journal_begin "$stage" "starting $stage"
+  if [[ ${KIBAOS_STUB_FAIL_AT:-} == "$stage" ]]; then
+    kibaos_journal_fail "$stage" 1 unexpected_exit "a step ended without reporting why" \
+      retry export log shell reboot
+    exit 1
+  fi
+  if [[ $stage == package-check ]]; then
+    kibaos_journal_ok "$stage" workspace
+  else
+    kibaos_journal_ok "$stage" "finished $stage"
+  fi
+done
+for stage in acquire confirm partition format mount pacstrap \
+  configure bootloader snapshot verify-install; do
+  kibaos_journal_begin "$stage" "starting $stage"
+  if [[ ${KIBAOS_STUB_FAIL_AT:-} == "$stage" ]]; then
+    kibaos_journal_fail "$stage" 1 unexpected_exit "a step ended without reporting why" \
+      retry export log shell reboot
+    exit 1
+  fi
+  kibaos_journal_ok "$stage" "finished $stage"
+done
+exit 0
+STUB
+chmod +x "$TMP/stub-engine"
+
+export KIBAOS_ZONEINFO_DIR="$TMP/zoneinfo" KIBAOS_LOCALE_DIR="$TMP/locales"
+export KIBAOS_KEYMAP_DIR="$TMP/keymaps" KIBAOS_BLOCK_DIR="$TMP/block"
+export KIBAOS_SNAPSHOT_FILE="$TMP/snapshot" KIBAOS_DISK_TABLE="$TMP/disks"
+export KIBAOS_PROBE_MEMINFO="$TMP/meminfo" KIBAOS_PROBE_DRI_DIR="$TMP/dri"
+# The production probe allows five seconds for an optional eglinfo call. This
+# fixture drives many independent installer flows, so bound that optional
+# lookup tightly while retaining the dedicated probe test's renderer cases.
+export KIBAOS_PROBE_GL_TIMEOUT=0.2
+export KIBAOS_TUI_COLOR=none KIBAOS_TUI_FRAME=ascii
+# Pinned so the progress screen picks the same layout everywhere.
+export KIBAOS_TUI_HEIGHT=34
+export KIBAOS_INSTALL_ENGINE="$TMP/stub-engine"
+export KIBAOS_JOURNAL_LIB="$ROOT/installer/lib/kibaos-journal.sh"
+export TMPDIR="$TMP"
+export KIBAOS_BUNDLE_DIR="$TMP/bundle"
+printf '%s\n' development-unsigned >"$TMP/installer-meta/repo-fingerprint"
+export KIBAOS_REPO_FINGERPRINT_FILE="$TMP/installer-meta/repo-fingerprint"
+
+# Answer the default path, then whatever the scenario adds at the gate.
+answers() {
+  local i
+  echo enter                       # welcome
+  echo c                           # network: continue on the wired test image
+  echo enter                       # locale (default)
+  echo enter                       # keymap (default)
+  echo enter                       # keyboard check
+  echo enter                       # timezone (default)
+  echo enter                       # disk -> /dev/sda
+  echo enter                       # hostname (default)
+  for (( i = 0; i < 4; i++ )); do echo 'a'; done; echo enter   # username aaaa
+  script_secret "$PASSWORD"
+  echo enter                       # encrypt: yes
+  script_secret "$PASSPHRASE"
+  echo c                           # review: continue
+                                 # `enter` on the review screen now edits the
+                                 # selected line, because a screen whose rows
+                                 # are all selectable should not have an enter
+                                 # that sometimes starts erasing a disk.
+}
+
+script_secret() {
+  local text=$1
+  for _ in 1 2; do
+    local i
+    for (( i = 0; i < ${#text}; i++ )); do
+      if [[ ${text:i:1} == ' ' ]]; then echo space; else printf '%s\n' "${text:i:1}"; fi
+    done
+    echo enter
+  done
+}
+
+typed_token() {
+  local text=$1 i
+  for (( i = 0; i < ${#text}; i++ )); do
+    if [[ ${text:i:1} == ' ' ]]; then echo space; else printf '%s\n' "${text:i:1}"; fi
+  done
+}
+
+run_flow() {
+  local name=$1
+  export KIBAOS_STUB_CALLS="$TMP/calls.$name"
+  : >"$KIBAOS_STUB_CALLS"
+  env KIBAOS_INSTALLER_TUI_LIB=1 \
+      KIBAOS_STUB_DRYRUN_STATUS="${KIBAOS_STUB_DRYRUN_STATUS:-0}" \
+      KIBAOS_STUB_FAIL_AT="${KIBAOS_STUB_FAIL_AT:-}" \
+      KIBAOS_TUI_KEYS="$TMP/keys.$name" \
+      KIBAOS_JOURNAL_PATH="$TMP/journal.$name.jsonl" \
+      KIBAOS_JOURNAL_RAW="$TMP/raw.$name.log" \
+      KIBAOS_FAILURE_EXPORT_DIR="${KIBAOS_TEST_EXPORT_DIR:-$TMP/export.$name}" \
+      KIBAOS_TEST_PLAN_ONLY="${KIBAOS_TEST_PLAN_ONLY:-0}" \
+      bash -c '
+        set -Eeuo pipefail
+        . "$1"
+        exec {_TUI_KEYFD}<"$KIBAOS_TUI_KEYS"
+        export _TUI_KEYFD
+        JOURNAL_FILE=$KIBAOS_JOURNAL_PATH
+        RAW_LOG=$KIBAOS_JOURNAL_RAW
+        EXPORT_DIR=$KIBAOS_FAILURE_EXPORT_DIR
+        PLAN_ONLY=$KIBAOS_TEST_PLAN_ONLY
+        main_flow
+      ' _ "$ROOT/installer/bin/kibaos-installer-tui" >"$TMP/out.$name" 2>&1
+}
+
+# --- a complete install -----------------------------------------------------
+{ answers; typed_token 'ERASE:/dev/sda'; echo enter; echo enter; } >"$TMP/keys.happy"
+run_flow happy || fail "a complete install returned non-zero: $(tail -3 "$TMP/out.happy")"
+
+calls=$TMP/calls.happy
+(( $(wc -l <"$calls") == 2 )) || fail "expected exactly two engine calls, got $(wc -l <"$calls")"
+head -1 "$calls" | grep -Fq -- '--dry-run' || fail 'the first engine call was not the dry run'
+head -1 "$calls" | grep -Fq -- '--execute' && fail 'the dry run was passed --execute'
+tail -1 "$calls" | grep -Fq -- '--execute' || fail 'the second engine call did not execute'
+tail -1 "$calls" | grep -Fq -- '--confirm ERASE:/dev/sda' ||
+  fail 'the execute call did not carry the exact confirmation token'
+tail -1 "$calls" | grep -Fq -- '--target /dev/sda' || fail 'the execute call named the wrong disk'
+tail -1 "$calls" | grep -Fq -- '--arch-snapshot 2026/07/12' ||
+  fail 'the execute call lost the image snapshot date'
+tail -1 "$calls" | grep -Fq -- '--encrypt' || fail 'encryption was requested but not passed'
+tail -1 "$calls" | grep -Fq -- '--allow-unsigned' ||
+  fail 'the image repository policy was not passed to the engine'
+
+# The finished screen must actually be reached.
+grep -Fq 'KibaOS is installed' "$TMP/out.happy" || fail 'the finished screen was never shown'
+# Enter on the finished screen restarts, through the stand in and never systemctl.
+[[ $(cat "$TMP/reboots" 2>/dev/null) == reboot ]] ||
+  fail 'enter on the finished screen did not ask for exactly one restart'
+[[ ! -s $TMP/systemctl ]] || fail "the installer called systemctl: $(cat "$TMP/systemctl")"
+# And the journal the engine wrote must have driven a progress render.
+grep -Fq 'Installing the base system' "$TMP/out.happy" || fail 'no progress screen was rendered'
+
+# --- no secret leaves the process ------------------------------------------
+! grep -Fq "$PASSWORD" "$calls" || fail 'the password was passed to the engine as an argument'
+! grep -Fq "$PASSPHRASE" "$calls" || fail 'the passphrase was passed to the engine as an argument'
+! grep -Fq "$PASSWORD" "$TMP/out.happy" || fail 'the password appeared on screen'
+! grep -Fq "$PASSPHRASE" "$TMP/out.happy" || fail 'the passphrase appeared on screen'
+! grep -Fq "$PASSWORD" "$TMP/raw.happy.log" || fail 'the password reached the raw log'
+! grep -Fq "$PASSPHRASE" "$TMP/raw.happy.log" || fail 'the passphrase reached the raw log'
+! grep -Fq "$PASSWORD" "$TMP/journal.happy.jsonl" || fail 'the password reached the journal'
+! grep -Fq "$PASSPHRASE" "$TMP/journal.happy.jsonl" || fail 'the passphrase reached the journal'
+# The secret directory is removed on exit, so nothing survives the run.
+find "$TMP" -maxdepth 1 -name 'kibaos-installer.*' -print -quit | grep -q . &&
+  fail 'the secret directory outlived the installer'
+
+# --- escaping the erase gate never reaches --execute ------------------------
+{ answers; typed_token 'ERASE:/dev/sda'; echo esc; } >"$TMP/keys.escaped"
+run_flow escaped || fail 'cancelling at the erase gate returned non-zero'
+grep -Fq 'Nothing was changed' "$TMP/out.escaped" ||
+  fail 'cancelling at the gate did not show the cancelled screen'
+(( $(wc -l <"$TMP/calls.escaped") == 1 )) ||
+  fail 'more than the dry run ran after the gate was cancelled'
+! grep -Fq -- '--execute' "$TMP/calls.escaped" ||
+  fail 'the engine was told to execute after the gate was cancelled'
+
+# --- a token for a different disk never reaches --execute -------------------
+{
+  answers
+  typed_token 'ERASE:/dev/sdb'; echo enter   # wrong disk: must not proceed
+  echo esc                                   # leave the gate
+} >"$TMP/keys.wrongdisk"
+run_flow wrongdisk || fail 'a mistyped token returned non-zero'
+! grep -Fq -- '--execute' "$TMP/calls.wrongdisk" ||
+  fail 'a confirmation token naming a different disk was accepted'
+
+# --- quitting before any question runs no engine at all ---------------------
+{ echo esc; echo q; } >"$TMP/keys.quit"
+run_flow quit || fail 'quitting at the welcome screen returned non-zero'
+[[ ! -s $TMP/calls.quit ]] || fail 'the engine ran even though the user quit at the welcome screen'
+grep -Fq 'Nothing was changed' "$TMP/out.quit" || fail 'quitting did not confirm that nothing changed'
+
+# --- a failing dry run stops before the gate --------------------------------
+{ answers; echo esc; } >"$TMP/keys.dryfail"
+KIBAOS_STUB_DRYRUN_STATUS=3 run_flow dryfail && fail 'a failing dry run reported success'
+(( $(wc -l <"$TMP/calls.dryfail") == 1 )) || fail 'the engine ran again after the dry run failed'
+! grep -Fq -- '--execute' "$TMP/calls.dryfail" ||
+  fail 'the erase gate was reached even though the dry run failed'
+
+# --- a mid-install failure lands on the failure screen ----------------------
+{ answers; typed_token 'ERASE:/dev/sda'; echo enter; echo esc; } >"$TMP/keys.bootfail"
+KIBAOS_STUB_FAIL_AT=bootloader run_flow bootfail && fail 'a failed install reported success'
+grep -Fq 'Making it bootable did not finish' "$TMP/out.bootfail" ||
+  fail 'the failure screen did not name the failed stage'
+sed 's/^ *[|+]//; s/[|+] *$//' "$TMP/out.bootfail" | tr '\n' ' ' | tr -s ' ' |
+  grep -Fq 'no way to carry on from where this stopped' ||
+  fail 'the failure screen did not admit that it cannot resume'
+# Scoped to the failure screen. This file captures the whole session, and a
+# question's own help text earlier in the run is not the failure screen
+# offering to retry anything.
+sed -n '/Making it bootable did not finish/,$p' "$TMP/out.bootfail" >"$TMP/failscreen.bootfail"
+! grep -Fq 'Try ' "$TMP/failscreen.bootfail" ||
+  fail 'the failure screen offered a retry the engine cannot honour'
+grep -Fq '"stage":"bootloader","status":"failed"' "$TMP/journal.bootfail.jsonl" ||
+  fail 'the journal did not record the failure'
+
+# --- the diagnostic report can be exported from the failure screen ----------
+{
+  answers; typed_token 'ERASE:/dev/sda'; echo enter
+  echo enter                     # save a diagnostic report (first option)
+  echo esc
+} >"$TMP/keys.export"
+KIBAOS_STUB_FAIL_AT=bootloader run_flow export && true
+# The helper keeps each source file's own basename, so the export is matched
+# by prefix rather than by an assumed name.
+exported=$(find "$TMP/export.export" -name 'journal.*' 2>/dev/null | head -1 || true)
+[[ -n $exported ]] || fail 'the failure screen did not export a diagnostic report'
+[[ $(stat -c '%a' "$exported") == 600 ]] || fail 'the exported journal is not mode 0600'
+! grep -Fq "$PASSWORD" "$exported" || fail 'the exported journal contains the password'
+raw_export=$(find "$TMP/export.export" -name 'raw.*' 2>/dev/null | head -1 || true)
+if [[ -n $raw_export ]]; then
+  ! grep -Fq "$PASSWORD" "$raw_export" || fail 'the exported raw log contains the password'
+  ! grep -Fq "$PASSPHRASE" "$raw_export" || fail 'the exported raw log contains the passphrase'
+fi
+
+# --- --plan-only can never reach --execute ---------------------------------
+# The flag exists so an operator can see the plan without any risk at all, so
+# the guarantee has to be that no key sequence gets past it - including one
+# that types a correct erase token.
+{
+  answers
+  typed_token 'ERASE:/dev/sda'; echo enter
+  echo enter; echo enter; echo esc
+} >"$TMP/keys.planonly"
+KIBAOS_TEST_PLAN_ONLY=1 run_flow planonly ||
+  fail '--plan-only returned non-zero on a complete answer set'
+(( $(wc -l <"$TMP/calls.planonly") == 1 )) ||
+  fail "--plan-only ran the engine $(wc -l <"$TMP/calls.planonly") times instead of once"
+grep -Fq -- '--dry-run' "$TMP/calls.planonly" || fail '--plan-only did not run the dry run'
+! grep -Fq -- '--execute' "$TMP/calls.planonly" ||
+  fail '--plan-only reached a destructive invocation'
+! grep -Fq -- '--confirm' "$TMP/calls.planonly" ||
+  fail '--plan-only built a confirmation token'
+! grep -Fq 'Confirm erase' "$TMP/out.planonly" ||
+  fail '--plan-only displayed the erase gate'
+[[ ! -e /dev/sda ]] || true
+
+# --- going back from the erase gate returns to review, as the footer says ---
+{
+  answers
+  echo esc                                   # gate -> review
+  echo c                                     # review -> prepare -> gate again
+  typed_token 'ERASE:/dev/sda'; echo enter   # now go through
+  echo enter
+} >"$TMP/keys.gateback"
+run_flow gateback || fail 'going back from the erase gate broke the flow'
+grep -Fq 'KibaOS is installed' "$TMP/out.gateback" ||
+  fail 'the install did not complete after going back and forward again'
+# Two dry runs, because returning to review re-validates the plan, then one
+# execute. The important part is that exactly one execute happened.
+(( $(grep -c -- '--execute' "$TMP/calls.gateback") == 1 )) ||
+  fail 'the engine executed more than once across a back-and-forward'
+(( $(grep -c -- '--dry-run' "$TMP/calls.gateback") == 2 )) ||
+  fail 'the plan was not re-validated after returning to the review screen'
+
+# --- a failed export says so, and the menu stays usable ---------------------
+# The helper exits with the install status on success and 2 on failure, so its
+# exit code cannot distinguish them. Reporting "Saved" for a report that was
+# never written is the failure this guards.
+{
+  answers; typed_token 'ERASE:/dev/sda'; echo enter
+  echo enter                     # save a diagnostic report -> must fail
+  echo down                      # menu still responds
+  echo esc
+} >"$TMP/keys.exportfail"
+KIBAOS_STUB_FAIL_AT=bootloader KIBAOS_TEST_EXPORT_DIR=/proc/kibaos-cannot-write \
+  run_flow exportfail && fail 'a failed install reported success'
+# Flatten the frame before matching: these sentences wrap, and an assertion
+# that depends on where they wrap breaks whenever the wording shifts.
+flatten() { tr -d '|' <"$1" | tr -s ' \n' '  ' ; }
+flatten "$TMP/out.exportfail" >"$TMP/exportfail.flat"
+grep -Fq 'Could not save a report' "$TMP/exportfail.flat" ||
+  fail 'a failed export did not report the failure'
+! grep -Fq 'Saved to' "$TMP/exportfail.flat" ||
+  fail 'a failed export claimed the report was saved'
+[[ ! -e /proc/kibaos-cannot-write ]] ||
+  fail 'the export wrote somewhere it should not have'
+# The menu is redrawn after the failed attempt, so the user still has options.
+(( $(grep -c 'See the full log' "$TMP/out.exportfail") >= 2 )) ||
+  fail 'the failure menu did not survive a failed export'
+grep -Fq 'Open a terminal' "$TMP/out.exportfail" ||
+  fail 'the failure menu lost its options after a failed export'
+
+# --- raw command output stays out of the structured journal -----------------
+# The journal is the contract the UI parses; a stray line of subprocess output
+# in it is both a parse hazard and a disclosure risk.
+python3 - "$TMP/journal.happy.jsonl" <<'PY' || fail 'the journal is not valid JSONL'
+import json, sys
+for n, line in enumerate(open(sys.argv[1]), 1):
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        json.loads(line)
+    except Exception as exc:
+        print(f'line {n} is not valid JSON: {exc}', file=sys.stderr)
+        sys.exit(1)
+PY
+! grep -Fq 'stub engine running stages' "$TMP/journal.happy.jsonl" ||
+  fail 'engine stdout leaked into the structured journal'
+grep -Fq 'stub engine running stages' "$TMP/raw.happy.log" ||
+  fail 'engine stdout did not reach the raw log'
+
+# A dry run that fails never reaches the execute call, so nothing truncates the
+# log and its output is exactly what the failure screen has to work with.
+grep -Fq 'stub engine invoked in dry-run mode' "$TMP/raw.dryfail.log" ||
+  fail 'the failing dry run left no output in the raw log'
+
+echo 'installer TUI engine test: PASS'

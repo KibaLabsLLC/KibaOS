@@ -1,0 +1,34 @@
+# Maintainer: KibaOS Contributors
+#
+# shill-nm-adapter: bridge that provides the org.chromium.flimflam DBus
+# interface required by ChromeOS Ash, translating to/from NetworkManager.
+# Allows the ChromeOS Ash desktop build to use the standard Linux network
+# stack without any Chromium source patches.
+
+pkgname=shill-nm-adapter
+pkgver=0.1.0
+pkgrel=9
+pkgdesc="Shill-to-NetworkManager DBus bridge for ChromeOS Ash"
+install=shill-nm-adapter.install
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=(
+    'dbus'
+    'python'
+    'python-dbus'
+    'python-gobject'
+    'glib2'
+    'networkmanager'
+)
+makedepends=()
+checkdepends=('python')
+source=(
+    "shill_nm_adapter.py"
+    "test_shill_nm_adapter.py"
+    "shill-nm-adapter.service"
+    "shill-nm-adapter.install"
+    "org.chromium.flimflam.conf"
+    "LICENSE"
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.chromium.SessionManager
+Exec=/usr/bin/python /usr/lib/chromiumos-ash/kibaos-session-manager-shim.py
+User=root
+SystemdService=kibaos-session-manager.service

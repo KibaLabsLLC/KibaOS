@@ -1,0 +1,10 @@
+[Unit]
+Description=KibaOS Android service
+Documentation=https://github.com/KibaLabsLLC/KibaDE
+
+[Service]
+Type=dbus
+BusName=org.kibaos.Android1
+ExecStart=/usr/lib/kibaos-android/kibaos-android
+Restart=on-failure
+KillMode=process

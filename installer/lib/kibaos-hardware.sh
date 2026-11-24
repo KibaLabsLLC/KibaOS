@@ -1,0 +1,161 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034  # the HW_* results are read by the installer that sources this file
+# What this machine needs beyond the stock Arch packages, worked out from the
+# firmware's description of it (DMI) and the PCI devices on it.
+#
+# Most machines need nothing: the firmware packages on every install cover
+# Intel, Qualcomm Atheros, Realtek, MediaTek and Marvell Wi-Fi, which is every
+# Surface (the Laptop 1 and 2, Pro 4 to 6 and Book 1 and 2 are Marvell; the
+# Go is Qualcomm Atheros; later ones are Intel) and every x86 Chromebook. The
+# keyboards that need help at the disk unlock prompt, Surface laptops and
+# 2015 to 2017 Macs, are handled by the kibaos-hardware package on every
+# install. What is left is decided here:
+#
+#   Broadcom Wi-Fi   A handful of Broadcom chips, the Wi-Fi in most Intel Macs
+#                    among them, only work with Broadcom's own driver. Arch
+#                    ships it as source, broadcom-wl-dkms, built against the
+#                    installed kernel's headers. Installed only when one of
+#                    those chips is present: it switches the open drivers off
+#                    for every other Broadcom chip.
+#   T2 Macs          2018 to 2020 Macs keep the keyboard, trackpad and Wi-Fi
+#                    behind Apple's T2 chip, which needs a kernel Arch does not
+#                    ship. Said, rather than installed silently broken.
+#   Surface touch    The touchscreen and pen need the linux-surface kernel,
+#                    which KibaOS does not install. Said, so nobody thinks the
+#                    install broke it.
+#   Chromebook sound Speakers and microphones need per-model sound settings
+#                    that Arch does not carry, and on some models the wrong
+#                    ones can damage the speakers. Said, with where the fix
+#                    for each model is, rather than guessed at.
+#   Virtual machines The hypervisor's guest tools, so the VM shuts down when
+#                    asked, keeps its clock and reports its address: VMware's
+#                    open-vm-tools, the QEMU guest agent (which its own udev
+#                    rule starts), VirtualBox's service without its X11 half,
+#                    and Hyper-V's daemons. Parallels Tools are not in Arch,
+#                    so that one is said instead.
+#
+# Everything reads under KIBAOS_HW_ROOT (default /), so tests can describe a
+# machine with a directory of files.
+
+KIBAOS_HW_ROOT=${KIBAOS_HW_ROOT:-/}
+
+# Broadcom devices (vendor 14e4) that only broadcom-wl drives: BCM4331,
+# BCM43227, BCM43228, BCM43142, BCM4360 and BCM4352.
+KIBAOS_HW_WL_DEVICES=(4331 4358 4359 4365 43a0 43b1)
+
+# Filled by kibaos_hw_detect.
+HW_PACKAGES=()
+HW_NOTES=()
+HW_SERVICES=()
+HW_SUMMARY=generic
+
+_kibaos_hw_dmi() {
+  local field=$1 value=
+  [[ -r ${KIBAOS_HW_ROOT%/}/sys/class/dmi/id/$field ]] &&
+    IFS= read -r value <"${KIBAOS_HW_ROOT%/}/sys/class/dmi/id/$field" || true
+  printf '%s' "$value"
+}
+
+# kibaos_hw_pci_has VENDOR DEVICE... : true when a PCI device with this
+# vendor and any of these device ids is present. Ids are hex, no 0x.
+kibaos_hw_pci_has() {
+  local vendor=$1 device_path id want dev ven
+  shift
+  for device_path in "${KIBAOS_HW_ROOT%/}"/sys/bus/pci/devices/*; do
+    [[ -r $device_path/vendor && -r $device_path/device ]] || continue
+    IFS= read -r ven <"$device_path/vendor" || continue
+    [[ ${ven,,} == "0x${vendor,,}" ]] || continue
+    IFS= read -r dev <"$device_path/device" || continue
+    id=${dev,,}
+    for want in "$@"; do
+      [[ $id == "0x${want,,}" ]] && return 0
+    done
+  done
+  return 1
+}
+
+kibaos_hw_is_surface() {
+  [[ $(_kibaos_hw_dmi sys_vendor) == "Microsoft Corporation" &&
+     $(_kibaos_hw_dmi product_name) == Surface* ]]
+}
+
+kibaos_hw_is_mac() {
+  [[ $(_kibaos_hw_dmi sys_vendor) == "Apple Inc." ]]
+}
+
+# The T2 chip shows up as Apple PCI bridges 1801 and 1802.
+kibaos_hw_is_t2_mac() {
+  kibaos_hw_pci_has 106b 1801 1802
+}
+
+kibaos_hw_is_chromebook() {
+  [[ $(_kibaos_hw_dmi sys_vendor) == "Google" ]]
+}
+
+# Which hypervisor this is, by the name its firmware gives the machine: vmware,
+# qemu, virtualbox, hyperv, parallels, or nothing on real hardware. The same
+# fields systemd-detect-virt reads first, and readable from a test directory.
+kibaos_hw_hypervisor() {
+  local vendor product
+  vendor=$(_kibaos_hw_dmi sys_vendor)
+  product=$(_kibaos_hw_dmi product_name)
+  case $vendor in
+    'VMware, Inc.') printf vmware ;;
+    QEMU) printf qemu ;;
+    'innotek GmbH') printf virtualbox ;;
+    'Parallels Software International Inc.'|'Parallels International GmbH.') printf parallels ;;
+    'Microsoft Corporation')
+      [[ $product != 'Virtual Machine' ]] || printf hyperv ;;
+  esac
+}
+
+kibaos_hw_detect() {
+  HW_PACKAGES=()
+  HW_NOTES=()
+  HW_SERVICES=()
+  HW_SUMMARY=generic
+
+  if kibaos_hw_is_surface; then
+    HW_SUMMARY="Microsoft $(_kibaos_hw_dmi product_name)"
+    HW_NOTES+=("this is a Surface: Wi-Fi, keyboard, touchpad and battery work with the standard kernel; the touchscreen and pen need the linux-surface kernel, which KibaOS does not install")
+  elif kibaos_hw_is_chromebook; then
+    HW_SUMMARY="Chromebook ($(_kibaos_hw_dmi product_name))"
+    HW_NOTES+=("this is a Chromebook: Wi-Fi works, and its speakers and microphone may not yet; the fix is per model, at docs.chrultrabook.com, and on some models a wrong one can damage the speakers, so follow its steps for this model only")
+  elif kibaos_hw_is_mac; then
+    HW_SUMMARY="Mac ($(_kibaos_hw_dmi product_name))"
+  fi
+
+  if kibaos_hw_pci_has 14e4 "${KIBAOS_HW_WL_DEVICES[@]}"; then
+    HW_PACKAGES+=(broadcom-wl-dkms linux-headers)
+    HW_NOTES+=("this Broadcom Wi-Fi only works with Broadcom's own driver: installing broadcom-wl-dkms, built for this kernel")
+  fi
+
+  if kibaos_hw_is_t2_mac; then
+    HW_NOTES+=("this Mac has Apple's T2 chip: its built-in keyboard, trackpad and Wi-Fi need the t2linux kernel, which KibaOS does not install yet; use a USB keyboard, mouse and network")
+  fi
+
+  case $(kibaos_hw_hypervisor) in
+    vmware)
+      HW_SUMMARY='VMware virtual machine'
+      HW_PACKAGES+=(open-vm-tools)
+      HW_SERVICES+=(vmtoolsd.service)
+      HW_NOTES+=('this is a VMware virtual machine: installing open-vm-tools') ;;
+    qemu)
+      HW_SUMMARY='QEMU virtual machine'
+      HW_PACKAGES+=(qemu-guest-agent)
+      HW_NOTES+=('this is a QEMU virtual machine: installing the QEMU guest agent') ;;
+    virtualbox)
+      HW_SUMMARY='VirtualBox virtual machine'
+      HW_PACKAGES+=(virtualbox-guest-utils-nox)
+      HW_SERVICES+=(vboxservice.service)
+      HW_NOTES+=("this is a VirtualBox virtual machine: installing VirtualBox's guest service") ;;
+    hyperv)
+      HW_SUMMARY='Hyper-V virtual machine'
+      HW_PACKAGES+=(hyperv)
+      HW_SERVICES+=(hv_kvp_daemon.service hv_vss_daemon.service)
+      HW_NOTES+=("this is a Hyper-V virtual machine: installing Hyper-V's guest daemons") ;;
+    parallels)
+      HW_SUMMARY='Parallels virtual machine'
+      HW_NOTES+=('this is a Parallels virtual machine: Parallels Tools are not packaged for Arch. Install them from the Parallels Actions menu') ;;
+  esac
+}

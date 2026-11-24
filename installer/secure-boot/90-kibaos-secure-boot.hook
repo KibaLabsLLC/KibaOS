@@ -1,0 +1,13 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = linux
+Target = linux-lts
+Target = linux-zen
+Target = systemd
+
+[Action]
+Description = Re-signing the KibaOS Secure Boot chain
+When = PostTransaction
+Exec = /usr/local/libexec/kibaos-secure-boot-sign

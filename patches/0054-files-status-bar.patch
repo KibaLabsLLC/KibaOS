@@ -1,0 +1,132 @@
+diff --git a/ui/file_manager/file_manager/foreground/css/file_manager.css b/ui/file_manager/file_manager/foreground/css/file_manager.css
+index c16d8ad8be8e..3d8136153c1a 100644
+--- a/ui/file_manager/file_manager/foreground/css/file_manager.css
++++ b/ui/file_manager/file_manager/foreground/css/file_manager.css
+@@ -2290,3 +2290,49 @@ body {
+     --cros-sys-ripple_primary: color-mix(in srgb, #d1bcff 12%, transparent);
+   }
+ }
++
++/* KibaOS: the status bar at the foot of the file list.
++ *
++ * The panel is a column flexbox whose list is flex: auto, so a sibling placed
++ * after the list and given flex: none pins itself to the bottom and the list
++ * gives up exactly that much height. No positioning, no z-index, nothing that
++ * can drift out of alignment with the scrollbar.
++ *
++ * It exists because the app already computed this text and then threw it away.
++ * The directory summary is written into #files-selected-label, which
++ * file_manager.css sets to display: none unless body.check-select, so the one
++ * number worth having when nothing is selected was being rendered into a
++ * hidden element. This is where it goes instead.
++ *
++ * It carries visibleif="full-page" so the file picker dialogs, which are the
++ * same document, do not grow a status bar they have no use for.
++ */
++#kibaos-status-bar {
++  align-items: center;
++  border-top: 1px solid var(--cros-sys-separator);
++  box-sizing: border-box;
++  color: var(--cros-sys-on_surface_variant);
++  display: flex;
++  flex: none;
++  font-size: 12px;
++  gap: 16px;
++  height: 28px;
++  justify-content: space-between;
++  padding: 0 16px;
++  user-select: none;
++}
++
++#kibaos-status-count,
++#kibaos-status-selection {
++  /* These are numbers that change in place as you move through a folder.
++   * Proportional digits make the text jitter every time the count ticks. */
++  font-variant-numeric: tabular-nums;
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++
++#kibaos-status-selection {
++  color: var(--cros-sys-primary);
++  text-align: end;
++}
+diff --git a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
+index 680284f60427..d2ad199ccdbd 100644
+--- a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
++++ b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
+@@ -66,6 +66,14 @@ export class ToolbarController {
+   private bulkPinningEnabled_: boolean;
+   private store_: Store;
+ 
++  /**
++   * KibaOS: the status bar's two halves, looked up on first use rather than in
++   * the constructor. The dialog variants of this document have no status bar,
++   * so a queryRequiredElement here would throw in the file picker.
++   */
++  private kibaOsStatusCount_: HTMLElement|null = null;
++  private kibaOsStatusSelection_: HTMLElement|null = null;
++
+   constructor(
+       private toolbar_: HTMLElement, _navigationList: HTMLElement,
+       private listContainer_: ListContainer,
+@@ -308,6 +316,43 @@ export class ToolbarController {
+     }
+ 
+     this.filesSelectedLabel_.textContent = text;
++    this.kibaOsUpdateStatusBar_(text);
++  }
++
++  /**
++   * KibaOS: keeps the status bar current.
++   *
++   * The elements are held in locals rather than read back off this between the
++   * null check and the use. kibaOsDirectorySummary_ is a method call, and a
++   * method call invalidates narrowing on a mutable property, so the checked
++   * fields would be nullable again by the time they were assigned to.
++   *
++   * The count is asked for on every update, including when something is
++   * selected, because kibaOsDirectorySummary_ is what sets the title that
++   * carries the forty two note. Reading the title before that call would show
++   * whatever the previous folder left behind.
++   */
++  private kibaOsUpdateStatusBar_(selectionText: string) {
++    const count = this.kibaOsStatusCount_ ??
++        document.querySelector<HTMLElement>('#kibaos-status-count');
++    const selectionEl = this.kibaOsStatusSelection_ ??
++        document.querySelector<HTMLElement>('#kibaos-status-selection');
++    if (!count || !selectionEl) {
++      return;
++    }
++    this.kibaOsStatusCount_ = count;
++    this.kibaOsStatusSelection_ = selectionEl;
++
++    const summary = this.kibaOsDirectorySummary_();
++    // An empty folder still says so. A blank bar reads as broken.
++    count.textContent = summary || 'Empty folder';
++    count.title = this.filesSelectedLabel_.title;
++
++    // The toolbar already shows the selection in full when there is one, so
++    // repeating it here would be noise; this half stays empty until there is
++    // something to say.
++    selectionEl.textContent =
++        this.selectionHandler_.selection.totalCount === 0 ? '' : selectionText;
+   }
+ 
+   /**
+diff --git a/ui/file_manager/file_manager/main.html b/ui/file_manager/file_manager/main.html
+index 41514a4024e0..937f7162ae72 100644
+--- a/ui/file_manager/file_manager/main.html
++++ b/ui/file_manager/file_manager/main.html
+@@ -475,6 +475,10 @@ found in the LICENSE file.
+                   <files-spinner class="loading-indicator" hidden></files-spinner>
+                   <div class="drive-welcome page"></div>
+                 </div>
++                <div id="kibaos-status-bar" visibleif="full-page">
++                  <span id="kibaos-status-count"></span>
++                  <span id="kibaos-status-selection"></span>
++                </div>
+               </div>
+             </div>
+           </div>

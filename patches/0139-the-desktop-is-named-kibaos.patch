@@ -1,0 +1,1425 @@
+diff --git a/ash/ash_strings.grd b/ash/ash_strings.grd
+index 15ab57a69db4..ad95efe4b9f0 100644
+--- a/ash/ash_strings.grd
++++ b/ash/ash_strings.grd
+@@ -650,10 +650,10 @@ Style notes:
+         Connect with a code
+       </message>
+       <message name="IDS_ASH_STATUS_TRAY_CAST_ZERO_STATE_TITLE" desc="The main label for the system tray Cast view when no Chromecast devices are available.">
+-        Cast your screen from your Chromebook
++        Cast your screen from your computer
+       </message>
+       <message name="IDS_ASH_STATUS_TRAY_CAST_ZERO_STATE_SUBTITLE" desc="The secondary label for the system tray Cast view when no Chromecast devices are available.">
+-        Make sure your Chromebook is on the same Wi-Fi network as your Chromecast device.
++        Make sure your computer is on the same Wi-Fi network as your Chromecast device.
+       </message>
+       <message name="IDS_ASH_STATUS_TRAY_DARK_THEME" desc="The label used as the header in the dark theme popup. [CHAR_LIMIT=19">
+         Dark theme
+@@ -1118,7 +1118,7 @@ Style notes:
+         <ph name="MANAGER">$1<ex>google.com</ex></ph> requires you to roll back your <ph name="DEVICE_TYPE">$2<ex>Chromebook</ex></ph>. Your device will reset and all data will be deleted.
+       </message>
+       <message name="IDS_UPDATE_NOTIFICATION_MESSAGE_SLOW_BOOT" desc="The additional body of the notification to notify the user that the next reboot is slow.">
+-        <ph name="UPDATE_TEXT">$1<ex>Learn more about the latest ChromiumOS update</ex></ph>. This Chromebook needs to restart to apply an update. This can take up to 1 minute.
++        <ph name="UPDATE_TEXT">$1<ex>Learn more about the latest ChromiumOS update</ex></ph>. This computer needs to restart to apply an update. This can take up to 1 minute.
+       </message>
+       <message name="IDS_DIALOG_TITLE_SLOW_BOOT" desc="The title of the Slow Boot Shutdown Confirmation Dialog.">
+         Restart may take awhile
+@@ -3565,7 +3565,7 @@ No devices connected.
+       </message>
+ 
+       <message name="IDS_ASH_STATUS_TRAY_AUDIO_NBS_MESSAGE" desc="label used to warn that NBS is in use">
+-        Your Chromebook or Bluetooth device is using an older version of Bluetooth. Use the internal microphone for better audio quality.
++        Your computer or Bluetooth device is using an older version of Bluetooth. Use the internal microphone for better audio quality.
+       </message>
+ 
+       <message name="IDS_ASH_STATUS_TRAY_AUDIO_INPUT_AGC_INFO" desc="label used for the information of who is controlling mic input gain. [ICU Syntax]">
+@@ -4967,10 +4967,10 @@ No devices connected.
+         This device may contain apps that haven't been verified by Google.
+       </message>
+       <message name="IDS_ASH_LOGIN_POD_TPM_LOCKED_ISSUE_WARNING" desc="Message shown as part of the TPM locked warning bubble when TPM is locked.">
+-        Your Chromebook is locked due to a known issue. You will be able to sign in after: <ph name="TIME_LEFT">$1<ex>1 hour, 15 minutes, 10 seconds</ex></ph>.
++        Your computer is locked due to a known issue. You will be able to sign in after: <ph name="TIME_LEFT">$1<ex>1 hour, 15 minutes, 10 seconds</ex></ph>.
+       </message>
+       <message name="IDS_ASH_LOGIN_POD_TPM_LOCKED_ISSUE_DESCRIPTION" desc="Message shown as part of the TPM locked warning bubble when TPM is locked.">
+-        Your Chromebook needs to stay on and connected to power during this time. Make sure the charger or adapter cables are completely plugged in, both to your Chromebook and the power outlet. Do not turn off your Chromebook.
++        Your computer needs to stay on and connected to power during this time. Make sure the charger or adapter cables are completely plugged in, both to your computer and the power outlet. Do not turn off your computer.
+       </message>
+       <message name="IDS_ASH_LOGIN_POD_PIN_LOCKED_WARNING" desc="Message shown when pin is soft locked due to multiple wrong attempts.">
+         Too many PIN attempts. Wait <ph name="TIME_LEFT">$1<ex>15 minutes, 10 seconds</ex></ph> and try PIN again, or enter password to sign in immediately.
+@@ -5047,7 +5047,7 @@ No devices connected.
+         Connect your <ph name="NAME">$1<ex>Pixel Buds</ex></ph>
+       </message>
+       <message name="IDS_FAST_PAIR_DISCOVERY_NOTIFICATION_MESSAGE" desc="Notification message shown when there is a device discovered with Fast Pair.">
+-        Connect <ph name="NAME">$1<ex>Pixel Buds</ex></ph> to this Chromebook
++        Connect <ph name="NAME">$1<ex>Pixel Buds</ex></ph> to this computer
+       </message>
+       <message name="IDS_FAST_PAIR_DISCOVERY_NOTIFICATION_EMAIL_MESSAGE" desc="Notification message shown when there is a device discovered with Fast Pair that includes the user's email address.">
+         Your <ph name="NAME">$1<ex>Pixel Buds</ex></ph> will appear on devices linked with <ph name="EMAIL">$2<ex>alisha123@gmail.com</ex></ph>
+@@ -5084,10 +5084,10 @@ No devices connected.
+         <ph name="ORIGIN_NAME">$1<ex>example.com</ex></ph> would like to confirm it's you
+       </message>
+       <message name="IDS_ASH_IN_SESSION_AUTH_SETTINGS_PROMPT" desc="Text shown in the settings auth dialog.">
+-        ChromeOS Settings would like to confirm it's you
++        KibaOS Settings would like to confirm it's you
+       </message>
+       <message name="IDS_ASH_IN_SESSION_AUTH_PASSWORD_MANAGER_PROMPT" desc="Text shown in the password manager auth dialog.">
+-        ChromeOS Password Manager would like to confirm it's you
++        KibaOS Password Manager would like to confirm it's you
+       </message>
+       <message name="IDS_ASH_IN_SESSION_AUTH_PASSWORD_PLACEHOLDER" desc="Text to display as placeholder in the password input field.">
+         Password
+@@ -5272,7 +5272,7 @@ No devices connected.
+         Your devices work even better together
+       </message>
+       <message name="IDS_ASH_MULTI_DEVICE_SETUP_NOTIFIER_TEXT_WITHOUT_PHONE_HUB" desc="The text does not mention Phone Hub that shows in the notifier of multidevice setup.">
+-        Save time by quickly replying to your phone's texts from your Chromebook
++        Save time by quickly replying to your phone's texts from your computer
+       </message>
+       <message name="IDS_ASH_MULTI_DEVICE_SETUP_NEW_USER_POTENTIAL_HOST_EXISTS_MESSAGE" desc="Message shown as part of the notification shown to a user that has not completed the MultiDevice setup when their Chrome device recognizes that they have a phone on their account that the Chrome device can connect to. Clicking it opens a prompt to guide them through setting up.">
+         Connect your <ph name="DEVICE_NAME">$1<ex>Chromebook</ex></ph> with your phone
+@@ -5352,12 +5352,12 @@ No devices connected.
+       </message>
+       <if expr="_google_chrome">
+         <message name="IDS_ASH_MESSAGE_CENTER_SYSTEM_APP_NAME" desc="The source of a system-generated notification, as displayed to the user.">
+-          ChromeOS
++          KibaOS
+         </message>
+       </if>
+       <if expr="not _google_chrome">
+         <message name="IDS_ASH_MESSAGE_CENTER_SYSTEM_APP_NAME" desc="The source of a system-generated notification, as displayed to the user.">
+-          ChromiumOS
++          KibaOS
+         </message>
+       </if>
+       <message name="IDS_ASH_MESSAGE_CENTER_ACCELERATOR_NO_NOTIFICATIONS" desc="The toast message displayed when Alt+Shift+N is pressed but there are no notifications.">
+@@ -5625,7 +5625,7 @@ No devices connected.
+         Your detachable keyboard needs a critical update
+       </message>
+       <message name="IDS_ASH_DETACHABLE_BASE_NOTIFICATION_UPDATE_NEEDED_MESSAGE" desc="Body for the notification shown to the user when the detachable base (keyboard) connected to the device has to be updated. This notification is shown if the keyboard is usable without the update.">
+-        To get the update, restart your Chromebook with the keyboard attached.
++        To get the update, restart your computer with the keyboard attached.
+       </message>
+ 
+       <!-- For privacy indicators notification -->
+@@ -5718,13 +5718,13 @@ No devices connected.
+         Turn on precise location access?
+       </message>
+       <message name="IDS_PRIVACY_HUB_GEOLOCATION_OFF_NOTIFICATION_MESSAGE" desc="Message for a notification shown to the users when an app tries to use the geolocation while the geolocation is off.">
+-        This allows all apps and websites with the location permission and ChromeOS to use Wi-Fi and mobile networks location.
++        This allows all apps and websites with the location permission and KibaOS to use Wi-Fi and mobile networks location.
+       </message>
+       <message name="IDS_PRIVACY_HUB_GEOLOCATION_OFF_NOTIFICATION_MESSAGE_WITH_ONE_APP_NAME" desc="Message for a notification shown to the users when an app tries to use the geolocation while the geolocation is off.">
+-        This allows <ph name="APP_NAME">$1<ex>Maps</ex></ph> and all apps and websites with the location permission and ChromeOS to use Wi-Fi and mobile networks location.
++        This allows <ph name="APP_NAME">$1<ex>Maps</ex></ph> and all apps and websites with the location permission and KibaOS to use Wi-Fi and mobile networks location.
+       </message>
+       <message name="IDS_PRIVACY_HUB_GEOLOCATION_OFF_NOTIFICATION_MESSAGE_WITH_TWO_APP_NAMES" desc="Message for a notification shown to the users when two and more apps try to use the geolocation while the geolocation is off.">
+-        This allows <ph name="APP_NAME">$1<ex>Maps</ex></ph>, <ph name="APP2_NAME">$2<ex>Waze</ex></ph>and all apps and websites with the location permission and ChromeOS to use Wi-Fi and mobile networks location.
++        This allows <ph name="APP_NAME">$1<ex>Maps</ex></ph>, <ph name="APP2_NAME">$2<ex>Waze</ex></ph>and all apps and websites with the location permission and KibaOS to use Wi-Fi and mobile networks location.
+       </message>
+       <message name="IDS_PRIVACY_HUB_TURN_ON_GEOLOCATION_ACTION_BUTTON" desc="Label for an action button that enables the geolocation.">
+         Turn on location access
+@@ -6471,7 +6471,7 @@ No devices connected.
+         Peripheral not supported
+       </message>
+       <message name="IDS_ASH_PCIE_PERIPHERAL_NOTIFICATION_DEVICE_BLOCKED_BODY" desc="Notification body text that explains to the user that their peripheral is not supported because it is not part of the approved peripherals list.">
+-        Only approved Thunderbolt devices are compatible with your Chromebook
++        Only approved Thunderbolt devices are compatible with your computer
+       </message>
+       <message name="IDS_ASH_PCIE_PERIPHERAL_NOTIFICATION_BILLBOARD_DEVICE" desc="Notification body text that explains to the user that the connected peripheral type (e.g. Thunderbolt peripheral) is not supported.">
+         The connected peripheral type is not supported
+@@ -6621,28 +6621,28 @@ No devices connected.
+ 
+       <!-- Smart Lock strings shown on the lock screen -->
+       <message name="IDS_SMART_LOCK_LABEL_LOOKING_FOR_PHONE" desc="Label for the Smart Lock spinner icon on user's lock screen while Chromebook is looking for paired phone.">
+-        To unlock your Chromebook, make sure your phone's Bluetooth is on
++        To unlock your computer, make sure your phone's Bluetooth is on
+       </message>
+       <message name="IDS_SMART_LOCK_LABEL_PHONE_LOCKED" desc="Label for the Smart Lock icon on user's lock screen when a phone eligible to unlock the Chromebook is detected, but it's locked and thus not allowed to unlock the Chromebook.">
+-        To unlock your Chromebook, first unlock your phone
++        To unlock your computer, first unlock your phone
+       </message>
+       <message name="IDS_SMART_LOCK_LABEL_NO_PHONE" desc="Label for the Smart Lock icon on user's lock screen when a phone eligible to unlock the Chromebook cannot be found after 15 seconds.">
+         Can’t find your phone. Make sure your phone’s Bluetooth is on.
+       </message>
+       <message name="IDS_SMART_LOCK_LABEL_NO_BLUETOOTH" desc="Label for the Smart Lock icon on user's lock screen when Smart Lock cannot be used because the Chromebook's Bluetooth is turned off.">
+-        Your Chromebook’s Bluetooth is off. To unlock your Chromebook, enter password.
++        Your computer’s Bluetooth is off. To unlock your computer, enter password.
+       </message>
+       <message name="IDS_SMART_LOCK_LABEL_NO_PHONE_LOCK_SCREEN" desc="Label for the Smart Lock icon on user's lock screen when Smart Lock cannot be used because the connected phone does not have a lock screen enabled.">
+-        Your phone doesn’t have a lock screen. To unlock your Chromebook, enter password.
++        Your phone doesn’t have a lock screen. To unlock your computer, enter password.
+       </message>
+       <message name="IDS_SMART_LOCK_LABEL_PHONE_TOO_FAR" desc="Label for the Smart Lock icon on user's lock screen when the connected phone is too far away to use Smart Lock, and must be brought closer.">
+         Your phone is too far away. Bring your phone closer.
+       </message>
+       <message name="IDS_AUTH_FACTOR_LABEL_UNLOCK_METHOD_SELECTION" desc="Label for the Smart Lock and Fingerprint icons on user's lock screen to select unlock method.">
+-        To unlock your Chromebook, use your fingerprint or unlock your phone
++        To unlock your computer, use your fingerprint or unlock your phone
+       </message>
+       <message name="IDS_AUTH_FACTOR_LABEL_CANNOT_UNLOCK" desc="Label on user's lock screen when unlock authentication methods fail.">
+-        Can't unlock your Chromebook
++        Can't unlock your computer
+       </message>
+       <message name="IDS_AUTH_FACTOR_LABEL_PASSWORD_REQUIRED" desc="Label on user's lock screen prompting user to enter password after other sign in authentication methods fail.">
+         Enter password for more security
+@@ -7363,10 +7363,10 @@ New install
+         This network doesn't support streaming apps from your phone. Try using your phone's hotspot. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
+       </message>
+       <message name="IDS_ASH_ECHE_APP_STREAMING_ERROR_DIALOG_DIFFERENT_NETWORK_TEXT" desc="The main description in the dialog that appears when devices are on different networks">
+-        Make sure your phone and Chromebook are on the same network and then try again. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
++        Make sure your phone and computer are on the same network and then try again. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
+       </message>
+       <message name="IDS_ASH_ECHE_APP_STREAMING_ERROR_DIALOG_PHONE_ON_CELLULAR_TEXT" desc="The main description in the dialog that appears when phone is on cellular">
+-        Your phone is using a mobile network. Make Sure your phone and Chromebook are on the same Wi-Fi network and then try again. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
++        Your phone is using a mobile network. Make Sure your phone and computer are on the same Wi-Fi network and then try again. <ph name="LEARN_MORE">$1<ex>Learn more</ex></ph>
+       </message>
+       <message name="IDS_ASH_ECHE_APP_STREMING_ERROR_DIALOG_TURN_ON_HOTSPOT" desc="The button in the dialog that appears when there is a connection error trying to stream app to turn on hotspot">
+         Turn on hotspot
+@@ -8052,10 +8052,10 @@ To shut down the device, press and hold the power button on the device again.
+         Open your previous windows and apps
+       </message>
+       <message name="IDS_ASH_INFORMED_RESTORE_DIALOG_CRASH_DESCRIPTION" desc="Label of the description for the informed restore dialog, if the previous session ended with a crash. Gives a little more information than the title.">
+-        Your Chromebook restarted unexpectedly. Open your previous windows and apps.
++        Your computer restarted unexpectedly. Open your previous windows and apps.
+       </message>
+       <message name="IDS_ASH_INFORMED_RESTORE_DIALOG_UPDATE_DESCRIPTION" desc="Label of the description for the informed restore dialog, if the previous session was on a earlier version.">
+-        Your Chromebook has been updated. Open your previous windows and apps.
++        Your computer has been updated. Open your previous windows and apps.
+       </message>
+       <message name="IDS_ASH_INFORMED_RESTORE_DIALOG_NO_THANKS_BUTTON" desc="Label of the no thanks button for the informed restore dialog, which users can click if they choose not to restore.">
+         No thanks
+@@ -8557,10 +8557,10 @@ To shut down the device, press and hold the power button on the device again.
+         Use location. Allow apps and services with location permission to use this device’s location. Google may collect location data periodically and use this data in an anonymous way to improve location accuracy and location-based services. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-location-service" aria-label="</ph>Learn more about location<ph name="BEGIN_LINK1_END">"&gt;</ph>Learn More<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
+       </message>
+       <message name="IDS_ARC_CROS_OPT_IN_LOCATION_SETTING" desc="Message in the opt-in dialog for Android apps for the user to turn on Google location services.">
+-        Use location. Allow ChromeOS and Android apps, websites, and services with location permission to use your device's location. Location Accuracy provides more accurate location for Android apps and services. To do this, Google periodically processes information about device sensors and wireless signals from your device to crowdsource wireless signal locations. These are used without identifying you to improve location accuracy and location-based services and to improve, provide, and maintain Google's services based on Google's and third parties' legitimate interests to serve users' needs. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-location-service"&gt;</ph>Learn more about using location<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
++        Use location. Allow KibaOS and Android apps, websites, and services with location permission to use your device's location. Location Accuracy provides more accurate location for Android apps and services. To do this, Google periodically processes information about device sensors and wireless signals from your device to crowdsource wireless signal locations. These are used without identifying you to improve location accuracy and location-based services and to improve, provide, and maintain Google's services based on Google's and third parties' legitimate interests to serve users' needs. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-location-service"&gt;</ph>Learn more about using location<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
+       </message>
+       <message name="IDS_ARC_CROS_OPT_IN_LOCATION_SETTING_CHILD" desc="Message in the opt-in dialog for Android apps for the user to turn on Google location services, and a child account is in use.">
+-        Use location. Allow ChromeOS and Android apps, websites, and services with location permission to use this device's location. Location Accuracy provides more accurate location for Android apps and services. To do this, Google periodically processes information about device sensors and wireless signals from this device to crowdsource wireless signal locations. These are used without identifying any individual to improve location accuracy and location-based services and to improve, provide, and maintain Google's services based on Google's and third parties' legitimate interests to serve users' needs. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-location-service"&gt;</ph>Learn more about using location<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
++        Use location. Allow KibaOS and Android apps, websites, and services with location permission to use this device's location. Location Accuracy provides more accurate location for Android apps and services. To do this, Google periodically processes information about device sensors and wireless signals from this device to crowdsource wireless signal locations. These are used without identifying any individual to improve location accuracy and location-based services and to improve, provide, and maintain Google's services based on Google's and third parties' legitimate interests to serve users' needs. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-location-service"&gt;</ph>Learn more about using location<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
+       </message>
+       <message name="IDS_ARC_OPT_IN_PAI" desc="Message in the opt-in dialog for Play auto install.">
+         Install updates &#38; apps. By continuing, you agree that this device may also automatically download and install updates and apps from Google, your carrier, and your device's manufacturer, possibly using cellular data. Some of these apps may offer in-app purchases. <ph name="BEGIN_LINK1">&lt;a href="#" id="learn-more-link-pai" aria-label="</ph>Learn more about play auto install<ph name="BEGIN_LINK1_END">"&gt;</ph>Learn More<ph name="END_LINK1">&lt;/a&gt;<ex>&lt;/a&gt;</ex></ph>
+@@ -8646,7 +8646,7 @@ To shut down the device, press and hold the power button on the device again.
+         Couldn't connect to Google Play. Check your network connection and try again. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+       </message>
+       <message name="IDS_ARC_SIGN_IN_BAD_AUTHENTICATION_ERROR" desc="Android sign-in error because of bad authentification">
+-        Couldn't verify your account. Please try again or restart your Chromebook.
++        Couldn't verify your account. Please try again or restart your computer.
+       </message>
+       <message name="IDS_ARC_SIGN_IN_GMS_CHECKIN_ERROR" desc="Android sign-in error because of GMS services are unavailable">
+         Couldn't connect with Google services. Check your network connection and try again. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+@@ -8664,7 +8664,7 @@ To shut down the device, press and hold the power button on the device again.
+         Provisioning flow was interrupted. Please try again or contact your device owner or administrator. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+       </message>
+       <message name="IDS_ARC_SIGN_IN_CLOUD_PROVISION_FLOW_NETWORK_ERROR" desc="Android permament sign-in error because of cloud provision flow failed">
+-        Couldn’t connect with the server. Check your network connection and try again. If you're still having trouble, try restarting your Chromebook. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
++        Couldn’t connect with the server. Check your network connection and try again. If you're still having trouble, try restarting your computer. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+       </message>
+       <message name="IDS_ARC_SIGN_IN_CLOUD_PROVISION_FLOW_PERMANENT_ERROR" desc="Android permament sign-in error because of cloud provision flow failed">
+         Something went wrong. Please contact your device owner or administrator. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+@@ -8691,7 +8691,7 @@ To shut down the device, press and hold the power button on the device again.
+         Something went wrong. Error code: <ph name="ERROR_CODE">$1<ex>7</ex></ph>.
+       </message>
+       <message name="IDS_ARC_SERVER_COMMUNICATION_ERROR" desc="Android sign-in error because of server communication error">
+-        Couldn’t connect with the server. Check your network connection and try again. If you're still having trouble, try restarting your Chromebook.
++        Couldn’t connect with the server. Check your network connection and try again. If you're still having trouble, try restarting your computer.
+       </message>
+       <message name="IDS_ARC_ANDROID_MANAGEMENT_REQUIRED_ERROR" desc="Error message shown when Android management is required for an unmanaged ChromeOS user.">
+         Your organization has not enabled Google Play Store for your account. Contact your administrator for more information.
+@@ -8871,7 +8871,7 @@ To shut down the device, press and hold the power button on the device again.
+         Success.
+       </message>
+       <message name="IDS_BRUSCHETTA_RESULT_DLC_INSTALL_ERROR" desc="Bruschetta (codename) result for error installing DLC.">
+-        Error installing DLC (oftentimes a reboot is needed, check Settings\>\>About ChromeOS for more information).
++        Error installing DLC (oftentimes a reboot is needed, check Settings\>\>About KibaOS for more information).
+       </message>
+       <message name="IDS_BRUSCHETTA_RESULT_START_VM_FAILED" desc="Bruschetta (codename) result for when VM fails to start.">
+         Starting VM failed.
+@@ -9046,10 +9046,10 @@ To shut down the device, press and hold the power button on the device again.
+       </if>
+       <if expr="not reven">
+         <message name="IDS_CROSTINI_INSTALLER_NEED_UPDATE_TITLE" desc="Title shown in the Crostini installer dialog when the VM fails to install because the device must be updated">
+-          ChromeOS update required
++          KibaOS update required
+         </message>
+         <message name="IDS_CROSTINI_INSTALLER_NEED_UPDATE_ERROR" desc="Text shown in the Crostini installer dialog when the VM fails to install because the device must be updated first">
+-          To finish setting up Linux, update ChromeOS and try again.
++          To finish setting up Linux, update KibaOS and try again.
+         </message>
+       </if>
+       <message name="IDS_CROSTINI_INSTALLER_CREATE_DISK_IMAGE_ERROR" desc="Text shown in the Crostini installer dialog when the failing to create the disk image">
+@@ -9932,7 +9932,7 @@ To shut down the device, press and hold the power button on the device again.
+         If you move away from your device, your screen will lock automatically. When you're in front of your device, your screen will stay awake longer. If lock screen is disabled, your device will sleep instead of lock.
+       </message>
+       <message name="IDS_SMART_PRIVACY_PROTECTION_CONTENT" desc="Description of the privacy protection features implementation. This message is followed by a 'Learn more' link.">
+-        Your Chromebook uses a built-in sensor to detect people in front of your device. All data is processed on your device immediately and then deleted. Sensor data is never sent to Google.
++        Your computer uses a built-in sensor to detect people in front of your device. All data is processed on your device immediately and then deleted. Sensor data is never sent to Google.
+       </message>
+       <message name="IDS_SMART_PRIVACY_PROTECTION_TURN_ON_BUTTON" desc="Label on a button to turn on the smart privacy protection feature and continue.">
+         Turn on
+@@ -10032,7 +10032,7 @@ To shut down the device, press and hold the power button on the device again.
+         </then>
+         <else>
+           <message name="IDS_TERMS_OF_SERVICE_SCREEN_SUBHEADING" desc="Subheading at the top of the Terms of Service screen. MANAGER can be a domain or an email address.">
+-            <ph name="MANAGER">$1<ex>example.com</ex></ph> requires that you read and accept the following Terms of Service before using this device. These terms do not expand, modify or limit the ChromiumOS Terms.
++            <ph name="MANAGER">$1<ex>example.com</ex></ph> requires that you read and accept the following Terms of Service before using this device. These terms do not expand, modify or limit the KibaOS Terms.
+           </message>
+         </else>
+       </if>
+diff --git a/ash/login/resources/ash_login_strings.grd b/ash/login/resources/ash_login_strings.grd
+index e98bc3690bbf..5f9d3d57a868 100644
+--- a/ash/login/resources/ash_login_strings.grd
++++ b/ash/login/resources/ash_login_strings.grd
+@@ -180,7 +180,7 @@
+         Now it's <ph name="SUPERVISED_USER_NAME">$1<ex>Child 1</ex></ph>'s turn
+       </message>
+       <message name="IDS_LOGIN_PARENTAL_HANDOFF_SCREEN_SUBTITLE" desc="Subtitle of screen which tells user that the parent can handoff the device to supervised user.">
+-        You can hand this Chromebook to <ph name="SUPERVISED_USER_NAME">$1<ex>Child 1</ex></ph>. Setup is almost done, then it's time to explore.
++        You can hand this computer to <ph name="SUPERVISED_USER_NAME">$1<ex>Child 1</ex></ph>. Setup is almost done, then it's time to explore.
+       </message>
+       <message name="IDS_LOGIN_PARENTAL_HANDOFF_SCREEN_NEXT_BUTTON" desc="Next button of parental handoff screen">
+         Next
+@@ -486,7 +486,7 @@
+         Turn on Bluetooth?
+       </message>
+       <message name="IDS_LOGIN_QUICK_START_BLUETOOTH_DIALOG_CONTENT" desc="The content shown on Quick Start's enable blutooth dialog.">
+-        To set up with your Android phone, your Chromebook's Bluetooth needs to be on
++        To set up with your Android phone, your computer's Bluetooth needs to be on
+       </message>
+       <message name="IDS_LOGIN_QUICK_START_BLUETOOTH_DIALOG_CANCEL" desc="A lable on the button of the enable bluetooth dialog. It lets the user prevent the bluetooth from being enabled and hence does not continue the Quick Start flow.">
+         Cancel
+@@ -1656,22 +1656,22 @@
+       </if>
+       <if expr="not reven">
+         <message name="IDS_OOBE_CHROMEVOX_HINT_TEXT" desc="Text content in the ChromeVox hint dialog, asking the user if they would like to activate ChromeVox.">
+-          Do you want to activate ChromeVox, the built-in screen reader for ChromeOS?
++          Do you want to activate ChromeVox, the built-in screen reader for KibaOS?
+         </message>
+         <message name="IDS_OOBE_CHROMEVOX_HINT_TEXT_EXPANDED" desc="Text content in the ChromeVox hint dialog, asking the user if they would like to activate ChromeVox.">
+-          The screen reader on ChromeOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press the space bar to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
++          The screen reader on KibaOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press the space bar to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
+         </message>
+         <message name="IDS_OOBE_CHROMEVOX_HINT_ANNOUNCEMENT_TEXT_LAPTOP" desc="The string spoken when the ChromeVox hint is activated when the device is in laptop mode." is_accessibility_with_no_ui="true">
+-          Do you want to activate ChromeVox, the built-in screen reader for ChromeOS? If so, press the space bar.
++          Do you want to activate ChromeVox, the built-in screen reader for KibaOS? If so, press the space bar.
+         </message>
+         <message name="IDS_OOBE_CHROMEVOX_HINT_ANNOUNCEMENT_TEXT_TABLET" desc="The string spoken when the ChromeVox hint is activated when the device is in tablet mode." is_accessibility_with_no_ui="true">
+-          Do you want to activate ChromeVox, the built-in screen reader for ChromeOS? If so, press and hold both volume keys for five seconds.
++          Do you want to activate ChromeVox, the built-in screen reader for KibaOS? If so, press and hold both volume keys for five seconds.
+         </message>
+         <message name="IDS_OOBE_CHROMEVOX_HINT_ANNOUNCEMENT_TEXT_LAPTOP_EXPANDED" desc="The new string spoken when the ChromeVox hint is activated when the device is in laptop mode." is_accessibility_with_no_ui="true">
+-          The screen reader on ChromeOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press the space bar to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
++          The screen reader on KibaOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press the space bar to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
+         </message>
+         <message name="IDS_OOBE_CHROMEVOX_HINT_ANNOUNCEMENT_TEXT_TABLET_EXPANDED" desc="The new string spoken when the ChromeVox hint is activated when the device is in tablet mode." is_accessibility_with_no_ui="true">
+-          The screen reader on ChromeOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press and hold both volume keys for five seconds to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
++          The screen reader on KibaOS, ChromeVox, is primarily used by people with blindness or low vision to read text displayed on the screen with a speech synthesizer or braille display. Press and hold both volume keys for five seconds to turn on ChromeVox. When ChromeVox is activated, you’ll go through a quick tour.
+         </message>
+       </if>
+ 
+@@ -2420,7 +2420,7 @@
+         Access your Google Drive files when you’re offline
+       </message>
+       <message name="IDS_OOBE_DRIVE_PINNING_SUBTITLE" desc="Description of the drive pinning screen.">
+-        Your files in My Drive will sync to your Chromebook automatically so you can access them without an internet connection. You can change this anytime in Settings > Files.
++        Your files in My Drive will sync to your computer automatically so you can access them without an internet connection. You can change this anytime in Settings > Files.
+       </message>
+       <message name="IDS_OOBE_DRIVE_PINNING_TOGGLE_TITLE" desc="Title of the toggle button of the drive pinning screen.">
+         File sync
+diff --git a/chrome/app/certificate_manager.grdp b/chrome/app/certificate_manager.grdp
+index 080b180c4270..40662d03af5e 100644
+--- a/chrome/app/certificate_manager.grdp
++++ b/chrome/app/certificate_manager.grdp
+@@ -68,13 +68,13 @@
+ 
+     <if expr="is_chromeos">
+       <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_PLATFORM" desc="Label for the OS platform.">
+-        ChromeOS
++        KibaOS
+       </message>
+       <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_PLATFORM_CERTS_TITLE" desc="Label for the title of the platform certs subpage.">
+-        Imported from ChromeOS
++        Imported from KibaOS
+       </message>
+       <message name="IDS_SETTINGS_CERTIFICATE_MANAGER_V2_PLATFORM_CERTS_VIEW_LINK" desc="Label for a link to view the imported platform certs.">
+-        View imported certificates from ChromeOS
++        View imported certificates from KibaOS
+       </message>
+     </if>
+ 
+diff --git a/chrome/app/chromeos_strings.grdp b/chrome/app/chromeos_strings.grdp
+index ad268d3f5122..e727ddddd177 100644
+--- a/chrome/app/chromeos_strings.grdp
++++ b/chrome/app/chromeos_strings.grdp
+@@ -359,10 +359,10 @@
+     Bluetooth is turned off. To see available devices, turn Bluetooth on.
+   </message>
+   <message name="IDS_BLUETOOTH_PAIRING_LEARN_MORE" desc="Bluetooth pairing dialog: Message informing the user on what actions to take in order to see a device in the list of available devices.">
+-    Make sure your Bluetooth device is in pairing mode and nearby. Only pair with devices you trust. Paired devices are visible to all accounts on this Chromebook. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
++    Make sure your Bluetooth device is in pairing mode and nearby. Only pair with devices you trust. Paired devices are visible to all accounts on this computer. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_BLUETOOTH_PAIRING_DESCRIPTION" desc="Bluetooth pairing dialog: Message informing the user on what actions to take in order to see a device in the list of available devices.">
+-    Make sure your Bluetooth device is in pairing mode and nearby. Only pair with devices you trust. Paired devices are visible to all accounts on this Chromebook.
++    Make sure your Bluetooth device is in pairing mode and nearby. Only pair with devices you trust. Paired devices are visible to all accounts on this computer.
+   </message>
+   <message name="IDS_BLUETOOTH_PAIRING_ENTER_PIN" desc="Bluetooth pairing dialog: Message displayed informing the user to enter a PIN in other to complete device pairing.">
+     Enter PIN to pair with <ph name="DEVICE_NAME">$1<ex>Nexus S</ex></ph>
+@@ -1037,7 +1037,7 @@
+   </if>
+   <if expr="not reven">
+     <message name="IDS_CHROME_OS_NOTIFICATION_SOURCE" desc="The name of the source of a ChromeOS notification">
+-      ChromeOS
++      KibaOS
+     </message>
+   </if>
+   <message name="IDS_APP_USING_CAMERA_NOTIFICATION_MESSAGE" desc="Message shown in notification when an app is using the camera">
+@@ -1494,7 +1494,7 @@ You can manage this account’s settings by installing the Family Link app on yo
+     Set up Microsoft 365 to open files
+   </message>
+   <message name="IDS_OFFICE_WELCOME_BODY_TEXT" desc="Body text for the welcome dialog when the user sets up Microsoft Office for the first time.">
+-    <ph name="LINK_BEGIN">&lt;a href="https://support.google.com/chromebook?p=edit_office_files" target="_blank"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph> about Microsoft 365 on your Chromebook.
++    <ph name="LINK_BEGIN">&lt;a href="https://support.google.com/chromebook?p=edit_office_files" target="_blank"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph> about Microsoft 365 on your computer.
+   </message>
+   <message name="IDS_OFFICE_WELCOME_INSTALL_MICROSOFT365" desc="A bullet point in the welcome dialog when the user sets up Microsoft Office for the first time, telling the user that Microsoft 365 web app will be installed.">
+     Install Microsoft 365
+@@ -1517,7 +1517,7 @@ You can manage this account’s settings by installing the Family Link app on yo
+     Connect to Microsoft OneDrive
+   </message>
+   <message name="IDS_CONNECT_TO_ONEDRIVE_BODY_TEXT" desc="Explanation text for a dialog which allows the user to connect Files app and Microsoft OneDrive storage.">
+-    Connect OneDrive to the Files app to manage your stored documents from your Chromebook. You'll need to sign in with your Microsoft account.
++    Connect OneDrive to the Files app to manage your stored documents from your computer. You'll need to sign in with your Microsoft account.
+   </message>
+   <message name="IDS_CONNECT_TO_ONEDRIVE_SIGNIN_FLOW_BODY_TEXT" desc="Explanation text for a dialog which allows the user to connect Files app and Microsoft OneDrive storage via sign in flow.">
+     Microsoft 365 uses OneDrive to open and edit Word, Excel, and PowerPoint files. These files will be found in the Files app side navigation labeled “Microsoft OneDrive.” You'll need to sign in with your Microsoft account. <ph name="LINK_BEGIN">&lt;a href="https://support.google.com/chromebook?p=edit_office_files" target="_blank"&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+diff --git a/chrome/app/generated_resources.grd b/chrome/app/generated_resources.grd
+index 6cc2e39b2ddb..fc6586514307 100644
+--- a/chrome/app/generated_resources.grd
++++ b/chrome/app/generated_resources.grd
+@@ -5676,7 +5676,7 @@ are declared in tools/grit/grit_args.gni.
+           Read information about your browser, OS, and device
+         </message>
+         <message name="IDS_EXTENSION_PROMPT_WARNING_ENTERPRISE_REMOTE_APPS" desc="Permission string for access to the Remote Apps Enterprise API.">
+-          Add remote apps to the ChromeOS launcher
++          Add remote apps to the KibaOS launcher
+         </message>
+         <if expr="reven">
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_ATTACHED_DEVICE_INFO" desc="Permission string for accessing information of attached devices.">
+@@ -5715,25 +5715,25 @@ are declared in tools/grit/grit_args.gni.
+             Read Bluetooth peripherals information and data
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_DIAGNOSTICS" desc="Permission string for chrome.os.diagnostcs API.">
+-            Run ChromeOS diagnostic tests
++            Run KibaOS diagnostic tests
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_DIAGNOSTICS_NETWORK_INFO_FOR_MLAB" desc="Permission string for chrome.os.diagnostics.network_info_mlab API.">
+             Collect IP address and network measurement results for Measurement Lab, according to their privacy policy (measurementlab.net/privacy)
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_EVENTS" desc="Permission string for chrome.os.events API.">
+-            Subscribe to ChromeOS system events
++            Subscribe to KibaOS system events
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_MANAGEMENT_AUDIO" desc="Permission string for chrome.os.management.audio API.">
+-            Manage ChromeOS audio settings
++            Manage KibaOS audio settings
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_TELEMETRY" desc="Permission string for chrome.os.telemetry API.">
+-            Read ChromeOS device information and data
++            Read KibaOS device information and data
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_TELEMETRY_SERIAL_NUMBER" desc="Permission string for serial number permission.">
+-            Read ChromeOS device and component serial numbers
++            Read KibaOS device and component serial numbers
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_CHROMEOS_TELEMETRY_NETWORK_INFORMATION" desc="Permission string for accessing network information.">
+-            Read ChromeOS network information
++            Read KibaOS network information
+           </message>
+           <message name="IDS_EXTENSION_PROMPT_WARNING_OMNIBOX_DIRECT_INPUT" desc="Permission string for omnibox labs.">
+             Read and save keyboard input from the address bar
+@@ -19737,7 +19737,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+       </if>
+       <if expr="is_chromeos">
+         <message name="IDS_DICTATION_NO_MIC_ERROR_TOAST" translateable="false" desc="Text shown in a toast notification when a voice typing/dictation session fails because no microphone was found.">
+-          Can't detect microphone. Make sure it's plugged in or check your ChromeOS settings
++          Can't detect microphone. Make sure it's plugged in or check your KibaOS settings
+         </message>
+       </if>
+       <if expr="is_linux">
+@@ -20233,7 +20233,7 @@ Please help our engineers fix this problem. Tell us what happened right before y
+     <!-- Chrome Apps Deprecation -->
+     <if expr="is_chromeos">
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_NOTIFICATION_MESSAGE" desc="Message of the notification displayed while launching a user-installed app.">
+-        This Chrome app will stop working after your ChromeOS version is updated. Save any app data you want to keep. To learn about your options, contact the app developer or your IT support team.
++        This Chrome app will stop working after your KibaOS version is updated. Save any app data you want to keep. To learn about your options, contact the app developer or your IT support team.
+       </message>
+       <message name="IDS_USER_INSTALLED_CHROME_APP_DEPRECATION_BLOCKED_LAUNCH_DIALOG_TITLE" desc="The title of the dialog displayed when a Crome App launch is blocked.">
+         <ph name="APP_NAME">$1<ex>Application</ex></ph> can't be launched
+diff --git a/chrome/app/os_settings_strings.grdp b/chrome/app/os_settings_strings.grdp
+index 39b3b371e889..d5e64d2298ee 100644
+--- a/chrome/app/os_settings_strings.grdp
++++ b/chrome/app/os_settings_strings.grdp
+@@ -200,7 +200,7 @@
+     Automatic updates provide you with the latest features. Explore highlights from recent updates.
+   </message>
+   <message name="IDS_SETTINGS_UPGRADE_TRY_AGAIN" desc="Status label: Update check error (ChromiumOS/ChromeOS)">
+-    Couldn't update your Chromebook. Please try again later.
++    Couldn't update your computer. Please try again later.
+   </message>
+   <message name="IDS_SETTINGS_UPGRADE_DOWNLOAD_ERROR" desc="Status label: Update check download error(ChromiumOS/ChromeOS)">
+     Couldn't download the update. Please try again later.
+@@ -389,7 +389,7 @@
+     Change device language
+   </message>
+   <message name="IDS_OS_SETTINGS_LANGUAGES_CHANGE_DEVICE_LANGUAGE_DIALOG_DESCRIPTION" desc="Description for the dialog to change device language.">
+-    You need to restart your Chromebook to change the device language. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
++    You need to restart your computer to change the device language. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_OS_SETTINGS_LANGUAGES_SELECTED_DEVICE_LANGUAGE_INSTRUCTION" desc="Instruction read by screen reader when users can unselect a language.">
+     <ph name="LANGUAGE">$1<ex>English</ex></ph> selected. Press Search plus Space to unselect.
+@@ -1071,10 +1071,10 @@
+     File sync
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_FILE_SYNC_SUBTITLE_WITHOUT_STORAGE" desc="Subtitle for the everything offline feature in Settings: Files: Google Drive.">
+-    Your files in My Drive sync to your Chromebook automatically so you can access them without an internet connection.
++    Your files in My Drive sync to your computer automatically so you can access them without an internet connection.
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_FILE_SYNC_SUBTITLE_WITH_STORAGE" desc="Subtitle for the everything offline feature in Settings: Files: Google Drive.">
+-    Your files in My Drive sync to your Chromebook automatically so you can access them without an internet connection. This will use about <ph name="REQUIRED_SPACE">$1<ex>12.2 GB</ex></ph>. You currently have <ph name="FREE_SPACE_AVAILABLE">$2<ex>96.7 GB</ex></ph> available.
++    Your files in My Drive sync to your computer automatically so you can access them without an internet connection. This will use about <ph name="REQUIRED_SPACE">$1<ex>12.2 GB</ex></ph>. You currently have <ph name="FREE_SPACE_AVAILABLE">$2<ex>96.7 GB</ex></ph> available.
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_OFFLINE_STORAGE_TITLE" desc="Title for the Offline Storage row where users can clear their offline storage in Settings: Files: Google Drive.">
+     Offline storage
+@@ -1089,7 +1089,7 @@
+     Turn off file sync?
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_FILE_SYNC_TURN_OFF_BODY_TEXT" desc="Body text for the confirmation dialog that spawns when attempting to turn off bulk pinning in Settings: Files: Google Drive.">
+-    New files in My Drive will stop syncing automatically to this Chromebook
++    New files in My Drive will stop syncing automatically to this computer
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_FILE_SYNC_LISTING_FILES_TITLE_TEXT" desc="Title text for the dialog that spawns when a user tries to turn on bulk pinning whilst we're still listing files in Settings: Files: Google Drive.">
+     Scanning is taking longer than expected
+@@ -1104,7 +1104,7 @@
+     Remove Google Drive access?
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_REMOVE_ACCESS_DIALOG_BODY" desc="Body text of the dialog that appears when the Remove Drive access button is pressed in Settings: Files: Google Drive">
+-    This will remove access to Google Drive on this Chromebook, including access to any files that have been made available offline
++    This will remove access to Google Drive on this computer, including access to any files that have been made available offline
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_REMOVE_BUTTON_TEXT" desc="Action button text of the dialog that appears when the Remove Drive access button is pressed in Settings: Files: Google Drive">
+     Remove
+@@ -1119,7 +1119,7 @@
+     You are currently offline
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_FILE_SYNC_OFFLINE_ERROR_BODY_TEXT" desc="Body text for the confirmation dialog that spawns when attempting to turn on bulk pinning but the device is offline in Settings: Files: Google Drive.">
+-    For initial setup, you need to connect to the internet so files can sync to your Chromebook
++    For initial setup, you need to connect to the internet so files can sync to your computer
+   </message>
+   <message name="IDS_SETTINGS_GOOGLE_DRIVE_BULK_PINNING_NOT_ENOUGH_SPACE_TITLE_TEXT" desc="Title text for the confirmation dialog that spawns when attempting to turn on bulk pinning but the user doesn't have enough free space in Settings: Files: Google Drive.">
+     Not enough storage space
+@@ -1179,7 +1179,7 @@
+     <ph name="ORIGIN_NAME">$1<ex>Chrome</ex></ph> would like to confirm it's you
+   </message>
+   <message name="IDS_SETTINGS_IN_SESSION_AUTH_ORIGIN_NAME_PROMPT_LOCATION" desc="Location in text shown in the auth dialog to indicate we are currently authenticating for ChromeOS settings">
+-    ChromeOS Settings
++    KibaOS Settings
+   </message>
+   <message name="IDS_SETTINGS_DOWNLOADS_SHARE_ADDED_NOT_FOUND_MESSAGE" desc="The message shown when mounting a new SMB share fails because the share cannot be found.">
+     Error mounting share. The specified share was not found on the network.
+@@ -1271,7 +1271,7 @@
+     Face control
+   </message>
+   <message name="IDS_OS_SETTINGS_ACCESSIBILITY_FACEGAZE_DESCRIPTION" desc="The description for the checkbox that enables controlling the mouse cursor and keyboard with face movements.">
+-    Use head movements and facial expressions to control your Chromebook. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
++    Use head movements and facial expressions to control your computer. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_OS_SETTINGS_ACCESSIBILITY_FACEGAZE_PREVIOUS" desc="Label for previous button.">
+     Previous
+@@ -2515,7 +2515,7 @@ Press an assigned switch or key to remove assignment.
+     Switch Access setup guide
+   </message>
+   <message name="IDS_SETTINGS_SWITCH_ACCESS_SETUP_INTRO_BODY" desc="The message displayed on the first page of the Switch Access setup guide, instructing the user to confirm that their external switch is appropriately connected to the chromebook. Switch Access is an alternative input method designed for users with limited mobility, where the user has as little as one switch (for example, a button) to control the computer.">
+-    To get started, please make sure your USB or Bluetooth switch is connected to your Chromebook. You can also use keyboard keys.
++    To get started, please make sure your USB or Bluetooth switch is connected to your computer. You can also use keyboard keys.
+   </message>
+   <message name="IDS_SETTINGS_SWITCH_ACCESS_SETUP_ASSIGN_SELECT_TITLE" desc="The title for the page of the Switch Access setup guide where the user assigns a switch to perform the action select, which selects the element onscreen currently surrounded by the focus ring. Switch Access is an alternative input method designed for users with limited mobility, where the user has as little as one switch (for example, a button) to control the computer.">
+     Assign switch for “Select”
+@@ -2846,7 +2846,7 @@ Press an assigned switch or key to remove assignment.
+     Manage USB devices
+   </message>
+   <message name="IDS_SETTINGS_GUEST_OS_SHARED_USB_DEVICES_DESCRIPTION" desc="Description for managing shared USB devices.">
+-    Give Android apps control over USB devices on this Chromebook
++    Give Android apps control over USB devices on this computer
+   </message>
+   <message name="IDS_SETTINGS_GUEST_OS_SHARED_USB_DEVICES_EXTRA_DESCRIPTION" desc="Extra description for managing shared USB devices.">
+     Only supported devices are shown. USB devices will no longer be available to native apps until disconnected.
+@@ -3082,7 +3082,7 @@ Press an assigned switch or key to remove assignment.
+     Reserve size
+   </message>
+   <message name="IDS_SETTINGS_CROSTINI_ARC_ADB_POWERWASH_REQUIRED_SUBLABEL" desc="Sublabel notifying user of powerwash requirement before enabling ARC ADB sideloading.">
+-    A factory reset of this Chromebook is required to enable ADB debugging. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
++    A factory reset of this computer is required to enable ADB debugging. <ph name="BEGIN_LINK_LEARN_MORE">&lt;a target="_blank" href="$1"&gt;</ph>Learn more<ph name="END_LINK_LEARN_MORE">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_CROSTINI_ARC_ADB_CONFIRMATION_MESSAGE_ENABLE" desc="Describes what will happen if the user enables ADB Sideloading.">
+     To enable ADB debugging, a restart of this <ph name="DEVICE_TYPE">$1<ex>Chromebook</ex></ph> is required. Disabling it requires a reset to factory settings.
+@@ -3171,7 +3171,7 @@ Press an assigned switch or key to remove assignment.
+     Remove Google Play and Android apps?
+   </message>
+   <message name="IDS_SETTINGS_APPS_ARC_VM_SHARED_USB_DEVICES_DESCRIPTION" desc="Description for managing shared USB devices. Do not translate 'ARCVM'.">
+-    Give Android apps control over USB devices on this Chromebook. Permission will be requested each time you plug in a USB device. Individual Android apps will ask for additional permissions.
++    Give Android apps control over USB devices on this computer. Permission will be requested each time you plug in a USB device. Individual Android apps will ask for additional permissions.
+   </message>
+   <message name="IDS_OS_SETTINGS_OPEN_GOOGLE_PLAY" desc="Label for launching Google Play Store.">
+     Open Google Play
+@@ -3503,7 +3503,7 @@ Press an assigned switch or key to remove assignment.
+     Forget
+   </message>
+   <message name="IDS_SETTINGS_FORGET_DEVICE_DIALOG_LABEL" desc="Bluetooth device details page > Forget device dialog: Label for dialog that forgets the device.">
+-    <ph name="DEVICE">$1<ex>Beats</ex></ph> will be removed from this Chromebook and won’t be saved to <ph name="PRIMARY_EMAIL">$2<ex>john@google.com</ex></ph>.
++    <ph name="DEVICE">$1<ex>Beats</ex></ph> will be removed from this computer and won’t be saved to <ph name="PRIMARY_EMAIL">$2<ex>john@google.com</ex></ph>.
+   </message>
+   <message name="IDS_SETTINGS_FORGET_DEVICE_DIALOG_TITLE" desc="Bluetooth device details page > Forget device dialog: Title for dialog that forgets the device." meaning="'Forget this device' means the device will be unpaired and removed from the account">
+     Forget this device?
+@@ -3653,7 +3653,7 @@ Press an assigned switch or key to remove assignment.
+     Focused voice
+   </message>
+   <message name="IDS_SETTINGS_AUDIO_INPUT_BEAMFORMING_DESCRIPTION" desc="In Device Settings, the description of the beamforming effect under the input section in audio settings subpage.">
+-    Beamforming mic so the person using the Chromebook sounds clear.
++    Beamforming mic so the person using the computer sounds clear.
+   </message>
+   <message name="IDS_SETTINGS_AUDIO_DEVICE_FRONT_MIC_LABEL" desc="In Device Settings, the label used for the front microphone.">
+     Front microphone
+@@ -4101,7 +4101,7 @@ Press an assigned switch or key to remove assignment.
+     Don’t see your printer?
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_HELP_SECTION_DESCRIPTION" desc="In CUPS printing settings subpage, this description helps users when trying to connect to a local printer.">
+-    Make sure your printer is connected to the same Wi-Fi network as your Chromebook or use a USB cable. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more about compatibility<ph name="LINK_END">&lt;/a&gt;</ph>
++    Make sure your printer is connected to the same Wi-Fi network as your computer or use a USB cable. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more about compatibility<ph name="LINK_END">&lt;/a&gt;</ph>
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_SHOW_MORE" desc="Text for the button to show more printers when there are more printers than currently displayed to the user.">
+     Show more
+@@ -4233,7 +4233,7 @@ Press an assigned switch or key to remove assignment.
+     Unable to add printer. Please check your printer's configuration and try again.
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_PRINTER_ADDED_PRINTER_PRINTER_UNREACHABLE_MESSAGE" desc="The message shown when the printer that is to be added is unreachable for configuration.">
+-    Can&#x2019;t connect to printer. Check that the printer is turned on and is connected to your Chromebook by Wi-Fi or USB.
++    Can&#x2019;t connect to printer. Check that the printer is turned on and is connected to your computer by Wi-Fi or USB.
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_PRINTER_ADDED_PRINTER_PPD_TOO_LARGE_MESSAGE" desc="The message shown when the PPD provided while trying to add new printer is too large.">
+     Can&#x2019;t load large PPD. Maximum size is 250 kB.
+@@ -4242,10 +4242,10 @@ Press an assigned switch or key to remove assignment.
+     File is the wrong format. Check the PPD file and try again.
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_PRINTER_ADDED_PRINTER_PPD_NOT_FOUND" desc="The message shown when the PPD provided while trying to add a new printer cannot be found.">
+-    Can&#x2019;t find PPD. Make sure your Chromebook is online and try again.
++    Can&#x2019;t find PPD. Make sure your computer is online and try again.
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_PRINTER_ADDED_PRINTER_PPD_UNRETRIEVABLE" desc="The message shown when the PPD provided while trying to add a new printer is unretrievable.">
+-    Can&#x2019;t find PPD. Make sure your Chromebook is online and try again.
++    Can&#x2019;t find PPD. Make sure your computer is online and try again.
+   </message>
+   <message name="IDS_SETTINGS_PRINTING_CUPS_PRINTER_ADDED_NATIVE_PRINTERS_NOT_ALLOWED_MESSAGE" desc="The message shown when the user is prevented from configuring printers due to an enterprise policy.">
+     Printer configuration is handled by the administrator.
+@@ -4562,7 +4562,7 @@ Press an assigned switch or key to remove assignment.
+     Show notification
+   </message>
+   <message name="IDS_SETTINGS_INTERNET_TETHER_NOTIFICATION_CONTROL_DESCRIPTION" desc="Description of a control allowing users to disable notifications for Instant Hotspot.">
+-    When your Chromebook is offline and hotspots are available
++    When your computer is offline and hotspots are available
+   </message>
+   <message name="IDS_SETTINGS_INTERNET_NO_NETWORKS" desc="Entry when there are no preferred networks or no networks of a particular type.">
+     None
+@@ -5797,7 +5797,7 @@ Press an assigned switch or key to remove assignment.
+     Restart your device
+   </message>
+   <message name="IDS_OS_SETTINGS_FACTORY_RESET_DESCRIPTION" desc="Description of the factory reset option on the ChromeOS settings page">
+-    Remove all user accounts and reset your Chromebook to be just like new.
++    Remove all user accounts and reset your computer to be just like new.
+   </message>
+   <message name="IDS_SETTINGS_FACTORY_RESET_WARNING" desc="Warning text in the 'Factory Reset' window">
+     A restart is required before your device can be reset with Powerwash. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+@@ -5836,7 +5836,7 @@ Press an assigned switch or key to remove assignment.
+     Remove unwanted pop-ups, fix network issues, and more by restoring your settings to safe defaults.
+   </message>
+   <message name="IDS_OS_SETTINGS_SANITIZE_DESCRIPTION" desc="Description of the sanitize feature on the sanitize window.">
+-    Getting unwanted pop-ups, or other unexpected behavior? Sometimes, apps and extensions that you install can change your ChromeOS settings without you knowing.
++    Getting unwanted pop-ups, or other unexpected behavior? Sometimes, apps and extensions that you install can change your KibaOS settings without you knowing.
+   </message>
+   <message name="IDS_OS_SETTINGS_SANITIZE_WARNING" desc="Warning text in the sanitize window.">
+     This will disable extensions and reset your settings to safe defaults. Tabs, files, and cookies will be preserved. <ph name="LINK_BEGIN">&lt;a&gt;</ph>Learn more<ph name="LINK_END">&lt;/a&gt;</ph>
+@@ -6561,7 +6561,7 @@ Press &amp; hold keyboard keys to see accent marks and special characters. This
+   <!-- TODO(jamescook): Use device type instead of "Chromebook", which may
+         require changing ArcPlayTermsOfServiceConsent resource id handling. -->
+   <message name="IDS_OS_SETTINGS_ANDROID_APPS_DISABLE_DIALOG_MESSAGE" desc="Describes what will happen if the user opts out of android apps.">
+-    Google Play and apps you've downloaded from Google Play will be deleted from this Chromebook.
++    Google Play and apps you've downloaded from Google Play will be deleted from this computer.
+     <ph name="LINE_BREAKS1">&lt;br&gt;&lt;br&gt;</ph>
+     Content you've purchased through Google Play such as movies, TV shows, music, books, as well as purchases from other apps may also be deleted.
+     <ph name="LINE_BREAKS2">&lt;br&gt;&lt;br&gt;</ph>
+@@ -7178,7 +7178,7 @@ Press &amp; hold keyboard keys to see accent marks and special characters. This
+     Web App
+   </message>
+   <message name="IDS_OS_SETTINGS_APP_DETAILS_TYPE_CROS_SYSTEM" desc="Text to explain that the type of an app is ChromeOS System app">
+-    ChromeOS System App
++    KibaOS System App
+   </message>
+   <message name="IDS_OS_SETTINGS_APP_DETAILS_TYPE_ANDROID_INSTALL_REASON_POLICY" desc="Explanation text for the android app installation reason, describing the type of the app, and that it is installed by the administrator.">
+     Android app installed by your device administrator.
+@@ -7203,10 +7203,10 @@ Press &amp; hold keyboard keys to see accent marks and special characters. This
+ 
+   <!-- Safety Hub -->
+   <message name="IDS_SETTINGS_SAFETY_HUB_VERSION_CARD_HEADER_RESTART" desc="Safety Hub settings page (chrome://settings/safetyHub) gives users an overview over their safety status. The version card, which this text is a part of, informs the user whether their Chrome is up to date. This title of the card is shown when Chrome is not up to date but there is an update available and the user needs to restart their browser to finish the update. Shown above the subtitle 'Relaunch to finish update. Your tabs will reopen'.">
+-    ChromeOS is out of date
++    KibaOS is out of date
+   </message>
+   <message name="IDS_SETTINGS_SAFETY_HUB_VERSION_CARD_HEADER_UPDATED" desc="Safety Hub settings page (chrome://settings/safetyHub) gives users an overview over their safety status. The version card, which this text is a part of, informs the user whether their Chrome is up to date. This title of the card is shown when Chrome is up to date and the user does not need to take any action. Shown above the subtitle that is the Chrome version.">
+-    ChromeOS is up to date
++    KibaOS is up to date
+   </message>
+ 
+   <!-- Lobster -->
+diff --git a/chrome/app/password_manager_ui_strings.grdp b/chrome/app/password_manager_ui_strings.grdp
+index e49648c05c54..40509c4b2cc3 100644
+--- a/chrome/app/password_manager_ui_strings.grdp
++++ b/chrome/app/password_manager_ui_strings.grdp
+@@ -896,7 +896,7 @@
+         Password Manager needs access to MacOS Keychain
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION" desc="Description for not branded Relaunch ChrChromiumome promo card.">
+-        To use Password Manager with macOS Keychain, relaunch Chromium and allow Keychain access. Your tabs will reopen after relaunching.
++        To use Password Manager with macOS Keychain, relaunch KibaOS and allow Keychain access. Your tabs will reopen after relaunching.
+       </message>
+     </else>
+     </if>
+@@ -916,7 +916,7 @@
+         Password Manager needs more access
+       </message>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_DESCRIPTION_LINUX" desc="Description for the Relaunch Chromium promo card.">
+-        To use Password Manager with your operating system, relaunch Chromium and allow access to your computer's password manager. Your tabs will reopen after relaunching.
++        To use Password Manager with your operating system, relaunch KibaOS and allow access to your computer's password manager. Your tabs will reopen after relaunching.
+       </message>
+     </else>
+     </if>
+@@ -930,7 +930,7 @@
+     </then>
+     <else>
+       <message name="IDS_PASSWORD_MANAGER_UI_RELAUNCH_CHROME_PROMO_CARD_ACTION" desc="Action button for not branded Relaunch Chrome promo card.">
+-        Relaunch Chromium
++        Relaunch KibaOS
+       </message>
+     </else>
+     </if>
+@@ -1037,7 +1037,7 @@
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_TOAST_SIGN_IN_TO_CONTINUE" desc="The description for the automated password change entry in Password Manager settings.">
+-      You need to sign in before Chromium can finish this task
++      You need to sign in before KibaOS can finish this task
+     </message>
+   </else>
+   </if>
+@@ -1108,7 +1108,7 @@
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chromium finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
++      If KibaOS finds one of your passwords in a public data breach, it can offer to change your password for you if you're signed in
+     </message>
+   </else>
+   </if>
+@@ -1123,7 +1123,7 @@
+   </then>
+   <else>
+     <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_SETTINGS_WITH_PRIVATE_INFERENCE_DESCRIPTION" desc="The description for the automated password change entry in Password Manager settings.">
+-      If Chromium finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
++      If KibaOS finds one of your passwords in a public data breach, Google Password Manager can offer to change it for you when you're signed in.
+     </message>
+   </else>
+   </if>
+@@ -1141,7 +1141,7 @@
+     </message>
+   </if>
+   <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_CHECKUP_BUTTON_ARIA_DESCRIPTION" desc="An accessibility description for the automated password change button in Password Manager checkup.">
+-    Let Chromium automatically change password for <ph name="WEBSITE">$1<ex>website.com</ex></ph>
++    Let KibaOS automatically change password for <ph name="WEBSITE">$1<ex>website.com</ex></ph>
+   </message>
+   <message name="IDS_PASSWORD_MANAGER_UI_PASSWORD_CHANGE_ATTEMPTING_SIGN_IN" desc="Status text on the button when automated password change is attempting to sign the user in.">
+     Attempting sign-in...
+@@ -1169,7 +1169,7 @@
+   </then>
+   <else>
+     <message name="IDS_SETTINGS_PASSWORD_CHANGE_SUBLABEL_WITH_LEARN_MORE" desc="Sublabel for password change entry in settings. The description of the feature beneath the 'Automated password change' feature title. This and the bullets beneath this paragraph represent the full description of the feature. * 'public' does two things: 1) it provides distance between 'Chrome' and 'data breach', because we don’t want users to associate the breach with Chrome (Chrome didn’t have a data leak, 2) and related, it might reassure the user to know that Chrome is using public information to establish these lists of compromised passwords. * 'Google Password Manager can offer…': The user has to agree to have this feature update their password for them each time. So Google Password Manager is ‘offering’ to do something for the user.">
+-      If Chromium finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
++      If KibaOS finds one of your passwords in a public data breach, Google Password Manager can offer to change your password for you if you're signed in. <ph name="BEGIN_LINK">&lt;a href="$1" target="_blank"&gt;</ph>More about automated password change<ph name="END_LINK">&lt;/a&gt;</ph>
+     </message>
+   </else>
+   </if>
+@@ -1190,7 +1190,7 @@
+     </then>
+     <else>
+       <message name="IDS_PASSWORD_MANAGER_UI_USER_INTERVENTION_NEEDED_TITLE" desc="Title of a dialog shown when the automated password change stops because the website requires identity verification.">
+-        Chromium needs help changing your password
++        KibaOS needs help changing your password
+       </message>
+     </else>
+   </if>
+diff --git a/chrome/app/printing_strings.grdp b/chrome/app/printing_strings.grdp
+index ff4c6e61e0a9..32e08d1b659d 100644
+--- a/chrome/app/printing_strings.grdp
++++ b/chrome/app/printing_strings.grdp
+@@ -276,7 +276,7 @@
+         Manage your printers in printer settings
+       </message>
+       <message name="IDS_PRINT_PREVIEW_PRINTER_SETUP_INFO_MESSAGE_DETAIL_PRINTER_OFFLINE_TEXT" desc="In preview-area, message shown to users when printer is offline.">
+-        Make sure your printer is turned on and connected to the same network as your Chromebook or use a USB cable
++        Make sure your printer is turned on and connected to the same network as your computer or use a USB cable
+       </message>
+       <message name="IDS_PRINT_PREVIEW_PRINTER_SETUP_INFO_MESSAGE_HEADING_NO_PRINTERS_TEXT" desc="In CrOS destination dialog, heading shown to users when destination list has no printers.">
+         No printer available
+diff --git a/chrome/app/settings_strings.grdp b/chrome/app/settings_strings.grdp
+index 6f068f9b51d9..007681c864ca 100644
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -1357,7 +1357,7 @@
+       </if>
+       <if expr="not reven">
+         <message name="IDS_SETTINGS_LANGUAGES_OPEN_CHROME_OS_SETTINGS_LABEL" desc="Label for the section that allow users to open languages settings in ChromeOS.">
+-          Manage languages in ChromeOS settings
++          Manage languages in KibaOS settings
+         </message>
+       </if>
+       <message name="IDS_SETTINGS_LANGUAGES_KEYBOARD_APPS" desc="Title for the list of keyboard apps installed via Play Store by the user.">
+@@ -1409,7 +1409,7 @@
+       </if>
+       <if expr="not reven">
+         <message name="IDS_SETTINGS_SECURE_DNS_OPEN_CHROME_OS_SETTINGS_LABEL" desc="Label for the section that allow users to open Secure DNS settings in ChromeOS.">
+-          Manage secure DNS in ChromeOS settings
++          Manage secure DNS in KibaOS settings
+         </message>
+       </if>
+     </if>
+@@ -3689,7 +3689,7 @@
+     </if>
+     <if expr="is_chromeos">
+       <message name="IDS_SETTINGS_ACCOUNT_BODY_CHROMEOS" desc="Description of the section in the account settings page for managing data types on ChromeOS.">
+-        When on, data is saved in your Google Account and can be used on all your devices. When off, data is saved only to this device. For ChromeOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>ChromeOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
++        When on, data is saved in your Google Account and can be used on all your devices. When off, data is saved only to this device. For KibaOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>KibaOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
+       </message>
+     </if>
+     <message name="IDS_SETTINGS_ACCOUNT_SYNC_DISABLED"  desc="Section in the account settings page informing the user when the toggles to save a specific data type to the user's Google Account are disabled as per an Enterprise policy.">
+diff --git a/chrome/app/shared_settings_strings.grdp b/chrome/app/shared_settings_strings.grdp
+index 35ef542fa88e..362192eb10a8 100644
+--- a/chrome/app/shared_settings_strings.grdp
++++ b/chrome/app/shared_settings_strings.grdp
+@@ -187,7 +187,7 @@
+     May incur mobile data charges
+   </message>
+   <message name="IDS_SETTINGS_NEARBY_SHARE_DATA_USAGE_MOBILE_DATA_TOOLTIP" desc="Explanation of when the mobile data usage setting applies. When selected, Mobile data means that Wi-Fi or cell data may be used for transfers for the Nearby Share feature.">
+-    This option applies to Chromebooks with a data plan or mobile network dongle, or when tethering to a portable hotspot
++    This option applies to computers with a data plan or mobile network dongle, or when tethering to a portable hotspot
+   </message>
+   <message name="IDS_SETTINGS_NEARBY_SHARE_DATA_USAGE_OFFLINE_LABEL" desc="Label for the data usage setting where transfers will only take place offline for the Nearby Share feature.">
+     Without internet
+@@ -428,7 +428,7 @@
+ 
+   <if expr="is_chromeos">
+     <message name="IDS_BROWSER_SETTINGS_SYNC_FEATURE_LABEL" desc="Label describing the browser sync feature.">
+-      Your data will be synced across all Chrome browsers where you have turned on sync for this account. For ChromeOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>ChromeOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
++      Your data will be synced across all Chrome browsers where you have turned on sync for this account. For KibaOS sync options, go to <ph name="LINK_BEGIN">&lt;a&gt;</ph>KibaOS settings<ph name="LINK_END">&lt;/a&gt;</ph>.
+     </message>
+     <message name="IDS_SETTINGS_COOKIES_CHECKBOX_LABEL" desc="Label for the checkbox which enables or disables syncing cookies between multiple browser instances.">
+       Cookies
+@@ -440,7 +440,7 @@
+     Checking for updates
+   </message>
+   <message name="IDS_SETTINGS_UPDATE_TO_ROLLBACK_VERSION_DISALLOWED" desc="Status label: After a consumer rollback, updating to the previously installed version just rolledback from is disallowed (ChromiumOS/ChromeOS)">
+-    You reverted to a previous version of ChromeOS. To get updates, wait until the next version is available.
++    You reverted to a previous version of KibaOS. To get updates, wait until the next version is available.
+   </message>
+ 
+   <if expr="is_chromeos">
+diff --git a/chrome/app/support_tool_strings.grdp b/chrome/app/support_tool_strings.grdp
+index 00aa5c6cebc5..1e3e60cd6a73 100644
+--- a/chrome/app/support_tool_strings.grdp
++++ b/chrome/app/support_tool_strings.grdp
+@@ -115,7 +115,7 @@
+             UI Hierarchy
+         </message>
+         <message name="IDS_SUPPORT_TOOL_ADDITIONAL_CROS_PLATFROM_LOGS" desc="Additional logs for ChromeOS platfrom.">
+-            Additional ChromeOS Platform Logs
++            Additional KibaOS Platform Logs
+         </message>
+         <message name="IDS_SUPPORT_TOOL_DEVICE_EVENT" desc="The events that happen on the device.">
+             Device Event
+@@ -133,34 +133,34 @@
+             DBus Details
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_NETWORK_ROUTES" desc="Network routes information for ChromeOS. Network routing is the process of selecting a path for a packet to travel between networks. An IP route consists of simply a mapping of a destination IP address or network to a next hop and interface.">
+-            ChromeOS Network Routes
++            KibaOS Network Routes
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_SHILL_LOGS" desc="Logs from ChromeOS connection manager, Shill.">
+-            ChromeOS Shill (Connection Manager) Logs
++            KibaOS Shill (Connection Manager) Logs
+         </message>
+         <message name="IDS_SUPPORT_TOOL_POLICIES" desc="Policies on managed devices.">
+             Policies
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_SYSTEM_STATE" desc="System state and reports of ChromeOS.">
+-            ChromeOS System State and Reports
++            KibaOS System State and Reports
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_SYSTEM_LOGS" desc="System logs on ChromeOS.">
+-            ChromeOS System Logs
++            KibaOS System Logs
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_CHROME_USER_LOGS" desc="Chrome logs from user's session on ChromeOS.">
+-            ChromeOS Chrome User Logs
++            KibaOS Browser User Logs
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_BLUETOOTH_FLOSS" desc="Bluetooth logs if Floss is enabled on the device. Floss is the project that works on converging on a single Bluetooth stack between Android and ChromeOS.">
+-            ChromeOS Bluetooth
++            KibaOS Bluetooth
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_CONNECTED_INPUT_DEVICES" desc="Information about connected input devices to a ChromeOS device.">
+-            ChromeOS Connected Input Devices
++            KibaOS Connected Input Devices
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_VIRTUAL_KEYBOARD" desc="Virtual keyboard details on ChromeOS.">
+-            ChromeOS Virtual Keyboard
++            KibaOS Virtual Keyboard
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_NETWORK_HEALTH" desc=" Network health data of a ChromeOS device.">
+-            ChromeOS Network Health
++            KibaOS Network Health
+         </message>
+         <message name="IDS_SUPPORT_TOOL_PERFORMANCE" desc="Performance and battery state of ChromeOS device.">
+             Performance and Battery State
+@@ -169,10 +169,10 @@
+             Sign In State
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_APP_SERVICE" desc="ChromeOS App Service gathers information from app service about installed and running apps.">
+-            ChromeOS App Service
++            KibaOS App Service
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROMEOS_KIOSK_APP_LEVEL_LOGS" desc="Logs collected from service workers, app windows and browser during a ChromeOS kiosk app session.">
+-            ChromeOS Kiosk App Logs
++            KibaOS Kiosk App Logs
+         </message>
+         <message name="IDS_SUPPORT_TOOL_CHROME_UPDATER" desc="Diagnostic information regarding Chrome's updater.">
+             Updater
+diff --git a/chrome/browser/resources/ash/settings/os_about_page/os_about_page.html b/chrome/browser/resources/ash/settings/os_about_page/os_about_page.html
+index 108102226dca..dbb3ed1f1d2c 100644
+--- a/chrome/browser/resources/ash/settings/os_about_page/os_about_page.html
++++ b/chrome/browser/resources/ash/settings/os_about_page/os_about_page.html
+@@ -330,7 +330,7 @@
+       <settings-card id="copyrightCard">
+         <div class="settings-box padded block first">
+           <div class="info-section">
+-            <div class="secondary">$i18n{aboutOsProductTitle}</div>
++            <div class="secondary">$i18n{aboutCopyrightProduct}</div>
+             <div class="secondary">$i18n{aboutProductCopyright}</div>
+           </div>
+ 
+diff --git a/chrome/browser/ui/webui/ash/settings/pages/about/about_section.cc b/chrome/browser/ui/webui/ash/settings/pages/about/about_section.cc
+index 6cb9281e0ffb..c11042f90530 100644
+--- a/chrome/browser/ui/webui/ash/settings/pages/about/about_section.cc
++++ b/chrome/browser/ui/webui/ash/settings/pages/about/about_section.cc
+@@ -396,6 +396,9 @@ void AboutSection::AddLoadTimeData(content::WebUIDataSource* html_source) {
+                             account_id && ShouldShowAUToggle(*account_id));
+   }
+ 
++  // The copyright beneath it is the Chromium Authors', for Chromium, which
++  // KibaOS is built from. A name, so not translated.
++  html_source->AddString("aboutCopyrightProduct", u"Chromium");
+   html_source->AddString("aboutBrowserVersion",
+                          VersionUI::GetAnnotatedVersionStringForUi());
+   html_source->AddString(
+diff --git a/chromeos/chromeos_strings.grd b/chromeos/chromeos_strings.grd
+index 556006b0dcb0..7356b56ca405 100644
+--- a/chromeos/chromeos_strings.grd
++++ b/chromeos/chromeos_strings.grd
+@@ -659,7 +659,7 @@
+           Change password
+         </message>
+         <message name="IDS_PASSWORD_CHANGE_NOTIFICATION_TITLE" desc="Message title for a notification that tells the user that the password was updated.">
+-          ChromeOS password updated
++          KibaOS password updated
+         </message>
+         <message name="IDS_PASSWORD_CHANGE_NOTIFICATION_BODY" desc="Message body on a notification that politely requests the user to start using the new password.">
+           Your password change was successful. Please use the new password from now on.
+@@ -706,7 +706,7 @@
+         </message>
+ 
+         <message name="IDS_IME_SERVICE_DISPLAY_NAME" desc="The display name (in the system task manager, etc) of the service process providing the input methods.">
+-          ChromeOS Input Method Service
++          KibaOS Input Method Service
+         </message>
+ 
+         <!-- Content transfer App -->
+@@ -3265,10 +3265,10 @@
+           Safety reset has been completed
+         </message>
+         <message name="IDS_SANITIZE_DONE_DESCRIPTION" desc="Description of the safety reset done dialog">
+-          Your Chromebook was reset to safe defaults. You can adjust these changes anytime in Settings.
++          Your computer was reset to safe defaults. You can adjust these changes anytime in Settings.
+         </message>
+         <message name="IDS_SANITIZE_DONE_ROLLBACK" desc="Summary title">
+-          Your Chromebook was reset to safe defaults. You can make changes anytime in Settings.
++          Your computer was reset to safe defaults. You can make changes anytime in Settings.
+         </message>
+         <message name="IDS_SANITIZE_DONE" desc="Name of the button that will close the safety reset done dialog">
+           Done
+@@ -3283,7 +3283,7 @@
+           Extensions disabled to prevent changes to settings. Only turn on extensions you trust.
+         </message>
+         <message name="IDS_SANITIZE_DONE_ACCORDION_CHROMEOS_TITLE" desc="Accordion title for ChromeOS resets">
+-          ChromeOS Settings
++          KibaOS Settings
+         </message>
+         <message name="IDS_SANITIZE_DONE_ACCORDION_CHROMEOS_INPUT_SUBHEADER" desc="Subheader for instructions to adjust ChromeOS Inputs">
+           Input method
+diff --git a/components/autofill_payments_strings.grdp b/components/autofill_payments_strings.grdp
+index 23f2a098da6f..d1f2161c4900 100644
+--- a/components/autofill_payments_strings.grdp
++++ b/components/autofill_payments_strings.grdp
+@@ -297,13 +297,13 @@
+     </if>
+     <if expr="not _google_chrome">
+       <message name="IDS_AUTOFILL_SAVE_AND_FILL_DIALOG_EXPLANATION_LOCAL" desc="Explanation text for the Autofill Save and Fill dialog for cards that will be saved locally.">
+-        Autofill this card for purchases made in Chromium when it's saved on this device
++        Autofill this card for purchases made in KibaOS when it's saved on this device
+       </message>
+       <message name="IDS_AUTOFILL_SAVE_AND_FILL_DIALOG_EXPLANATION_UPLOAD" desc="Explanation text for the Autofill Save and Fill dialog for cards that will be saved to the GPay server.">
+-        Autofill this card for purchases made in Chromium when it's saved to use with Google Pay
++        Autofill this card for purchases made in KibaOS when it's saved to use with Google Pay
+       </message>
+       <message name="IDS_AUTOFILL_SAVE_AND_FILL_TO_WALLET_DIALOG_EXPLANATION_UPLOAD" desc="Explanation text for the Autofill Save and Fill dialog for cards that will be saved to Google Wallet.">
+-        Autofill this card for purchases made in Chromium when it's saved in Google Wallet
++        Autofill this card for purchases made in KibaOS when it's saved in Google Wallet
+       </message>
+     </if>
+     <message name="IDS_AUTOFILL_SAVE_AND_FILL_DIALOG_CARD_NUMBER_LABEL" desc="The label text for the card number textfield.">
+@@ -616,13 +616,13 @@
+     </if>
+     <if expr="not _google_chrome">
+       <message name="IDS_PAYMENTS_AUTOFILL_FILLING_MANDATORY_REAUTH" desc="Text that appears in the payments autofill mandatory re-authentication popup as the sublabel, asking the user to authenticate using biometric or device unlock before filling.">
+-        Verify it's you so Chromium can fill in your payment info.
++        Verify it's you so KibaOS can fill in your payment info.
+       </message>
+       <message name="IDS_PAYMENTS_AUTOFILL_SETTINGS_TOGGLE_MANDATORY_REAUTH" desc="Text that appears in the payments autofill mandatory re-authentication popup as the sublabel when users try to switch the mandatory reauth settings page toggle, asking the user to authenticate using biometric or device unlock before the toggle is switched.">
+-        Chromium is trying to modify settings for filling payment methods.
++        KibaOS is trying to modify settings for filling payment methods.
+       </message>
+       <message name="IDS_PAYMENTS_AUTOFILL_SETTINGS_EDIT_MANDATORY_REAUTH" desc="Text that appears in the payments autofill mandatory re-authentication popup as the sublabel when users try to edit cards in the settings page, asking the user to authenticate using biometric or device unlock first.">
+-        Chromium is trying to edit payment methods.
++        KibaOS is trying to edit payment methods.
+       </message>
+     </if>
+   </if>
+diff --git a/components/autofill_strings.grdp b/components/autofill_strings.grdp
+index 9a1de743f99a..a7d92772d910 100644
+--- a/components/autofill_strings.grdp
++++ b/components/autofill_strings.grdp
+@@ -62,13 +62,13 @@
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_AUTOFILL_DELETE_AUTOCOMPLETE_SUGGESTION_CONFIRMATION_BODY" desc="Text in a dialog to confirm that the user wants to delete an autocomplete form history suggestion.">
+-      Remove form suggestion from Chromium?
++      Remove form suggestion from KibaOS?
+     </message>
+     <message name="IDS_AUTOFILL_DELETE_CREDIT_CARD_SUGGESTION_CONFIRMATION_BODY" desc="Text in a dialog to confirm that the user wants to delete a credit card from Autofill.">
+-      Remove credit card from Chromium?
++      Remove credit card from KibaOS?
+     </message>
+     <message name="IDS_AUTOFILL_DELETE_PROFILE_SUGGESTION_CONFIRMATION_BODY" desc="Text in a dialog to confirm that the user wants to delete an address from Autofill.">
+-      Remove address from Chromium?
++      Remove address from KibaOS?
+     </message>
+   </if>
+   <message name="IDS_AUTOFILL_REMOVE_HOME_PROFILE_SUGGESTION_CONFIRMATION_TITLE" desc="Title in a dialog to confirm that the user wants to delete their Home address from Autofill." formatter_data="android_java">
+@@ -2053,13 +2053,13 @@ You can remove this suggestion from Chrome. Your original source won't be delete
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_SETTINGS_AUTOFILL_AI_TOGGLE_SUB_LABEL" desc="The description of the setting. By 'understand forms better', we mean that when a user submits a form on a website, and if they're using smarter form understanding, this feature can offer to save the user's submitted info. When Chromium saves that info, we save the submitted values and consider the page context." formatter_data="android_java">
+-      Chromium understands forms better and can autofill them faster for you
++      KibaOS understands forms better and can autofill them faster for you
+     </message>
+     <message name="IDS_SETTINGS_AUTOFILL_AI_TOGGLE_SUB_LABEL_V2" desc="The description of the setting. This explains to users that Google can process page data in Google servers as a way to provide a better experience. Importantly, it mentions that this is done safely and cannot be viewed by anyone." formatter_data="android_java">
+-      Help Chromium better understand and fill complex forms by securely processing data on Google's servers. Your info remains private and isn't reviewed by anyone.
++      Help KibaOS better understand and fill complex forms by securely processing data on Google's servers. Your info remains private and isn't reviewed by anyone.
+     </message>
+     <message name="IDS_SETTINGS_AUTOFILL_AI_WHEN_ON_CAN_FILL_DIFFICULT_FIELDS" desc="Bullet point that appears beneath the 'When on' title when seeing the Smarter Form Understanding description page. This string explains one of the advantages users will get from enabling the feature and serves as a way to incentivize the user to do so." formatter_data="android_java">
+-      Chromium can autofill difficult fields that standard autofill might miss
++      KibaOS can autofill difficult fields that standard autofill might miss
+     </message>
+   </if>
+ 
+diff --git a/components/management_strings.grdp b/components/management_strings.grdp
+index 7c7f1dd48a57..6190e4f41635 100644
+--- a/components/management_strings.grdp
++++ b/components/management_strings.grdp
+@@ -75,10 +75,10 @@
+       </if>
+       <if expr="not _google_chrome">
+         <message name="IDS_MANAGEMENT_BROWSER_NOTICE" desc="Message shown when the (non-Google-branded) Chromium browser is managed, it indicates what the administrator can do on the browser.">
+-        Your administrator can make changes to your profile and browser remotely, analyze information about the browser through reporting, and perform other necessary tasks. Activity on this device may also be managed outside of Chromium. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1" aria-label="$2"&gt;</ph>Learn more<ph name="END_LINK">&lt;/a&gt;</ph>
++        Your administrator can make changes to your profile and browser remotely, analyze information about the browser through reporting, and perform other necessary tasks. Activity on this device may also be managed outside of KibaOS. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1" aria-label="$2"&gt;</ph>Learn more<ph name="END_LINK">&lt;/a&gt;</ph>
+         </message>
+         <message name="IDS_MANAGEMENT_NOT_MANAGED_NOTICE" desc="Message indicating that the (non-Google-branded) Chromium browser is not managed">
+-        This browser is not managed by a company or other organization. Activity on this device may be managed outside of Chromium. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1" aria-label="$2"&gt;</ph>Learn more<ph name="END_LINK">&lt;/a&gt;</ph>
++        This browser is not managed by a company or other organization. Activity on this device may be managed outside of KibaOS. <ph name="BEGIN_LINK">&lt;a target="_blank" href="$1" aria-label="$2"&gt;</ph>Learn more<ph name="END_LINK">&lt;/a&gt;</ph>
+         </message>
+       </if>
+       <message name="IDS_MANAGEMENT_PROFILE_NOTICE" desc="Message shown when one profile from the Chrome browser is managed, it indicates what the administrator can do for that profile.">
+diff --git a/components/new_or_sad_tab_strings.grdp b/components/new_or_sad_tab_strings.grdp
+index 21a8aae55523..c770c8b997fc 100644
+--- a/components/new_or_sad_tab_strings.grdp
++++ b/components/new_or_sad_tab_strings.grdp
+@@ -88,7 +88,7 @@
+       </if>
+       <if expr="not _google_chrome">
+         <message name="IDS_SAD_TAB_RELOAD_RESTART_BROWSER" desc="One of the bullet points displayed on the web page if a reload failed to fix the issue, advising the user to restart Chromium." formatter_data="android_java">
+-          Restart Chromium
++          Restart KibaOS
+         </message>
+       </if>
+       <if expr="is_android or is_ios">
+@@ -177,7 +177,7 @@
+       </if>
+       <if expr="not _google_chrome">
+         <message name="IDS_NEW_TAB_OTR_NOT_SAVED" desc="Bullet points listing data that are not saved in the Incognito mode. 'Browsing history' means a history of visited websites. 'Cookies and site data' refers to data saved by websites on the user's device (e.g. sign-in state, preferences, etc.). 'Information entered in forms' refers to names, addresses, passwords etc. that users enter into forms on the web." formatter_data="android_java">
+-          Chromium <ph name="BEGIN_EMPHASIS">&lt;em&gt;</ph>won’t save<ph name="END_EMPHASIS">&lt;/em&gt;</ph>:
++          KibaOS <ph name="BEGIN_EMPHASIS">&lt;em&gt;</ph>won’t save<ph name="END_EMPHASIS">&lt;/em&gt;</ph>:
+           <ph name="BEGIN_LIST">&lt;ul&gt;</ph>
+             <ph name="LIST_ITEM">&lt;li&gt;</ph>Your browsing history
+             <ph name="LIST_ITEM">&lt;li&gt;</ph>Cookies and site data
+diff --git a/components/omnibox_pedal_ui_strings.grdp b/components/omnibox_pedal_ui_strings.grdp
+index 480e8831d923..84739b3b4687 100644
+--- a/components/omnibox_pedal_ui_strings.grdp
++++ b/components/omnibox_pedal_ui_strings.grdp
+@@ -499,13 +499,13 @@
+     Manage accessibility settings
+   </message>
+   <message name="IDS_OMNIBOX_PEDAL_MANAGE_CHROMEOS_ACCESSIBILITY_SUGGESTION_CONTENTS" desc="The button hover tooltip text to describe pedal action, MANAGE_CHROMEOS_ACCESSIBILITY">
+-    Personalize your accessibility tools in ChromeOS settings
++    Personalize your accessibility tools in KibaOS settings
+   </message>
+   <message name="IDS_ACC_OMNIBOX_PEDAL_MANAGE_CHROMEOS_ACCESSIBILITY_SUFFIX" desc="Suffix for spoken suggestion description with pedal action button, to explain keystroke used to MANAGE_CHROMEOS_ACCESSIBILITY.">
+-    <ph name="MANAGE_CHROMEOS_ACCESSIBILITY_FOCUSED_FRIENDLY_MATCH_TEXT">$1<ex>The Chromium Projects http://www.chromium.org bookmark</ex></ph>, Press tab then Enter to personalize your accessibility tools in ChromeOS settings
++    <ph name="MANAGE_CHROMEOS_ACCESSIBILITY_FOCUSED_FRIENDLY_MATCH_TEXT">$1<ex>The Chromium Projects http://www.chromium.org bookmark</ex></ph>, Press tab then Enter to personalize your accessibility tools in KibaOS settings
+   </message>
+   <message name="IDS_ACC_OMNIBOX_PEDAL_MANAGE_CHROMEOS_ACCESSIBILITY" desc="Announcement when pedal action button is focused, MANAGE_CHROMEOS_ACCESSIBILITY">
+-    Manage accessibility settings button, Enter to personalize your accessibility tools in ChromeOS settings
++    Manage accessibility settings button, Enter to personalize your accessibility tools in KibaOS settings
+   </message>
+ 
+   <message name="IDS_OMNIBOX_PEDAL_SET_CHROME_AS_DEFAULT_BROWSER_HINT" desc="The button text contents to suggest pedal action, SET_CHROME_AS_DEFAULT_BROWSER">
+diff --git a/components/page_info_strings.grdp b/components/page_info_strings.grdp
+index 5a4e88cfdb3a..11421475bd6e 100644
+--- a/components/page_info_strings.grdp
++++ b/components/page_info_strings.grdp
+@@ -108,7 +108,7 @@
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS_SAVED" desc="A short paragraph explaining to a Chromium user that they have reused their saved password on the current website.">
+-      You just entered your password on a deceptive site. To secure your accounts, Chromium recommends checking your saved passwords.
++      You just entered your password on a deceptive site. To secure your accounts, KibaOS recommends checking your saved passwords.
+     </message>
+   </if>
+   <if expr="use_titlecase">
+@@ -524,19 +524,19 @@
+     </if>
+     <if expr="not _google_chrome">
+       <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS" desc="A short paragraph explaining to the user that they has reuse their google password on current website.">
+-        You could lose access to your Google Account. Chromium recommends changing your password now. You'll be asked to sign in.
++        You could lose access to your Google Account. KibaOS recommends changing your password now. You'll be asked to sign in.
+       </message>
+       <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS_SYNC" desc="A short paragraph explaining to a Chrome sync user that they have reused their Google password on the current website.">
+-        Chromium can help you protect your Google Account and change your password.
++        KibaOS can help you protect your Google Account and change your password.
+       </message>
+       <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS_SIGNED_IN_NON_SYNC" desc="A short paragraph explaining to a non-sync user that they have reused their Google password on the current website.">
+-        You just entered your password on a deceptive site. Chromium can help. To change your password and notify Google that your account may be at risk, click Protect Account.
++        You just entered your password on a deceptive site. KibaOS can help. To change your password and notify Google that your account may be at risk, click Protect Account.
+       </message>
+       <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS_ENTERPRISE" desc="A short paragraph explaining to the user that they have reused their password on the current website.">
+-        You could lose access to your organization's account or experience identity theft. Chromium recommends changing your password now.
++        You could lose access to your organization's account or experience identity theft. KibaOS recommends changing your password now.
+       </message>
+       <message name="IDS_PAGE_INFO_CHANGE_PASSWORD_DETAILS_ENTERPRISE_WITH_ORG_NAME" desc="A short paragraph explaining to the user that they have reused their password on the current website.">
+-        You could lose access to your <ph name="ORG_NAME">$1<ex>Google</ex></ph> account or experience identity theft. Chromium recommends changing your password now.
++        You could lose access to your <ph name="ORG_NAME">$1<ex>Google</ex></ph> account or experience identity theft. KibaOS recommends changing your password now.
+       </message>
+     </if>
+ 
+diff --git a/components/password_manager_strings.grdp b/components/password_manager_strings.grdp
+index 9e6856152682..b211c3a3ce73 100644
+--- a/components/password_manager_strings.grdp
++++ b/components/password_manager_strings.grdp
+@@ -52,7 +52,7 @@
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_PASSWORD_MANAGER_LEAK_HELP_MESSAGE" desc="The text is shown in a popup that explains to the user why they are seeing a warning about leaked passwords. This is a stand-alone string and the only content of the popup dialog.">
+-      When you use a password, Chromium warns you if it has been published online. When doing this, your passwords and usernames are encrypted, so they can’t be read by anyone, including Google.
++      When you use a password, KibaOS warns you if it has been published online. When doing this, your passwords and usernames are encrypted, so they can’t be read by anyone, including Google.
+     </message>
+   </if>
+   <message name="IDS_MANAGE_PASSWORDS_AUTO_SIGNIN_TITLE" desc="The title of the auto-signin toast.">
+@@ -237,7 +237,7 @@
+       Password Manager needs access to MacOS Keychain
+     </message>
+     <message name="IDS_PASSWORD_MANAGER_RELAUNCH_CHROME_BUBBLE_DESCRIPTION_NON_BRANDED" desc="Text that appears in the description of the relaunch Chromium bubble.">
+-      To use Password Manager with macOS Keychain, relaunch Chromium and allow Keychain access. Your tabs will reopen after relaunching.
++      To use Password Manager with macOS Keychain, relaunch KibaOS and allow Keychain access. Your tabs will reopen after relaunching.
+     </message>
+   </if>
+   <if expr="is_linux">
+@@ -251,7 +251,7 @@
+       Password Manager needs more access
+     </message>
+     <message name="IDS_PASSWORD_MANAGER_RELAUNCH_CHROME_BUBBLE_DESCRIPTION_LINUX_NON_BRANDED" desc="Text that appears in the description of the relaunch Chromium bubble.">
+-      To use Password Manager with your operating system, relaunch Chromium and allow access to your computer's password manager. Your tabs will reopen after relaunching.
++      To use Password Manager with your operating system, relaunch KibaOS and allow access to your computer's password manager. Your tabs will reopen after relaunching.
+     </message>
+   </if>
+   <if expr="is_win or is_macosx or is_chromeos">
+@@ -277,7 +277,7 @@
+       Relaunch Chrome
+     </message>
+     <message name="IDS_PASSWORD_MANAGER_RELAUNCH_CHROME_BUBBLE_ACCEPT_BUTTON_NON_BRANDED" desc="Text that appears in the accept button of the relaunch Chromium bubble.">
+-      Relaunch Chromium
++      Relaunch KibaOS
+     </message>
+     <if expr="use_titlecase">
+       <message name="IDS_PASSWORD_MANAGER_RELAUNCH_CHROME_BUBBLE_CANCEL_BUTTON" desc="Text that appears in the cancel button of the relaunch Chrome bubble.">
+diff --git a/components/permissions_strings.grdp b/components/permissions_strings.grdp
+index eb5d4a72a85e..b73818c932ab 100644
+--- a/components/permissions_strings.grdp
++++ b/components/permissions_strings.grdp
+@@ -613,7 +613,7 @@ This will otherwise be blocked by your privacy settings. This will allow the con
+     Windows
+   </message>
+   <message name="IDS_CHROMEOS_NAME_FRAGMENT" desc="Text fragment identifying the ChromeOS">
+-    ChromeOS
++    KibaOS
+   </message>
+   <if expr="is_android">
+     <message name="IDS_ANDROID_NAME_FRAGMENT" desc="Text fragment identifying the Android">
+diff --git a/components/privacy_sandbox_strings.grd b/components/privacy_sandbox_strings.grd
+index ff3325526079..a788beb3c033 100644
+--- a/components/privacy_sandbox_strings.grd
++++ b/components/privacy_sandbox_strings.grd
+@@ -305,7 +305,7 @@
+         </then>
+         <else>
+           <message name="IDS_SETTINGS_COOKIES_BLOCK_THIRD_PARTY_SETTINGS_ALLOW_BULLET_THREE" desc="This text is for a bullet that provides detail about the first setting option. It describes the key new detail that now applies to this setting option." formatter_data="android_java">
+-            When you're in Incognito mode, Chromium blocks sites from using third-party cookies
++            When you're in Incognito mode, KibaOS blocks sites from using third-party cookies
+           </message>
+         </else>
+       </if>
+@@ -343,7 +343,7 @@
+         </then>
+         <else>
+           <message name="IDS_PRIVACY_GUIDE_COOKIE_SETTINGS_ALLOW_THINGS_TO_CONSIDER_BULLET_TWO" desc="This text is for a bullet that provides key considerations about the first setting option. It describes the key new detail that now applies to this setting option.">
+-            When you're in Incognito mode, Chromium blocks sites from using third-party cookies
++            When you're in Incognito mode, KibaOS blocks sites from using third-party cookies
+           </message>
+         </else>
+       </if>
+diff --git a/components/reset_password_strings.grdp b/components/reset_password_strings.grdp
+index 5f58c26466f0..26c11a68d058 100644
+--- a/components/reset_password_strings.grdp
++++ b/components/reset_password_strings.grdp
+@@ -40,10 +40,10 @@
+   </if>
+   <if expr="not _google_chrome">
+      <message name="IDS_RESET_PASSWORD_EXPLANATION_PARAGRAPH" desc="The primary explanatory paragraph for the reset password page when the user manually navigates to this page.">
+-      Chromium recommends resetting your password if you reused it on other sites.
++      KibaOS recommends resetting your password if you reused it on other sites.
+     </message>
+     <message name="IDS_RESET_PASSWORD_EXPLANATION_PARAGRAPH_WITH_ORG_NAME" desc="The primary explanatory paragraph for the reset password page when the user manually navigates to this page.">
+-      Chromium recommends resetting your <ph name="BEGIN_BOLD">&lt;strong&gt;</ph><ph name="ORG_NAME">$1<ex>Google</ex></ph><ph name="END_BOLD">&lt;/strong&gt;</ph> password if you reused it on other sites.
++      KibaOS recommends resetting your <ph name="BEGIN_BOLD">&lt;strong&gt;</ph><ph name="ORG_NAME">$1<ex>Google</ex></ph><ph name="END_BOLD">&lt;/strong&gt;</ph> password if you reused it on other sites.
+     </message>
+   </if>
+ </grit-part>
+diff --git a/components/search_engine_choice_strings.grdp b/components/search_engine_choice_strings.grdp
+index cc85a72337f1..25b50b6921f4 100644
+--- a/components/search_engine_choice_strings.grdp
++++ b/components/search_engine_choice_strings.grdp
+@@ -64,7 +64,7 @@
+     </if>
+     <if expr="not _google_chrome">
+       <message name="IDS_SEARCH_ENGINE_CHOICE_PAGE_SUBTITLE_INFO_LINK_A11Y_LABEL" desc="Accessibility label for the “Learn more” link in the search engine choice screen. Clicking the link will open a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium.">
+-        Learn more about your search engine in Chromium
++        Learn more about your search engine in KibaOS
+       </message>
+     </if>
+ 
+@@ -116,25 +116,25 @@
+     <if expr="not _google_chrome">
+       <if expr="use_titlecase">
+         <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_TITLE" desc="This string is the heading of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium. (A search engine provides answers to search queries; this is different from a browser, which displays web pages. A search engine powers many experiences within a browser.) This screen appears when the user taps or clicks “Learn more” on the search engine choice screen. This string is before the “Based on a law in your region...” string. We want users to read this screen and understand that they can use any search engine with Chromium and what the impact of their choice might be.">
+-          Your Search Engine in Chromium
++          Your Search Engine in KibaOS
+         </message>
+       </if>
+       <if expr="not use_titlecase">
+         <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_TITLE" desc="This string is the heading of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium. (A search engine provides answers to search queries; this is different from a browser, which displays web pages. A search engine powers many experiences within a browser.) This screen appears when the user taps or clicks “Learn more” on the search engine choice screen. This string is before the “Based on a law in your region...” string. We want users to read this screen and understand that they can use any search engine with Chromium and what the impact of their choice might be.">
+-          Your search engine in Chromium
++          Your search engine in KibaOS
+         </message>
+       </if>
+       <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_BODY_FIRST_PARAGRAPH" desc="This is the first paragraph of the body text of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chrome. This screen provides the following details: 1. the list includes search engines that are popular in the user’s region and the order includes randomization (not in order of recommendation); 2. features may be unavailable if the chosen default search engine doesn’t support them; 3. the user can change their mind at any time. This card appears when the user taps or clicks “Learn more” on the search engine choice screen. The headline for this card is “Your search engine in Chromium”.">
+-        Based on a law in your region, Chromium asks you to choose your default search engine. These search engines are popular in your region and are shown in random order.
++        Based on a law in your region, KibaOS asks you to choose your default search engine. These search engines are popular in your region and are shown in random order.
+       </message>
+       <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_BODY_SECOND_PARAGRAPH" desc="This is the second paragraph of the body text of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium. This screen provides the following details: 1. the list includes search engines that are popular in the user’s region and the order includes randomization (not in order of recommendation); 2. features may be unavailable if the chosen default search engine doesn’t support them; 3. the user can change their mind at any time. This card appears when the user taps or clicks “Learn more” on the search engine choice screen. The headline for this card is “Your search engine in Chromium”.">
+-        <ph name="BEGIN_BOLD">&lt;b&gt;</ph>Your default search engine lets you search the web and powers Chromium features<ph name="END_BOLD">&lt;/b&gt;</ph> like searching from the address bar and from images on web pages. A feature might not be available if your search engine doesn’t support it.
++        <ph name="BEGIN_BOLD">&lt;b&gt;</ph>Your default search engine lets you search the web and powers KibaOS features<ph name="END_BOLD">&lt;/b&gt;</ph> like searching from the address bar and from images on web pages. A feature might not be available if your search engine doesn’t support it.
+       </message>
+       <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_BODY_THIRD_PARAGRAPH" desc="This is the third paragraph of the body text of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium. This screen provides the following details: 1. the list includes search engines that are popular in the user’s region and the order includes randomization (not in order of recommendation); 2. features may be unavailable if the chosen default search engine doesn’t support them; 3. the user can change their mind at any time. This card appears when the user taps or clicks “Learn more” on the search engine choice screen. The headline for this card is “Your search engine in Chromium”.">
+-        You can change your search engine anytime in Chromium’s settings.
++        You can change your search engine anytime in KibaOS’s settings.
+       </message>
+       <message name="IDS_SEARCH_ENGINE_CHOICE_INFO_DIALOG_BODY_THIRD_PARAGRAPH_INSTRUCTIVE" desc="This is the third paragraph of the body text of a card that explains why users are being prompted to choose a search engine, and what a search engine does in Chromium. This screen provides the following details: 1. the list includes search engines that are popular in the user’s region and the order includes randomization (not in order of recommendation); 2. features may be unavailable if the chosen default search engine doesn’t support them; 3. the user can change their mind at any time. For JSA, we add more information on how to add non-regional search engines. This card appears when the user taps or clicks “Learn more” on the search engine choice screen. The headline for this card is “Your search engine in Chromium”.">
+-        You can change your search engine anytime in Chromium’s settings. If you don’t see your preferred search engine, you can perform a search from their site. You’ll see it listed as a recently visited search engine in Chromium settings, and you can make it your default.
++        You can change your search engine anytime in KibaOS’s settings. If you don’t see your preferred search engine, you can perform a search from their site. You’ll see it listed as a recently visited search engine in KibaOS settings, and you can make it your default.
+       </message>
+     </if>
+ 
+diff --git a/components/security_interstitials_strings.grdp b/components/security_interstitials_strings.grdp
+index 690bb1b9a5e2..8282c2656ba9 100644
+--- a/components/security_interstitials_strings.grdp
++++ b/components/security_interstitials_strings.grdp
+@@ -174,7 +174,7 @@
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_CLOCK_ERROR_EXPLANATION" desc="Body text under an 'Advanced' button. Context: error shown when the browser can't load a page because the device's clock is wrong. This paragraph explains why a correct clock is necessary.">
+-      To establish a secure connection, your clock needs to be set correctly. This is because the certificates that websites use to identify themselves are only valid for specific periods of time. Since your device's clock is incorrect, Chromium cannot verify these certificates.
++      To establish a secure connection, your clock needs to be set correctly. This is because the certificates that websites use to identify themselves are only valid for specific periods of time. Since your device's clock is incorrect, KibaOS cannot verify these certificates.
+     </message>
+   </if>
+ 
+@@ -223,10 +223,10 @@
+   </if>
+   <if expr="not _google_chrome">
+     <message name="IDS_SSL_NONOVERRIDABLE_MORE" desc="Body text for the explanation shown if user clicks on the Details button.">
+-      <ph name="SITE">$1<ex>google.com</ex></ph> normally uses encryption to protect your information. When Chromium tried to connect to <ph name="SITE">$1<ex>google.com</ex></ph> this time, the website sent back unusual and incorrect credentials. This may happen when an attacker is trying to pretend to be <ph name="SITE">$1<ex>google.com</ex></ph>, or a Wi-Fi sign-in screen has interrupted the connection. Your information is still secure because Chromium stopped the connection before any data was exchanged.
++      <ph name="SITE">$1<ex>google.com</ex></ph> normally uses encryption to protect your information. When KibaOS tried to connect to <ph name="SITE">$1<ex>google.com</ex></ph> this time, the website sent back unusual and incorrect credentials. This may happen when an attacker is trying to pretend to be <ph name="SITE">$1<ex>google.com</ex></ph>, or a Wi-Fi sign-in screen has interrupted the connection. Your information is still secure because KibaOS stopped the connection before any data was exchanged.
+     </message>
+     <message name="IDS_SSL_NONOVERRIDABLE_INVALID" desc="A sentence to explain why the user can't proceed.">
+-      You cannot visit <ph name="SITE">$1<ex>google.com</ex></ph> right now because the website sent scrambled credentials that Chromium cannot process. Network errors and attacks are usually temporary, so this page will probably work later.
++      You cannot visit <ph name="SITE">$1<ex>google.com</ex></ph> right now because the website sent scrambled credentials that KibaOS cannot process. Network errors and attacks are usually temporary, so this page will probably work later.
+     </message>
+   </if>
+ 
+@@ -444,7 +444,7 @@
+     </if>
+     <if expr="not _google_chrome">
+       <message name="IDS_KNOWN_INTERCEPTION_BODY2" desc="Second body text for the chrome://connection-monitoring-detected/ page with more details">
+-        This problem happens because of a certificate you or someone else installed on your device. The certificate is known to be used to monitor and intercept networks, and is not trusted by Chromium. While some legitimate cases for monitoring do exist, like on a school or company network, Chromium wants to make sure you're aware it's happening, even if you can't stop it. Monitoring may happen in any browser or application that accesses the web.
++        This problem happens because of a certificate you or someone else installed on your device. The certificate is known to be used to monitor and intercept networks, and is not trusted by KibaOS. While some legitimate cases for monitoring do exist, like on a school or company network, KibaOS wants to make sure you're aware it's happening, even if you can't stop it. Monitoring may happen in any browser or application that accesses the web.
+       </message>
+     </if>
+ 
+diff --git a/components/ssl_errors_strings.grdp b/components/ssl_errors_strings.grdp
+index b071895a60c7..a484acf436b1 100644
+--- a/components/ssl_errors_strings.grdp
++++ b/components/ssl_errors_strings.grdp
+@@ -158,7 +158,7 @@
+   <if expr="not _google_chrome">
+     <if expr="is_ios">
+       <message name="IDS_CERT_ERROR_AUTHORITY_INVALID_DETAILS" desc="Details for an X509 certificate with an invalid authority">
+-        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph>; its security certificate is not trusted by Chromium. This may be caused by a misconfiguration or an attacker intercepting your connection.
++        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph>; its security certificate is not trusted by KibaOS. This may be caused by a misconfiguration or an attacker intercepting your connection.
+       </message>
+     </if>
+     <if expr="is_android">
+@@ -188,12 +188,12 @@
+   <if expr="not _google_chrome">
+     <if expr="is_ios or is_android">
+       <message name="IDS_CERT_ERROR_AUTHORITY_INVALID_DETAILS_V2" desc="Details for an X509 certificate with an invalid authority, V2.">
+-        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph> because it is using a security certificate that is not trusted by Chromium or your system configuration for web traffic encryption. This may be caused by a misconfiguration, or an attacker intercepting your connection.
++        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph> because it is using a security certificate that is not trusted by KibaOS or your system configuration for web traffic encryption. This may be caused by a misconfiguration, or an attacker intercepting your connection.
+       </message>
+     </if>
+     <if expr="not is_ios and not is_android">
+       <message name="IDS_CERT_ERROR_AUTHORITY_INVALID_DETAILS_V2" desc="Details for an X509 certificate with an invalid authority, V2.">
+-        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph> because it is using a security certificate that is not trusted by Chromium or your system configuration for web traffic encryption. This may be caused by a misconfiguration, or an attacker intercepting your connection. <ph name="BEGIN_VIEW_CERTIFICATE_LINK">&lt;a href="#" id="view-certificate-link"&gt;</ph>View Certificate<ph name="END_VIEW_CERTIFICATE_LINK">&lt;/a&gt;</ph>
++        This server could not prove that it is <ph name="DOMAIN">&lt;strong&gt;$1<ex>paypal.com</ex>&lt;/strong&gt;</ph> because it is using a security certificate that is not trusted by KibaOS or your system configuration for web traffic encryption. This may be caused by a misconfiguration, or an attacker intercepting your connection. <ph name="BEGIN_VIEW_CERTIFICATE_LINK">&lt;a href="#" id="view-certificate-link"&gt;</ph>View Certificate<ph name="END_VIEW_CERTIFICATE_LINK">&lt;/a&gt;</ph>
+       </message>
+     </if>
+   </if>
+diff --git a/extensions/strings/extensions_strings.grd b/extensions/strings/extensions_strings.grd
+index f9b2679ff7d1..8f31e973ee65 100644
+--- a/extensions/strings/extensions_strings.grd
++++ b/extensions/strings/extensions_strings.grd
+@@ -461,7 +461,7 @@
+       </if>
+       <if expr="not reven">
+         <message name="IDS_EXTENSION_INSTALL_KIOSK_MODE_ONLY" desc="Error displayed during installation of an app with 'kiosk_only' attribute but user is not in ChromeOS kiosk mode.">
+-          App with 'kiosk_only' manifest attribute must be installed in ChromeOS kiosk mode
++          App with 'kiosk_only' manifest attribute must be installed in KibaOS kiosk mode
+         </message>
+       </if>
+       <message name="IDS_EXTENSION_INSTALL_NOT_ENABLED" desc="Error displayed during installation of apps or extensions when installation is not enabled.">
+diff --git a/remoting/resources/remoting_strings.grd b/remoting/resources/remoting_strings.grd
+index bd9e14105894..18be93b8db3e 100644
+--- a/remoting/resources/remoting_strings.grd
++++ b/remoting/resources/remoting_strings.grd
+@@ -341,7 +341,7 @@
+         </if>  <!-- is_android or is_ios -->
+ 
+         <message desc="Error displayed if authentication fails. This can be caused by stale credentials, in which logging out of the web-app and retrying can fix the problem." name="IDS_ERROR_AUTHENTICATION_FAILED" formatter_data="android_java">
+-          Authentication failed. Please sign in to Chromium again.
++          Authentication failed. Please sign in to KibaOS again.
+         </message>
+         <message desc="Message displayed when the client or host has disconnected." name="IDS_MESSAGE_SESSION_FINISHED">
+           Your Chromoting session has ended.
+diff --git a/ui/chromeos/file_manager_strings.grdp b/ui/chromeos/file_manager_strings.grdp
+index a861baa1981d..5ecc7c6a9509 100644
+--- a/ui/chromeos/file_manager_strings.grdp
++++ b/ui/chromeos/file_manager_strings.grdp
+@@ -1432,10 +1432,10 @@
+     This file type is not supported. Please visit the Chrome Web Store to find an app that can open this type of file.
+   </message>
+   <message name="IDS_FILE_BROWSER_ERROR_VIEWING_FILE_FOR_DMG" desc="Error message when user attempts to open a dmg file in the Files app via Downloads panel.">
+-    This file is designed for a computer using Macintosh software. This is not compatible with your device which runs ChromeOS. Please search the Chrome Web Store for a suitable replacement app.
++    This file is designed for a computer using Macintosh software. This is not compatible with your device which runs KibaOS. Please search the Chrome Web Store for a suitable replacement app.
+   </message>
+   <message name="IDS_FILE_BROWSER_ERROR_VIEWING_FILE_FOR_EXECUTABLE" desc="Error message when user attempts to open a exe file in the Files app via Downloads panel.">
+-    This file is designed for a PC using Windows software. This is not compatible with your device which runs ChromeOS. Please search the Chrome Web Store for a suitable replacement app.
++    This file is designed for a PC using Windows software. This is not compatible with your device which runs KibaOS. Please search the Chrome Web Store for a suitable replacement app.
+   </message>
+   <message name="IDS_FILE_BROWSER_ERROR_UNRESOLVABLE_FILE" desc="Error message when the file attempted to open from Downloads panel was not found under paths managed by file manager.">
+     This file has wandered off somewhere. Please check your download location setting and try again.
+@@ -1679,10 +1679,10 @@
+     Access your Google Drive files offline with file sync
+   </message>
+   <message name="IDS_FILE_BROWSER_BULK_PINNING_EXPLANATION" desc="The main text of the dialog offering the Google Drive bulk pinning feature">
+-    Your files in My Drive will sync to your Chromebook automatically so you can access them without an internet connection.
++    Your files in My Drive will sync to your computer automatically so you can access them without an internet connection.
+   </message>
+   <message name="IDS_FILE_BROWSER_BULK_PINNING_POINT_1" desc="First bullet point of the dialog offering the Google Drive bulk pinning feature">
+-    Files will be stored in the cloud and on this Chromebook.
++    Files will be stored in the cloud and on this computer.
+   </message>
+   <message name="IDS_FILE_BROWSER_GOOGLE_DRIVE_MULTIPLE_FILES_SYNCING_LABEL" desc="The text used when Google drive items are being downloaded and this represents the total number of items to sync.">
+     Syncing <ph name="NUMBER_OF_FILES_SYNCING">$1<ex>1,687</ex></ph> Drive files
+diff --git a/ui/views/examples/views_examples_resources.grd b/ui/views/examples/views_examples_resources.grd
+index 253f2b2673b3..b97c12843177 100644
+--- a/ui/views/examples/views_examples_resources.grd
++++ b/ui/views/examples/views_examples_resources.grd
+@@ -108,7 +108,7 @@
+         Thank you! We received the following response: <ph name="USER_FEEDBACK">$1<ex>I like it.</ex></ph>
+       </message>
+       <message translateable="false" name="IDS_COLORED_DIALOG_TITLE">
+-        Send Feedback to Chromium
++        Send Feedback to KibaOS
+       </message>
+       <message translateable="false" name="IDS_COLORED_DIALOG_TEXTFIELD_PLACEHOLDER">
+         Please type your quick feedback here...

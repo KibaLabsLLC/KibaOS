@@ -1,0 +1,37 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-login
+pkgver=0.2.0
+pkgrel=6
+pkgdesc="PAM, greetd, and logind session integration for KibaOS"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=(
+  'bash'
+  'chromiumos-ash'
+  'greetd'
+  'greetd-tuigreet'
+  'pam'
+  'polkit'
+  'systemd'
+  'util-linux'
+)
+checkdepends=('bubblewrap')
+backup=('etc/greetd/kibaos.toml')
+install='kibaos-login.install'
+source=(
+  'kibaos-session-control'
+  'kibaos-session-supervisor'
+  'kibaos-greetd.service'
+  'kibaos-greetd-vt@.service'
+  'kibaos-greetd-vt'
+  'kibaos.toml'
+  '49-kibaos-greeter-switch.rules'
+  'LICENSE'
+  'kibaos-login.install'
+  'test-session-supervisor.sh'
+  'test-session-child'
+  'test-greetd'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

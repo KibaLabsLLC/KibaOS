@@ -1,0 +1,47 @@
+diff --git a/ash/accessibility/accessibility_controller.cc b/ash/accessibility/accessibility_controller.cc
+index 6e8963e84eef..26bdbe43ff6c 100644
+--- a/ash/accessibility/accessibility_controller.cc
++++ b/ash/accessibility/accessibility_controller.cc
+@@ -86,6 +86,7 @@
+ #include "base/metrics/histogram_macros.h"
+ #include "base/metrics/user_metrics.h"
+ #include "base/strings/string_number_conversions.h"
++#include "base/system/sys_info.h"
+ #include "base/time/time.h"
+ #include "chromeos/ash/components/audio/cras_audio_handler.h"
+ #include "chromeos/ash/components/audio/sounds.h"
+@@ -1444,7 +1445,11 @@ void AccessibilityController::RegisterProfilePrefs(
+       user_prefs::PrefRegistrySyncable::SYNCABLE_OS_PREF);
+   registry->RegisterBooleanPref(
+       prefs::kAccessibilityEnhancedNetworkVoicesInSelectToSpeakAllowed,
+-      kDefaultAccessibilityEnhancedNetworkVoicesInSelectToSpeakAllowed,
++      // KibaOS compatibility: the enhanced-network engine depends on
++      // ChromeOS-only TTS assets and Mojo services. Generic Linux uses the
++      // native system voice instead.
++      base::SysInfo::IsRunningOnChromeOS() &&
++          kDefaultAccessibilityEnhancedNetworkVoicesInSelectToSpeakAllowed,
+       user_prefs::PrefRegistrySyncable::SYNCABLE_OS_PREF);
+   registry->RegisterBooleanPref(
+       prefs::kAccessibilitySelectToSpeakBackgroundShading,
+diff --git a/ash/accessibility/accessibility_controller_unittest.cc b/ash/accessibility/accessibility_controller_unittest.cc
+index de08b4350288..5601a2b2ceaf 100644
+--- a/ash/accessibility/accessibility_controller_unittest.cc
++++ b/ash/accessibility/accessibility_controller_unittest.cc
+@@ -50,6 +50,7 @@
+ #include "base/run_loop.h"
+ #include "base/scoped_observation.h"
+ #include "base/strings/utf_string_conversions.h"
++#include "base/system/sys_info.h"
+ #include "base/test/bind.h"
+ #include "base/test/metrics/histogram_tester.h"
+ #include "base/test/scoped_feature_list.h"
+@@ -328,6 +329,9 @@ TEST_F(AccessibilityControllerTest, PrefsAreRegistered) {
+       prefs()->FindPreference(prefs::kAccessibilityVirtualKeyboardEnabled));
+   EXPECT_TRUE(prefs()->FindPreference(
+       prefs::kAccessibilityEnhancedNetworkVoicesInSelectToSpeakAllowed));
++  EXPECT_EQ(base::SysInfo::IsRunningOnChromeOS(),
++            prefs()->GetBoolean(
++                prefs::kAccessibilityEnhancedNetworkVoicesInSelectToSpeakAllowed));
+   EXPECT_TRUE(
+       prefs()->FindPreference(prefs::kAccessibilityColorCorrectionEnabled));
+   EXPECT_TRUE(prefs()->FindPreference(

@@ -1,0 +1,23 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-power
+pkgver=0.2.0
+pkgrel=2
+pkgdesc="Linux laptop power lifecycle service for KibaOS"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=('python' 'python-gobject' 'systemd' 'upower' 'brightnessctl')
+backup=('etc/systemd/logind.conf.d/60-kibaos-laptop.conf')
+source=(
+  'kibaos-powerd'
+  'kibaos-power-status'
+  'kibaos-powerd.service'
+  'kibaos-power-sleep'
+  '60-kibaos-laptop.conf'
+  '60-kibaos-backlight.rules'
+  'org.kibaos.Power.conf'
+  'kibaos-power.tmpfiles'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

@@ -1,0 +1,51 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos
+pkgver=158.0.8115.0
+pkgrel=1
+pkgdesc="ChromiumOS-style desktop environment for Arch Linux"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=(
+    "chromiumos-ash>=${pkgver}"
+    'kibaosfs'
+    'kibaos-webapp-shortcuts'
+    'kibaos-login'
+    'kibaos-power'
+    'kibaos-hardware'
+    'kibaos-host-bridge'
+    'lm_sensors'
+    'mesa-utils'
+    'alsa-utils'
+    'alsa-ucm-conf'
+    'libpulse'
+    'pipewire'
+    'pipewire-alsa'
+    'pipewire-jack'
+    'pipewire-pulse'
+    'rtkit'
+    'speech-dispatcher'
+    'espeak-ng'
+    'wireplumber'
+    'upower'
+    'brightnessctl'
+    'pciutils'
+    'usbutils'
+    'vulkan-tools'
+    'libva-utils'
+    'wayland-utils'
+    'libinput'
+    'playerctl'
+)
+source=(
+    'kibaos'
+    'kibaos-session'
+    'kibaos-shell'
+    'kibaos-hardware-report'
+    'kibaos-audio'
+    'kibaos.desktop'
+    'kibaos-shell.desktop'
+    'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

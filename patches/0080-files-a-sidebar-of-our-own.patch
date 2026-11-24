@@ -1,0 +1,2329 @@
+diff --git a/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts b/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts
+new file mode 100644
+index 000000000000..8d4609224963
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts
+@@ -0,0 +1,349 @@
++/**
++ * The list, driven the way a person drives it.
++ *
++ * The unit suite runs in node and has no DOM, so keyboard handling, ARIA and
++ * recycling had roles and handlers written but nothing exercising them. This
++ * runs in a real browser against real events.
++ *
++ * Every assertion here is about behaviour a person would notice: whether the
++ * arrow key moved the selection, whether a screen reader is told how many
++ * items there are, whether scrolling a hundred thousand rows quietly builds a
++ * hundred thousand elements.
++ */
++import type {EntryDto, Metadata} from '../../port/types.js';
++import {asFileKey} from '../../port/types.js';
++import {FileList} from '../../ui/file_list.js';
++
++const NOW = new Date('2026-09-02T15:30:00').getTime();
++const ROOT = asFileKey('mock://myfiles');
++
++class AssertionError extends Error {}
++function assert(condition: unknown, message: string): asserts condition {
++  if (!condition) {
++    throw new AssertionError(message);
++  }
++}
++function equal<T>(actual: T, expected: T, message: string): void {
++  if (actual !== expected) {
++    throw new AssertionError(
++        `${message}: expected ${String(expected)}, got ${String(actual)}`);
++  }
++}
++
++interface Harness {
++  list: FileList;
++  host: HTMLElement;
++  viewport: HTMLElement;
++  entries: EntryDto[];
++  rows(): HTMLElement[];
++  key(key: string, modifiers?: {shift?: boolean, ctrl?: boolean}): void;
++  selectedNames(): string[];
++  destroy(): void;
++}
++
++function makeHarness(count = 20, height = 400): Harness {
++  const host = document.createElement('div');
++  host.style.height = `${height}px`;
++  host.style.width = '760px';
++  document.body.appendChild(host);
++
++  const entries: EntryDto[] = [];
++  const metadata = new Map<ReturnType<typeof asFileKey>, Metadata>();
++  for (let i = 0; i < count; i++) {
++    const name = i % 4 === 0 ? `folder-${i}` : `file-${i}.txt`;
++    const key = asFileKey(`${ROOT}/${name}`);
++    entries.push({key, name, isDirectory: i % 4 === 0, parent: ROOT});
++    metadata.set(key, {size: (i + 1) * 1024, modificationTime: NOW});
++  }
++
++  const list = new FileList(host, {rowHeight: 40});
++  list.setEntries(entries, NOW);
++  list.setMetadata(metadata);
++  const viewport = host.querySelector('.kibaos-list') as HTMLElement;
++
++  return {
++    list,
++    host,
++    viewport,
++    entries,
++    rows: () => [...host.querySelectorAll<HTMLElement>('.kibaos-row')],
++    key(key, modifiers = {}) {
++      viewport.dispatchEvent(new KeyboardEvent('keydown', {
++        key,
++        bubbles: true,
++        cancelable: true,
++        shiftKey: !!modifiers.shift,
++        ctrlKey: !!modifiers.ctrl,
++      }));
++    },
++    selectedNames() {
++      const keys = list.selectedKeys();
++      return entries.filter(e => keys.has(e.key)).map(e => e.name);
++    },
++    destroy() {
++      list.destroy();
++      host.remove();
++    },
++  };
++}
++
++interface Case {
++  name: string;
++  run(): void;
++}
++
++const CASES: Case[] = [
++  {
++    name: 'the list tells a screen reader what it is and how big it is',
++    run() {
++      const h = makeHarness(20);
++      try {
++        equal(h.viewport.getAttribute('role'), 'listbox', 'role');
++        equal(h.viewport.getAttribute('aria-multiselectable'), 'true',
++              'multiselectable');
++        equal(h.viewport.getAttribute('aria-setsize'), '20', 'set size');
++        const rows = h.rows();
++        assert(rows.length > 0, 'some rows are rendered');
++        equal(rows[0]!.getAttribute('role'), 'option', 'row role');
++        equal(rows[0]!.getAttribute('aria-posinset'), '1',
++              'the first row is position one, not zero');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'every row carries a name that reads as a sentence, not as cells',
++    run() {
++      const h = makeHarness(6);
++      try {
++        const label = h.rows()[1]!.getAttribute('aria-label') ?? '';
++        assert(label.includes('file-1.txt'), `names the file: ${label}`);
++        assert(label.includes('Document') || label.includes('File'),
++               `says what kind it is: ${label}`);
++        assert(label.split(',').length >= 3,
++               `carries the columns rather than just the name: ${label}`);
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'arrow keys move the selection',
++    run() {
++      const h = makeHarness(20);
++      try {
++        h.key('ArrowDown');
++        equal(h.selectedNames().length, 1, 'one selected');
++        h.key('ArrowDown');
++        h.key('ArrowDown');
++        equal(h.selectedNames()[0], 'file-3.txt', 'moved three down');
++        h.key('ArrowUp');
++        equal(h.selectedNames()[0], 'file-2.txt', 'and back up one');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'shift and an arrow extends the selection rather than moving it',
++    run() {
++      const h = makeHarness(20);
++      try {
++        h.key('ArrowDown');
++        h.key('ArrowDown', {shift: true});
++        h.key('ArrowDown', {shift: true});
++        equal(h.selectedNames().length, 3, 'three in the range');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'home and end reach the ends without walking there',
++    run() {
++      const h = makeHarness(500);
++      try {
++        h.key('End');
++        equal(h.selectedNames()[0], 'file-499.txt', 'the last entry');
++        h.key('Home');
++        equal(h.selectedNames()[0], 'folder-0', 'the first entry');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'page keys move by a viewport rather than by one',
++    run() {
++      const h = makeHarness(200, 400);
++      try {
++        h.key('Home');
++        h.key('PageDown');
++        const after = h.selectedNames()[0]!;
++        assert(after !== 'folder-0', 'it moved');
++        const index = h.entries.findIndex(e => e.name === after);
++        assert(index >= 8, `moved most of a viewport, landed on ${index}`);
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'control A selects everything, including what is not rendered',
++    run() {
++      const h = makeHarness(1000);
++      try {
++        h.key('a', {ctrl: true});
++        equal(h.list.selectedKeys().size, 1000,
++              'the selection is over indices, not over rendered rows');
++        assert(h.rows().length < 100,
++               `and only a viewport is rendered, not ${h.rows().length}`);
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'aria-selected follows the selection',
++    run() {
++      const h = makeHarness(20);
++      try {
++        h.key('ArrowDown');
++        const selected = h.rows().filter(
++            row => row.getAttribute('aria-selected') === 'true');
++        equal(selected.length, 1, 'exactly one row is marked selected');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'Enter opens what is focused',
++    run() {
++      const h = makeHarness(10);
++      try {
++        let opened: string|null = null;
++        const host = document.createElement('div');
++        host.style.height = '400px';
++        document.body.appendChild(host);
++        const list = new FileList(host, {
++          rowHeight: 40,
++          onActivate: entry => { opened = entry.name; },
++        });
++        list.setEntries(h.entries, NOW);
++        const viewport = host.querySelector('.kibaos-list') as HTMLElement;
++        viewport.dispatchEvent(
++            new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
++        viewport.dispatchEvent(
++            new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
++        equal(opened, 'file-1.txt', 'the focused entry was opened');
++        list.destroy();
++        host.remove();
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'scrolling a long list does not build a long list',
++    run() {
++      const h = makeHarness(20_000);
++      try {
++        const before = h.rows().length;
++        for (let step = 0; step < 40; step++) {
++          h.viewport.scrollTop = step * 4_000;
++          h.list.render();
++        }
++        equal(h.rows().length, before,
++              'the pool is the size of the viewport and stays there');
++        assert(before < 40, `and it is small: ${before} rows`);
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'a short directory after a long one leaves no rows behind',
++    run() {
++      const h = makeHarness(2_000);
++      try {
++        const many = h.rows().length;
++        assert(many > 4, `the pool should start bigger than that: ${many}`);
++        // The pool only ever shrinks on this path. Scrolling never takes it,
++        // because the viewport keeps the same height and therefore asks for the
++        // same number of rows every time, so a suite that only scrolls will
++        // happily pass with the shrink deleted and leave a thousand rows from
++        // the previous directory sitting on screen.
++        const parent = h.entries[0]!.parent;
++        const short = ['one.txt', 'two.txt', 'three.txt'].map(name => ({
++          key: asFileKey(`${parent}/${name}`),
++          name,
++          isDirectory: false,
++          parent,
++        }));
++        h.list.setEntries(short, NOW);
++        equal(h.rows().length, 3,
++              'rows from the previous directory are still in the tree');
++        const shown = h.rows().map(row => row.textContent ?? '').join(' ');
++        assert(!shown.includes('file-1'),
++               `a row kept its old contents: ${shown.slice(0, 120)}`);
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'the empty state replaces the rows and is announced',
++    run() {
++      const h = makeHarness(0);
++      try {
++        h.list.setEmptyReason('filtered');
++        const empty = h.host.querySelector('.kibaos-empty') as HTMLElement;
++        assert(empty && !empty.hidden, 'the empty state is showing');
++        equal(empty.getAttribute('role'), 'status', 'it is announced');
++        assert((empty.textContent ?? '').includes('filter'),
++               `it says which emptiness this is: ${empty.textContent}`);
++        equal(h.rows().length, 0, 'and there are no rows behind it');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++  {
++    name: 'a selection set programmatically reads back as those entries',
++    run() {
++      const h = makeHarness(50);
++      try {
++        h.list.setSelectedIndices([2, 3, 4]);
++        equal(h.selectedNames().length, 3, 'three selected');
++        equal(h.selectedNames()[0], 'file-2.txt', 'and the right three');
++      } finally {
++        h.destroy();
++      }
++    },
++  },
++];
++
++export interface DomResult {
++  name: string;
++  ok: boolean;
++  error?: string;
++}
++
++export function runListDomTests(): DomResult[] {
++  const results: DomResult[] = [];
++  for (const testCase of CASES) {
++    try {
++      testCase.run();
++      results.push({name: testCase.name, ok: true});
++    } catch (error) {
++      results.push({
++        name: testCase.name,
++        ok: false,
++        error: error instanceof Error ? error.message : String(error),
++      });
++    }
++  }
++  return results;
++}
+diff --git a/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts b/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts
+new file mode 100644
+index 000000000000..d42d73d1a144
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts
+@@ -0,0 +1,406 @@
++/**
++ * The sidebar, driven the way a person drives it.
++ *
++ * The upstream tree lives in a shadow root and was restyled by pushing a
++ * stylesheet into every item; its selected state painted dark ink on a dark
++ * fill for months without anything noticing. These assertions are the reason
++ * that cannot happen again here: they are about what a person sees and what a
++ * screen reader is told, not about which classes exist.
++ */
++import type {Volume} from '../../port/types.js';
++import {asFileKey} from '../../port/types.js';
++import {Sidebar} from '../../ui/sidebar.js';
++import type {Place} from '../../ui/sidebar.js';
++
++const GIB = 1024 * 1024 * 1024;
++
++class AssertionError extends Error {}
++function assert(condition: unknown, message: string): asserts condition {
++  if (!condition) {
++    throw new AssertionError(message);
++  }
++}
++function equal<T>(actual: T, expected: T, message: string): void {
++  if (actual !== expected) {
++    throw new AssertionError(
++        `${message}: expected ${String(expected)}, got ${String(actual)}`);
++  }
++}
++
++function volume(overrides: Partial<Volume> & {id: string}): Volume {
++  return {
++    root: asFileKey(`mock://${overrides.id}`),
++    label: overrides.id,
++    kind: 'drive',
++    removable: false,
++    readOnly: false,
++    capacity: null,
++    ...overrides,
++  } as Volume;
++}
++
++function places(): Place[] {
++  const internal = volume({
++    id: 'internal',
++    label: 'Home',
++    kind: 'system',
++    capacity: {total: 32 * GIB, free: 8 * GIB},
++  });
++  const stick = volume({
++    id: 'stick',
++    label: 'CRUZER',
++    removable: true,
++    capacity: {total: 16 * GIB, free: 128 * 1024 * 1024},
++  });
++  return [
++    {key: asFileKey('fake://recent'), label: 'Recent', kind: 'recent'},
++    {key: asFileKey('fake://starred'), label: 'Starred', kind: 'starred'},
++    {key: asFileKey('fake://trash'), label: 'Trash', kind: 'trash'},
++    {key: internal.root, label: internal.label, kind: 'volume', volume: internal},
++    {key: stick.root, label: stick.label, kind: 'volume', volume: stick},
++    {key: asFileKey('fake://basket'), label: 'Basket', kind: 'basket', badge: 3},
++  ];
++}
++
++interface Harness {
++  sidebar: Sidebar;
++  host: HTMLElement;
++  chosen: Place[];
++  buttons(): HTMLElement[];
++  labels(): string[];
++  headings(): string[];
++  destroy(): void;
++}
++
++function makeHarness(list: Place[] = places()): Harness {
++  const host = document.createElement('div');
++  document.body.appendChild(host);
++  const chosen: Place[] = [];
++  const sidebar = new Sidebar(host, {onSelect: place => chosen.push(place)});
++  sidebar.setPlaces(list);
++  return {
++    sidebar,
++    host,
++    chosen,
++    buttons: () => [...host.querySelectorAll<HTMLElement>('.kibaos-place')],
++    labels: () => [...host.querySelectorAll<HTMLElement>('.kibaos-place-label')]
++                      .map(node => node.textContent ?? ''),
++    headings: () => [...host.querySelectorAll<HTMLElement>('.kibaos-place-heading')]
++                        .map(node => node.textContent ?? ''),
++    destroy: () => {
++      sidebar.destroy();
++      host.remove();
++    },
++  };
++}
++
++function press(target: HTMLElement, key: string): void {
++  target.dispatchEvent(
++      new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
++}
++
++interface DomResult {
++  name: string;
++  ok: boolean;
++  error?: string;
++}
++
++const CASES: Array<{name: string, run: () => void}> = [
++  {
++    name: 'the sidebar is a navigation landmark with a name',
++    run: () => {
++      const h = makeHarness();
++      const nav = h.host.querySelector('nav');
++      assert(nav, 'there is no nav element');
++      equal(nav!.getAttribute('aria-label'), 'Places',
++            'the landmark is unnamed, so it is announced as just "navigation"');
++      h.destroy();
++    },
++  },
++  {
++    name: 'each group is a list that says which group it is',
++    run: () => {
++      const h = makeHarness();
++      const lists = [...h.host.querySelectorAll('.kibaos-place-list')];
++      assert(lists.length >= 3, `expected several groups, got ${lists.length}`);
++      for (const list of lists) {
++        const id = list.getAttribute('aria-labelledby');
++        assert(id, 'a group is not associated with its heading');
++        const heading = h.host.querySelector(`#${id}`);
++        assert(heading, `nothing carries the id ${id}`);
++        assert((heading!.textContent ?? '').length > 0,
++               'the heading a group points at is empty');
++      }
++      h.destroy();
++    },
++  },
++  {
++    name: 'removable media is separated from what is bolted in',
++    run: () => {
++      const h = makeHarness();
++      const headings = h.headings();
++      assert(headings.includes('This computer'),
++             `no fixed group heading in ${JSON.stringify(headings)}`);
++      assert(headings.includes('Devices'),
++             `no removable group heading in ${JSON.stringify(headings)}`);
++      const groups = [...h.host.querySelectorAll('.kibaos-place-group')];
++      const devices = groups.find(
++          group => group.querySelector('.kibaos-place-heading')?.textContent ===
++              'Devices')!;
++      const names = [...devices.querySelectorAll('.kibaos-place-label')]
++                        .map(node => node.textContent);
++      equal(names.join(','), 'CRUZER',
++            'the removable group holds the wrong drives');
++      h.destroy();
++    },
++  },
++  {
++    name: 'where you are is announced as current, and only once',
++    run: () => {
++      const h = makeHarness();
++      const all = places();
++      h.sidebar.setSelected(all[3]!.key);
++      const current = h.buttons().filter(
++          button => button.getAttribute('aria-current') === 'page');
++      equal(current.length, 1, 'exactly one place should be current');
++      equal(current[0]!.querySelector('.kibaos-place-label')!.textContent,
++            'Home', 'the wrong place is marked current');
++      h.destroy();
++    },
++  },
++  {
++    name: 'selecting a different place moves the current marker',
++    run: () => {
++      const h = makeHarness();
++      const all = places();
++      h.sidebar.setSelected(all[3]!.key);
++      h.sidebar.setSelected(all[0]!.key);
++      const current = h.buttons().filter(
++          button => button.getAttribute('aria-current') === 'page');
++      equal(current.length, 1, 'the old marker was left behind');
++      equal(current[0]!.querySelector('.kibaos-place-label')!.textContent,
++            'Recent', 'the marker did not move');
++      h.destroy();
++    },
++  },
++  {
++    name: 'clicking a place asks to go there',
++    run: () => {
++      const h = makeHarness();
++      h.buttons()[4]!.click();
++      equal(h.chosen.length, 1, 'the click was not reported');
++      equal(h.chosen[0]!.label, 'CRUZER', 'the wrong place was reported');
++      h.destroy();
++    },
++  },
++  {
++    name: 'arrow keys walk the whole sidebar, not one group',
++    run: () => {
++      const h = makeHarness();
++      const buttons = h.buttons();
++      buttons[2]!.focus();
++      press(buttons[2]!, 'ArrowDown');
++      // Trash is the last of Quick access; the next place down is the first
++      // drive. A sidebar that stops at a heading makes the keyboard useless.
++      equal(document.activeElement, buttons[3]!,
++            'arrowing down stopped at the end of the group');
++      h.destroy();
++    },
++  },
++  {
++    name: 'arrow keys stop at the ends rather than wrapping',
++    run: () => {
++      const h = makeHarness();
++      const buttons = h.buttons();
++      buttons[0]!.focus();
++      press(buttons[0]!, 'ArrowUp');
++      equal(document.activeElement, buttons[0]!, 'focus wrapped off the top');
++      const last = buttons[buttons.length - 1]!;
++      last.focus();
++      press(last, 'ArrowDown');
++      equal(document.activeElement, last, 'focus wrapped off the bottom');
++      h.destroy();
++    },
++  },
++  {
++    name: 'home and end reach the ends of the whole sidebar',
++    run: () => {
++      const h = makeHarness();
++      const buttons = h.buttons();
++      buttons[2]!.focus();
++      press(buttons[2]!, 'End');
++      equal(document.activeElement, buttons[buttons.length - 1]!,
++            'End did not reach the last place');
++      press(document.activeElement as HTMLElement, 'Home');
++      equal(document.activeElement, buttons[0]!,
++            'Home did not reach the first place');
++      h.destroy();
++    },
++  },
++  {
++    name: 'tab reaches the sidebar once, not once per place',
++    run: () => {
++      const h = makeHarness();
++      const stops = h.buttons().filter(button => button.tabIndex === 0);
++      equal(stops.length, 1,
++            'a roving tabindex means exactly one place is a tab stop');
++      h.destroy();
++    },
++  },
++  {
++    name: 'the sidebar stays reachable when you are somewhere it does not list',
++    run: () => {
++      const h = makeHarness();
++      // Three levels into a folder, nothing in the sidebar is current. That is
++      // the ordinary case rather than the exception, and it must not drop the
++      // whole sidebar out of the tab order.
++      h.sidebar.setSelected(asFileKey('mock://internal/deep/deeper/deepest'));
++      const stops = h.buttons().filter(button => button.tabIndex === 0);
++      equal(stops.length, 1,
++            'with nothing current the sidebar became unreachable by keyboard');
++      h.destroy();
++    },
++  },
++  {
++    name: 'two sidebars on one page do not share heading ids',
++    run: () => {
++      const first = makeHarness();
++      const second = makeHarness();
++      const ids = [...document.querySelectorAll('.kibaos-place-heading')].map(
++          node => node.id);
++      equal(new Set(ids).size, ids.length,
++            `split view would resolve the wrong heading: ${ids.join(', ')}`);
++      second.destroy();
++      first.destroy();
++    },
++  },
++  {
++    name: 'capacity is a sentence, not only a bar',
++    run: () => {
++      const h = makeHarness();
++      const free = [...h.host.querySelectorAll('.kibaos-place-free')]
++                       .map(node => node.textContent);
++      assert(free.includes('8.0 GB free of 32 GB'),
++             `capacity did not read as free of total: ${JSON.stringify(free)}`);
++      h.destroy();
++    },
++  },
++  {
++    name: 'the bar is not read out twice',
++    run: () => {
++      const h = makeHarness();
++      const bars = [...h.host.querySelectorAll('.kibaos-place-bar')];
++      assert(bars.length > 0, 'no capacity bars were drawn');
++      for (const bar of bars) {
++        equal(bar.getAttribute('aria-hidden'), 'true',
++              'the bar repeats what the sentence already said');
++      }
++      h.destroy();
++    },
++  },
++  {
++    name: 'a drive with no room left says so in colour as well as words',
++    run: () => {
++      const h = makeHarness();
++      const fills =
++          [...h.host.querySelectorAll<HTMLElement>('.kibaos-place-bar-fill')];
++      // The stick is 16 GB with 128 MB left, which is over 99% used.
++      const alarming = fills.filter(fill => fill.dataset['level'] === 'full');
++      equal(alarming.length, 1,
++            'a drive at 99% should not look the same as one at 25%');
++      const roomy = fills.filter(fill => fill.dataset['level'] === undefined);
++      equal(roomy.length, 1, 'a drive with room to spare should look ordinary');
++      h.destroy();
++    },
++  },
++  {
++    name: 'a place with no notion of capacity draws none',
++    run: () => {
++      const h = makeHarness();
++      const groups = [...h.host.querySelectorAll('.kibaos-place-group')];
++      const quick = groups[0]!;
++      equal(quick.querySelectorAll('.kibaos-place-capacity').length, 0,
++            'Recent and Trash are not drives and have no free space');
++      h.destroy();
++    },
++  },
++  {
++    name: 'a count says what it counts',
++    run: () => {
++      const h = makeHarness();
++      const basket = h.buttons().find(
++          button => button.querySelector('.kibaos-place-label')?.textContent ===
++              'Basket')!;
++      equal(basket.getAttribute('aria-label'), 'Basket, 3 items',
++            'the badge is announced as a bare number');
++      h.destroy();
++    },
++  },
++  {
++    name: 'one gathered item is not "1 items"',
++    run: () => {
++      const list = places().map(
++          place => place.kind === 'basket' ? {...place, badge: 1} : place);
++      const h = makeHarness(list);
++      const basket = h.buttons().find(
++          button => button.querySelector('.kibaos-place-label')?.textContent ===
++              'Basket')!;
++      equal(basket.getAttribute('aria-label'), 'Basket, 1 item',
++            'the plural rule does not hold at one');
++      h.destroy();
++    },
++  },
++  {
++    name: 'an empty basket shows no badge at all',
++    run: () => {
++      const list = places().map(
++          place => place.kind === 'basket' ? {...place, badge: 0} : place);
++      const h = makeHarness(list);
++      equal(h.host.querySelectorAll('.kibaos-place-badge').length, 0,
++            'a zero should be absent rather than drawn as a zero');
++      h.destroy();
++    },
++  },
++  {
++    name: 'a drive named by its owner cannot inject markup',
++    run: () => {
++      // Deliberately not alert(): a dialog blocks the page, so the suite
++      // would hang instead of failing, and a hang tells you far less.
++      delete (window as unknown as Record<string, unknown>)['kibaosInjected'];
++      const nasty = volume({
++        id: 'x',
++        label: '<img src=x onerror="window.kibaosInjected = true">',
++      });
++      const h = makeHarness([{
++        key: nasty.root,
++        label: nasty.label,
++        kind: 'volume',
++        volume: nasty,
++      }]);
++      equal(h.host.querySelectorAll('img').length, 0,
++            'a volume label was parsed as HTML');
++      equal(h.labels()[0], '<img src=x onerror="window.kibaosInjected = true">',
++            'the label should be shown literally');
++      equal((window as unknown as Record<string, unknown>)['kibaosInjected'],
++            undefined, 'a volume label ran as script');
++      h.destroy();
++    },
++  },
++];
++
++export function runSidebarDomTests(): DomResult[] {
++  const results: DomResult[] = [];
++  for (const testCase of CASES) {
++    try {
++      testCase.run();
++      results.push({name: testCase.name, ok: true});
++    } catch (error) {
++      results.push({
++        name: testCase.name,
++        ok: false,
++        error: error instanceof Error ? error.message : String(error),
++      });
++    }
++  }
++  return results;
++}
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/dom.html b/ui/file_manager/file_manager/kibaos/tests/harness/dom.html
+new file mode 100644
+index 000000000000..65069a5ac370
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/dom.html
+@@ -0,0 +1,28 @@
++<!doctype html>
++<meta charset="utf-8">
++<title>KibaOS Files DOM tests</title>
++<link rel="stylesheet" href="../../ui/tokens.css">
++<style>html, body { margin: 0; background: var(--kibaos-ground); }</style>
++<script type="module">
++  import {runListDomTests} from '../dom/list_test.js';
++  import {runSidebarDomTests} from '../dom/sidebar_test.js';
++  // Named here rather than in each suite so a suite that throws on import is
++  // still reported as a failure with a name, instead of the page simply never
++  // publishing a result and the runner timing out with nothing to say.
++  const suites = [['list', runListDomTests], ['sidebar', runSidebarDomTests]];
++  const results = [];
++  for (const [suite, run] of suites) {
++    try {
++      for (const result of run()) {
++        results.push(Object.assign({}, result, {name: suite + ': ' + result.name}));
++      }
++    } catch (error) {
++      results.push({
++        name: suite + ': the suite itself',
++        ok: false,
++        error: String(error && error.stack || error),
++      });
++    }
++  }
++  window.kibaosDomResults = results;
++</script>
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/dom.py b/ui/file_manager/file_manager/kibaos/tests/harness/dom.py
+new file mode 100755
+index 000000000000..403e619f4319
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/dom.py
+@@ -0,0 +1,95 @@
++#!/usr/bin/env python3
++"""Run the DOM suite in a real browser.
++
++The unit suite runs in node, which has no DOM, so keyboard handling, ARIA and
++row recycling had code written and nothing exercising it. Those are not details
++that can be checked by reading: whether an arrow key moved the selection is a
++question about events, and whether scrolling builds elements is a question
++about what the browser actually did.
++
++Shares the golden harness's build and browser rather than adding a second way
++to compile and launch the same code.
++"""
++import argparse
++import importlib.util
++import json
++import os
++import shutil
++import sys
++import tempfile
++import time
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++spec = importlib.util.spec_from_file_location(
++    "golden", os.path.join(HERE, "golden.py"))
++golden = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(golden)
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.parse_args()
++
++    work = tempfile.mkdtemp(prefix="kibaos-dom-")
++    try:
++        # build() compiles the folders the golden harness needs; the DOM suite
++        # lives beside them and has to be added to that set.
++        sources = []
++        for folder in ("port", "session", "ui", "tests/harness", "tests/dom"):
++            directory = os.path.join(golden.KIBAOS, folder)
++            sources += [os.path.join(directory, f)
++                        for f in sorted(os.listdir(directory))
++                        if f.endswith(".ts")]
++        import subprocess
++        result = subprocess.run(
++            [golden.NODE, golden.TSC, "--strict", "--skipLibCheck",
++             "--target", "es2022", "--module", "es2022",
++             "--moduleResolution", "bundler", "--lib", "es2022,dom",
++             "--rootDir", golden.KIBAOS, "--outDir", work] + sources,
++            capture_output=True, text=True)
++        if result.returncode:
++            sys.stderr.write(result.stdout + result.stderr)
++            raise SystemExit("the DOM suite does not compile")
++        os.makedirs(os.path.join(work, "ui"), exist_ok=True)
++        shutil.copy(os.path.join(golden.KIBAOS, "ui/tokens.css"),
++                    os.path.join(work, "ui/tokens.css"))
++        shutil.copy(os.path.join(HERE, "dom.html"),
++                    os.path.join(work, "tests/harness/dom.html"))
++
++        server, port = golden.serve(work)
++        browser = golden.Browser(os.path.join(work, "profile"))
++        try:
++            browser.call("Emulation.setDeviceMetricsOverride", width=900,
++                         height=700, deviceScaleFactor=1, mobile=False)
++            browser.call("Page.navigate",
++                         url="http://127.0.0.1:%d/tests/harness/dom.html" % port)
++            browser.wait_for("Page.loadEventFired")
++            deadline = time.time() + 30
++            results = None
++            while time.time() < deadline:
++                answer = browser.call(
++                    "Runtime.evaluate",
++                    expression="JSON.stringify(window.kibaosDomResults || null)",
++                    returnByValue=True)
++                value = answer.get("result", {}).get("value")
++                if value and value != "null":
++                    results = json.loads(value)
++                    break
++                time.sleep(0.1)
++            if results is None:
++                raise SystemExit("the DOM suite never reported a result")
++        finally:
++            browser.close()
++            server.shutdown()
++    finally:
++        shutil.rmtree(work, ignore_errors=True)
++
++    failed = [r for r in results if not r["ok"]]
++    print("DOM suites: %d/%d passed" % (len(results) - len(failed), len(results)))
++    for result in failed:
++        print("  FAIL %s\n       %s" % (result["name"], result.get("error", "")))
++    return 1 if failed else 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-current.png b/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-current.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..12f47b2e15dd75057a155255e2b365995312aae5
+GIT binary patch
+literal 15672
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-dark.png b/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-dark.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..66a908caf701d7754c75e91386b8e4cae850fa9e
+GIT binary patch
+literal 15158
+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
+a%wSfarTv9vqBa8q1B0ilpUXO@geCyNl+%v@
+
+literal 0
+HcmV?d00001
+
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-light.png b/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-light.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..41bc7fd04974ecefbb71ed2555774a69a80064a3
+GIT binary patch
+literal 15049
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts b/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
+index d536252d43eb..2d8a570fee0c 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
+@@ -10,6 +10,8 @@ import {asFileKey} from '../../port/types.js';
+ import type {EmptyReason} from '../../ui/copy.js';
+ import {FileList} from '../../ui/file_list.js';
+ import {createRow, updateRow} from '../../ui/file_row.js';
++import {Sidebar} from '../../ui/sidebar.js';
++import type {Place} from '../../ui/sidebar.js';
+ 
+ export interface Story {
+   readonly name: string;
+@@ -122,7 +124,76 @@ function emptyStory(name: string, reason: EmptyReason, subject?: string): Story
+   };
+ }
+ 
++
++/**
++ * One sidebar, holding the states that are easy to get wrong: a drive with
++ * room, a drive with none, and a count. The near full stick is here on purpose,
++ * because the colour it turns is the kind of thing that survives a refactor
++ * looking fine and is only wrong when you put the two bars side by side.
++ */
++const PLACES: Place[] = (() => {
++  const gib = 1024 * 1024 * 1024;
++  const internal = {
++    id: 'internal',
++    root: asFileKey('mock://internal'),
++    label: 'Home',
++    kind: 'system' as const,
++    removable: false,
++    readOnly: false,
++    capacity: {total: 32 * gib, free: 8 * gib},
++  };
++  const stick = {
++    id: 'stick',
++    root: asFileKey('mock://stick'),
++    label: 'CRUZER',
++    kind: 'removable' as const,
++    removable: true,
++    readOnly: false,
++    capacity: {total: 16 * gib, free: 128 * 1024 * 1024},
++  };
++  return [
++    {key: asFileKey('fake://recent'), label: 'Recent', kind: 'recent'},
++    {key: asFileKey('fake://starred'), label: 'Starred', kind: 'starred'},
++    {key: asFileKey('fake://trash'), label: 'Trash', kind: 'trash'},
++    {key: internal.root, label: internal.label, kind: 'volume', volume: internal},
++    {key: stick.root, label: stick.label, kind: 'volume', volume: stick},
++    {key: asFileKey('fake://basket'), label: 'Basket', kind: 'basket', badge: 3},
++  ];
++})();
++
++function sidebar(root: HTMLElement, selected?: string): void {
++  const host = document.createElement('div');
++  host.className = 'kibaos-panel';
++  root.appendChild(host);
++  const widget = new Sidebar(host);
++  widget.setPlaces(PLACES);
++  if (selected) {
++    widget.setSelected(asFileKey(selected));
++  }
++}
++
+ export const STORIES: Story[] = [
++  {
++    name: 'sidebar-light',
++    width: 268,
++    height: 430,
++    theme: 'light',
++    render: root => sidebar(root),
++  },
++  {
++    name: 'sidebar-dark',
++    width: 268,
++    height: 430,
++    theme: 'dark',
++    render: root => sidebar(root),
++  },
++  {
++    name: 'sidebar-current',
++    width: 268,
++    height: 430,
++    theme: 'dark',
++    render: root => sidebar(root, 'mock://internal'),
++  },
+   {
+     name: 'rows-light',
+     width: 720,
+diff --git a/ui/file_manager/file_manager/kibaos/ui/sidebar.ts b/ui/file_manager/file_manager/kibaos/ui/sidebar.ts
+new file mode 100644
+index 000000000000..3548b9538a21
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/ui/sidebar.ts
+@@ -0,0 +1,269 @@
++/**
++ * The places you can go, as our own component.
++ *
++ * Upstream puts this in a shadow root, which is why restyling it needed a
++ * stylesheet pushed into every tree item individually and why its selected
++ * state was unreadable for months: the rule paints on_primary over primary and
++ * a palette that retints those separately lands dark on dark. None of that is
++ * a problem you can have if you own the markup.
++ *
++ * Built as a list of buttons rather than a tree. A tree role promises expand
++ * and collapse semantics, arrow keys that walk levels, and a shape a screen
++ * reader will describe as nested. This is a flat set of destinations in
++ * labelled groups, so it says so.
++ */
++import type {FileKey, Volume} from '../port/types.js';
++import {formatSize} from './format.js';
++
++export type PlaceKind = 'recent'|'starred'|'trash'|'basket'|'volume';
++
++export interface Place {
++  readonly key: FileKey;
++  readonly label: string;
++  readonly kind: PlaceKind;
++  readonly volume?: Volume;
++  /** Shown as a count beside the label, for the basket. */
++  readonly badge?: number;
++}
++
++export interface SidebarOptions {
++  readonly onSelect?: (place: Place) => void;
++}
++
++const GLYPHS: Record<PlaceKind|'removable'|'system', string> = {
++  recent: 'M10 5v5l3.5 2M10 3.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z',
++  starred: 'M10 3.5l2 4.2 4.5.6-3.3 3.2.8 4.5-4-2.2-4 2.2.8-4.5L3.5 8.3l4.5-.6z',
++  trash: 'M4.5 6h11M8 6V4.5h4V6M6 6l.7 9.5h6.6L14 6M8.5 8.5v5M11.5 8.5v5',
++  basket: 'M3.5 7.5h13l-1.4 8h-10.2zM7 7.5 8.5 3.5M13 7.5 11.5 3.5',
++  volume: 'M3 5.5h14v9H3zM3 11.5h14',
++  system: 'M4 5h12v7H4zM2.5 14.5h15',
++  removable: 'M7 3.5h6v5h2v8H5v-8h2zM9 5v2M11 5v2',
++};
++
++const STROKED = new Set<string>(['recent', 'trash', 'volume', 'system',
++                                 'removable', 'basket']);
++
++function glyph(kind: string): string {
++  const path = GLYPHS[kind as keyof typeof GLYPHS] ?? GLYPHS.volume;
++  const stroke = STROKED.has(kind) ?
++      'fill="none" stroke="currentColor" stroke-width="1.5" ' +
++          'stroke-linejoin="round" stroke-linecap="round"' :
++      'fill="currentColor"';
++  return `<svg class="kibaos-place-glyph" viewBox="0 0 20 20" aria-hidden="true">` +
++      `<path d="${path}" ${stroke}/></svg>`;
++}
++
++function volumeGlyphKind(volume: Volume): string {
++  if (volume.removable) {
++    return 'removable';
++  }
++  return volume.kind === 'system' ? 'system' : 'volume';
++}
++
++let instances = 0;
++
++export class Sidebar {
++  private readonly nav: HTMLElement;
++  /** Distinguishes this sidebar's heading ids from another pane's. */
++  private readonly instance = ++instances;
++  private places: Place[] = [];
++  private selected: FileKey|null = null;
++
++  constructor(
++      private readonly container: HTMLElement,
++      private readonly options: SidebarOptions = {}) {
++    this.nav = document.createElement('nav');
++    this.nav.className = 'kibaos-sidebar';
++    this.nav.setAttribute('aria-label', 'Places');
++    this.container.appendChild(this.nav);
++    this.nav.addEventListener('click', this.onClick);
++    this.nav.addEventListener('keydown', this.onKeyDown);
++  }
++
++  setPlaces(places: readonly Place[]): void {
++    this.places = places.slice();
++    this.render();
++  }
++
++  setSelected(key: FileKey|null): void {
++    this.selected = key;
++    this.render();
++  }
++
++  private groups(): Array<{title: string, places: Place[]}> {
++    const quick = this.places.filter(
++        place => place.kind !== 'volume' && place.kind !== 'basket');
++    const volumes = this.places.filter(place => place.kind === 'volume');
++    const basket = this.places.filter(place => place.kind === 'basket');
++    const out: Array<{title: string, places: Place[]}> = [];
++    if (quick.length) {
++      out.push({title: 'Quick access', places: quick});
++    }
++    // Removable media is separated from what is always there, because a drive
++    // you can pull out and a drive you cannot are not the same kind of place.
++    const fixed = volumes.filter(place => !place.volume?.removable);
++    const removable = volumes.filter(place => place.volume?.removable);
++    if (fixed.length) {
++      out.push({title: 'This computer', places: fixed});
++    }
++    if (removable.length) {
++      out.push({title: 'Devices', places: removable});
++    }
++    if (basket.length) {
++      out.push({title: 'Gathered', places: basket});
++    }
++    return out;
++  }
++
++  private render(): void {
++    this.nav.textContent = '';
++    for (const group of this.groups()) {
++      const section = document.createElement('div');
++      section.className = 'kibaos-place-group';
++      const heading = document.createElement('h2');
++      heading.className = 'kibaos-place-heading';
++      heading.textContent = group.title;
++      const id = `kibaos-group-${this.instance}-` +
++          group.title.replace(/\s+/g, '-').toLowerCase();
++      heading.id = id;
++      const list = document.createElement('ul');
++      list.className = 'kibaos-place-list';
++      list.setAttribute('aria-labelledby', id);
++      for (const place of group.places) {
++        list.appendChild(this.renderPlace(place));
++      }
++      section.append(heading, list);
++      this.nav.appendChild(section);
++    }
++  }
++
++  private renderPlace(place: Place): HTMLElement {
++    const item = document.createElement('li');
++    const button = document.createElement('button');
++    button.type = 'button';
++    button.className = 'kibaos-place';
++    button.dataset['key'] = place.key;
++    const current = place.key === this.selected;
++    // aria-current rather than aria-selected: this is where you are, not one
++    // of a set of things you have picked.
++    if (current) {
++      button.setAttribute('aria-current', 'page');
++    }
++    // Where you are is the natural place for the keyboard to land, but only if
++    // it is somewhere this sidebar actually lists. It usually is not: open a
++    // folder three levels down and none of these is current. Falling back to
++    // the first place keeps the sidebar in the tab order instead of dropping
++    // it out of the document entirely.
++    button.tabIndex = place === this.tabStop() ? 0 : -1;
++
++    const kind = place.kind === 'volume' && place.volume ?
++        volumeGlyphKind(place.volume) : place.kind;
++    const label = document.createElement('span');
++    label.className = 'kibaos-place-label';
++    label.textContent = place.label;
++
++    button.innerHTML = glyph(kind);
++    button.appendChild(label);
++
++    if (place.badge !== undefined && place.badge > 0) {
++      const badge = document.createElement('span');
++      badge.className = 'kibaos-place-badge';
++      badge.textContent = String(place.badge);
++      // The number is meaningless read on its own, so the button says what it
++      // counts and the badge itself is decoration.
++      button.setAttribute(
++          'aria-label',
++          `${place.label}, ${place.badge} ${place.badge === 1 ? 'item' : 'items'}`);
++      button.appendChild(badge);
++    }
++
++    item.appendChild(button);
++
++    const capacity = place.volume?.capacity;
++    if (capacity && capacity.total > 0) {
++      // Exact free space in words, with the bar as the supplement. A ring or a
++      // bar on its own is poor for comparison and worse for anybody who cannot
++      // see it, so the sentence carries the meaning.
++      const used = 1 - capacity.free / capacity.total;
++      const meter = document.createElement('div');
++      meter.className = 'kibaos-place-capacity';
++      const text = document.createElement('span');
++      text.className = 'kibaos-place-free';
++      text.textContent =
++          `${formatSize(capacity.free)} free of ${formatSize(capacity.total)}`;
++      const bar = document.createElement('div');
++      bar.className = 'kibaos-place-bar';
++      bar.setAttribute('role', 'img');
++      bar.setAttribute('aria-hidden', 'true');
++      const fill = document.createElement('div');
++      fill.className = 'kibaos-place-bar-fill';
++      fill.style.inlineSize = `${Math.round(used * 100)}%`;
++      if (used >= 0.98) {
++        fill.dataset['level'] = 'full';
++      } else if (used >= 0.90) {
++        fill.dataset['level'] = 'high';
++      }
++      bar.appendChild(fill);
++      meter.append(text, bar);
++      item.appendChild(meter);
++    }
++
++    return item;
++  }
++
++  private tabStop(): Place|undefined {
++    return this.places.find(place => place.key === this.selected) ??
++        this.places[0];
++  }
++
++  private buttons(): HTMLElement[] {
++    return [...this.nav.querySelectorAll<HTMLElement>('.kibaos-place')];
++  }
++
++  private activate(button: HTMLElement): void {
++    const key = button.dataset['key'];
++    const place = this.places.find(candidate => candidate.key === key);
++    if (place) {
++      this.options.onSelect?.(place);
++    }
++  }
++
++  private onClick = (event: MouseEvent): void => {
++    const button = (event.target as HTMLElement|null)?.closest?.('.kibaos-place');
++    if (button) {
++      this.activate(button as HTMLElement);
++    }
++  };
++
++  // Arrow keys walk the whole sidebar rather than one group, because the
++  // grouping is a way of reading it and not a set of separate controls.
++  private onKeyDown = (event: KeyboardEvent): void => {
++    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' &&
++        event.key !== 'Home' && event.key !== 'End') {
++      return;
++    }
++    const buttons = this.buttons();
++    if (!buttons.length) {
++      return;
++    }
++    const active = document.activeElement as HTMLElement|null;
++    const at = buttons.findIndex(button => button === active);
++    let next: number;
++    switch (event.key) {
++      case 'ArrowDown': next = at < 0 ? 0 : Math.min(buttons.length - 1, at + 1); break;
++      case 'ArrowUp': next = at < 0 ? 0 : Math.max(0, at - 1); break;
++      case 'Home': next = 0; break;
++      default: next = buttons.length - 1;
++    }
++    for (const button of buttons) {
++      button.tabIndex = -1;
++    }
++    buttons[next]!.tabIndex = 0;
++    buttons[next]!.focus();
++    event.preventDefault();
++  };
++
++  destroy(): void {
++    this.nav.remove();
++  }
++}
+diff --git a/ui/file_manager/file_manager/kibaos/ui/tokens.css b/ui/file_manager/file_manager/kibaos/ui/tokens.css
+index a087b213f83b..d608ed352619 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/tokens.css
++++ b/ui/file_manager/file_manager/kibaos/ui/tokens.css
+@@ -29,6 +29,8 @@
+   --kibaos-tile-selected: #dbcdf6;
+   --kibaos-glyph: #6f6885;
+   --kibaos-tag-bg: #f7f5fc;
++  --kibaos-warn: #a1651a;
++  --kibaos-danger: #b3261e;
+ 
+   --kibaos-radius-row: 11px;
+   --kibaos-radius-tile: 11px;
+@@ -57,6 +59,8 @@
+     --kibaos-tile-selected: #4a3b74;
+     --kibaos-glyph: #a79dc4;
+     --kibaos-tag-bg: #211f2c;
++  --kibaos-warn: #e6b062;
++  --kibaos-danger: #f2b8b5;
+   }
+ }
+ 
+@@ -80,6 +84,8 @@
+     --kibaos-tile-selected: #4a3b74;
+     --kibaos-glyph: #a79dc4;
+     --kibaos-tag-bg: #211f2c;
++  --kibaos-warn: #e6b062;
++  --kibaos-danger: #f2b8b5;
+ }
+ 
+ /* Density is fixed per mode, never measured. Dynamic row heights across a
+@@ -229,3 +235,125 @@
+      stranding "files." on its own. */
+   max-inline-size: 48ch;
+ }
++
++
++/* The sidebar: where you can go, as opposed to what is in front of you.
++
++   Group headings are quiet and small rather than uppercase and tracked out.
++   Small caps at this size is a legibility cost paid for a filing cabinet
++   aesthetic nobody asked for, and these are three or four words that want to
++   be skimmed past on the way to the thing underneath. */
++.kibaos-sidebar {
++  box-sizing: border-box;
++  display: flex;
++  flex-direction: column;
++  gap: 18px;
++  inline-size: 232px;
++  overflow-y: auto;
++  padding: 12px 10px;
++}
++.kibaos-place-heading {
++  color: var(--kibaos-quiet);
++  font-size: 11px;
++  font-weight: 600;
++  letter-spacing: .01em;
++  margin: 0 0 4px;
++  padding-inline: 10px;
++}
++.kibaos-place-list {
++  display: flex;
++  flex-direction: column;
++  gap: 1px;
++  list-style: none;
++  margin: 0;
++  padding: 0;
++}
++.kibaos-place {
++  align-items: center;
++  background: none;
++  border: 0;
++  border-radius: var(--kibaos-radius-row);
++  color: var(--kibaos-ink);
++  cursor: default;
++  display: flex;
++  font: inherit;
++  gap: 10px;
++  inline-size: 100%;
++  padding: 7px 10px;
++  position: relative;
++  text-align: start;
++}
++.kibaos-place:hover { background: var(--kibaos-row-hover); }
++.kibaos-place:focus-visible {
++  outline: 2px solid var(--kibaos-accent);
++  outline-offset: -2px;
++}
++.kibaos-place[aria-current="page"] {
++  background: var(--kibaos-row-selected);
++  color: var(--kibaos-accent);
++  font-weight: 600;
++}
++/* A rail rather than a full bleed fill. The fill alone reads as a hover that
++   got stuck; the rail is what says this is where you are. */
++.kibaos-place[aria-current="page"]::before {
++  background: var(--kibaos-accent);
++  block-size: 16px;
++  border-radius: var(--kibaos-radius-pill);
++  content: "";
++  inline-size: 3px;
++  inset-block-start: 50%;
++  inset-inline-start: 1px;
++  position: absolute;
++  translate: 0 -50%;
++}
++.kibaos-place-glyph {
++  block-size: 18px;
++  color: var(--kibaos-glyph);
++  flex: none;
++  inline-size: 18px;
++}
++.kibaos-place[aria-current="page"] .kibaos-place-glyph { color: inherit; }
++.kibaos-place-label {
++  overflow: hidden;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++.kibaos-place-badge {
++  background: var(--kibaos-tag-bg);
++  border-radius: var(--kibaos-radius-pill);
++  color: var(--kibaos-quiet);
++  font-size: 11px;
++  font-variant-numeric: tabular-nums;
++  margin-inline-start: auto;
++  padding: 1px 7px;
++}
++.kibaos-place[aria-current="page"] .kibaos-place-badge {
++  background: var(--kibaos-panel);
++  color: var(--kibaos-accent);
++}
++
++/* Capacity sits under the drive it belongs to, indented to the label rather
++   than the glyph, so the eye reads it as a note about that row. */
++.kibaos-place-capacity {
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++  padding: 1px 10px 6px 38px;
++}
++.kibaos-place-free {
++  color: var(--kibaos-quiet);
++  font-size: 11px;
++}
++.kibaos-place-bar {
++  background: var(--kibaos-line);
++  block-size: 3px;
++  border-radius: var(--kibaos-radius-pill);
++  overflow: hidden;
++}
++.kibaos-place-bar-fill {
++  background: var(--kibaos-accent);
++  block-size: 100%;
++  border-radius: inherit;
++}
++.kibaos-place-bar-fill[data-level="high"] { background: var(--kibaos-warn); }
++.kibaos-place-bar-fill[data-level="full"] { background: var(--kibaos-danger); }

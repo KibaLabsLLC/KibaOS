@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=KibaOS
+Comment=Start the KibaOS desktop session
+Exec=/usr/bin/kibaos-session
+Type=Application

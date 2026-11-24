@@ -1,20 +1,28 @@
-
 cff-version: 1.2.0
-message: "If you use KibaOS, please cite it using the following metadata."
-
-title: "KibaOS"
-abstract: "KibaOS is an operating system developed by Kiba Labs, LLC, focused on simplicity, refinement, and modern desktop computing."
-
-authors:
-  - name: "Kiba Labs, LLC"
-
-version: "Latest"
-
-url: "https://kibaos.com"
-repository-code: "https://github.com/KibaLabsLLC/KibaOS"
-
+title: KibaOS
+version: 0.1.0-prealpha
+type: software
+abstract: >-
+  KibaOS is an unofficial ChromiumOS Ash-based desktop environment for Arch
+  Linux, with a configurable local-first ChromeOS-style desktop, Wayland and
+  X11 support, hardware integration, recovery tooling, and optional local AI.
+date-released: 2026-08-10
+repository-code: https://github.com/KibaLabsLLC/KibaDE
+url: https://github.com/KibaLabsLLC/KibaDE
+license: BSD-3-Clause
 keywords:
-  - Linux
-  - Operating System
+  - KibaOS
+  - ChromiumOS
+  - ChromeOS
+  - Ash
   - Arch Linux
-  - Desktop Environment
+  - Linux desktop environment
+  - Wayland
+  - Weston
+  - local AI
+  - accessibility
+authors:
+  - name: KibaOS Contributors
+message: >-
+  If you use KibaOS in research or a public project, cite the repository and
+  the exact commit or release artifact used.

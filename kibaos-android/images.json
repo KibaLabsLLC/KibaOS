@@ -1,0 +1,14 @@
+{
+  "version": "2026-10-23",
+  "base_url": "https://github.com/KibaLabsLLC/KibaDE/releases/download/android-images-2026-10-23/",
+  "files": [
+    {
+      "name": "system.img",
+      "size": 1482285056
+    },
+    {
+      "name": "vendor.img",
+      "size": 755724288
+    }
+  ]
+}

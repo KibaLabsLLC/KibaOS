@@ -1,0 +1,16 @@
+# shellcheck shell=bash
+_kibaos_remove_legacy_web_launchers() {
+  rm -f /usr/share/applications/kibaos-web-*.desktop
+  rm -f /usr/share/applications/kibaos-connect-google.desktop
+  rm -f /usr/share/applications/kibaos-disconnect-google.desktop
+  rm -f /usr/share/icons/hicolor/scalable/apps/kibaos-web-*.svg
+
+}
+
+post_install() {
+  _kibaos_remove_legacy_web_launchers
+}
+
+post_upgrade() {
+  _kibaos_remove_legacy_web_launchers
+}

@@ -1,0 +1,31 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-android
+pkgver=158.0.8115.0
+pkgrel=1
+pkgdesc="Android apps for KibaOS: the system service behind Ash's own ARC code"
+arch=('any')
+install=kibaos-android.install
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=('python' 'python-dbus' 'python-gobject' 'waydroid' 'lxc' 'acl' 'wl-clipboard')
+source=(
+  'kibaos-android'
+  'kibaos-android.service'
+  'kibaos-android.sysusers'
+  'kibaos-android.tmpfiles'
+  'kibaos-android-loop'
+  'kibaos-android-loop.conf'
+  'kibaos-android-patch-waydroid'
+  'kibaos-android-waydroid.hook'
+  'kibaos-apk-check'
+  'kibaos-android-install'
+  'kibaos-android-install.desktop'
+  'kibaos-bridge.apk'
+  'org.kibaos.Android1.conf'
+  'org.kibaos.Android1.service'
+  'images.json'
+  'release.gpg'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

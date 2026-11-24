@@ -1,0 +1,255 @@
+#!/usr/bin/env bash
+# Small, non-GUI failure view shared by the interactive installer and future
+# front ends. It reads only bounded journal fields; raw command output stays in
+# the private log until the user explicitly exports it.
+#
+# The sentences come from lib/kibaos-copy.sh, and that is the whole point of
+# this file having been rewritten. It used to carry its own remediation table,
+# keyed on cause codes that did not all exist, and phrased as a list of things
+# for the reader to go and verify. Somebody reading this screen has just had an
+# install stop on them. They get told what happened, what state their disk is
+# in, and one thing to do.
+set -Eeuo pipefail
+
+SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+
+_find_lib() {
+  local name=$1 candidate
+  for candidate in "/usr/local/lib/kibaos/$name" "$SELF_DIR/../lib/$name"; do
+    [[ -r $candidate ]] || continue
+    printf '%s' "$candidate"
+    return 0
+  done
+  return 1
+}
+
+# The copy and the reversibility boundary. Without them this program can still
+# report an exit status, so a missing library degrades the screen rather than
+# replacing it with an error about a library.
+for _lib in kibaos-journal.sh kibaos-copy.sh; do
+  if _path=$(_find_lib "$_lib"); then
+    # shellcheck source=/dev/null
+    . "$_path"
+  fi
+done
+unset _lib _path
+
+STATUS=1
+JOURNAL=${KIBAOS_JOURNAL_PATH:-/run/kibaos-install/journal.jsonl}
+RAW_LOG=${KIBAOS_JOURNAL_RAW:-/run/kibaos-install/install.log}
+EXPORT_DIR=${KIBAOS_FAILURE_EXPORT_DIR:-/run/kibaos-install}
+NONINTERACTIVE=0
+EXPORT_REQUEST=
+
+usage() {
+  cat <<'EOF'
+Usage: kibaos-install-failure --status CODE [options]
+
+Options:
+  --journal FILE       The journal to read the failure from
+  --raw-log FILE       The private log, which is never printed here
+  --export DIR         Save the journal and the log into a new private directory
+  --noninteractive     Print the report and return without asking anything
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --status|--journal|--raw-log|--export)
+      (( $# >= 2 )) || {
+        echo "kibaos-install-failure: $1 requires an argument" >&2
+        usage >&2
+        exit 2
+      }
+      case "$1" in
+        --status) STATUS=$2 ;;
+        --journal) JOURNAL=$2 ;;
+        --raw-log) RAW_LOG=$2 ;;
+        --export) EXPORT_REQUEST=$2 ;;
+      esac
+      shift 2
+      ;;
+    --noninteractive) NONINTERACTIVE=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "kibaos-install-failure: unknown option: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+[[ $STATUS =~ ^[0-9]+$ ]] || { echo 'kibaos-install-failure: status must be numeric' >&2; exit 2; }
+
+extract_field() {
+  local field=$1 line=$2
+  awk -v marker="\"${field}\":\"" '
+    {
+      start = index($0, marker)
+      if (!start) exit
+      value = substr($0, start + length(marker))
+      escaped = 0
+      result = ""
+      for (i = 1; i <= length(value); i++) {
+        character = substr(value, i, 1)
+        if (escaped) {
+          result = result "\\" character
+          escaped = 0
+        } else if (character == "\\") {
+          escaped = 1
+        } else if (character == "\"") {
+          print result
+          exit
+        } else {
+          result = result character
+        }
+      }
+    }
+  ' <<<"$line"
+}
+
+latest_failed_record() {
+  [[ -r $JOURNAL ]] || return 0
+  awk '/"status":"failed"/ { record=$0 } END { if (record) print record }' "$JOURNAL"
+}
+
+# The one line the report leads with.
+#
+# A saved report is two files of JSON and a log, and the first thing anybody
+# does with it is paste it somewhere and ask for help. What they need at the
+# top is the sentence that says what happened, in an amount of text that
+# survives being pasted into a chat window: which stage, which cause, which
+# exit code. Everything under it is for whoever answers.
+#
+# Built from the same journal record the screen is built from, so the report
+# and the screen cannot disagree about what failed.
+summary_line() {
+  local record stage cause label
+  record=$(latest_failed_record || true)
+  stage=$(extract_field stage "$record")
+  cause=$(extract_field cause "$record")
+  label=$stage
+  if [[ -n $stage ]] && declare -F stage_label >/dev/null 2>&1; then
+    label=$(stage_label "$stage")
+  fi
+  if [[ -z $label && -z $cause ]]; then
+    printf 'KibaOS install failed, exit %s. No stage was recorded.' "$STATUS"
+    return 0
+  fi
+  printf 'KibaOS install failed during %s' "${label:-an unrecorded stage}"
+  [[ -z $cause ]] || printf ' (cause %s)' "$cause"
+  printf ', exit %s.' "$STATUS"
+}
+
+report() {
+  local record stage cause message headline explanation disk_state next
+  record=$(latest_failed_record || true)
+  stage=$(extract_field stage "$record")
+  cause=$(extract_field cause "$record")
+  message=$(extract_field message "$record")
+
+  # Fall back to the codes only if the copy library is missing. A raw token on
+  # this screen is the failure this rewrite exists to prevent, so where that
+  # happens it is labelled as a code rather than dressed up as a sentence.
+  if declare -F stage_label >/dev/null 2>&1; then
+    headline=${stage:+$(stage_label "$stage")}
+    disk_state=${stage:+$(stage_explanation "$stage")}
+    explanation=${cause:+$(cause_explanation "$cause")}
+    next=$(cause_next_step "$cause")
+  else
+    headline=$stage
+    disk_state=
+    explanation=${cause:+"Reported code: $cause"}
+    next='Save a report, then start again.'
+  fi
+
+  printf '\n' >&2
+  # Every stage label is a gerund phrase, so "while <label>" reads as English
+  # for all of them and needs no per-stage wording of its own.
+  if [[ -n $headline ]]; then
+    printf 'The install stopped while %s%s.\n\n' \
+      "$(printf '%s' "${headline:0:1}" | tr '[:upper:]' '[:lower:]')" \
+      "${headline:1}" >&2
+  else
+    printf 'The install stopped.\n\n' >&2
+  fi
+  # The state of the disk comes before the reason for it, always. It is the
+  # only thing on this screen the reader is actually afraid of.
+  [[ -z $disk_state ]] || printf '%s\n' "$disk_state" >&2
+  [[ -z $explanation ]] || printf '%s\n' "$explanation" >&2
+  printf '\n%s\n\n' "$next" >&2
+
+  [[ -z $message ]] || printf 'Detail: %s\n' "$message" >&2
+  printf 'The full log is at %s, and it stays on this computer.\n' "$RAW_LOG" >&2
+}
+
+export_logs() {
+  local destination=$1 source copied=0
+  [[ $destination == /* && $destination != / ]] || {
+    echo 'kibaos-install-failure: export directory must be an absolute non-root path' >&2
+    return 2
+  }
+  [[ ! -e $destination ]] || {
+    echo "kibaos-install-failure: export directory already exists: $destination" >&2
+    return 1
+  }
+  install -d -m 0700 "$destination"
+  for source in "$JOURNAL" "$RAW_LOG"; do
+    [[ -r $source ]] || continue
+    install -m 0600 "$source" "$destination/$(basename "$source")"
+    copied=1
+  done
+  if (( ! copied )); then
+    rmdir -- "$destination" 2>/dev/null || true
+    echo 'There is nothing to save yet.' >&2
+    return 1
+  fi
+  # First line first. Written after the copy so that a report which turned out
+  # to have nothing in it does not leave a summary of nothing behind.
+  {
+    summary_line
+    printf '\n\n'
+    printf 'Saved %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf 'Journal: %s\n' "$(basename "$JOURNAL")"
+    printf 'Log: %s\n' "$(basename "$RAW_LOG")"
+  } >"$destination/summary.txt"
+  chmod 0600 "$destination/summary.txt" 2>/dev/null || true
+  printf 'Report saved to %s\n' "$destination" >&2
+}
+
+report
+if [[ -n $EXPORT_REQUEST ]]; then
+  export_logs "$EXPORT_REQUEST" || exit 2
+  exit "$STATUS"
+fi
+(( NONINTERACTIVE )) && exit "$STATUS"
+[[ -t 0 ]] || exit "$STATUS"
+
+while true; do
+  printf '%s' '[s]ave a report, [d]etails about this computer, [t]erminal, [r]estart, [q]uit [q]: ' >&2
+  IFS= read -r choice || choice=q
+  case ${choice,,} in
+    s)
+      stamp=$(date -u +%Y%m%dT%H%M%SZ)
+      export_logs "${EXPORT_DIR%/}/failure-${stamp}" || true
+      ;;
+    d)
+      if command -v kibaos-hardware-qualify >/dev/null 2>&1; then
+        stamp=$(date -u +%Y%m%dT%H%M%SZ)
+        destination="${EXPORT_DIR%/}/support-${stamp}"
+        install -d -m 0700 "$destination"
+        kibaos-hardware-qualify --output-dir "$destination" ||
+          echo 'That did not finish. Save a report instead, which has most of the same detail.' >&2
+      else
+        echo 'This image cannot collect those details. Save a report instead.' >&2
+      fi
+      ;;
+    t) bash ;;
+    r)
+      # Deliberately as blunt as the erase gate. Restarting from here is the
+      # one action on this screen that cannot be taken back.
+      read -r -p 'Restart now? Type RESTART to confirm: ' confirmation
+      if [[ $confirmation == RESTART ]]; then
+        systemctl reboot
+        exit "$STATUS"
+      fi
+      ;;
+    q|'') exit "$STATUS" ;;
+    *) echo 'Press s, d, t, r, or q.' >&2 ;;
+  esac
+done

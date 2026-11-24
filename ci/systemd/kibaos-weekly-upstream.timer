@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly KibaOS Chromium upstream candidate validation
+
+[Timer]
+OnCalendar=Sun *-*-* 01:00:00
+RandomizedDelaySec=2h
+Persistent=true
+Unit=kibaos-weekly-upstream.service
+
+[Install]
+WantedBy=timers.target

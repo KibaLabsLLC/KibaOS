@@ -1,0 +1,25 @@
+pkgbase = kibaosfs
+	pkgdesc = The file service behind the KibaOS Files app
+	pkgver = 0.1.0
+	pkgrel = 6
+	url = https://github.com/KibaLabsLLC/KibaDE
+	arch = x86_64
+	license = MIT
+	makedepends = cargo
+	makedepends = rust
+	depends = gcc-libs
+	depends = glibc
+	depends = xz
+	depends = bzip2
+	depends = zlib
+	depends = libgit2.so=1.9-64
+	optdepends = ffmpeg: video thumbnails, media details and the covers of sound files
+	optdepends = poppler: PDF thumbnails and previews
+	optdepends = gnupg: signature verification in Properties
+	optdepends = polkit: Run as administrator, through pkexec
+	options = !lto
+	source = README.md
+	source = LICENSE
+	source = kibaosfs.service
+
+pkgname = kibaosfs

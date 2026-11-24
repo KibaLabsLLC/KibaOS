@@ -1,0 +1,24 @@
+pkgbase = kibaos-power
+	pkgdesc = Linux laptop power lifecycle service for KibaOS
+	pkgver = 0.2.0
+	pkgrel = 2
+	url = https://github.com/KibaLabsLLC/KibaDE
+	arch = any
+	license = BSD-3-Clause
+	depends = python
+	depends = python-gobject
+	depends = systemd
+	depends = upower
+	depends = brightnessctl
+	backup = etc/systemd/logind.conf.d/60-kibaos-laptop.conf
+	source = kibaos-powerd
+	source = kibaos-power-status
+	source = kibaos-powerd.service
+	source = kibaos-power-sleep
+	source = 60-kibaos-laptop.conf
+	source = 60-kibaos-backlight.rules
+	source = org.kibaos.Power.conf
+	source = kibaos-power.tmpfiles
+	source = LICENSE
+
+pkgname = kibaos-power

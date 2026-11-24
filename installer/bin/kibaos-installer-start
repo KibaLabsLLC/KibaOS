@@ -1,0 +1,549 @@
+#!/usr/bin/env bash
+# Start the best installer this machine can actually display.
+#
+# One command in the message of the day, two renderers behind it. The choice is
+# made by `kibaos-probe.sh` - the same probe both front ends use - and it is
+# made before anything is drawn, because a graphical installer that discovers
+# it cannot open a window has already produced the black screen it exists to
+# prevent.
+#
+# The graphical path needs a compositor: GTK 4 on a bare virtual console has
+# nothing to draw on. `cage` is on the image for exactly this and nothing else,
+# so if it is missing, or if it exits without ever showing anything, the text
+# installer runs instead. Falling back is not a failure mode here; it is the
+# guaranteed path, and it does the same install.
+
+set -Eeuo pipefail
+
+SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+
+_find() {
+  local name=$1 candidate
+  for candidate in "/usr/local/sbin/$name" "$SELF_DIR/$name"; do
+    [[ -x $candidate ]] || continue
+    printf '%s' "$candidate"
+    return 0
+  done
+  return 1
+}
+
+_find_lib() {
+  local name=$1 candidate
+  for candidate in "/usr/local/lib/kibaos/$name" "$SELF_DIR/../lib/$name"; do
+    [[ -r $candidate ]] || continue
+    printf '%s' "$candidate"
+    return 0
+  done
+  return 1
+}
+
+usage() {
+  cat <<'EOF'
+Usage: kibaos-installer-start [options]
+
+Runs the graphical installer when this machine can display one, and the text
+installer when it cannot. Both ask the same questions and run the same engine.
+
+Options:
+  --text             Use the text installer regardless of what the probe finds
+  --graphical        Try the graphical installer even if the probe advises text
+  --safe-graphics    Graphical, with every acceleration path skipped
+  --plan-only        Ask the questions and check the plan; never offer to erase
+  --answers FILE     Start the installer with the answers in FILE filled in
+  --express          With --answers and --password-hash-file: install without asking
+                     (a virtual machine with a blank disk only)
+  --password-hash-file FILE  The account's password hash, for --express
+  -h, --help         This message
+
+Environment:
+  KIBAOS_FORCE_TUI=1 Same as --text
+  KIBAOS_FORCE_GUI=1 Run the graphical installer past the soft checks: low
+                     memory, software rendering, and the unproven VMware display
+                     path. It cannot force past a missing GPU, which would only
+                     install a system that boots to a black screen.
+  KIBAOS_SAFE_GRAPHICS=1
+                     Same as --safe-graphics
+EOF
+}
+
+# Two kinds of output leave this program and they are not for the same reader.
+#
+# `say` is addressed to whoever is sitting in front of the computer watching a
+# console because the installer has not appeared yet. It is a plain sentence
+# with no program name in front of it, and there are deliberately very few.
+#
+# `note` is addressed to whoever is reading this back afterwards. It keeps the
+# program name, because in a boot log the name is the point.
+#
+# The renderer negotiation used to speak entirely in the second voice, so a
+# machine that needed four attempts greeted its owner with four lines of
+# `kibaos-installer-start: trying GLES on card0`. Every one of those attempts
+# is still recorded, in the attempt log, where it is useful.
+say()  { printf '%s\n' "$*" >&2; }
+note() { printf 'kibaos-installer-start: %s\n' "$*" >&2; }
+
+MODE=auto
+PASSTHROUGH=()
+ANSWERS_IN=
+# Arguments for the graphical front end only. The text installer never sees
+# these, and `run_text` passes only what both understand.
+GUI_EXTRA=()
+
+# A live console often has no login-manager-created runtime directory. Cage
+# needs one to create its Wayland socket, even when its DRM and GL setup are
+# otherwise completely healthy. Keep the directory we create private to this
+# invocation and remove it on both normal exit and the text-installer handoff.
+READY_DIR=
+RUNTIME_DIR=
+RUNTIME_DIR_CREATED=0
+
+cleanup_runtime() {
+  if (( RUNTIME_DIR_CREATED )) && [[ -n $RUNTIME_DIR ]]; then
+    rm -rf -- "$RUNTIME_DIR"
+    RUNTIME_DIR=
+    RUNTIME_DIR_CREATED=0
+  fi
+}
+
+cleanup() {
+  cleanup_runtime
+  [[ -z $READY_DIR ]] || rm -rf -- "$READY_DIR"
+}
+
+trap cleanup EXIT
+
+while (($#)); do
+  case $1 in
+    --text)      MODE=text; shift ;;
+    # `--force` because the front end runs its own probe as well, and inside
+    # `cage` that probe can reach a different answer to the one the user just
+    # overruled. Asking for the graphical installer has to mean it.
+    --graphical) MODE=graphical; GUI_EXTRA+=(--force); shift ;;
+    # Safe graphics is a graphical install by definition: the point of it is
+    # the window, and the only question is how hard the machine is allowed to
+    # try to draw one.
+    --safe-graphics)
+      MODE=graphical; GUI_EXTRA+=(--force); export KIBAOS_SAFE_GRAPHICS=1; shift ;;
+    --plan-only) PASSTHROUGH+=(--plan-only); shift ;;
+    # Either installer starts from an answer file. The text one is handed it
+    # as --answers (see `run_text`). The graphical one never sees it as an
+    # argument: its model process reads it from the environment, which the
+    # front end passes on, and the path is made absolute because nothing says
+    # that process starts in this directory.
+    --answers)
+      [[ -n ${2:-} ]] || { echo 'kibaos-installer-start: --answers needs a file' >&2; exit 2; }
+      ANSWERS_IN=$2
+      [[ $ANSWERS_IN == /* ]] || ANSWERS_IN=$PWD/$ANSWERS_IN
+      shift 2 ;;
+    --express) MODE=text; PASSTHROUGH+=(--express); shift ;;
+    --password-hash-file)
+      [[ -n ${2:-} ]] || { echo 'kibaos-installer-start: --password-hash-file needs a file' >&2; exit 2; }
+      MODE=text; PASSTHROUGH+=(--password-hash-file "$2"); shift 2 ;;
+    -h|--help)   usage; exit 0 ;;
+    *) echo "kibaos-installer-start: unknown option: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+[[ -z $ANSWERS_IN ]] || export KIBAOS_INSTALLER_ANSWERS=$ANSWERS_IN
+
+TUI=$(_find kibaos-installer-tui) || {
+  echo 'kibaos-installer-start: the text installer is missing from this image' >&2
+  exit 1
+}
+
+run_text() {
+  cleanup
+  exec "$TUI" ${ANSWERS_IN:+--answers "$ANSWERS_IN"} ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"}
+}
+
+[[ $MODE != text && ${KIBAOS_FORCE_TUI:-0} != 1 ]] || run_text
+
+GUI=$(_find kibaos-installer-gui) || run_text
+
+if [[ $MODE == auto ]]; then
+  probe_lib=$(_find_lib kibaos-probe.sh) || run_text
+  # shellcheck source=/dev/null
+  . "$probe_lib"
+  kibaos_probe_renderer
+  if [[ $KIBAOS_PROBE_RENDERER != gui ]]; then
+    # The probe's advice is worth printing even on the way to the text
+    # installer: on a virtual machine it is usually a setting the user can
+    # change, and it is the same finding the graphics screen will repeat.
+    say "$(kibaos_probe_advice)"
+    run_text
+  fi
+fi
+
+# Already inside a session with a display: run the front end directly.
+if [[ -n ${WAYLAND_DISPLAY:-} || -n ${DISPLAY:-} ]]; then
+  exec "$GUI" ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"} \
+    ${GUI_EXTRA[@]+"${GUI_EXTRA[@]}"}
+fi
+
+command -v cage >/dev/null 2>&1 || {
+  say 'This image cannot show the graphical installer. Starting the text installer, which installs exactly the same system.'
+  note 'no compositor on this image'
+  run_text
+}
+
+runtime_dir_usable() {
+  local candidate=${XDG_RUNTIME_DIR:-} owner mode uid
+  [[ -n $candidate && -d $candidate && -w $candidate ]] || return 1
+  uid=${EUID:-$(id -u)}
+  owner=$(stat -c '%u' -- "$candidate" 2>/dev/null) || return 1
+  mode=$(stat -c '%a' -- "$candidate" 2>/dev/null) || return 1
+  [[ $owner == "$uid" && $mode == 700 ]]
+}
+
+prepare_runtime_dir() {
+  runtime_dir_usable && return 0
+
+  local base=${KIBAOS_RUNTIME_BASE:-}
+  if [[ -z $base ]]; then
+    if [[ -d /run && -w /run ]]; then
+      base=/run
+    else
+      base=${TMPDIR:-/tmp}
+    fi
+  fi
+  RUNTIME_DIR=$(mktemp -d -- "$base/kibaos-runtime.XXXXXX") || {
+    say 'The graphical installer has nowhere to run. Starting the text installer, which installs exactly the same system.'
+    note 'could not create a private Wayland runtime directory'
+    return 1
+  }
+  RUNTIME_DIR_CREATED=1
+  chmod 700 -- "$RUNTIME_DIR" || {
+    say 'The graphical installer has nowhere private to run. Starting the text installer, which installs exactly the same system.'
+    note 'could not secure the Wayland runtime directory'
+    return 1
+  }
+  export XDG_RUNTIME_DIR=$RUNTIME_DIR
+  note "using private Wayland runtime directory $RUNTIME_DIR"
+}
+
+prepare_runtime_dir || run_text
+
+# Make sure there is a seat before anything asks for one.
+#
+# wlroots asks libseat for a seat before it looks at a graphics device, and
+# libseat has two ways to get one: the seatd daemon on /run/seatd.sock, or a
+# logind session. A live console started from a systemd oneshot has no logind
+# session, so on this image the answer has to be seatd, and without it every
+# renderer in the negotiation fails identically for a reason that has nothing
+# to do with graphics.
+#
+# The unit is ordered after `seatd.service`, which is the real fix. This is
+# here anyway because `Type=simple` means systemd calls the service started
+# when it has been executed, not when its socket exists, so the ordering alone
+# still leaves a race, and losing it costs the whole graphical installer.
+KIBAOS_SEAT_SOCKET=${KIBAOS_SEAT_SOCKET:-/run/seatd.sock}
+
+seat_available() {
+  [[ -S $KIBAOS_SEAT_SOCKET ]] && return 0
+  # A session that already has logind behind it needs no daemon.
+  [[ -n ${XDG_SESSION_ID:-} ]] && return 0
+  return 1
+}
+
+prepare_seat() {
+  local waited=0
+  seat_available && return 0
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl start seatd.service >/dev/null 2>&1 || true
+  fi
+  # Three seconds, in tenths, because the daemon either binds its socket almost
+  # at once or is not going to. Waiting longer would only add to the black
+  # screen this whole path exists to prevent.
+  while (( waited < 30 )); do
+    seat_available && return 0
+    sleep 0.1
+    waited=$(( waited + 1 ))
+  done
+  note 'no seat manager is running, so the compositor will not be able to start'
+  return 1
+}
+
+# Without a seat, wlroots cannot open any graphics device. Continuing into the
+# renderer matrix only repeats the same guaranteed failure several times and
+# leaves the person watching a black console. The text path installs the same
+# system and is the only useful fallback until a seat manager is available.
+prepare_seat || run_text
+
+# What the kernel thought of that attempt.
+#
+# The graphical installer records its own crashes now, and there is one death
+# it cannot record: the kernel killing it. An out of memory kill is SIGKILL, so
+# there is no handler, no traceback and no file, and what is left behind is a
+# window that vanished for no stated reason. The evidence exists, in the kernel
+# log, in the format nobody reads.
+#
+# `kibaos-explain` is on this image and its whole purpose is turning that into
+# a sentence, so it is asked. A silent answer is the common case and prints
+# nothing; anything else goes next to the attempt it belongs to.
+explain_kernel_view() {
+  local explain
+  explain=$(_find kibaos-explain) || return 0
+  command -v dmesg >/dev/null 2>&1 || return 0
+  local view
+  view=$(dmesg 2>/dev/null | "$explain" --quiet 2>/dev/null) || true
+  [[ -n $view ]] || return 0
+  case $view in
+    'Nothing in this log'*) return 0 ;;
+  esac
+  printf '\n--- what the kernel said during that attempt ---\n%s\n' "$view" >>"$ATTEMPT_LOG"
+  say "$view"
+}
+
+renderer_lib=$(_find_lib kibaos-renderers.sh) || {
+  say 'Starting the text installer, which installs exactly the same system.'
+  note 'the renderer list is missing from this image'
+  run_text
+}
+# shellcheck source=../lib/kibaos-renderers.sh
+. "$renderer_lib"
+
+# Try each renderer for real, best first, and stop at the first one that puts
+# a window on the screen and keeps it there.
+#
+# There are two independent things that can fail, and telling them apart is
+# what this loop exists to do. `cage` has to start on this machine's graphics
+# device, and GTK has to be able to draw into the compositor `cage` started.
+# Either one failing produces the same symptom - no installer - and the same
+# exit status, because cage exits with its client's status. Changing the
+# compositor's renderer cannot fix a client that cannot draw, and changing
+# GTK's drawing path cannot fix a compositor that never came up, so guessing
+# wrong here means walking the whole list and fixing nothing.
+#
+# The installer answers the question itself by recording how far it got:
+#
+#   nothing written   nothing was ever on the screen; the compositor failed,
+#                     so move to the next graphics candidate.
+#   `mapped`          a window appeared. The compositor works. If the process
+#                     then died, that is GTK's drawing path, so try the next
+#                     client candidate under this same compositor.
+#   `engaged`         the user pressed Continue. There are answers on the
+#                     screen now, and restarting under a different renderer
+#                     would throw them away. Stop, whatever happened next.
+#   `declined`        the front end refused to draw at all - no toolkit, no
+#                     model, or a probe that says no. Every other candidate
+#                     would reach the same answer, so the chain ends here.
+#
+# A clean exit at `mapped` is someone who quit at the first screen. That is
+# also a stop: the installer worked, and they chose to leave.
+READY_DIR=$(mktemp -d "${TMPDIR:-/tmp}/kibaos-installer.XXXXXX")
+export KIBAOS_GUI_READY_FILE="$READY_DIR/drawn"
+ATTEMPT_LOG="$READY_DIR/attempts.log"
+
+# Every attempt's output is kept as well as shown. When the whole chain fails
+# the last thing on a 25-line console is a wall of EGL extension names, and
+# the line that says why is long gone; this is where it can still be read.
+attempt_stage() {
+  [[ -r $KIBAOS_GUI_READY_FILE ]] || { printf 'none'; return; }
+  local stage
+  read -r stage <"$KIBAOS_GUI_READY_FILE" 2>/dev/null || stage=
+  printf '%s' "${stage:-none}"
+}
+
+# Is this attempt still a live process, as opposed to one that has already
+# exited and is only waiting to be reaped? A finished-but-unwaited child shows
+# state `Z` in /proc, and treating that as gone is what lets a fast refusal be
+# noticed the instant it happens instead of being mistaken for a slow start and
+# waited out. The comm field can hold spaces and parentheses, so the state is
+# read as the first word after the last `)` rather than by counting fields.
+_attempt_alive() {
+  local stat state
+  { read -r stat < "/proc/$1/stat"; } 2>/dev/null || return 1
+  state=${stat##*) }
+  [[ ${state%% *} != Z ]]
+}
+
+# How long to wait for a compositor to put its first frame on the screen before
+# deciding it never will. Only the wait for that first frame is bounded; see the
+# attempt loop for why that is not a screen timeout. A real compositor draws in
+# a second or two even in software, so this is a wide margin, not a deadline.
+# Set it to 0 to wait forever, which is what this did before.
+KIBAOS_RENDERER_DRAW_TIMEOUT=${KIBAOS_RENDERER_DRAW_TIMEOUT:-45}
+[[ $KIBAOS_RENDERER_DRAW_TIMEOUT =~ ^[0-9]+$ ]] || KIBAOS_RENDERER_DRAW_TIMEOUT=45
+
+#: What every attempt gets, whichever renderer and whichever client.
+#:
+#: All three of these are here because of something that was measured, and all
+#: three are what `installer/tests/test-gui-runtime.sh` has been setting for
+#: its own runs since it was written. The tests set them and the image did
+#: not, which is the worst way round: the harness was papering over three
+#: things that only happen on the machine somebody actually installs from.
+#:
+#: `GTK_USE_PORTAL=0`, because there is no xdg-desktop-portal on this image
+#: and every portal lookup GTK makes otherwise waits out its own D-Bus
+#: timeout before the first page is drawn. Twenty five seconds each, and it
+#: makes more than one of them.
+#:
+#: `GIO_USE_VFS=local`, because there is no GVFS daemon either and the same
+#: waiting applies to it.
+#:
+#: `GTK_IM_MODULE=gtk-im-context-simple`, because the ibus module recurses
+#: until the stack runs out on a host with no input method daemon, and the
+#: segfault that produces looks exactly like the installer crashing. This one
+#: is not about speed at all.
+#:
+#: None of them is a workaround for a bug in this installer. They are three
+#: statements of what this image is: a live medium with no desktop session
+#: behind it, telling a toolkit that expects one not to go looking.
+BASE_ENV='GTK_USE_PORTAL=0 GIO_USE_VFS=local GTK_IM_MODULE=gtk-im-context-simple'
+
+#: The keyboard layout, which changes while the installer runs.
+#:
+#: `cage` compiles an XKB keymap for each keyboard as it appears, from a layout
+#: it reads out of its environment once, when it starts. Naming a layout that
+#: lives in a file in this run's directory is what lets the bridge change it
+#: later: it rewrites the file and has udev plug the keyboards in again (see
+#: `gb_set`). The file starts as the US layout `cage` would have used anyway.
+#: If it does not compile, `cage` gets nothing extra and types US as it always
+#: did, and the bridge, with no KIBAOS_LIVE_XKB, leaves the layout alone.
+LIVE_XKB=$READY_DIR/xkb
+if install -d -m 0755 "$LIVE_XKB/symbols" 2>/dev/null &&
+    printf 'default partial alphanumeric_keys modifier_keys\nxkb_symbols "basic" {\n  include "pc+us+inet(evdev)"\n};\n' \
+      >"$LIVE_XKB/symbols/kibaos" &&
+    XKB_CONFIG_EXTRA_PATH=$LIVE_XKB xkbcli compile-keymap --layout kibaos >/dev/null 2>&1; then
+  BASE_ENV+=" XKB_CONFIG_EXTRA_PATH=$LIVE_XKB XKB_DEFAULT_LAYOUT=kibaos KIBAOS_LIVE_XKB=$LIVE_XKB"
+fi
+
+attempted=0
+mapfile -t CLIENTS < <(kibaos_renderer_client_plan)
+
+while IFS=$'\t' read -r label settings; do
+  [[ -n $label ]] || continue
+
+  client_index=0
+  for client in "${CLIENTS[@]}"; do
+    client_label=${client%%$'\t'*}
+    client_settings=${client#*$'\t'}
+    attempted=$(( attempted + 1 ))
+    client_index=$(( client_index + 1 ))
+    rm -f -- "$KIBAOS_GUI_READY_FILE"
+
+    # The label and the client name go to the attempt log two lines below.
+    # Here, the person is told what is happening, not which of nine
+    # combinations of environment variables is being tried on their behalf.
+    if (( attempted == 1 )); then
+      say 'Starting the installer.'
+    else
+      say 'Trying another way to draw the screen.'
+    fi
+
+    # Stamped, and the time each attempt took recorded after it.
+    #
+    # "It sat on a black screen for two minutes" is not something anybody can
+    # act on, and it is the only report available from a machine whose virtual
+    # consoles are taken by a kiosk compositor. With this, the log that is
+    # already being written says which attempt the two minutes were spent in,
+    # which turns the next report into a number.
+    attempt_started=$SECONDS
+    printf '\n=== %s  %s / %s (%s %s %s)\n' \
+      "$(date -u +%H:%M:%S)" "$label" "$client_label" "$BASE_ENV" \
+      "$settings" "$client_settings" >>"$ATTEMPT_LOG"
+
+    # `env` rather than exporting: each attempt gets exactly the settings for
+    # that combination and nothing carried over from the attempt before it.
+    set +e
+    # Started in the background so the wait for it can be the wait for a drawn
+    # frame rather than the wait for the process to end. `$!` is cage itself,
+    # not the log writer, because its output goes to `tee` through a process
+    # substitution instead of a pipe; that is what makes it the thing to watch
+    # and, if it hangs, the thing to stop.
+    # shellcheck disable=SC2086  # both are deliberate lists of KEY=VALUE
+    env $BASE_ENV $settings $client_settings cage -- "$GUI" \
+      ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"} \
+      ${GUI_EXTRA[@]+"${GUI_EXTRA[@]}"} \
+      > >(tee -a "$ATTEMPT_LOG") 2>&1 &
+    cage_pid=$!
+
+    # Wait for the first frame, and only for the first frame. A compositor that
+    # opens the graphics device and then draws nothing is the one failure the
+    # stage machine above cannot see: it never exits, so `mapped` is never
+    # written and the chain never advances - the black screen with no way back
+    # that every other path here falls out of. This bounds that single wait and
+    # nothing else. The instant the front end writes its ready file the window
+    # exists, watching stops, and the `wait` below runs unbounded: nothing a
+    # person can read or answer is ever put on a clock, which is the rule
+    # test-no-timeouts.sh keeps. A refusal is noticed the moment the process
+    # leaves the run queue, so only a true hang ever spends the whole budget.
+    if (( KIBAOS_RENDERER_DRAW_TIMEOUT > 0 )); then
+      drew=0
+      for (( waited = 0; waited < KIBAOS_RENDERER_DRAW_TIMEOUT; waited++ )); do
+        [[ -e $KIBAOS_GUI_READY_FILE ]] && { drew=1; break; }
+        _attempt_alive "$cage_pid" || { drew=1; break; }
+        sleep 1
+      done
+      # A frame that arrived during the final second still counts: the ready
+      # file is checked once more here, so a window that drew late is waited
+      # for like any other, never reclaimed for having been slow.
+      if (( ! drew )) && [[ ! -e $KIBAOS_GUI_READY_FILE ]] && _attempt_alive "$cage_pid"; then
+        printf '\n--- %s drew nothing in %ss; giving up on it\n' \
+          "$label" "$KIBAOS_RENDERER_DRAW_TIMEOUT" >>"$ATTEMPT_LOG"
+        note "the '$label' path opened the screen but drew nothing in ${KIBAOS_RENDERER_DRAW_TIMEOUT}s, moving on to the next"
+        # TERM first so cage can hand back the DRM master and the virtual
+        # console it took; KILL only if it will not.
+        kill -TERM "$cage_pid" 2>/dev/null
+        for _ in 1 2 3; do _attempt_alive "$cage_pid" || break; sleep 1; done
+        kill -KILL "$cage_pid" 2>/dev/null
+      fi
+    fi
+    wait "$cage_pid"
+    status=$?
+    set -e
+
+    stage=$(attempt_stage)
+    printf -- '--- %s after %ss, status %s, reached %s\n' \
+      "$client_label" "$(( SECONDS - attempt_started ))" "$status" "$stage" \
+      >>"$ATTEMPT_LOG"
+    case $stage in
+      engaged)
+        (( status == 0 )) || {
+          # Past the first screen there are answers on the record, so this
+          # cannot quietly restart into something else. It says so and stops.
+          say 'The graphical installer stopped.'
+          say 'Run `kibaos-installer-tui` to carry on in text.'
+          note "graphical installer exit status $status"
+        }
+        exit "$status"
+        ;;
+      quit)
+        # A decision, not a failure. Nothing else is tried whatever the exit
+        # status, because the one thing worse than an installer that will not
+        # start is one that will not stop: `cage` has no VT-switch bindings, so
+        # Quit is the only way out, and restarting on it leaves no way out at
+        # all.
+        say 'The installer closed. Nothing has been written to any disk.'
+        exit 0
+        ;;
+      declined)
+        # The front end itself said no: no model, no toolkit, or a probe that
+        # says this machine cannot display one. Every remaining candidate
+        # would reach the same conclusion at the same cost.
+        say 'This computer cannot show the graphical installer. Starting the text installer, which installs exactly the same system.'
+        run_text
+        ;;
+      mapped)
+        (( status != 0 )) || exit 0   # a window, then a clean exit: they quit
+        note "$label drew a window and then stopped (status $status)"
+        explain_kernel_view
+        ;;
+      *)
+        # The compositor never drew. Nothing on the client side can change
+        # that, so the rest of the client list is not worth the wait.
+        note "$label did not produce a display"
+        break
+        ;;
+    esac
+  done
+done < <(kibaos_renderer_plan)
+
+say 'The graphical installer will not start on this computer. Starting the text installer, which installs exactly the same system.'
+note "no renderer produced a display after $attempted attempts"
+if [[ -s $ATTEMPT_LOG ]]; then
+  SAVED_LOG=$(mktemp "${TMPDIR:-/tmp}/kibaos-installer-graphics.XXXXXX.log")
+  cp -- "$ATTEMPT_LOG" "$SAVED_LOG"
+  note "what each attempt printed is in $SAVED_LOG"
+fi
+run_text

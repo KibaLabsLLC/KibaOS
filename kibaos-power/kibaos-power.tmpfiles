@@ -1,0 +1,2 @@
+d /run/kibaos 0755 root root -
+d /var/lib/kibaos 0755 root root -

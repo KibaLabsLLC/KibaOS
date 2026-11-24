@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "release": "0.2.0",
+  "status": "candidate",
+  "architectures": [
+    "x86_64"
+  ],
+  "source": {
+    "tree": "installer",
+    "provenance": "The ISO build records the resolved main commit in .build-info; these source hashes bind the GUI payload before that build."
+  },
+  "payload": [
+    {
+      "path": "installer/bin/kibaos-installer-gui"
+    },
+    {
+      "path": "installer/bin/kibaos-installer-gui-bridge"
+    },
+    {
+      "path": "installer/bin/kibaos-installer-start"
+    },
+    {
+      "path": "installer/lib/kibaos-wifi.sh"
+    },
+    {
+      "path": "installer/lib/kibaos-keyboard.sh"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/__init__.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/bridge.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/flow.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/app.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/a11y.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/arcade.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/bible.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/brand.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/locales.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/stage.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/status.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/tokens.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/wait.py"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/theme-dark-hc.css"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/theme-dark.css"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/theme-hc.css"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/theme-oled.css"
+    },
+    {
+      "path": "installer/lib/kibaos_gui/theme.css"
+    }
+  ],
+  "runtime_packages": [
+    "cage",
+    "gtk4",
+    "libadwaita",
+    "python-cairo",
+    "python-gobject",
+    "ttf-jetbrains-mono"
+  ],
+  "public_release_policy": {
+    "gui_in_0_1_0": false,
+    "artifact_signature_required": true,
+    "full_profile_build_required": true,
+    "physical_accelerated_runtime_required": true
+  }
+}

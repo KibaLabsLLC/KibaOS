@@ -1,0 +1,12 @@
+# KibaOS's own defaults, read by applications in a KibaOS session
+# (XDG_CURRENT_DESKTOP=KibaOS) before the shared list. Folders open in
+# KibaOS Files, whatever other file manager is installed, and links in the
+# KibaOS browser, whatever other browser is. A default you choose yourself,
+# in ~/.config/mimeapps.list, wins over this.
+[Default Applications]
+inode/directory=kibaos-files.desktop
+x-scheme-handler/http=kibaos-browser.desktop
+x-scheme-handler/https=kibaos-browser.desktop
+text/html=kibaos-browser.desktop
+application/xhtml+xml=kibaos-browser.desktop
+application/vnd.android.package-archive=kibaos-android-install.desktop

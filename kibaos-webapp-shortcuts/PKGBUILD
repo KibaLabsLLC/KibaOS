@@ -1,0 +1,16 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-webapp-shortcuts
+pkgver=0.1.0
+pkgrel=9
+pkgdesc="KibaOS web session helper for browser and PWA shared sign-in"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=('bash' 'chromiumos-ash>=156.0.8060.0-15')
+install='kibaos-webapp-shortcuts.install'
+source=(
+  'kibaos-web-session'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP')

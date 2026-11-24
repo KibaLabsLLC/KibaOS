@@ -1,0 +1,1188 @@
+#!/usr/bin/env bash
+# The model process behind the graphical installer.
+#
+# The graphical front end is a renderer and nothing else. It owns pixels,
+# focus order and wording layout; it owns no question, no validation rule, no
+# argument list, no secret and no opinion about what is reversible. Everything
+# in that second list already exists in shell, has tests, and is the code the
+# text installer runs. So this program sources that code and speaks it over a
+# pipe, and the graphical front end asks it.
+#
+# The reuse is deliberate and total. `kibaos-installer-tui` can be sourced with
+# KIBAOS_INSTALLER_TUI_LIB=1, which defines every function and stops before its
+# entry point. That gives this bridge the identical `build_engine_args`,
+# `hash_password`, `write_secret`, `apply_answer`, `disk_table`, journal
+# readers and stage vocabulary the text installer uses. A graphical installer
+# that built its own argument list would be a second implementation of the one
+# join where a mistake reaches a destructive engine, and the two would drift.
+#
+# The dependency runs one way. Nothing here is on the text installer's path, so
+# a broken or absent GUI cannot affect the fallback, which is the renderer this
+# product guarantees.
+#
+# Protocol: one command per line on stdin, one line of JSON per response on
+# stdout. Commands that carry a value read exactly one more line, unmodified,
+# so a passphrase containing spaces survives - the text installer has already
+# shipped that bug once, in a widget that dropped the space key.
+#
+# Secrets are held in this process and written only by `write_secret`. They are
+# never echoed back, never logged, and never appear in a response. The renderer
+# sends a password once and can never read it again.
+
+set -Eeuo pipefail
+
+GB_SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+
+GB_TUI=${KIBAOS_INSTALLER_TUI:-}
+if [[ -z $GB_TUI ]]; then
+  for _candidate in /usr/local/sbin/kibaos-installer-tui "$GB_SELF_DIR/kibaos-installer-tui"; do
+    [[ -r $_candidate ]] || continue
+    GB_TUI=$_candidate
+    break
+  done
+fi
+[[ -n $GB_TUI && -r $GB_TUI ]] || {
+  echo 'kibaos-installer-gui-bridge: cannot find kibaos-installer-tui' >&2
+  exit 1
+}
+
+export KIBAOS_INSTALLER_TUI_LIB=1
+# shellcheck source=/dev/null
+. "$GB_TUI"
+unset KIBAOS_INSTALLER_TUI_LIB
+
+# The keyboard conversion the engine writes into the installed system, so the
+# layout a password is typed on here is the one it is asked for on there.
+if _gb_keyboard_lib=$(_find_lib kibaos-keyboard.sh); then
+  # shellcheck source=../lib/kibaos-keyboard.sh
+  . "$_gb_keyboard_lib"
+fi
+# The XKB settings the start script gave `cage` are for `cage`. Nothing this
+# process starts, the engine and everything it runs in the target included,
+# should compile a keymap from a file in this session's temporary directory.
+unset XKB_CONFIG_EXTRA_PATH XKB_DEFAULT_LAYOUT
+
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
+
+while (($#)); do
+  case $1 in
+    # Exported, not merely set: the engine is a child process and reads these
+    # from its environment. Setting them privately would point the renderer at
+    # one journal and the engine at another.
+    --journal) JOURNAL_FILE=$2; export KIBAOS_JOURNAL_PATH=$2; shift 2 ;;
+    --raw-log) RAW_LOG=$2; export KIBAOS_JOURNAL_RAW=$2; shift 2 ;;
+    --plan-only) PLAN_ONLY=1; shift ;;
+    -h|--help)
+      cat <<'EOF'
+Usage: kibaos-installer-gui-bridge [options]
+
+Reads commands on stdin and writes one line of JSON per command on stdout.
+This is the model process for kibaos-installer-gui; it is not a user command.
+
+Options:
+  --journal FILE   Structured journal to read progress and failure from
+  --raw-log FILE   Private unstructured installer log
+  --plan-only      Build and check a plan; the execute command does not exist
+EOF
+      exit 0
+      ;;
+    *) echo "kibaos-installer-gui-bridge: unknown option: $1" >&2; exit 2 ;;
+  esac
+done
+
+# Secrets belong on a runtime tmpfs, so /run is preferred, but a non-root
+# context (a CI runner, an unprivileged test) cannot write there. Fall
+# back to the user runtime dir and then a temp dir so it can still start;
+# a real install runs as root and takes the first path.
+SECRET_DIR=$(mktemp -d "${TMPDIR:-/run}/kibaos-installer-gui.XXXXXX" 2>/dev/null) ||
+  SECRET_DIR=$(mktemp -d "${XDG_RUNTIME_DIR:-/tmp}/kibaos-installer-gui.XXXXXX" 2>/dev/null) ||
+  SECRET_DIR=$(mktemp -d "/tmp/kibaos-installer-gui.XXXXXX")
+chmod 700 "$SECRET_DIR"
+install -d -m 0700 "$(dirname "$JOURNAL_FILE")" 2>/dev/null || true
+install -d -m 0700 "$(dirname "$RAW_LOG")" 2>/dev/null || true
+
+GB_PLANNED=0
+GB_ENGINE_PID=
+
+# The renderer is trusted code, but the bridge is the privileged boundary and
+# it must remain bounded when a renderer is broken or an input pipe is
+# corrupted. A normal device path, SSID or passphrase is much smaller than
+# this. Keeping the limit here, before dispatch, prevents a malformed request
+# from consuming memory while it is being split into a command and a value.
+readonly GB_MAX_LINE_LENGTH=65536
+readonly GB_MAX_VALUE_LENGTH=65536
+GB_VALUE=
+
+# --------------------------------------------------------------------------
+# JSON output
+# --------------------------------------------------------------------------
+#
+# `_json_escape` comes from kibaos-journal.sh, which is already sourced and
+# already the escaper the journal itself is written with. Responses are built
+# whole and printed once, so a reader never sees half a record.
+
+_gb_str() { printf '"%s"' "$(_json_escape "${1-}")"; }
+
+_gb_bool() { if "$@"; then printf 'true'; else printf 'false'; fi; }
+
+_gb_emit() { printf '%s\n' "$1"; }
+
+_gb_ok() { _gb_emit "{\"ok\":true${1:+,$1}}"; }
+
+_gb_err() { _gb_emit "{\"ok\":false,\"error\":$(_gb_str "$1")}"; }
+
+# Read one value line and reject unbounded input before it reaches a model
+# function. EOF remains an empty value, preserving the existing validation
+# error for an incomplete request.
+_gb_read_value() {
+  if ! IFS= read -r GB_VALUE; then
+    GB_VALUE=''
+  fi
+  if (( ${#GB_VALUE} > GB_MAX_VALUE_LENGTH )); then
+    _gb_err 'the value is too large'
+    return 1
+  fi
+  return 0
+}
+
+# --------------------------------------------------------------------------
+# Read-only views
+# --------------------------------------------------------------------------
+
+# Which questions are currently askable. The encryption passphrase exists only
+# when encryption was chosen, and that rule lives in `visible_questions`, so the
+# renderer asks again after an answer that could change it rather than keeping
+# a second copy of the condition.
+gb_visible() {
+  local id out='[' sep=''
+  for id in $(visible_questions); do
+    out+="${sep}$(_gb_str "$id")"; sep=','
+  done
+  out+=']'
+  _gb_emit "$out"
+}
+
+# Where a question starts: the answer it already has, which before anybody
+# has pressed anything can only have come from a prepared file (see
+# `gb_preload_answers`), and otherwise its default. A secret never starts with
+# anything, and is never in a file to begin with.
+gb_starting_value() {
+  if ! kibaos_question_is_secret "$1" && [[ -n ${ANSWERS[$1]:-} ]]; then
+    printf '%s' "${ANSWERS[$1]}"
+  else
+    kibaos_question_default "$1"
+  fi
+}
+
+gb_manifest() {
+  local id out sep=''
+  out='{"order":['
+  for id in $(visible_questions); do
+    out+="${sep}$(_gb_str "$id")"; sep=','
+  done
+  out+='],"advanced":['
+  sep=''
+  for id in "${KIBAOS_QUESTION_IDS[@]}"; do
+    kibaos_question_is_advanced "$id" || continue
+    out+="${sep}$(_gb_str "$id")"; sep=','
+  done
+  out+='],"questions":{'
+  sep=''
+  for id in "${KIBAOS_QUESTION_IDS[@]}"; do
+    out+="${sep}$(_gb_str "$id"):{"
+    out+="\"label\":$(_gb_str "$(kibaos_question_field "$id" label)"),"
+    out+="\"short\":$(_gb_str "$(kibaos_question_field "$id" short)"),"
+    out+="\"help\":$(_gb_str "$(kibaos_question_field "$id" help)"),"
+    out+="\"type\":$(_gb_str "$(kibaos_question_field "$id" type)"),"
+    out+="\"default\":$(_gb_str "$(gb_starting_value "$id")"),"
+    out+="\"error\":$(_gb_str "$(kibaos_question_field "$id" error)"),"
+    out+="\"advanced\":$(_gb_bool kibaos_question_is_advanced "$id"),"
+    out+="\"secret\":$(_gb_bool kibaos_question_is_secret "$id")}"
+    sep=','
+  done
+  out+='}}'
+  _gb_emit "$out"
+}
+
+gb_disks() {
+  local out='[' sep='' path size model tran serial booted
+  booted=$(boot_disk)
+  while IFS='|' read -r path size model tran serial; do
+    [[ -n $path ]] || continue
+    out+="${sep}{\"path\":$(_gb_str "$path"),\"size\":$(_gb_str "$size"),"
+    # Both: the raw code, because the removable check compares against it, and
+    # the words, because the raw code is what put `SPI` under a disk somebody
+    # was about to erase.
+    out+="\"model\":$(_gb_str "$model"),\"transport\":$(_gb_str "$tran"),"
+    out+="\"connection\":$(_gb_str "$(connection_label "$tran")"),"
+    # What is already on it, and whether it is the one this installer is
+    # running from. Both come from the text installer's own functions rather
+    # than a second implementation, so the two front ends cannot describe the
+    # same disk differently on the screen before the same gate.
+    out+="\"holds\":$(_gb_str "$(disk_contents "$path")"),"
+    # And how much of its write life the drive says it has spent, from the
+    # same function and the same threshold, so a drive called worn out on one
+    # front end is not called fine on the other. Empty for every drive with
+    # nothing worth saying about it, which is nearly all of them.
+    out+="\"wear\":$(_gb_str "$(disk_wear_note "$path")"),"
+    out+="\"booted\":$(_gb_bool test "$path" = "$booted"),"
+    out+="\"serial\":$(_gb_str "$serial")}"
+    sep=','
+  done < <(disk_table)
+  out+=']'
+  _gb_emit "$out"
+}
+
+gb_probe() {
+  local out
+  kibaos_probe_renderer
+  out='{'
+  out+="\"renderer\":$(_gb_str "$KIBAOS_PROBE_RENDERER"),"
+  out+="\"reason\":$(_gb_str "$KIBAOS_PROBE_REASON"),"
+  out+="\"graphics\":$(_gb_str "$KIBAOS_PROBE_GRAPHICS"),"
+  out+="\"memory\":$(_gb_str "$KIBAOS_PROBE_MEMORY"),"
+  out+="\"virt\":$(_gb_str "$KIBAOS_PROBE_VIRT"),"
+  out+="\"driver\":$(_gb_str "$KIBAOS_PROBE_DRIVER"),"
+  out+="\"node\":$(_gb_str "$KIBAOS_PROBE_NODE"),"
+  out+="\"gl\":$(_gb_str "$KIBAOS_PROBE_GL"),"
+  out+="\"advice\":$(_gb_str "$(kibaos_probe_advice)"),"
+  out+="\"predicts_black_screen\":$(_gb_bool kibaos_probe_predicts_black_screen)}"
+  _gb_emit "$out"
+}
+
+# Whether this computer can run KibaOS, as a list of findings.
+#
+# Every check here is one the engine already enforces, moved forward. The
+# engine refuses a legacy BIOS boot. Secure Boot is different: setup mode and a
+# supplied key use signing, while an enabled or unreadable state without a key
+# is a warning. The install continues so the user can finish, then explains
+# that firmware must be disabled or a KibaOS key enrolled before first boot.
+#
+# The states are `ok`, `warn` and `blocked`, and they mean exactly one thing
+# each: it is fine, it will work but worse, and this will not install.
+KIBAOS_EFI_DIR=${KIBAOS_EFI_DIR:-/sys/firmware/efi}
+
+_gb_check() {
+  local id=$1 title=$2 state=$3 finding=$4 action=${5:-} detail=${6:-}
+  printf '{"id":%s,"title":%s,"state":%s,"finding":%s,"action":%s,"detail":%s}' \
+    "$(_gb_str "$id")" "$(_gb_str "$title")" "$(_gb_str "$state")" \
+    "$(_gb_str "$finding")" "$(_gb_str "$action")" "$(_gb_str "$detail")"
+}
+
+_gb_efi_boolean() {
+  local name=$1 variable
+  for variable in "${KIBAOS_EFIVARS_DIR:-/sys/firmware/efi/efivars}/${name}-"*; do
+    [[ -r $variable ]] || continue
+    od -An -j4 -N1 -tu1 "$variable" 2>/dev/null | tr -d '[:space:]'
+    return 0
+  done
+  return 1
+}
+
+# Compare two lsblk size strings ("931.5G", "476.9G", "1.8T"). Bigger wins.
+_gb_size_gt() {
+  local a=$1 b=$2
+  awk -v a="$a" -v b="$b" '
+    function bytes(s,   n, u) {
+      n = s + 0
+      u = toupper(substr(s, length(s)))
+      if (u == "T") return n * 1024 * 1024
+      if (u == "G") return n * 1024
+      if (u == "M") return n
+      if (u == "K") return n / 1024
+      return n
+    }
+    BEGIN { exit !(bytes(a) > bytes(b)) }'
+}
+
+_gb_readiness_disk() {
+  local path size model tran serial biggest='' biggest_size='' count=0
+  while IFS='|' read -r path size model tran serial; do
+    [[ -n $path ]] || continue
+    count=$(( count + 1 ))
+    # Compared as printed, which is what lsblk gives: a plain numeric sort of
+    # "931.5G" against "476.9G" is right, and against "28.7G" it is right too.
+    if [[ -z $biggest ]] || _gb_size_gt "$size" "$biggest_size"; then
+      biggest="$path"
+      biggest_size=$size
+    fi
+  done < <(disk_table)
+  if (( count == 0 )); then
+    _gb_check disk 'Storage' blocked 'No disk to install to.' \
+      'Check that the drive is connected and that the firmware can see it.'
+    return 0
+  fi
+  if (( count == 1 )); then
+    _gb_check disk 'Storage' ok \
+      "$(printf '%s, %s.' "$biggest" "$biggest_size")" '' \
+      "$(disk_table | tr '|' ' ' | tr '\n' ';')"
+  else
+    _gb_check disk 'Storage' ok \
+      "$(printf '%s disks. The largest is %s, %s.' "$count" "$biggest" "$biggest_size")" '' \
+      "$(disk_table | tr '|' ' ' | tr '\n' ';')"
+  fi
+}
+
+gb_readiness() {
+  local out='' sep='' verdict=ok secure state finding action
+  kibaos_probe_renderer
+
+  # Firmware mode. `kibaos-install` refuses outright without it.
+  if [[ -d $KIBAOS_EFI_DIR ]]; then
+    out+="${sep}$(_gb_check firmware 'Firmware' ok 'Booted in UEFI mode.')"
+  else
+    verdict=blocked
+    out+="${sep}$(_gb_check firmware 'Firmware' blocked \
+      'This computer booted in legacy BIOS mode. KibaOS only installs in UEFI mode.' \
+      'Restart, open the firmware settings, turn off legacy or CSM boot, then start the installer again.')"
+  fi
+  sep=','
+
+# Secure Boot is actionable information, not a reason to repeat the entire
+  # install. Signing is used when available; otherwise the engine continues
+  # and the completion guidance covers the firmware step.
+  secure=$(bootctl is-secure-boot 2>/dev/null || printf 'unknown')
+  case $secure in
+    disabled)
+      out+="${sep}$(_gb_check secure_boot 'Secure Boot' ok 'Off, which is what KibaOS needs.')" ;;
+    enabled)
+      setup_mode=$(_gb_efi_boolean SetupMode 2>/dev/null || true)
+      if [[ $setup_mode == 1 ]]; then
+        [[ $verdict == blocked ]] || verdict=attention
+        out+="${sep}$(_gb_check secure_boot 'Secure Boot' warn \
+          'On, with firmware in setup mode. KibaOS will sign the boot chain and offer to enroll its key on first boot.' \
+          'Leave setup mode on until the installed system offers the KibaOS enrollment entry, then turn Secure Boot back on.')"
+      elif [[ $setup_mode == 0 && -r ${KIBAOS_SECURE_BOOT_KEY:-/dev/null} && \
+          -r ${KIBAOS_SECURE_BOOT_CERT:-/dev/null} && \
+          -n ${KIBAOS_SECURE_BOOT_KEY:-} && -n ${KIBAOS_SECURE_BOOT_CERT:-} ]]; then
+        out+="${sep}$(_gb_check secure_boot 'Secure Boot' ok \
+          'On, with a pre-enrolled KibaOS signing key.' '' \
+          'The installer will sign systemd-boot and the kernel with the supplied key.')"
+      else
+        [[ $verdict == blocked ]] || verdict=attention
+        out+="${sep}$(_gb_check secure_boot 'Secure Boot' warn \
+          'On, but no KibaOS signing key is available. The install will continue.' \
+          'Disable Secure Boot before the first boot, or enroll a KibaOS key after installation.')"
+      fi ;;
+    *)
+      [[ $verdict == blocked ]] || verdict=attention
+      out+="${sep}$(_gb_check secure_boot 'Secure Boot' warn \
+        'Could not tell whether Secure Boot is on.' \
+        'The install will continue. If firmware has Secure Boot enabled, disable it or enroll a KibaOS key before the first boot.' \
+        "bootctl is-secure-boot: ${secure}")" ;;
+  esac
+
+  # Memory, from the same probe the renderer decision uses. Reported in the
+  # unit the number is printed on the side of the machine in, not in mebibytes.
+  local free_gb
+  free_gb=$(printf '%s.%s' "$(( KIBAOS_PROBE_MEM_MIB / 1024 ))" \
+    "$(( (KIBAOS_PROBE_MEM_MIB % 1024) * 10 / 1024 ))")
+  if (( KIBAOS_PROBE_MEM_MIB >= KIBAOS_PROBE_MIN_GUI_MIB )); then
+    out+="${sep}$(_gb_check memory 'Memory' ok \
+      "$(printf '%s GB free.' "$free_gb")" '' \
+      "$KIBAOS_PROBE_MEMORY")"
+  else
+    [[ $verdict == blocked ]] || verdict=attention
+    out+="${sep}$(_gb_check memory 'Memory' warn \
+      "$(printf '%s GB free. The installed system gets more to work with than this live image does.' "$free_gb")" \
+      '' "$KIBAOS_PROBE_MEMORY")"
+  fi
+
+  out+="${sep}$(_gb_readiness_disk)"
+
+  # Power, and only when there is something to say. A laptop that loses power
+  # part way through writing a filesystem is left with a disk that is neither
+  # the old system nor the new one, and nothing later in this program can warn
+  # about that because there is no later.
+  #
+  # `battery_low` is the text installer's, sourced above rather than written
+  # again here, so the two front ends cannot come to disagree about what
+  # counts as low.
+  if battery_low; then
+    [[ $verdict == blocked ]] || verdict=attention
+    out+="${sep}$(_gb_check power 'Power' warn \
+      "$(printf 'Running on battery at %s percent.' "$BATTERY_PERCENT")" \
+      'Plug this computer in before starting. Installing takes about ten minutes.')"
+  fi
+
+  # Graphics, in one sentence. The driver strings and node paths are real
+  # evidence and they stay available, but they belong behind the details
+  # control rather than in the middle of the first screen someone reads.
+  if kibaos_probe_predicts_black_screen; then
+    verdict=blocked
+    state=blocked
+    finding='No working graphics driver, so the desktop would not appear after installing.'
+    action='On a virtual machine, turn on 3D acceleration in its display settings. On a real one, the graphics card is probably not supported.'
+  elif [[ $KIBAOS_PROBE_REASON == software-rendering || $KIBAOS_PROBE_REASON == display-only ]]; then
+    [[ $verdict == blocked ]] || verdict=attention
+    state=warn
+    finding='Drawn by the processor rather than a graphics card. The desktop will work, slowly.'
+    action='On a virtual machine, turning on 3D acceleration usually fixes it.'
+  else
+    state=ok
+    finding='Driver loaded. The desktop should come up fine.'
+    action=''
+  fi
+  out+="${sep}$(_gb_check graphics 'Graphics' "$state" "$finding" "$action" \
+    "$KIBAOS_PROBE_GRAPHICS")"
+
+  _gb_emit "{\"ok\":true,\"verdict\":$(_gb_str "$verdict"),\"checks\":[$out]}"
+}
+
+# The stage rows the progress view draws, in journal order, with the display
+# rule and the reversibility boundary both taken from the shared libraries
+# rather than restated here.
+gb_stages() {
+  local stage out='[' sep=''
+  for stage in "${KIBAOS_STAGES[@]}"; do
+    stage_displayed "$stage" || continue
+    out+="${sep}{\"stage\":$(_gb_str "$stage"),"
+    out+="\"label\":$(_gb_str "$(stage_label "$stage")"),"
+    out+="\"reversible\":$(_gb_bool kibaos_stage_reversible "$stage")}"
+    sep=','
+  done
+  out+=']'
+  _gb_emit "$out"
+}
+
+gb_enum() {
+  local id=$1 out='[' sep='' candidate count=0
+  while IFS= read -r candidate; do
+    [[ -n $candidate ]] || continue
+    out+="${sep}$(_gb_str "$candidate")"; sep=','
+    count=$(( count + 1 ))
+    (( count < 5000 )) || break
+  done < <(enum_candidates "$id")
+  out+=']'
+  _gb_emit "$out"
+}
+
+# The review rows, with the same rule the text installer uses: a secret is
+# reported as having been set, never as its value.
+gb_answers() {
+  local id out='{' sep='' value
+  for id in "${KIBAOS_QUESTION_IDS[@]}"; do
+    if kibaos_question_is_secret "$id"; then
+      [[ -n ${ANSWERS[$id]:-} ]] || continue
+      value='set'
+    else
+      value=${ANSWERS[$id]:-}
+      [[ -n $value ]] || continue
+    fi
+    out+="${sep}$(_gb_str "$id"):{\"short\":$(_gb_str "$(kibaos_question_field "$id" short)"),"
+    out+="\"value\":$(_gb_str "$value"),"
+    out+="\"advanced\":$(_gb_bool kibaos_question_is_advanced "$id")}"
+    sep=','
+  done
+  out+='}'
+  _gb_emit "$out"
+}
+
+# The erase gate's identity block, read from the same disk table the text
+# installer's gate reads.
+gb_target() {
+  local target=${ANSWERS[target]:-} out layout
+  layout=${ANSWERS[layout]:-$(kibaos_question_default layout)}
+  [[ -n $target ]] || { _gb_err 'no disk has been chosen'; return 0; }
+  out='{"ok":true,'
+  out+="\"path\":$(_gb_str "$target"),"
+  out+="\"model\":$(_gb_str "$(disk_field "$target" 3)"),"
+  out+="\"serial\":$(_gb_str "$(disk_serial "$target")"),"
+  out+="\"size\":$(_gb_str "$(disk_field "$target" 2)"),"
+  out+="\"transport\":$(_gb_str "$(disk_field "$target" 4)"),"
+  out+="\"connection\":$(_gb_str "$(connection_label "$(disk_field "$target" 4)")"),"
+  out+="\"layout\":$(_gb_str "$layout"),"
+  out+="\"token\":$(_gb_str "$(kibaos_confirmation_token "$target" "$layout")")}"
+  _gb_emit "$out"
+}
+
+# The live-session network and clock preflight, which is a read-only helper
+# that already exists and already has a test. The graphical installer shows
+# its result on a page of its own because "packages could not be downloaded"
+# is a much worse place to learn that the clock is wrong.
+#
+# This does not become a question. The engine has no flag for it, and the
+# manifest deliberately carries nothing the engine cannot consume.
+NETWORK_HELPER=${KIBAOS_NETWORK_HELPER:-/usr/local/sbin/kibaos-network-diagnostics}
+[[ -x $NETWORK_HELPER ]] ||
+  NETWORK_HELPER="$GB_SELF_DIR/../archiso/airootfs/usr/local/sbin/kibaos-network-diagnostics"
+
+gb_network() {
+  local status=0 report errors out='{' sep='' line
+  if [[ ! -x $NETWORK_HELPER ]]; then
+    _gb_emit '{"ok":false,"available":false,"notes":[],"issues":["The network check is missing from this image."]}'
+    return 0
+  fi
+  report=$(mktemp "${TMPDIR:-/tmp}/kibaos-net.XXXXXX")
+  errors=$(mktemp "${TMPDIR:-/tmp}/kibaos-net-err.XXXXXX")
+  "$NETWORK_HELPER" >"$report" 2>"$errors" || status=$?
+  out+="\"ok\":$(if (( status == 0 )); then printf 'true'; else printf 'false'; fi),"
+  out+='"available":true,"notes":['
+  while IFS= read -r line; do
+    line=${line#"${line%%[![:space:]]*}"}
+    [[ -n $line ]] || continue
+    out+="${sep}$(_gb_str "$line")"; sep=','
+  done <"$report"
+  out+='],"issues":['
+  sep=''
+  while IFS= read -r line; do
+    line=${line#"${line%%[![:space:]]*}"}
+    line=${line#ERROR: }
+    [[ -n $line ]] || continue
+    out+="${sep}$(_gb_str "$line")"; sep=','
+  done <"$errors"
+  out+=']}'
+  rm -f -- "$report" "$errors"
+  _gb_emit "$out"
+}
+
+# --------------------------------------------------------------------------
+# Wireless
+# --------------------------------------------------------------------------
+#
+# Joining a network is a live-session action, not an installer question. The
+# engine has no flag for it and the manifest deliberately carries nothing the
+# engine cannot consume, so this sits beside `apply_answer` rather than beside
+# the question set: something the user does now, so the rest of the flow can
+# proceed, exactly like loading a keymap.
+#
+# The passphrase never appears in a command line. `nmcli ... password <psk>`
+# would put it in argv where every process on the machine can read it, so the
+# profile is written the way NetworkManager stores one itself: a mode-0600
+# keyfile in its own profile directory, which is where the secret was going to
+# end up regardless.
+
+gb_net_status() {
+  kibaos_wifi_status
+  if [[ $KIBAOS_WIFI_AVAILABLE != true ]]; then
+    _gb_emit '{"ok":false,"available":false,"wired":false,"wifi":false,"radio":"unavailable","ssid":"","reason":"Nothing on this image can set up a wireless connection."}'
+    return 0
+  fi
+  _gb_emit "{\"ok\":true,\"available\":true,\"wired\":$KIBAOS_WIFI_WIRED,\"wifi\":$KIBAOS_WIFI_WIFI,\"radio\":$(_gb_str "$KIBAOS_WIFI_RADIO"),\"ssid\":$(_gb_str "$KIBAOS_WIFI_SSID"),\"connectivity\":$(_gb_str "$KIBAOS_WIFI_CONNECTIVITY")}"
+}
+
+gb_wifi_scan() {
+  local out='[' sep='' index
+  if ! kibaos_wifi_scan; then
+    _gb_emit "{\"ok\":false,\"error\":$(_gb_str "$KIBAOS_WIFI_ERROR"),\"networks\":[]}"
+    return 0
+  fi
+  for index in "${!KIBAOS_WIFI_SSIDS[@]}"; do
+    out+="${sep}{\"ssid\":$(_gb_str "${KIBAOS_WIFI_SSIDS[index]}"),\"signal\":${KIBAOS_WIFI_SIGNALS[index]},"
+    out+="\"security\":$(_gb_str "${KIBAOS_WIFI_SECURITY[index]}"),"
+    out+="\"auth\":$(_gb_str "${KIBAOS_WIFI_AUTH[index]}"),\"open\":${KIBAOS_WIFI_OPEN[index]},"
+    out+="\"no_password\":$(if [[ ${KIBAOS_WIFI_AUTH[index]} == open || ${KIBAOS_WIFI_AUTH[index]} == owe ]]; then printf true; else printf false; fi),"
+    out+="\"active\":${KIBAOS_WIFI_ACTIVE[index]},\"saved\":${KIBAOS_WIFI_SAVED[index]}}"
+    sep=','
+  done
+  out+=']'
+  _gb_emit "{\"ok\":true,\"networks\":$out}"
+}
+
+gb_wifi_connect() {
+  local ssid=$1 psk=$2
+  if kibaos_wifi_connect "$ssid" "$psk"; then
+    _gb_ok "\"ssid\":$(_gb_str "$ssid")"
+  else
+    _gb_err "$KIBAOS_WIFI_ERROR"
+  fi
+}
+
+gb_wifi_forget() {
+  if kibaos_wifi_forget "$1"; then
+    _gb_ok
+  else
+    _gb_err "$KIBAOS_WIFI_ERROR"
+  fi
+}
+
+# The accessibility choices, read and written through the same shared state the
+# text installer uses. Neither command can reach a disk, so both are available
+# in plan-only mode: somebody checking a plan still has to be able to read the
+# screen they are checking it on.
+gb_access() {
+  local key out='{' sep='' value values
+  for key in "${ACCESS_ORDER[@]}"; do
+    values='['
+    local candidate first=1
+    for candidate in ${ACCESS_VALUES[$key]}; do
+      (( first )) || values+=','
+      values+=$(_gb_str "$candidate")
+      first=0
+    done
+    values+=']'
+    out+="${sep}$(_gb_str "$key"):{"
+    out+="\"value\":$(_gb_str "${ACCESS[$key]}"),"
+    out+="\"label\":$(_gb_str "${ACCESS_LABEL[$key]}"),"
+    out+="\"help\":$(_gb_str "${ACCESS_HELP[$key]}"),"
+    out+="\"values\":$values}"
+    sep=','
+  done
+  out+='}'
+  _gb_emit "{\"ok\":true,\"access\":$out,\"order\":$(_gb_str "${ACCESS_ORDER[*]}")}"
+}
+
+gb_access_set() {
+  local pair=$1 key value
+  [[ $pair == *=* ]] || { _gb_err 'expected key=value'; return 0; }
+  key=${pair%%=*}
+  value=${pair#*=}
+  if access_set "$key" "$value"; then
+    _gb_ok
+  else
+    # The engine refuses the same values independently. This refusal is what
+    # makes a mistake visible in the interface rather than at install time.
+    _gb_err "$key cannot be set to that"
+  fi
+}
+
+gb_wifi_radio() {
+  if kibaos_wifi_radio "$1"; then
+    _gb_ok
+  else
+    _gb_err "$KIBAOS_WIFI_ERROR"
+  fi
+}
+
+gb_progress() {
+  local stage record status out='[' sep='' active='' pct detail elapsed running
+  local reversible can_stop
+  # The overall bar, weighted by how long each stage actually takes. See
+  # `stage_weight`. Both front ends compute it from the same table, because a
+  # graphical bar at 60 percent next to a text one at 8 percent is two
+  # products disagreeing about the same install.
+  # `active_pct` is kept apart from `pct` on purpose. `pct` is reset at the
+  # top of every stage, so by the end of the loop it holds the last stage's
+  # value rather than the running one's, and the weighted total computed from
+  # it came out zero on every install.
+  local weight_done=0 weight_total=0 weight_active=0 overall=0 active_pct=0
+  for stage in "${KIBAOS_STAGES[@]}"; do
+    stage_displayed "$stage" || continue
+    record=$(journal_last_for_stage "$stage")
+    status=pending
+    pct=0
+    detail=''
+    elapsed=''
+    weight_total=$(( weight_total + $(stage_weight "$stage") ))
+    if [[ -n $record ]]; then
+      status=$(json_field status "$record")
+      detail=$(json_field message "$record")
+      case $status in
+        running)
+          active=$stage
+          pct=$(json_field pct "$record")
+          [[ $pct =~ ^[0-9]+$ ]] || pct=0
+          weight_active=$(stage_weight "$stage")
+          active_pct=$pct
+          # The step that is running gets a clock too, measured from its own
+          # first record. Without this the only stage with no time against it
+          # was the one being watched, and a five minute download with a
+          # still bar and no clock is indistinguishable from a hang.
+          elapsed=$(journal_running_ms "$stage")
+          ;;
+        ok)
+          elapsed=$(json_field elapsed_ms "$record")
+          weight_done=$(( weight_done + $(stage_weight "$stage") ))
+          ;;
+      esac
+    fi
+    out+="${sep}{\"stage\":$(_gb_str "$stage"),"
+    out+="\"label\":$(_gb_str "$(stage_label "$stage")"),"
+    out+="\"status\":$(_gb_str "$status"),\"pct\":${pct:-0},"
+    out+="\"detail\":$(_gb_str "$detail"),"
+    # Roughly how long this one takes, from lib/kibaos-copy.sh, so the two
+    # front ends give the same answer to "is it stuck".
+    out+="\"pacing\":$(_gb_str "$(stage_pacing "$stage")"),"
+    # Whether this stage can still be walked away from. The renderer uses it
+    # to decide which of two footers to show, and both front ends read the
+    # answer from kibaos_stage_reversible rather than from a list of their
+    # own, because the boundary moving in one and not the other is how one of
+    # them ends up telling somebody it is safe to turn the machine off.
+    out+="\"reversible\":$(_gb_bool kibaos_stage_reversible "$stage"),"
+    out+="\"elapsed\":$(_gb_str "$(format_elapsed "${elapsed:-}")")}"
+    sep=','
+  done
+  out+=']'
+  running=false
+  if [[ -n $GB_ENGINE_PID ]] && kill -0 "$GB_ENGINE_PID" 2>/dev/null; then
+    running=true
+  fi
+  # Two different questions, kept apart because they have different answers.
+  #
+  # `reversible` is about the disk: has anything been written yet. It comes
+  # from `kibaos_stage_reversible`, the same boundary the engine and the text
+  # installer use, never from a second opinion held here.
+  #
+  # `can_stop` is about the offer: a Stop control may only appear while the
+  # engine is running AND nothing has been written. The instant the engine
+  # reaches `partition` the offer is gone, because from there the only honest
+  # thing to say is that stopping would leave a half-written disk.
+  if (( weight_total > 0 )); then
+    overall=$(( (weight_done * 100 + weight_active * active_pct) / weight_total ))
+    (( overall <= 100 )) || overall=100
+  fi
+  reversible=true
+  [[ -z $active ]] || kibaos_stage_reversible "$active" || reversible=false
+  can_stop=false
+  [[ $running != true || $reversible != true ]] || can_stop=true
+  # Total time so far, summed from the journal rather than from a clock this
+  # process started, so that a screen redrawn from a saved journal shows the
+  # same number it showed at the time.
+  local total_ms=0
+  if [[ -r $JOURNAL_FILE ]]; then
+    total_ms=$(awk '
+      match($0, /"elapsed_ms":[0-9]+/) {
+        sum += substr($0, RSTART + 13, RLENGTH - 13) + 0
+      }
+      END { printf "%d", sum }
+    ' "$JOURNAL_FILE" 2>/dev/null || printf '0')
+    [[ $total_ms =~ ^[0-9]+$ ]] || total_ms=0
+  fi
+  # How fast the download is going, when something is measuring it.
+  #
+  # `kibaos-rate-sampler` watches the package cache grow and writes one bytes
+  # per second figure per line. The text installer has drawn a sparkline from
+  # it for a while; this is the same numbers, handed to the graphical one, so
+  # that the stage which takes the longest and reports the least is not five
+  # minutes of a bar that does not move.
+  #
+  # Bounded and filtered here rather than trusted: this file is written by a
+  # background process and read by a front end, and a line that is not a
+  # number has no business reaching a JSON document.
+  local rate='[]' rate_sep='' rate_line rate_count=0
+  if [[ -n ${RATE_FILE:-} && -r ${RATE_FILE:-} ]]; then
+    rate='['
+    while IFS= read -r rate_line; do
+      [[ $rate_line =~ ^[0-9]+$ ]] || continue
+      rate+="${rate_sep}${rate_line}"
+      rate_sep=','
+      rate_count=$(( rate_count + 1 ))
+      (( rate_count < 96 )) || break
+    done <"$RATE_FILE"
+    rate+=']'
+  fi
+  _gb_emit "{\"ok\":true,\"rate\":${rate},\"stages\":$out,\"active\":$(_gb_str "$active"),\"running\":$running,\"position\":$(_gb_str "$(stage_position "$active")"),\"elapsed_ms\":${total_ms},\"overall\":${overall},\"reversible\":${reversible},\"can_stop\":${can_stop}}"
+}
+
+# Stop a run that has not written anything yet.
+#
+# This is not a new capability and not a new code path. `kibaos-install`
+# already traps TERM and already has `handle_cancel`, which writes a
+# `cancelled` journal record, preserves the evidence, and lets its EXIT
+# cleanup unmount, close any LUKS mapping and remove the work directory. All
+# this does is surface that, and only while the shared reversibility boundary
+# says the disk is still untouched.
+gb_stop() {
+  local active record stage
+  [[ -n $GB_ENGINE_PID ]] && kill -0 "$GB_ENGINE_PID" 2>/dev/null || {
+    _gb_err 'nothing is running'
+    return 0
+  }
+  active=''
+  for stage in "${KIBAOS_STAGES[@]}"; do
+    record=$(journal_last_for_stage "$stage")
+    [[ -n $record ]] || continue
+    [[ $(json_field status "$record") == running ]] || continue
+    active=$stage
+  done
+  if [[ -n $active ]] && ! kibaos_stage_reversible "$active"; then
+    _gb_err 'the disk has already been changed. Stopping now would leave it half written'
+    return 0
+  fi
+  kill -TERM "$GB_ENGINE_PID" 2>/dev/null || true
+  _gb_ok '"stopping":true'
+}
+
+# Reboot only after the renderer has shown the finished screen and asked for a
+# second confirmation. Keeping the privileged operation here leaves the GUI as
+# a renderer: it cannot accidentally gain a direct systemctl path while it is
+# handling an ordinary button click. `--no-block` lets the response reach the
+# renderer before systemd takes the live session down.
+gb_reboot() {
+  if ! command -v systemctl >/dev/null 2>&1; then
+    _gb_err 'the system could not be restarted from this image'
+    return 0
+  fi
+  if systemctl --no-block reboot >/dev/null 2>&1; then
+    _gb_ok '"restarting":true'
+  else
+    _gb_err 'the system could not be restarted'
+  fi
+}
+
+gb_failure() {
+  local record stage cause message out
+  record=$(journal_last_failed)
+  stage=$(json_field stage "$record")
+  cause=$(json_field cause "$record")
+  message=$(json_field message "$record")
+  out='{"ok":true,'
+  out+="\"stage\":$(_gb_str "$stage"),"
+  out+="\"label\":$(_gb_str "${stage:+$(stage_label "$stage")}"),"
+  out+="\"cause\":$(_gb_str "$cause"),"
+  out+="\"cause_text\":$(_gb_str "${cause:+$(cause_explanation "$cause")}"),"
+  out+="\"explanation\":$(_gb_str "${stage:+$(stage_explanation "$stage")}"),"
+  out+="\"next_step\":$(_gb_str "$(cause_next_step "$cause")"),"
+  out+="\"detail\":$(_gb_str "$message"),"
+  out+="\"restart_advice\":$(_gb_str "$(restart_advice "$stage")"),"
+  out+="\"position\":$(_gb_str "$(stage_position "$stage")"),"
+  out+="\"reversible\":$(_gb_bool kibaos_stage_reversible "${stage:-start}"),"
+  out+="\"raw_log\":$(_gb_str "$RAW_LOG")}"
+  _gb_emit "$out"
+}
+
+# --------------------------------------------------------------------------
+# Answers
+# --------------------------------------------------------------------------
+#
+# One entry point, so validation and immediate application happen for every
+# answer regardless of which widget produced it. `kibaos_question_validate`
+# and `apply_answer` are the text installer's; nothing is re-decided here.
+#
+# The keyboard layout is the one answer applied a second time, to this screen.
+# The text installer loads a keymap onto its console, and that is where its
+# keys come from. These keys come from `cage`, which compiled one XKB keymap
+# when it started and never reads the console's. So choosing a layout here
+# used to change nothing on this screen: the field under it still typed US,
+# and a passphrase set here was typed on US and asked for on the chosen layout
+# at every boot after.
+#
+# `cage` cannot be told a new layout, but it compiles a keymap for every
+# keyboard that appears, from the layout file the start script pointed it at
+# (KIBAOS_LIVE_XKB). So the file is rewritten to say the chosen layout, in the
+# conversion the engine writes into the installed system, and the keyboards
+# are unplugged and plugged back in as far as udev is concerned. The window,
+# its answers and its focus stay where they are. A keymap with no XKB layout
+# is refused rather than typed on US, which is the mistake this exists to stop.
+
+GB_LAYOUT_ERROR=
+GB_LAYOUT_SYMBOLS=
+
+# The symbols the chosen keymap's layout is made of, spelled the way the XKB
+# rules spell them. Sets GB_LAYOUT_SYMBOLS, or GB_LAYOUT_ERROR and fails.
+gb_layout_symbols() {
+  local keymap=$1 xkb layout model variant options
+  GB_LAYOUT_ERROR=
+  GB_LAYOUT_SYMBOLS=
+  if ! declare -F kibaos_keymap_xkb >/dev/null || ! xkb=$(kibaos_keymap_xkb "$keymap"); then
+    # Short enough for the one line a toast has; the longer version was cut
+    # off before it said what to do. Typed on US here, a password would not
+    # match the keyboard when the computer starts, which is why this refuses.
+    GB_LAYOUT_ERROR="This screen cannot type the layout you picked. Choose another, or use the text installer."
+    return 1
+  fi
+  IFS=$'\t' read -r layout model variant options <<<"$xkb"
+  [[ $variant != - ]] || variant=
+  [[ $options != - ]] || options=
+  GB_LAYOUT_SYMBOLS=$(xkbcli compile-keymap --kccgst --rules evdev --model "$model" \
+      --layout "$layout" --variant "$variant" --options "$options" 2>/dev/null |
+    sed -n 's/^[[:space:]]*xkb_symbols[[:space:]]*{[[:space:]]*include "\([^"]*\)".*/\1/p') || true
+  if [[ -z $GB_LAYOUT_SYMBOLS ]]; then
+    GB_LAYOUT_ERROR="The layout you picked could not be set up on this screen. Choose another, or use the text installer."
+    return 1
+  fi
+}
+
+# Every keyboard udev knows of, by its event device.
+# The symbols the keyboards were last plugged in on, when that worked.
+GB_LIVE_SYMBOLS=''
+
+gb_keyboards() {
+  local event props
+  for event in "${KIBAOS_INPUT_SYSFS:-/sys/class/input}"/event*; do
+    [[ -e $event ]] || continue
+    # Read whole, then matched: `grep -q` on the pipe can finish first, and
+    # under pipefail the SIGPIPE that leaves udevadm with would count a match
+    # as a failure.
+    props=$(udevadm info --query=property --path="$event" 2>/dev/null) || continue
+    [[ $'\n'$props$'\n' == *$'\nID_INPUT_KEYBOARD=1\n'* ]] && printf '%s\n' "$event"
+  done
+  return 0
+}
+
+gb_replug_keyboards() {
+  local -a keyboards
+  mapfile -t keyboards < <(gb_keyboards)
+  (( ${#keyboards[@]} )) || return 0
+  # By path both times. A device udev has just been told is gone has no
+  # properties left, so a second trigger that matched on them would find
+  # nothing and leave every keyboard unplugged.
+  udevadm trigger --action=remove --settle "${keyboards[@]}" >/dev/null 2>&1 || true
+  udevadm trigger --action=add --settle "${keyboards[@]}" >/dev/null 2>&1
+}
+
+# The layout file, replaced by one that includes the symbols. Compiled first
+# under another name, because a file `cage` cannot compile is a keyboard it
+# drops the next time one appears, and on this screen that is every keyboard.
+gb_apply_layout() {
+  local symbols=$1 dir=$KIBAOS_LIVE_XKB/symbols previous=''
+  # Already what every keyboard was plugged in on. The page sends its layout
+  # again on every Next, and a replug for nothing lets go of a held key.
+  [[ -z $GB_LIVE_SYMBOLS || $symbols != "$GB_LIVE_SYMBOLS" ]] || return 0
+  printf 'default partial alphanumeric_keys modifier_keys\nxkb_symbols "basic" {\n  include "%s"\n};\n' \
+    "$symbols" >"$dir/kibaos-next" || return 1
+  if ! XKB_CONFIG_EXTRA_PATH=$KIBAOS_LIVE_XKB xkbcli compile-keymap --layout kibaos-next >/dev/null 2>&1; then
+    rm -f -- "$dir/kibaos-next"
+    return 1
+  fi
+  [[ ! -r $dir/kibaos ]] || previous=$(<"$dir/kibaos")
+  mv -f -- "$dir/kibaos-next" "$dir/kibaos" || return 1
+  if gb_replug_keyboards; then
+    GB_LIVE_SYMBOLS=$symbols
+    return 0
+  fi
+  # Plugged back in on the layout it had, as far as that goes, rather than
+  # left on one no answer names. What the keyboards are on is not known after
+  # this, so the next layout asked for is plugged in whatever it is.
+  GB_LIVE_SYMBOLS=''
+  [[ -z $previous ]] || printf '%s\n' "$previous" >"$dir/kibaos"
+  gb_replug_keyboards || true
+  return 1
+}
+
+gb_set() {
+  local id=$1 value=$2 live=0
+  kibaos_question_exists "$id" || { _gb_err "unknown question: $id"; return 0; }
+  if ! kibaos_question_validate "$id" "$value"; then
+    _gb_err "$(kibaos_question_field "$id" error)"
+    return 0
+  fi
+  [[ $id != keymap || -z ${KIBAOS_LIVE_XKB:-} ]] || live=1
+  # Refused before anything changes, the console included.
+  if (( live )) && ! gb_layout_symbols "$value"; then
+    _gb_err "$GB_LAYOUT_ERROR"
+    return 0
+  fi
+  if ! apply_answer "$id" "$value"; then
+    _gb_err "${APPLY_ERROR:-That answer could not be applied.}"
+    return 0
+  fi
+  if (( live )) && ! gb_apply_layout "$GB_LAYOUT_SYMBOLS"; then
+    # The console back on the answer this screen still types, so nothing is
+    # left on a layout that no answer names.
+    apply_answer keymap "${ANSWERS[keymap]:-us}" || true
+    _gb_err "The layout you picked could not be set up on this screen. Choose another, or use the text installer."
+    return 0
+  fi
+  ANSWERS[$id]=$value
+  # A plan built from earlier answers is no longer the plan for these.
+  GB_PLANNED=0
+  _gb_ok
+}
+
+# Secret questions carry no validator in the manifest, because what makes a
+# password acceptable is that it was typed twice and is not empty, and both of
+# those are the renderer's business. What is not the renderer's business is
+# where the value then goes, which is why it comes here.
+gb_secret() {
+  local id=$1 value=$2
+  kibaos_question_exists "$id" || { _gb_err "unknown question: $id"; return 0; }
+  kibaos_question_is_secret "$id" || { _gb_err "$id is not a secret question"; return 0; }
+  [[ -n $value ]] || { _gb_err "$(kibaos_question_field "$id" error)"; return 0; }
+  ANSWERS[$id]=$value
+  GB_PLANNED=0
+  _gb_ok
+}
+
+gb_get() {
+  local id=$1
+  kibaos_question_exists "$id" || { _gb_err "unknown question: $id"; return 0; }
+  if kibaos_question_is_secret "$id"; then
+    _gb_emit "{\"ok\":true,\"value\":$(_gb_str "${ANSWERS[$id]:+set}")}"
+    return 0
+  fi
+  _gb_emit "{\"ok\":true,\"value\":$(_gb_str "${ANSWERS[$id]:-}")}"
+}
+
+# --------------------------------------------------------------------------
+# The engine
+# --------------------------------------------------------------------------
+
+# Hash the password, write the passphrase to its mode-0600 file, build the
+# argument list, and run the engine's own dry run. All four steps are the text
+# installer's functions. The plan the user approves is therefore the plan the
+# engine produced from these exact arguments, not a description of it.
+gb_plan() {
+  local status=0
+  [[ -n $ENGINE && -x $ENGINE ]] || { _gb_err 'the installation engine is missing from this image'; return 0; }
+  [[ -n ${ANSWERS[target]:-} ]] || { _gb_err 'no disk has been chosen'; return 0; }
+  if ! hash_password; then
+    _gb_err 'the account password could not be prepared on this system'
+    return 0
+  fi
+  if [[ ${ANSWERS[encrypt]:-no} == yes && ${ANSWERS[luks_passphrase]:-} != set ]]; then
+    write_secret luks.passphrase "${ANSWERS[luks_passphrase]}"
+    ANSWERS[luks_passphrase]='set'
+  fi
+  build_engine_args
+  # `|| status=$?` and not `if ! ...`: inside an `if !` the value of `$?` is the
+  # status of the negation, which is always zero when the branch is taken. That
+  # exact mistake once made a failed dry run report a successful install.
+  status=0
+  "$ENGINE" "${ENGINE_ARGS[@]}" --dry-run >>"$RAW_LOG" 2>&1 || status=$?
+  if (( status != 0 )); then
+    GB_PLANNED=0
+    _gb_emit "{\"ok\":false,\"status\":${status},\"error\":\"the plan did not pass the engine's own checks\"}"
+    return 0
+  fi
+  GB_PLANNED=1
+  _gb_ok "\"plan_only\":$(if (( PLAN_ONLY )); then printf 'true'; else printf 'false'; fi)"
+}
+
+# The confirmation token is compared whole against the one built from the
+# canonical target. The engine independently requires the same token, so a
+# renderer bug here cannot by itself cause an erase.
+gb_execute() {
+  local token=$1 expected
+  (( GB_PLANNED )) || { _gb_err 'no checked plan. The plan step has to succeed first'; return 0; }
+  [[ -z $GB_ENGINE_PID ]] || { _gb_err 'the installation is already running'; return 0; }
+  expected=$(kibaos_confirmation_token "${ANSWERS[target]:-}" \
+    "${ANSWERS[layout]:-$(kibaos_question_default layout)}")
+  [[ $token == "$expected" ]] || { _gb_err 'the confirmation did not match the disk'; return 0; }
+  "$ENGINE" "${ENGINE_ARGS[@]}" --execute --confirm "$expected" >>"$RAW_LOG" 2>&1 &
+  GB_ENGINE_PID=$!
+  _gb_ok '"started":true'
+}
+
+gb_wait() {
+  local status=0
+  if [[ -z $GB_ENGINE_PID ]]; then
+    _gb_err 'nothing is running'
+    return 0
+  fi
+  wait "$GB_ENGINE_PID" || status=$?
+  GB_ENGINE_PID=
+  _gb_emit "{\"ok\":$(if (( status == 0 )); then printf 'true'; else printf 'false'; fi),\"status\":${status}}"
+}
+
+# Whether saving the report worked is decided by looking at the artifact, not
+# at the helper's exit status: the helper exits with the install's own status
+# on success and 2 on failure, and the install status may itself be 2.
+gb_export() {
+  local status=$1
+  [[ $status =~ ^[0-9]+$ ]] || status=1
+  if export_report "$status"; then
+    _gb_emit "{\"ok\":true,\"notice\":$(_gb_str "$EXPORT_NOTICE")}"
+  else
+    _gb_emit "{\"ok\":false,\"notice\":$(_gb_str "$EXPORT_NOTICE"),\"error\":$(_gb_str "$EXPORT_NOTICE")}"
+  fi
+}
+
+# --------------------------------------------------------------------------
+# Dispatch
+# --------------------------------------------------------------------------
+#
+# Two tables, chosen once at startup. In plan-only mode `execute` is not a
+# command that is refused; it is a command that does not exist, which is the
+# same shape as the text installer's terminal `planned` state. A flag consulted
+# just before a destructive call is one edit away from being consulted after it.
+
+_gb_common() {
+  local command=$1 argument=$2
+  case $command in
+    manifest)  gb_manifest ;;
+    visible)   gb_visible ;;
+    disks)     gb_disks ;;
+    probe)     gb_probe ;;
+    readiness) gb_readiness ;;
+    network)   gb_network ;;
+    net-status) gb_net_status ;;
+    wifi-scan) gb_wifi_scan ;;
+    wifi-forget) gb_wifi_forget "$argument" ;;
+    wifi-radio) gb_wifi_radio "$argument" ;;
+    wifi-connect) _gb_read_value || return 0; gb_wifi_connect "$argument" "$GB_VALUE" ;;
+    stages)    gb_stages ;;
+    enum)      gb_enum "$argument" ;;
+    answers)   gb_answers ;;
+    access)    gb_access ;;
+    access-set) gb_access_set "$argument" ;;
+    target)    gb_target ;;
+    progress)  gb_progress ;;
+    failure)   gb_failure ;;
+    get)       gb_get "$argument" ;;
+    set)       _gb_read_value || return 0; gb_set "$argument" "$GB_VALUE" ;;
+    secret)    _gb_read_value || return 0; gb_secret "$argument" "$GB_VALUE" ;;
+    plan)      gb_plan ;;
+    export)    gb_export "$argument" ;;
+    ping)      _gb_ok ;;
+    *)         return 1 ;;
+  esac
+  return 0
+}
+
+_gb_dispatch_plan_only() {
+  _gb_common "$1" "$2" && return 0
+  _gb_err "unknown command: $1"
+}
+
+_gb_dispatch_full() {
+  local command=$1 argument=$2
+  case $command in
+    execute) gb_execute "$argument"; return 0 ;;
+    wait)    gb_wait; return 0 ;;
+    stop)    gb_stop; return 0 ;;
+    reboot)  gb_reboot; return 0 ;;
+  esac
+  _gb_common "$command" "$argument" && return 0
+  _gb_err "unknown command: $command"
+}
+
+# --------------------------------------------------------------------------
+# Answers prepared ahead of time
+# --------------------------------------------------------------------------
+#
+# kibaos-vm writes the answers its user already gave, and the start script
+# hands the file to the text installer as --answers and to this one in
+# KIBAOS_INSTALLER_ANSWERS, because the front end starts this process and
+# passes its own environment on. It is read by the text installer's own loader,
+# so an answer refused there is refused here and a secret in the file is
+# dropped in both. Each answer becomes the starting value of its question, and
+# every page and the erase gate are still there to go through.
+gb_preload_answers() {
+  local file=${KIBAOS_INSTALLER_ANSWERS:-}
+  [[ -n $file ]] || return 0
+  if ! answers_load "$file"; then
+    printf 'kibaos-installer-gui-bridge: the answers in %s could not be read, so every question starts empty\n' "$file" >&2
+    return 0
+  fi
+  if (( ${#ANSWERS_REJECTED[@]} )); then
+    printf 'kibaos-installer-gui-bridge: not taken from %s: %s\n' "$file" "${ANSWERS_REJECTED[*]}" >&2
+  fi
+  # The console is on the file's keymap now (apply_answer). The screen has to
+  # be as well, or the typing test on the first page types one layout under a
+  # picker that names another. A layout this screen cannot type is dropped, the
+  # same as one chosen on the page, and the console goes back with it.
+  [[ -n ${ANSWERS[keymap]:-} && -n ${KIBAOS_LIVE_XKB:-} ]] || return 0
+  if ! gb_layout_symbols "${ANSWERS[keymap]}" || ! gb_apply_layout "$GB_LAYOUT_SYMBOLS"; then
+    printf 'kibaos-installer-gui-bridge: this screen cannot type the keymap %s from %s, so it starts on US\n' \
+      "${ANSWERS[keymap]}" "$file" >&2
+    unset 'ANSWERS[keymap]'
+    apply_answer keymap us || true
+  fi
+}
+
+gb_preload_answers
+
+GB_DISPATCH=_gb_dispatch_full
+(( ! PLAN_ONLY )) || GB_DISPATCH=_gb_dispatch_plan_only
+
+while IFS= read -r line; do
+  [[ -n $line ]] || continue
+  if (( ${#line} > GB_MAX_LINE_LENGTH )); then
+    _gb_err 'the request is too large'
+    continue
+  fi
+  gb_command=${line%% *}
+  gb_argument=''
+  [[ $gb_command == "$line" ]] || gb_argument=${line#* }
+  [[ $gb_command != quit ]] || break
+  if [[ ! $gb_command =~ ^[a-z][a-z0-9-]{0,31}$ ]]; then
+    _gb_err 'invalid command'
+    continue
+  fi
+  "$GB_DISPATCH" "$gb_command" "$gb_argument"
+done
+
+exit 0

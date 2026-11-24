@@ -1,0 +1,40 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-host-bridge
+pkgver=0.1.0
+pkgrel=4
+pkgdesc="BlueZ, udisks2, pacman, and MIME integration bridge for KibaOS"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=(
+  'archlinux-appstream-data'
+  'bluez'
+  'dbus'
+  'glib2'
+  'libjxl'
+  'pacman'
+  'pacman-contrib'
+  'polkit'
+  'python'
+  'python-dbus'
+  'python-gobject'
+  'systemd'
+  'udisks2'
+)
+optdepends=('xdg-utils: fallback MIME launcher when gio is unavailable')
+source=(
+  'kibaos_host_bridge_core.py'
+  'kibaos_host_bridge.py'
+  'kibaos_desktop_bridge.py'
+  'kibaos_hostctl.py'
+  'kibaos-host-bridge.service'
+  'org.kibaos.HostBridge.service'
+  'org.kibaos.DesktopBridge.service'
+  'org.kibaos.HostBridge.conf'
+  'org.kibaos.host-bridge.policy'
+  'README.md'
+  'LICENSE'
+  'test_core.py'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

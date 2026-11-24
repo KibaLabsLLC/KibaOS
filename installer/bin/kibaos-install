@@ -1,0 +1,2370 @@
+#!/usr/bin/env bash
+# Deterministic, noninteractive KibaOS installation engine.
+set -Eeuo pipefail
+
+PROGRAM=${0##*/}
+SELF_DIR=$(cd -- "$(dirname -- "$0")" && pwd -P)
+
+JOURNAL_LIB=${KIBAOS_JOURNAL_LIB:-/usr/local/lib/kibaos/kibaos-journal.sh}
+[[ -r $JOURNAL_LIB ]] || JOURNAL_LIB="$SELF_DIR/../lib/kibaos-journal.sh"
+[[ -r $JOURNAL_LIB ]] || {
+  printf '%s: install journal library not found\n' "${0##*/}" >&2
+  exit 1
+}
+# shellcheck source=../lib/kibaos-journal.sh
+. "$JOURNAL_LIB"
+
+STAGING_LIB=${KIBAOS_STAGING_LIB:-/usr/local/lib/kibaos/kibaos-staging.sh}
+[[ -r $STAGING_LIB ]] || STAGING_LIB="$SELF_DIR/../lib/kibaos-staging.sh"
+[[ -r $STAGING_LIB ]] || {
+  printf '%s: package staging library not found\n' "${0##*/}" >&2
+  exit 1
+}
+# shellcheck source=../lib/kibaos-staging.sh
+. "$STAGING_LIB"
+
+WIFI_LIB=${KIBAOS_WIFI_LIB:-/usr/local/lib/kibaos/kibaos-wifi.sh}
+[[ -r $WIFI_LIB ]] || WIFI_LIB="$SELF_DIR/../lib/kibaos-wifi.sh"
+[[ -r $WIFI_LIB ]] || {
+  printf '%s: Wi-Fi library not found\n' "${0##*/}" >&2
+  exit 1
+}
+# shellcheck source=../lib/kibaos-wifi.sh
+. "$WIFI_LIB"
+
+KEYBOARD_LIB=${KIBAOS_KEYBOARD_LIB:-/usr/local/lib/kibaos/kibaos-keyboard.sh}
+[[ -r $KEYBOARD_LIB ]] || KEYBOARD_LIB="$SELF_DIR/../lib/kibaos-keyboard.sh"
+[[ -r $KEYBOARD_LIB ]] || {
+  printf '%s: keyboard library not found\n' "${0##*/}" >&2
+  exit 1
+}
+# shellcheck source=../lib/kibaos-keyboard.sh
+. "$KEYBOARD_LIB"
+
+HARDWARE_LIB=${KIBAOS_HARDWARE_LIB:-/usr/local/lib/kibaos/kibaos-hardware.sh}
+[[ -r $HARDWARE_LIB ]] || HARDWARE_LIB="$SELF_DIR/../lib/kibaos-hardware.sh"
+[[ -r $HARDWARE_LIB ]] || {
+  printf '%s: hardware library not found\n' "${0##*/}" >&2
+  exit 1
+}
+# shellcheck source=../lib/kibaos-hardware.sh
+. "$HARDWARE_LIB"
+
+# The install fingerprint. Optional: a machine that cannot find the library
+# gets an install without a mark on it, which is a missing file in /etc and
+# nothing else.
+BADGE_LIB=${KIBAOS_BADGE_LIB:-/usr/local/lib/kibaos/kibaos-badge.sh}
+[[ -r $BADGE_LIB ]] || BADGE_LIB="$SELF_DIR/../lib/kibaos-badge.sh"
+if [[ -r $BADGE_LIB ]]; then
+  # shellcheck source=../lib/kibaos-badge.sh
+  . "$BADGE_LIB"
+fi
+
+MODE=dry-run
+TARGET=
+CONFIRM=
+MOUNTPOINT=/mnt/kibaos-target
+HOSTNAME=kibaos
+USERNAME=
+PASSWORD_HASH_FILE=
+LUKS=0
+LUKS_PASSPHRASE_FILE=
+ARCH_SNAPSHOT=
+BUNDLE_DIR=/opt/kibaos/repo
+PACKAGE_LOCK=
+REPO_NAME=kibaos
+DEFAULT_REPO_URL=${KIBAOS_DEFAULT_REPO_URL:-file:///var/cache/kibaos/repo}
+REPO_URL=$DEFAULT_REPO_URL
+RELEASE_FINGERPRINT=BC390DCF360B2184DBBF008B8B2AB2EFE667CB69
+HOSTED_REPO_URL=${KIBAOS_HOSTED_REPO_URL:-https://github.com/KibaLabsLLC/KibaDE/releases/download/repo-x86_64}
+REPO_KEY=
+REPO_FINGERPRINT=
+ALLOW_UNSIGNED=0
+ALLOW_LOOP=0
+TIMEZONE=UTC
+LOCALE=en_US.UTF-8
+KEYMAP=us
+# Storage shape. The defaults are the only combination this product has ever
+# shipped, and they stay the defaults: a wiped disk, one Btrfs root with
+# subvolumes, and no swap. Everything below is additive - choosing something
+# other than the default is what turns a branch on, so an install that passes
+# none of these new flags runs exactly the sequence it ran before.
+FILESYSTEM=btrfs
+SWAP=none
+STAGING_MODE=${KIBAOS_INSTALL_STAGING:-auto}
+
+# Accessibility, which is not a setting the installer applies to itself.
+#
+# Somebody who turns on a screen reader to get through an install and reboots
+# into a desktop that does not speak has not been helped, they have been moved
+# one wall further along. The installer is the only moment these can be
+# captured and written into the target, so they travel with the install rather
+# than living in the front end that collected them.
+#
+# Every default is the behaviour that exists today, so an install that never
+# passes any of these is byte for byte the install it was before.
+SCREEN_READER=no
+BRAILLE=no
+CONTRAST=normal
+TEXT_SCALE=100
+REDUCE_MOTION=no
+CURSOR_SIZE=24
+SPACING=normal
+TYPEFACE=system
+HARDWARE_SUPPORT=${KIBAOS_HARDWARE_SUPPORT:-auto}
+# The desktop as it should look and what it should carry on its first start.
+# Each default is again what an install did before these existed: the feature
+# set worked out from memory at every start, the scale worked out from each
+# monitor, nothing beyond the base set of programs, and no snapshot taken by
+# anything but the person at the keyboard.
+FEATURE_PROFILE=auto
+WALLPAPER=auto
+DISPLAY_SCALE=auto
+APPS=none
+AUTO_SNAPSHOTS=no
+SWAP_SIZE=auto
+LAYOUT=wipe
+SECURE_BOOT_KEY_FILE=${KIBAOS_SECURE_BOOT_KEY:-}
+SECURE_BOOT_CERT_FILE=${KIBAOS_SECURE_BOOT_CERT:-}
+SECURE_BOOT_SIGN=0
+SECURE_BOOT_SETUP_MODE=0
+SECURE_BOOT_ENROLL=${KIBAOS_SECURE_BOOT_ENROLL:-manual}
+BASE_PACKAGES=(
+  base archlinux-keyring linux linux-firmware linux-firmware-marvell wireless-regdb intel-ucode amd-ucode sof-firmware btrfs-progs seatd dosfstools cryptsetup
+  gptfdisk efibootmgr sbsigntools networkmanager sudo pipewire pipewire-alsa
+  pipewire-pulse wireplumber alsa-utils upower brightnessctl udisks2
+  xdg-utils polkit openssh bluez bluez-utils vim
+)
+
+ROOT_PART=
+ESP_PART=
+ALONGSIDE_ESP=
+SWAP_FILE=
+SWAP_SIZE_MIB=0
+CRYPT_NAME=kibaos-root
+CRYPT_OPENED=0
+TARGET_MOUNTED=0
+WORK_DIR=
+ARCH_PACMAN_CONF=
+ARCH_LOCAL_PACMAN_CONF=
+ARCH_CACHE=
+ARCH_GPG_DIR=
+ARCH_DB_PATH=
+ARCH_LOG_FILE=
+MICROCODE_IMAGE=
+ARCH_STAGING_SELECTED=
+ARCH_PACKAGE_BYTES=0
+ARCH_FIRST_PACKAGE_URL=
+ARCH_PACKAGE_FILES=()
+ARCH_KEYRING_FILES=(pubring.gpg trustdb.gpg gpg.conf dirmngr.conf dirmngr_ldapserver.conf)
+
+# KibaOS is a copy of the live system it booted from. The base system is not
+# downloaded or pacstrapped: the squashfs layer under the live root is copied
+# onto the new disk, then configured.
+live_rootfs_source() {
+  local candidate lower
+  for candidate in /run/archiso/sfs/airootfs /run/archiso/airootfs; do
+    if mountpoint -q "$candidate" 2>/dev/null; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  # Fall back to the lower layer of the overlay that / is mounted on.
+  lower=$(findmnt -n -o OPTIONS / 2>/dev/null | tr ',' '\n' | sed -n 's/^lowerdir=//p' | cut -d: -f1 || true)
+  if [[ -n $lower && -d $lower ]]; then
+    printf '%s\n' "$lower"
+    return 0
+  fi
+  return 1
+}
+
+check_live_rootfs() {
+  local src=$1 fstype installed package missing=()
+  fstype=$(findmnt -n -o FSTYPE --target "$src" 2>/dev/null || true)
+  [[ $fstype == squashfs ]] || die "live root at $src is ${fstype:-not mounted}, not squashfs"
+  installed=$(pacman --root "$src" --dbpath "$src/var/lib/pacman" --cachedir "$WORK_DIR" \
+    -Qq 2>/dev/null) || die 'the live root has no readable package database'
+  for package in "${BASE_PACKAGES[@]}"; do
+    grep -Fxq -- "$package" <<<"$installed" || missing+=("$package")
+  done
+  # Checked before anything is erased: a live image that lacks a package the
+  # install needs must be rebuilt, not patched around after the disk is wiped.
+  (( ${#missing[@]} == 0 )) || \
+    die "the live image does not contain packages the install needs: ${missing[*]}"
+  log "live root $src holds the full base set (${#BASE_PACKAGES[@]} packages)"
+}
+
+copy_live_rootfs() {
+  local src=$1
+  if [[ $MODE == dry-run ]]; then
+    printf ' + copy live root %q to %q (runtime paths and live credentials excluded)\n' \
+      "$src" "$MOUNTPOINT"
+    return 0
+  fi
+  log "copying the live root from $src"
+  # Read from the squashfs layer, not from /: / is an overlay that also holds
+  # the live session's writes. The live keyring and the live account are left
+  # behind; scrub_live_identity rebuilds the keyring inside the target.
+  tar -C "$src" --xattrs --acls --numeric-owner \
+    --exclude=./proc --exclude=./sys --exclude=./dev --exclude=./run --exclude=./tmp \
+    --exclude=./etc/pacman.d/gnupg --exclude=./var/cache/pacman/pkg \
+    --exclude=./etc/machine-id --exclude=./var/lib/dbus/machine-id \
+    --exclude=./home/liveuser --exclude=./root/.gnupg \
+    -cf - . \
+    | tar -C "$MOUNTPOINT" --xattrs --acls --numeric-owner -xpf -
+}
+
+scrub_live_identity() {
+  if [[ $MODE == dry-run ]]; then
+    printf ' + remove live-session files, the live account and archiso tooling from %q\n' "$MOUNTPOINT"
+    printf ' + set the stock mkinitcpio hooks, then rebuild the pacman keyring inside %q\n' "$MOUNTPOINT"
+    return 0
+  fi
+  local path
+  for path in etc/hostname etc/motd etc/issue root/.automated_script.sh \
+    root/customize_airootfs.sh etc/sudoers.d/g_wheel \
+    etc/systemd/system/getty@tty1.service.d etc/mkinitcpio.conf.d/archiso.conf; do
+    rm -rf -- "$MOUNTPOINT/$path"
+  done
+  find "$MOUNTPOINT/etc/systemd/system" \( -name '*archiso*' -o -name 'choose-mirror*' \) \
+    -exec rm -f -- {} + 2>/dev/null || true
+
+  if grep -q '^liveuser:' "$MOUNTPOINT/etc/passwd"; then
+    arch-chroot "$MOUNTPOINT" userdel liveuser || true
+    grep -q '^liveuser:' "$MOUNTPOINT/etc/passwd" && \
+      die 'the live account could not be removed from the copied system'
+  fi
+  rm -rf -- "$MOUNTPOINT/home/liveuser"
+
+  local live_packages
+  live_packages=$(arch-chroot "$MOUNTPOINT" pacman -Qq 2>/dev/null | \
+    grep -E '^(archiso|mkinitcpio-archiso)$' || true)
+  if [[ -n $live_packages ]]; then
+    # shellcheck disable=SC2086
+    arch-chroot "$MOUNTPOINT" pacman -Rns --noconfirm $live_packages || \
+      log 'could not remove the live tooling packages from the copied system'
+  fi
+
+  # The stock hook set the base package ships. The LUKS and hibernation
+  # branches further down rewrite this line exactly as they do on a fresh install.
+  sed -i -E 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck)|' \
+    "$MOUNTPOINT/etc/mkinitcpio.conf"
+
+  # The private keys of the live image are not copied, so the keyring is built
+  # fresh in the target. The KibaOS repository key is added by the steps below.
+  arch-chroot "$MOUNTPOINT" pacman-key --init
+  arch-chroot "$MOUNTPOINT" pacman-key --populate archlinux
+}
+
+usage() {
+  cat <<'EOF'
+Usage: kibaos-install --target /dev/DEVICE --username NAME \
+  --password-hash-file FILE [options]
+
+The default is a dry run. Real installation additionally requires:
+  --execute --confirm ERASE:/dev/DEVICE
+
+Required:
+  --target DEVICE              Whole target disk, never a partition
+  --username NAME              Initial unprivileged account
+  --password-hash-file FILE    Root-readable file containing a crypt(3) hash
+
+Repository integrity:
+  --bundle-dir DIR             Offline KibaOS package repository
+  --package-lock FILE          SHA-256 lock (default: DIR/packages.lock)
+  --repo-key FILE              Pacman-compatible public signing key
+  --repo-fingerprint HEX       Full fingerprint expected in --repo-key
+  --repo-name NAME             Installed pacman repository name
+  --repo-url URL               Installed repository URL
+  --allow-unsigned             Development only; still verifies package hashes
+
+Storage and identity:
+  --encrypt                    Format the root partition as LUKS2
+  --luks-passphrase-file FILE  Root-readable LUKS passphrase file
+  --filesystem FS              btrfs (default), ext4 or xfs
+  --swap POLICY                none (default), file or zram
+  --swap-size SIZE             auto (default), hibernate, or a size like 8G
+  --staging MODE               auto (default), workspace or target
+  --layout MODE                wipe (default) or alongside
+  --hardware-support MODE      auto (default): drivers this machine needs, such as
+                               broadcom-wl-dkms, and a virtual machine's guest
+                               tools; off: stock packages only
+  --auto-snapshots yes|no      Btrfs only: a recovery snapshot before every
+                               package change (default no)
+
+The desktop:
+  --feature-profile NAME       auto (default), standard, plus, advanced_plus or
+                               advanced_plus_ai
+  --display-scale PERCENT      auto (default), 100, 125, 150, 175 or 200
+  --wallpaper NAME             auto (default), or a wallpaper the installed
+                               system has, such as quiet-rainleaves
+  --apps LIST                  none (default), or a comma list of firefox,
+                               vscode, flatpak, waydroid and devtools
+  --secure-boot-key FILE       PEM private key for an already-enrolled Secure Boot db key
+  --secure-boot-cert FILE      PEM certificate matching --secure-boot-key
+  --secure-boot-enroll MODE    manual (default) or if-safe for setup-mode enrollment
+  --mountpoint DIR             Temporary target mountpoint
+  --hostname NAME
+  --timezone ZONE
+  --locale LOCALE
+  --keymap KEYMAP
+  --allow-loop                 Permit /dev/loop* as an execution target
+
+--arch-snapshot is accepted and ignored: the base system is a copy of the live root.
+
+Only Btrfs carries the factory snapshot and the rollback boot entry. ext4 and
+xfs install a system that boots and updates, with no rollback to return to.
+
+--layout alongside keeps the existing partitions and the existing EFI system
+partition, and installs into free space that is already unallocated. It never
+moves or resizes anything, so the free space has to exist first.
+
+Safety:
+  --dry-run                    Print the complete plan (default)
+  --execute                    Permit execution after every safety check passes
+  --confirm TOKEN              ERASE:<target> when wiping, INSTALL:<target>
+                               when installing alongside
+
+Optional failure evidence:
+  KIBAOS_FAILURE_JOURNAL_DIR  Disk-backed directory for a secret-free copy of
+                              the structured journal after an unexpected exit
+EOF
+}
+
+die() {
+  local message=$* cause=installer_error journal_message
+  # Keep fatal-stage records machine-readable and bounded. The full diagnostic
+  # still goes to stderr and the raw log. The structured journal gets only a
+  # short caller-authored message and a stable cause code for front ends.
+  #
+  # The cause is chosen by matching the message, which means the words in a
+  # `die` call are load bearing: rewriting one can silently move a failure into
+  # a different explanation and a different suggested next step. Every message
+  # that reaches this classifier is pinned by name in tests/test-die-cause.sh,
+  # so a reworded sentence that lands in the wrong bucket fails there rather
+  # than in front of a user.
+  if [[ -n ${_J_ACTIVE_STAGE:-} ]]; then
+    # Order is the whole of the logic here, because a `case` takes the first
+    # arm that matches and several of these messages match more than one.
+    #
+    # Secure Boot goes first for a reason worth keeping: `sbverify` failing
+    # produces "Secure Boot signature verification failed for systemd-boot",
+    # which contains the word signature, and while the signature arm was above
+    # this one that failure told the user a package had not matched its
+    # signature and sent them to check the clock on their computer. A Secure
+    # Boot problem is a Secure Boot problem however it is worded, so the most
+    # specific subject wins over the most general one.
+    case $message in
+      *Secure\ Boot*) cause=secure_boot_error ;;
+      *keyring*|*signature*) cause=keyring_error ;;
+      *--staging*) cause=installer_error ;;
+      *staging\ filesystem*|*capacity*|*free\ space*) cause=capacity_error ;;
+      *archive*|*acquire*|*network*|*DNS*|*route*|*clock*) cause=network_error ;;
+      *target*|*disk*|*partition*) cause=target_error ;;
+      *mount*|*filesystem*|*subvolume*) cause=storage_error ;;
+    esac
+    journal_message=${message:0:256}
+    kibaos_journal_fail "$_J_ACTIVE_STAGE" 1 "$cause" "$journal_message" \
+      log shell reboot
+  fi
+  printf '%s: %s\n' "$PROGRAM" "$message" >&2
+  exit 1
+}
+
+#: When this run started, for the relative timestamps below. Set once, on the
+#: first line logged, rather than at startup, so that a log read back later
+#: starts at zero rather than at however long argument parsing took.
+_LOG_STARTED=0
+
+# One line of the log, stamped with how long the install has been going.
+#
+# Relative rather than wall clock, and that is the whole point. Nobody reading
+# an install log cares that something happened at 14:52:07. They care that it
+# happened two minutes in and the next thing took six, because the question
+# they are answering is "where did the time go" or "where did it stop". A wall
+# clock makes the reader do the subtraction, on every line, in their head.
+log() {
+  local now elapsed
+  now=${EPOCHSECONDS:-0}
+  (( _LOG_STARTED )) || _LOG_STARTED=$now
+  elapsed=$(( now - _LOG_STARTED ))
+  printf '[kibaos-install +%dm %02ds] %s\n' \
+    "$(( elapsed / 60 ))" "$(( elapsed % 60 ))" "$*" >&2
+}
+
+check_workspace_capacity() {
+  local path=$1 minimum=${KIBAOS_MIN_WORKSPACE_BYTES:-268435456}
+  local available_bytes
+  [[ $minimum =~ ^[0-9]+$ ]] || die 'KIBAOS_MIN_WORKSPACE_BYTES must be an integer byte count'
+  available_bytes=$(kibaos_workspace_capacity_bytes "$path") || die "cannot determine free space on installer staging filesystem: $path"
+  if (( available_bytes < minimum )); then
+    die "installer staging capacity is ${available_bytes} bytes and needs at least ${minimum} to check package availability before changing the disk. Set KIBAOS_INSTALL_WORK_DIR to a disk with more free space."
+  fi
+  log "installer staging capacity is ${available_bytes} bytes before package planning"
+}
+
+# EFI variables have four bytes of attributes before their payload. Keep this
+# tiny reader local rather than trusting a human-readable firmware command: it
+# works in the live image before sbctl is installed and is easy to fixture in
+# tests. A missing variable is deliberately different from a zero value.
+efi_boolean() {
+  local name=$1 variable
+  for variable in "${KIBAOS_EFIVARS_DIR:-/sys/firmware/efi/efivars}/${name}-"*; do
+    [[ -r $variable ]] || continue
+    od -An -j4 -N1 -tu1 "$variable" 2>/dev/null | tr -d '[:space:]'
+    return 0
+  done
+  return 1
+}
+
+secure_boot_validate_material() {
+  [[ -n $SECURE_BOOT_KEY_FILE && -n $SECURE_BOOT_CERT_FILE ]] || {
+    die 'Secure Boot signing requires both a private key and certificate'
+  }
+  [[ -r $SECURE_BOOT_KEY_FILE ]] || die "Secure Boot private key is not readable: $SECURE_BOOT_KEY_FILE"
+  [[ -r $SECURE_BOOT_CERT_FILE ]] || die "Secure Boot certificate is not readable: $SECURE_BOOT_CERT_FILE"
+  [[ -z $(find "$SECURE_BOOT_KEY_FILE" -maxdepth 0 -perm /077 -print -quit) ]] || \
+    die 'Secure Boot private key must not be group/world accessible'
+  command -v openssl >/dev/null || die 'openssl is required for Secure Boot key validation'
+  local key_public cert_public
+  key_public=$(openssl pkey -in "$SECURE_BOOT_KEY_FILE" -pubout -outform DER 2>/dev/null | sha256sum | awk '{print $1}') || \
+    die 'Secure Boot private key is not a readable PEM key'
+  cert_public=$(openssl x509 -in "$SECURE_BOOT_CERT_FILE" -pubkey -noout 2>/dev/null | \
+    openssl pkey -pubin -outform DER 2>/dev/null | sha256sum | awk '{print $1}') || \
+    die 'Secure Boot certificate is not a readable PEM X.509 certificate'
+  [[ -n $key_public && $key_public == "$cert_public" ]] || \
+    die 'Secure Boot private key and certificate do not contain the same public key'
+}
+
+secure_boot_generate_material() {
+  [[ -n ${WORK_DIR:-} ]] || die 'Secure Boot key generation requires an installer workspace'
+  command -v openssl >/dev/null || die 'openssl is required to generate Secure Boot keys'
+  SECURE_BOOT_KEY_FILE=$WORK_DIR/secure-boot-private-key.pem
+  SECURE_BOOT_CERT_FILE=$WORK_DIR/secure-boot-certificate.pem
+  # Only for the key. A umask left at 077 reached pacstrap, which then made
+  # /var/cache/pacman and /var/lib/pacman/local private on every installed
+  # system: pacman's sandboxed downloader could not reach its download
+  # directory, and nobody but root could list packages.
+  local previous_umask
+  previous_umask=$(umask)
+  umask 077
+  openssl req -new -x509 -newkey rsa:2048 -nodes \
+    -subj '/CN=KibaOS Secure Boot/' -days 3650 \
+    -keyout "$SECURE_BOOT_KEY_FILE" -out "$SECURE_BOOT_CERT_FILE" \
+    >/dev/null 2>&1 || die 'could not generate the temporary KibaOS Secure Boot key'
+  umask "$previous_umask"
+  chmod 0600 "$SECURE_BOOT_KEY_FILE" "$SECURE_BOOT_CERT_FILE"
+  log 'generated a per-install Secure Boot key. The firmware enrollment entry will be offered on first boot.'
+}
+
+secure_boot_sign_in_place() {
+  local input=$1 temporary
+  [[ -r $input ]] || die "Secure Boot kernel artifact is missing: ${input##*/}"
+  [[ $MODE == dry-run ]] && {
+    printf ' + sbsign --key %q --cert %q --output %q %q\n' \
+      "$SECURE_BOOT_KEY_FILE" "$SECURE_BOOT_CERT_FILE" "${input}.signed" "$input"
+    return 0
+  }
+  temporary=$(mktemp "$WORK_DIR/secure-boot-sign.XXXXXX")
+  if ! sbsign --key "$SECURE_BOOT_KEY_FILE" --cert "$SECURE_BOOT_CERT_FILE" \
+      --output "$temporary" "$input" >/dev/null 2>&1; then
+    rm -f -- "$temporary"
+    die "could not sign Secure Boot kernel: ${input##*/}"
+  fi
+  sbverify --cert "$SECURE_BOOT_CERT_FILE" "$temporary" >/dev/null 2>&1 || {
+    rm -f -- "$temporary"
+    die "Secure Boot signature verification failed: ${input##*/}"
+  }
+  install -m 0644 "$temporary" "$input"
+  rm -f -- "$temporary"
+}
+
+secure_boot_sign_loader() {
+  (( SECURE_BOOT_SIGN )) || return 0
+  local source="$MOUNTPOINT/usr/lib/systemd/boot/efi/systemd-bootx64.efi"
+  local output="${source}.signed"
+  if [[ $MODE == dry-run ]]; then
+    printf ' + sbsign --key %q --cert %q --output %q %q\n' \
+      "$SECURE_BOOT_KEY_FILE" "$SECURE_BOOT_CERT_FILE" "$output" "$source"
+    return 0
+  fi
+  [[ -r $source ]] || die 'Secure Boot signing source is missing: systemd-bootx64.efi'
+  sbsign --key "$SECURE_BOOT_KEY_FILE" --cert "$SECURE_BOOT_CERT_FILE" \
+    --output "$output" "$source" >/dev/null 2>&1 || \
+    die 'could not sign the systemd-boot loader for Secure Boot'
+  sbverify --cert "$SECURE_BOOT_CERT_FILE" "$output" >/dev/null 2>&1 || \
+    die 'Secure Boot signature verification failed for systemd-boot'
+  chmod 0644 "$output"
+}
+
+print_command() {
+  printf ' +'
+  printf ' %q' "$@"
+  printf '\n'
+}
+
+run() {
+  if [[ $MODE == dry-run ]]; then
+    print_command "$@"
+  else
+    "$@"
+  fi
+}
+
+run_logged() {
+  local log_path=$1
+  shift
+  if "$@" 2>&1 | tee -a "$log_path"; then
+    return 0
+  fi
+  local statuses=("${PIPESTATUS[@]}")
+  return "${statuses[0]}"
+}
+
+pacman_keyring_failure() {
+  local log_path=$1
+  grep -Eiq -- \
+    'keyring.*(not writable|permission denied|not found)|public keyring not found|required key missing from keyring|failed to initialize|unknown trust|signature from .* is unknown trust|GPGME error|could not open keyring|unknown public key|no public key|cannot check signature|keydb_search failed' \
+    "$log_path"
+}
+
+die_keyring_failure() {
+  die 'the package signing keyring could not be set up. The most common reason is a wrong date on this computer'
+}
+
+verify_arch_package_signatures() {
+  local log_path=$1 package signature failure=0
+  [[ -r $ARCH_GPG_DIR/pubring.gpg ]] || {
+    printf '%s\n' 'Arch package keyring has no public keyring file' >>"$log_path"
+    return 1
+  }
+  for package in "${ARCH_PACKAGE_FILES[@]}"; do
+    signature=${package}.sig
+    if [[ ! -r $signature ]]; then
+      printf 'missing Arch package signature: %s\n' "${package##*/}" >>"$log_path"
+      failure=1
+      continue
+    fi
+    if ! gpgv --keyring "$ARCH_GPG_DIR/pubring.gpg" "$signature" "$package" >>"$log_path" 2>&1; then
+      printf 'invalid Arch package signature: %s\n' "${package##*/}" >>"$log_path"
+      failure=1
+    fi
+  done
+  return "$failure"
+}
+
+prepare_arch_keyring() {
+  command -v pacman-key >/dev/null || die 'pacman-key is required to initialize the writable Arch keyring'
+  command -v gpg >/dev/null || die 'gpg is required to initialize the writable Arch keyring'
+  copy_public_keyring /etc/pacman.d/gnupg "$ARCH_GPG_DIR"
+
+  # ArchISO may ship /etc/pacman.d/gnupg from a read-only squashfs. Copy only
+  # public state into the installer work directory; never copy private keys.
+  if [[ ! -s $ARCH_GPG_DIR/pubring.gpg || ! -s $ARCH_GPG_DIR/trustdb.gpg ]]; then
+    log 'initializing the writable Arch pacman keyring'
+    pacman-key --gpgdir "$ARCH_GPG_DIR" --init || die_keyring_failure
+  fi
+  [[ -r /usr/share/pacman/keyrings/archlinux.gpg ]] || \
+    die 'this image is missing the Arch signing keyring'
+  pacman-key --gpgdir "$ARCH_GPG_DIR" --populate archlinux || die_keyring_failure
+  [[ -r $ARCH_GPG_DIR/pubring.gpg && -r $ARCH_GPG_DIR/trustdb.gpg && -w $ARCH_GPG_DIR ]] || \
+    die_keyring_failure
+}
+
+copy_public_keyring() {
+  local source_dir=$1 destination_dir=$2 keyring_file
+  install -d -m 0700 "$destination_dir"
+  for keyring_file in "${ARCH_KEYRING_FILES[@]}"; do
+    if [[ -r $source_dir/$keyring_file ]]; then
+      cp -a --no-preserve=ownership "$source_dir/$keyring_file" \
+        "$destination_dir/$keyring_file"
+    fi
+  done
+  chmod -R u+rwX,go-rwx "$destination_dir"
+}
+
+# pacstrap, with the package count reported as it goes.
+#
+# This is the six minute step, and until now it reported nothing at all: the
+# bar sat still for the longest part of the install, which is exactly when
+# somebody starts wondering whether the machine has stopped.
+#
+# pacman prefixes each package with `( 12/531)`, and that is the only thing
+# read out of its output. Nothing else about the transaction is interpreted
+# and nothing is acted on: a line that does not match is passed over, and if
+# pacman ever stops printing that prefix the result is the silence there was
+# before rather than a failure.
+#
+# The loop runs in this shell rather than at the end of a pipe on purpose. A
+# `while read` on the right of a pipe is a subshell, the journal's sequence
+# counter would increment inside it and be thrown away at the end, and every
+# record written after pacstrap would reuse numbers already on disk.
+#
+# Which leaves getting the exit status back out of a process substitution,
+# and the answer is that it comes back in the stream. A status file races the
+# pipe closing, and a `read` that reaches end of file without a newline
+# reports failure even though it read the value, which between them turned a
+# pacstrap that exited 17 into one that exited 1. So the status is appended as
+# a line, after `tee`, where it reaches the loop and never reaches the log.
+_PACSTRAP_MARK='@@kibaos-pacstrap-status@@'
+
+run_pacstrap_logged() {
+  local log_path=$1
+  shift
+  local line pct last=-1 done_count total status=1
+  while IFS= read -r line; do
+    if [[ $line == "$_PACSTRAP_MARK"* ]]; then
+      status=${line#"$_PACSTRAP_MARK"}
+      continue
+    fi
+    [[ $line =~ ^\(\ *([0-9]+)/([0-9]+)\) ]] || continue
+    done_count=${BASH_REMATCH[1]}
+    total=${BASH_REMATCH[2]}
+    (( total > 0 )) || continue
+    pct=$(( done_count * 100 / total ))
+    # One record per whole percent. Five hundred packages would otherwise be
+    # five hundred journal lines to say what a hundred can.
+    (( pct != last )) || continue
+    last=$pct
+    kibaos_journal_progress pacstrap "$pct" \
+      "$(printf '%s of %s packages' "$done_count" "$total")"
+  done < <( if "$@" 2>&1 | tee -a "$log_path"; then
+              printf '%s0\n' "$_PACSTRAP_MARK"
+            else
+              # `if` is what makes this work under errexit. A bare pipeline
+              # here ends the subshell the moment pacstrap fails, before the
+              # status can be written, and the caller then sees a generic 1
+              # for every kind of failure. An `if` condition is exempt from
+              # errexit, and PIPESTATUS still holds the pipeline's statuses
+              # when the branch expands its arguments.
+              printf '%s%s\n' "$_PACSTRAP_MARK" "${PIPESTATUS[0]}"
+            fi )
+  [[ $status =~ ^[0-9]+$ ]] || status=1
+  return "$status"
+}
+
+run_pacstrap() {
+  if [[ $MODE == dry-run ]]; then
+    run pacstrap -M -G -C "$ARCH_LOCAL_PACMAN_CONF" "$@"
+    return
+  fi
+
+  local attempt
+  for attempt in 1 2 3; do
+    local attempt_log="$WORK_DIR/pacstrap-${attempt}.log"
+    : >"$attempt_log"
+    if run_pacstrap_logged "$attempt_log" pacstrap -M -G -C "$ARCH_LOCAL_PACMAN_CONF" "$@"; then
+      return 0
+    fi
+    if pacman_keyring_failure "$attempt_log"; then
+      die_keyring_failure
+    fi
+    if (( attempt < 3 )); then
+      log "pacstrap attempt ${attempt}/3 failed. Retrying the package transaction."
+    fi
+  done
+  die 'pacstrap failed after three attempts'
+}
+
+# The download meter that lets the progress screen draw a sparkline during
+# `acquire`. See bin/kibaos-rate-sampler for why it is a separate program and
+# why it watches the cache directory rather than reading pacman's output.
+#
+# Everything here is best effort. A sampler that will not start, or that dies
+# halfway through, costs a line on a screen and nothing else, so none of this
+# is allowed to fail an install: no `die`, no unchecked command, no exit
+# status that reaches errexit.
+RATE_SAMPLER_PID=
+
+start_rate_sampler() {
+  local watched=$1 sampler
+  [[ -n ${KIBAOS_RATE_PATH:-} ]] || return 0
+  sampler=${KIBAOS_RATE_SAMPLER:-/usr/local/bin/kibaos-rate-sampler}
+  [[ -x $sampler ]] || sampler="$SELF_DIR/kibaos-rate-sampler"
+  [[ -x $sampler ]] || return 0
+  "$sampler" "$watched" "$KIBAOS_RATE_PATH" \
+    "${KIBAOS_RATE_SAMPLE_SECONDS:-1}" "${KIBAOS_RATE_WINDOW:-48}" \
+    >/dev/null 2>&1 &
+  RATE_SAMPLER_PID=$!
+  return 0
+}
+
+stop_rate_sampler() {
+  [[ -n ${RATE_SAMPLER_PID:-} ]] || return 0
+  kill "$RATE_SAMPLER_PID" 2>/dev/null || true
+  wait "$RATE_SAMPLER_PID" 2>/dev/null || true
+  RATE_SAMPLER_PID=
+  return 0
+}
+
+write_arch_pacman_conf() {
+  cat >"$ARCH_PACMAN_CONF" <<EOF
+[options]
+Architecture = auto
+CheckSpace
+ParallelDownloads = 1
+DisableDownloadTimeout
+DBPath = ${ARCH_DB_PATH}
+CacheDir = ${ARCH_CACHE}
+GPGDir = ${ARCH_GPG_DIR}
+LogFile = ${ARCH_LOG_FILE}
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Required
+
+[core]
+Server = https://archive.archlinux.org/repos/${ARCH_SNAPSHOT}/\$repo/os/\$arch
+
+[extra]
+Server = https://archive.archlinux.org/repos/${ARCH_SNAPSHOT}/\$repo/os/\$arch
+EOF
+}
+
+write_arch_local_pacman_conf() {
+  # pacstrap prefixes CacheDir with the target root, so keep its default path.
+  cat >"$ARCH_LOCAL_PACMAN_CONF" <<EOF
+[options]
+Architecture = auto
+CheckSpace
+ParallelDownloads = 1
+GPGDir = ${ARCH_GPG_DIR}
+SigLevel = Required DatabaseOptional
+LocalFileSigLevel = Required
+
+[kibaos-arch]
+SigLevel = Required DatabaseOptional
+Server = file://${ARCH_CACHE}
+EOF
+}
+
+plan_arch_package_set() {
+  command -v pacman >/dev/null || die 'pacman is required to install Arch packages'
+  command -v timeout >/dev/null || die 'timeout is required to check the pinned package list'
+  local attempt attempt_log plan_output bytes url extra total=0
+  local plan_timeout=${KIBAOS_ARCH_PLAN_TIMEOUT:-2m}
+  ARCH_FIRST_PACKAGE_URL=
+  ARCH_PACKAGE_BYTES=0
+
+  for attempt in 1 2 3; do
+    attempt_log="$WORK_DIR/arch-plan-${attempt}.log"
+    : >"$attempt_log"
+    if ! run_logged "$attempt_log" timeout --foreground "$plan_timeout" \
+        pacman --config "$ARCH_PACMAN_CONF" --cachedir "$ARCH_CACHE" \
+        --disable-sandbox -Syy --noconfirm; then
+      (( attempt < 3 )) && log 'the pinned package list could not be refreshed. Trying once more.'
+      continue
+    fi
+    if ! plan_output=$(timeout --foreground "$plan_timeout" \
+        pacman --config "$ARCH_PACMAN_CONF" --cachedir "$ARCH_CACHE" \
+        --disable-sandbox -Sp --print-format '%s %l' --needed --noconfirm \
+        "${BASE_PACKAGES[@]}" 2>>"$attempt_log"); then
+      (( attempt < 3 )) && log 'the pinned package set could not be resolved. Trying once more.'
+      continue
+    fi
+
+    total=0
+    ARCH_FIRST_PACKAGE_URL=
+    while read -r bytes url extra; do
+      [[ -n ${bytes:-} ]] || continue
+      [[ $bytes =~ ^[0-9]+$ && -n ${url:-} && -z ${extra:-} ]] || \
+        die 'the pinned package archive returned an unreadable package list'
+      (( total <= 9223372036854775807 - bytes )) || \
+        die 'the pinned package list is too large to stage safely'
+      total=$((total + bytes))
+      [[ -n $ARCH_FIRST_PACKAGE_URL ]] || ARCH_FIRST_PACKAGE_URL=$url
+    done <<<"$plan_output"
+    (( total > 0 )) || die 'the pinned package list is empty'
+    ARCH_PACKAGE_BYTES=$total
+    break
+  done
+  (( ARCH_PACKAGE_BYTES > 0 )) || die 'the pinned package archive could not be reached before changing the disk'
+
+  command -v curl >/dev/null || die 'required command not found: curl'
+  local probe_timeout=${KIBAOS_ARCH_PROBE_TIMEOUT:-20}
+  timeout --foreground "$((probe_timeout + 5))s" curl --fail --silent --show-error \
+    --location --head --max-time "$probe_timeout" -- "$ARCH_FIRST_PACKAGE_URL" \
+    >/dev/null || die 'the pinned package archive did not answer before the disk was changed'
+}
+
+# The download, with how much of it has arrived reported as it goes.
+#
+# This is the fifteen minute step on a slow archive, and it used to report
+# nothing: the bar sat at the start of the stage while the only sign of life
+# was the rate meter. The total is already known, `plan_arch_package_set`
+# added it up from the package list, so what is missing is how much is on
+# disk, and that is measured rather than read out of pacman. Its transfer
+# lines redraw in place with carriage returns, see bin/kibaos-rate-sampler.
+#
+# A ticker beside the command writes a mark into the same stream every two
+# seconds, and on each mark this shell measures the cache. It is the pacstrap
+# arrangement again, for the same reason: the loop has to run in this shell so
+# the journal's sequence counter survives it. The ticker never goes through
+# `tee`, so the log holds only what pacman said. A mark that lands in the
+# middle of a pacman line is a missed tick and nothing else.
+_DOWNLOAD_TICK='@@kibaos-download-tick@@'
+_DOWNLOAD_MARK='@@kibaos-download-status@@'
+
+download_size_label() {
+  local bytes=$1
+  if (( bytes >= 1073741824 )); then
+    printf '%d.%d GB' $(( bytes / 1073741824 )) $(( bytes % 1073741824 * 10 / 1073741824 ))
+  else
+    printf '%d MB' $(( bytes / 1048576 ))
+  fi
+}
+
+run_download_logged() {
+  local stage=$1 log_path=$2 total=${ARCH_PACKAGE_BYTES:-0}
+  shift 2
+  local line bytes pct last=-1 status=1
+  while IFS= read -r line; do
+    if [[ $line == "$_DOWNLOAD_MARK"* ]]; then
+      status=${line#"$_DOWNLOAD_MARK"}
+      continue
+    fi
+    [[ $line == "$_DOWNLOAD_TICK" ]] || continue
+    (( total > 0 )) || continue
+    bytes=$(du -sb "$ARCH_CACHE" 2>/dev/null | cut -f1) || continue
+    [[ $bytes =~ ^[0-9]+$ ]] || continue
+    (( bytes <= total )) || bytes=$total
+    # Never 100 from here. Signatures still have to be checked, and the stage
+    # finishing is what says it is done.
+    pct=$(( bytes * 100 / total ))
+    (( pct < 100 )) || pct=99
+    (( pct != last )) || continue
+    last=$pct
+    kibaos_journal_progress "$stage" "$pct" \
+      "$(printf '%s of %s' "$(download_size_label "$bytes")" "$(download_size_label "$total")")"
+  done < <( ( while sleep "${KIBAOS_DOWNLOAD_TICK_SECONDS:-2}"; do
+                printf '%s\n' "$_DOWNLOAD_TICK" || exit 0
+              done ) &
+            ticker=$!
+            if "$@" 2>&1 | tee -a "$log_path"; then
+              status=0
+            else
+              # See run_pacstrap_logged for why this is an `if`.
+              status=${PIPESTATUS[0]}
+            fi
+            kill "$ticker" 2>/dev/null || true
+            wait "$ticker" 2>/dev/null || true
+            printf '%s%s\n' "$_DOWNLOAD_MARK" "$status" )
+  [[ $status =~ ^[0-9]+$ ]] || status=1
+  return "$status"
+}
+
+download_arch_packages() {
+  local changed_disk=$1 attempt acquired=0 signature_failure_seen=0 stage=acquire
+  (( ! changed_disk )) || stage=acquire-target
+  local acquire_timeout=${KIBAOS_ARCH_ACQUIRE_TIMEOUT:-30m}
+  command -v repo-add >/dev/null || die 'repo-add is required to prepare the offline Arch package set'
+  command -v timeout >/dev/null || die 'timeout is required to bound Arch package acquisition'
+  install -d -m 0755 "$ARCH_CACHE"
+  start_rate_sampler "$ARCH_CACHE"
+
+  # A slow link can need several attempts. Each attempt keeps what earlier ones
+  # downloaded (pacman resumes partial files), so an attempt that grew the cache
+  # is not a failure. The cache is only cleared after a bad signature. The
+  # timeout kills pacman without letting it remove its lock, and the lock is in
+  # this installer's private database, so it is cleared before every attempt.
+  local failures=0 max_attempts=${KIBAOS_ARCH_ACQUIRE_MAX_ATTEMPTS:-12} before after
+  attempt=0
+  while (( failures < 3 && attempt < max_attempts )); do
+    attempt=$(( attempt + 1 ))
+    rm -f -- "$ARCH_DB_PATH/db.lck"
+    before=$(du -sb "$ARCH_CACHE" 2>/dev/null | cut -f1)
+    local attempt_log="$WORK_DIR/arch-acquire-${attempt}.log"
+    : >"$attempt_log"
+    if (( changed_disk )); then
+      log "downloading the pinned package set to the new disk (attempt ${attempt})"
+    else
+      log "downloading the pinned package set before changing $TARGET (attempt ${attempt})"
+    fi
+    if run_download_logged "$stage" "$attempt_log" timeout --foreground "$acquire_timeout" \
+        pacman --config "$ARCH_PACMAN_CONF" --cachedir "$ARCH_CACHE" \
+        --disable-sandbox -Sw --needed --noconfirm "${BASE_PACKAGES[@]}"; then
+      mapfile -t ARCH_PACKAGE_FILES < <(
+        find "$ARCH_CACHE" -maxdepth 1 -type f -name '*.pkg.tar.*' ! -name '*.sig' ! -name '*.part' -print | LC_ALL=C sort
+      )
+      ((${#ARCH_PACKAGE_FILES[@]} > 0)) || die 'Arch package acquisition produced no package files'
+      if verify_arch_package_signatures "$attempt_log"; then
+        acquired=1
+        break
+      fi
+      if pacman_keyring_failure "$attempt_log"; then
+        die_keyring_failure
+      fi
+      signature_failure_seen=1
+      failures=$(( failures + 1 ))
+      rm -f -- "$ARCH_CACHE"/*
+      log 'one or more package signatures were invalid. Clearing the cache and retrying.'
+      continue
+    fi
+    if pacman_keyring_failure "$attempt_log"; then
+      die_keyring_failure
+    fi
+    after=$(du -sb "$ARCH_CACHE" 2>/dev/null | cut -f1)
+    if [[ $before =~ ^[0-9]+$ && $after =~ ^[0-9]+$ ]] && (( after > before )); then
+      log 'the download is still going. Continuing where it stopped.'
+    else
+      failures=$(( failures + 1 ))
+      (( failures < 3 )) && log 'package acquisition failed. Trying once more.'
+    fi
+  done
+  stop_rate_sampler
+  if (( ! acquired )); then
+    if (( signature_failure_seen )); then
+      if (( changed_disk )); then
+        die 'the downloaded packages did not match their signatures after the disk was changed'
+      fi
+      die 'the downloaded packages did not match their signatures before the disk was changed'
+    fi
+    if (( changed_disk )); then
+      die 'the packages could not all be downloaded from the archive after the disk was changed'
+    fi
+    die 'the packages could not all be downloaded from the archive before changing the disk'
+  fi
+
+  repo-add "$ARCH_CACHE/kibaos-arch.db.tar.gz" "${ARCH_PACKAGE_FILES[@]}" >/dev/null || \
+    die 'could not build the local Arch package repository'
+  write_arch_local_pacman_conf
+  log "verified ${#ARCH_PACKAGE_FILES[@]} Arch packages. The base system install can run without a network connection."
+}
+
+acquire_arch_packages() {
+  if [[ $MODE == dry-run ]]; then
+    run install -d -m 0755 "$ARCH_CACHE" "$ARCH_DB_PATH"
+    run pacman --config "$ARCH_PACMAN_CONF" --cachedir "$ARCH_CACHE" \
+      --disable-sandbox -Syy --noconfirm
+    run pacman --config "$ARCH_PACMAN_CONF" --cachedir "$ARCH_CACHE" \
+      --disable-sandbox -Sp --print-format '%s %l' --needed --noconfirm \
+      "${BASE_PACKAGES[@]}"
+    case $STAGING_MODE in
+      workspace)
+        printf ' + download and verify the package set before changing the target\n'
+        ;;
+      target)
+        printf ' + download the package set to %q after the new system is mounted\n' \
+          "$MOUNTPOINT/var/cache/pacman/pkg"
+        ;;
+      auto)
+        printf ' + compare package size with available memory and swap\n'
+        printf ' + download to the target disk after mount when memory headroom is low\n'
+        ;;
+    esac
+    ARCH_STAGING_SELECTED=$STAGING_MODE
+    write_arch_local_pacman_conf
+    return
+  fi
+
+  command -v repo-add >/dev/null || die 'repo-add is required to prepare the offline Arch package set'
+  command -v timeout >/dev/null || die 'timeout is required to bound Arch package planning'
+  install -d -m 0755 "$ARCH_CACHE" "$ARCH_DB_PATH"
+  plan_arch_package_set
+  ARCH_STAGING_SELECTED=$(kibaos_select_package_staging "$STAGING_MODE" \
+    "$ARCH_PACKAGE_BYTES" "$WORKSPACE_FS_PATH") || {
+      die 'installer staging capacity is too small for the pinned package set. Set KIBAOS_INSTALL_WORK_DIR to a disk with more free space.'
+    }
+  log "package set size is ${ARCH_PACKAGE_BYTES} bytes. Staging mode is ${ARCH_STAGING_SELECTED}."
+}
+
+write_target_file() {
+  local relative=$1 mode=$2 content=$3
+  local destination="${MOUNTPOINT%/}${relative}"
+  if [[ $MODE == dry-run ]]; then
+    printf ' + write %q mode=%q\n' "$destination" "$mode"
+    return
+  fi
+  install -d -m 0755 "$(dirname "$destination")"
+  printf '%b' "$content" >"$destination"
+  chmod "$mode" "$destination"
+}
+
+# The XKB lines for a console keymap, the way `localectl set-keymap` writes
+# them beside KEYMAP, escaped for write_target_file. Nothing for a keymap with
+# no XKB layout (lib/kibaos-keyboard.sh).
+#
+# Everything graphical reads keys through XKB and ignores KEYMAP. The login
+# screen, and on an encrypted install the unlock screen, type with these
+# lines, and the graphical installer typed the passwords with the same
+# conversion, so all of them agree.
+keymap_xkb_lines() {
+  local layout model variant options
+  IFS=$'\t' read -r layout model variant options < <(kibaos_keymap_xkb "$1") || return 0
+  printf 'XKBLAYOUT=%s\\n' "$layout"
+  [[ $model == - ]] || printf 'XKBMODEL=%s\\n' "$model"
+  [[ $variant == - ]] || printf 'XKBVARIANT=%s\\n' "$variant"
+  [[ $options == - ]] || printf 'XKBOPTIONS=%s\\n' "$options"
+}
+
+# An install signed with the release key follows the published repository,
+# so pacman -Syu picks up KibaOS fixes. The copy on disk stays as a second
+# server for machines with no network. Any other key, or a URL the user chose,
+# gets exactly that URL: the published repository is signed with the release
+# key, and a development key would reject it.
+kibaos_mirror_servers() {
+  if [[ $REPO_URL == "$DEFAULT_REPO_URL" && $ALLOW_UNSIGNED == 0 &&
+        ${expected_fingerprint:-} == "$RELEASE_FINGERPRINT" ]]; then
+    printf 'Server = %s\\nServer = %s\\n' "$HOSTED_REPO_URL" "${REPO_URL%/}"
+  else
+    printf 'Server = %s\\n' "${REPO_URL%/}"
+  fi
+}
+
+canonical_device() {
+  local value=$1
+  if [[ -e $value ]]; then
+    readlink -f -- "$value"
+  else
+    printf '%s\n' "$value"
+  fi
+}
+
+partition_path() {
+  local disk=$1 number=$2
+  case "$disk" in
+    /dev/nvme*|/dev/mmcblk*|/dev/loop*) printf '%sp%s\n' "$disk" "$number" ;;
+    *) printf '%s%s\n' "$disk" "$number" ;;
+  esac
+}
+
+#: GPT type GUID of an EFI System Partition. Used to find the partition an
+#: existing operating system already boots from, so `alongside` can add an
+#: entry to it instead of creating a second ESP the firmware may ignore.
+ESP_TYPE_GUID=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
+
+existing_esp() {
+  local device parttype
+  while read -r device parttype; do
+    [[ ${parttype^^} == "$ESP_TYPE_GUID" ]] || continue
+    printf '%s' "$device"
+    return 0
+  done < <(lsblk -lnpo NAME,PARTTYPE "$1" 2>/dev/null)
+  return 1
+}
+
+# Bytes in the largest run of unallocated sectors. sgdisk answers this
+# directly, which is worth using: parsing its human-readable table would break
+# the first time it changes a column.
+largest_free_bytes() {
+  local disk=$1 first last sector
+  first=$(sgdisk --first-in-largest "$disk" 2>/dev/null | tr -dc '0-9')
+  last=$(sgdisk --end-of-largest "$disk" 2>/dev/null | tr -dc '0-9')
+  sector=$(blockdev --getss "$disk" 2>/dev/null)
+  [[ $first =~ ^[0-9]+$ && $last =~ ^[0-9]+$ && $sector =~ ^[0-9]+$ ]] || { printf '0'; return 0; }
+  (( last >= first )) || { printf '0'; return 0; }
+  printf '%s' "$(( (last - first + 1) * sector ))"
+}
+
+# The swap file's size in MiB, or 0 for no swap file. `hibernate` needs room
+# for every page of RAM plus headroom; `auto` is the usual compromise that
+# keeps a desktop responsive under pressure without eating the disk.
+swap_mib() {
+  local total_kib total_mib
+  [[ $SWAP == file ]] || { printf '0'; return 0; }
+  case $SWAP_SIZE in
+    *M) printf '%s' "${SWAP_SIZE%M}"; return 0 ;;
+    *G) printf '%s' "$(( ${SWAP_SIZE%G} * 1024 ))"; return 0 ;;
+  esac
+  total_kib=$(awk '/^MemTotal:/ { print $2; exit }' "${KIBAOS_MEMINFO:-/proc/meminfo}" 2>/dev/null || true)
+  [[ $total_kib =~ ^[0-9]+$ ]] || total_kib=$(( 4 * 1024 * 1024 ))
+  total_mib=$(( total_kib / 1024 ))
+  if [[ $SWAP_SIZE == hibernate ]]; then
+    printf '%s' "$(( total_mib + 2048 ))"
+    return 0
+  fi
+  (( total_mib < 8192 )) || { printf '8192'; return 0; }
+  printf '%s' "$total_mib"
+}
+
+cleanup() {
+  local status=$?
+  set +e
+  # First, because it is a process this shell started and every line below is
+  # teardown it must not be sampling through.
+  stop_rate_sampler
+  # A command can fail after a stage has started without passing through a
+  # helper that knows the right cause code. Preserve a bounded, secret-free
+  # failure record before tearing down mounts and private installer state.
+  if (( status != 0 )) && [[ -n ${KIBAOS_JOURNAL_PATH:-} ]]; then
+    if [[ -n ${_J_ACTIVE_STAGE:-} ]]; then
+      kibaos_journal_fail "$_J_ACTIVE_STAGE" "$status" unexpected_exit \
+        'installer stopped unexpectedly. The private install log records where.' \
+        log shell reboot
+    fi
+    # Preserve a specific die() record as well as a generic unexpected exit;
+    # the journal helper copies only structured, secret-free evidence.
+    kibaos_journal_preserve_failure >/dev/null 2>&1 || true
+  fi
+  if (( TARGET_MOUNTED )); then
+    umount -R "$MOUNTPOINT" >/dev/null 2>&1 || true
+  fi
+  if (( CRYPT_OPENED )); then
+    cryptsetup close "$CRYPT_NAME" >/dev/null 2>&1 || true
+  fi
+  if [[ -n ${ARCH_GPG_DIR:-} && -d ${ARCH_GPG_DIR:-} ]] && command -v gpgconf >/dev/null 2>&1; then
+    gpgconf --homedir "$ARCH_GPG_DIR" --kill all >/dev/null 2>&1 || true
+  fi
+  [[ -z ${WORK_DIR:-} ]] || rm -rf -- "$WORK_DIR"
+  exit "$status"
+}
+
+handle_cancel() {
+  local status=$1
+  set +e
+  trap - INT TERM
+  if [[ -n ${_J_ACTIVE_STAGE:-} ]]; then
+    kibaos_journal_fail "$_J_ACTIVE_STAGE" "$status" cancelled \
+      'installer cancelled. The private install log records how far it got.' \
+      log shell reboot || true
+  fi
+  kibaos_journal_preserve_failure >/dev/null 2>&1 || true
+  exit "$status"
+}
+
+trap cleanup EXIT
+trap 'handle_cancel 130' INT
+trap 'handle_cancel 143' TERM
+
+while (($#)); do
+  case "$1" in
+    --target) TARGET=${2:?}; shift 2 ;;
+    --username) USERNAME=${2:?}; shift 2 ;;
+    --password-hash-file) PASSWORD_HASH_FILE=${2:?}; shift 2 ;;
+    --arch-snapshot) ARCH_SNAPSHOT=${2:?}; shift 2 ;;
+    --bundle-dir) BUNDLE_DIR=${2:?}; shift 2 ;;
+    --package-lock) PACKAGE_LOCK=${2:?}; shift 2 ;;
+    --repo-key) REPO_KEY=${2:?}; shift 2 ;;
+    --repo-fingerprint) REPO_FINGERPRINT=${2:?}; shift 2 ;;
+    --repo-name) REPO_NAME=${2:?}; shift 2 ;;
+    --repo-url) REPO_URL=${2:?}; shift 2 ;;
+    --mountpoint) MOUNTPOINT=${2:?}; shift 2 ;;
+    --hostname) HOSTNAME=${2:?}; shift 2 ;;
+    --timezone) TIMEZONE=${2:?}; shift 2 ;;
+    --locale) LOCALE=${2:?}; shift 2 ;;
+    --keymap) KEYMAP=${2:?}; shift 2 ;;
+    --luks-passphrase-file) LUKS_PASSPHRASE_FILE=${2:?}; shift 2 ;;
+    --filesystem) FILESYSTEM=${2:?}; shift 2 ;;
+    --swap) SWAP=${2:?}; shift 2 ;;
+    --swap-size) SWAP_SIZE=${2:?}; shift 2 ;;
+    --staging) STAGING_MODE=${2:?}; shift 2 ;;
+    --layout) LAYOUT=${2:?}; shift 2 ;;
+    --screen-reader) SCREEN_READER=${2:?}; shift 2 ;;
+    --braille) BRAILLE=${2:?}; shift 2 ;;
+    --contrast) CONTRAST=${2:?}; shift 2 ;;
+    --text-scale) TEXT_SCALE=${2:?}; shift 2 ;;
+    --reduce-motion) REDUCE_MOTION=${2:?}; shift 2 ;;
+    --cursor-size) CURSOR_SIZE=${2:?}; shift 2 ;;
+    --spacing) SPACING=${2:?}; shift 2 ;;
+    --typeface) TYPEFACE=${2:?}; shift 2 ;;
+    --hardware-support) HARDWARE_SUPPORT=${2:?}; shift 2 ;;
+    --feature-profile) FEATURE_PROFILE=${2:?}; shift 2 ;;
+    --display-scale) DISPLAY_SCALE=${2:?}; shift 2 ;;
+    --wallpaper) WALLPAPER=${2:?}; shift 2 ;;
+    --apps) APPS=${2:?}; shift 2 ;;
+    --auto-snapshots) AUTO_SNAPSHOTS=${2:?}; shift 2 ;;
+    --secure-boot-key) SECURE_BOOT_KEY_FILE=${2:?}; shift 2 ;;
+    --secure-boot-cert) SECURE_BOOT_CERT_FILE=${2:?}; shift 2 ;;
+    --secure-boot-enroll) SECURE_BOOT_ENROLL=${2:?}; shift 2 ;;
+    --encrypt) LUKS=1; shift ;;
+    --allow-unsigned) ALLOW_UNSIGNED=1; shift ;;
+    --allow-loop) ALLOW_LOOP=1; shift ;;
+    --execute) MODE=execute; shift ;;
+    --dry-run) MODE=dry-run; shift ;;
+    --confirm) CONFIRM=${2:?}; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "unknown option: $1" ;;
+  esac
+done
+
+[[ -n $TARGET ]] || die '--target is required'
+[[ $TARGET == /dev/* ]] || die '--target must be an absolute /dev path'
+TARGET=$(canonical_device "$TARGET")
+[[ $TARGET =~ ^/dev/[A-Za-z0-9._/+:-]+$ ]] || die 'target device path contains unsupported characters'
+[[ -n $USERNAME ]] || die '--username is required'
+[[ $USERNAME =~ ^[a-z_][a-z0-9_-]{0,30}$ ]] || die 'invalid username'
+[[ $HOSTNAME =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]{0,62}$ ]] || die 'invalid hostname'
+[[ $REPO_NAME =~ ^[a-zA-Z0-9._-]+$ ]] || die 'invalid repository name'
+[[ $REPO_URL =~ ^(https|file)://[^[:space:]\\]+$ ]] || die '--repo-url must be an HTTPS or file URL without whitespace'
+[[ $REPO_URL != *repo.kibaos.invalid* ]] || die '--repo-url may not use the development placeholder host'
+[[ $MOUNTPOINT == /* && $MOUNTPOINT != / ]] || die '--mountpoint must be an absolute non-root path'
+[[ $TIMEZONE =~ ^[A-Za-z0-9_+.-]+(/[A-Za-z0-9_+.-]+)*$ && $TIMEZONE != *..* ]] || die 'invalid timezone'
+[[ $LOCALE =~ ^[A-Za-z0-9_.@-]+$ ]] || die 'invalid locale'
+[[ $KEYMAP =~ ^[A-Za-z0-9_.@+-]+$ ]] || die 'invalid keymap'
+case $FILESYSTEM in
+  btrfs|ext4|xfs) ;;
+  *) die '--filesystem must be btrfs, ext4 or xfs' ;;
+esac
+case $STAGING_MODE in
+  auto|workspace|target) ;;
+  *) die '--staging must be auto, workspace or target' ;;
+esac
+case $SCREEN_READER in yes|no) ;; *) die '--screen-reader must be yes or no' ;; esac
+case $BRAILLE in yes|no) ;; *) die '--braille must be yes or no' ;; esac
+case $CONTRAST in normal|high) ;; *) die '--contrast must be normal or high' ;; esac
+case $REDUCE_MOTION in yes|no) ;; *) die '--reduce-motion must be yes or no' ;; esac
+# Three steps rather than a free number. A scale nobody can read back to you
+# over a phone is a scale nobody can be helped with.
+case $TEXT_SCALE in 100|125|150) ;; *) die '--text-scale must be 100, 125 or 150' ;; esac
+case $CURSOR_SIZE in 24|32|48) ;; *) die '--cursor-size must be 24, 32 or 48' ;; esac
+case $SPACING in normal|roomy|roomier) ;; *) die '--spacing must be normal, roomy or roomier' ;; esac
+case $TYPEFACE in system|atkinson|opendyslexic) ;; *) die '--typeface must be system, atkinson or opendyslexic' ;; esac
+case $HARDWARE_SUPPORT in auto|off) ;; *) die '--hardware-support must be auto or off' ;; esac
+case $FEATURE_PROFILE in
+  auto|standard|plus|advanced_plus|advanced_plus_ai) ;;
+  *) die '--feature-profile must be auto, standard, plus, advanced_plus or advanced_plus_ai' ;;
+esac
+case $DISPLAY_SCALE in auto|100|125|150|175|200) ;; *) die '--display-scale must be auto, 100, 125, 150, 175 or 200' ;; esac
+case $AUTO_SNAPSHOTS in yes|no) ;; *) die '--auto-snapshots must be yes or no' ;; esac
+# A name and nothing more: it becomes part of a path below, so no slash, no
+# dot and nothing a shell would read. Whether the installed system has it is
+# checked once that system exists.
+[[ $WALLPAPER =~ ^[a-z][a-z0-9-]{0,63}$ ]] || die '--wallpaper must be auto or the name of a wallpaper, such as quiet-rainleaves'
+# Each app by the name somebody would recognise, and the packages it is. A
+# closed list, so the answers file can never name a package: what it can ask
+# for is exactly what is written here, from the same pinned snapshot as
+# everything else.
+declare -A APP_PACKAGES=(
+  [firefox]='firefox'
+  [vscode]='code'
+  [flatpak]='flatpak'
+  [waydroid]='waydroid'
+  [devtools]='base-devel git'
+)
+APP_LIST=()
+if [[ $APPS != none ]]; then
+  IFS=, read -r -a _apps <<<"$APPS"
+  (( ${#_apps[@]} > 0 )) || die '--apps must be none or a list of firefox, vscode, flatpak, waydroid and devtools'
+  for _app in "${_apps[@]}"; do
+    # An empty name, from `,` or `a,,b`, is checked first: as a subscript it
+    # is not a missing app, it is a fatal error.
+    [[ -n $_app && -n ${APP_PACKAGES[$_app]:-} ]] || die '--apps must be none or a list of firefox, vscode, flatpak, waydroid and devtools'
+    [[ " ${APP_LIST[*]} " == *" $_app "* ]] || APP_LIST+=("$_app")
+  done
+fi
+
+case $SWAP in
+  none|file|zram) ;;
+  # A swap partition is deliberately absent. On the encrypted path it would
+  # need either its own passphrase prompt at boot or a random key that makes
+  # hibernation impossible, and on the unencrypted path it would be the one
+  # part of the disk not covered by LUKS. A swap file lives inside the root
+  # filesystem, so it inherits the encryption and needs no second answer.
+  *) die '--swap must be none, file or zram' ;;
+esac
+case $SWAP_SIZE in
+  auto|hibernate) ;;
+  *[0-9]G|*[0-9]M)
+    [[ $SWAP_SIZE =~ ^[0-9]+[GM]$ ]] || die '--swap-size must be auto, hibernate, or a size like 8G' ;;
+  *) die '--swap-size must be auto, hibernate, or a size like 8G' ;;
+esac
+case $LAYOUT in
+  wipe|alongside) ;;
+  *) die '--layout must be wipe or alongside' ;;
+esac
+case $SECURE_BOOT_ENROLL in
+  manual|if-safe) ;;
+  *) die '--secure-boot-enroll must be manual or if-safe' ;;
+esac
+[[ -z $SECURE_BOOT_KEY_FILE && -z $SECURE_BOOT_CERT_FILE ]] || {
+  [[ -n $SECURE_BOOT_KEY_FILE && -n $SECURE_BOOT_CERT_FILE ]] || \
+    die '--secure-boot-key and --secure-boot-cert must be provided together'
+  secure_boot_validate_material
+}
+[[ $SWAP != zram || $SWAP_SIZE != hibernate ]] || \
+  die 'zram swap lives in memory, so it cannot be used for hibernation'
+[[ $FILESYSTEM != xfs || $SWAP_SIZE != hibernate ]] || \
+  die 'hibernation needs a swap file with a stable physical offset, which xfs does not provide'
+[[ $AUTO_SNAPSHOTS != yes || $FILESYSTEM == btrfs ]] || \
+  die 'automatic snapshots need btrfs, the only filesystem here that takes them'
+[[ -z $ARCH_SNAPSHOT ]] || log '--arch-snapshot is accepted and ignored: the base system is a copy of the live root'
+[[ -n $PACKAGE_LOCK ]] || PACKAGE_LOCK="${BUNDLE_DIR%/}/packages.lock"
+if [[ -n $KIBAOS_FAILURE_JOURNAL_DIR ]]; then
+  [[ $KIBAOS_FAILURE_JOURNAL_DIR == /* && $KIBAOS_FAILURE_JOURNAL_DIR != / ]] || \
+    die 'KIBAOS_FAILURE_JOURNAL_DIR must be an absolute non-root path'
+fi
+
+[[ -r $PASSWORD_HASH_FILE ]] || die "password hash file is not readable: $PASSWORD_HASH_FILE"
+[[ -z $(find "$PASSWORD_HASH_FILE" -maxdepth 0 -perm /077 -print -quit) ]] || die 'password hash file must not be group/world accessible'
+if ! awk 'BEGIN { count = 0; valid = 0 }
+  NR == 1 {
+    # Accept the crypt(3) families understood by shadow/chpasswd, including
+    # schemes with extra fields, but require a scheme, salt/parameter field,
+    # and final hash with no whitespace or blank records around it.
+    valid = ($0 ~ /^\$[^[:space:]$]+\$[^[:space:]$]+\$[^[:space:]]+$/)
+  }
+  { count++ }
+  END { exit !(count == 1 && valid) }' "$PASSWORD_HASH_FILE"; then
+  die 'password hash must be a single crypt(3) hash, not plaintext'
+fi
+
+if (( LUKS )); then
+  [[ -r $LUKS_PASSPHRASE_FILE ]] || die '--encrypt requires a readable --luks-passphrase-file'
+  [[ -s $LUKS_PASSPHRASE_FILE ]] || die 'LUKS passphrase file is empty'
+  [[ -z $(find "$LUKS_PASSPHRASE_FILE" -maxdepth 0 -perm /077 -print -quit) ]] || die 'LUKS passphrase file must not be group/world accessible'
+fi
+
+[[ -d $BUNDLE_DIR ]] || die "bundle directory does not exist: $BUNDLE_DIR"
+[[ -r $PACKAGE_LOCK ]] || die "package lock does not exist: $PACKAGE_LOCK"
+for helper in kibaos-recovery kibaos-hardware-qualify; do
+  [[ -e $SELF_DIR/$helper ]] || die "installer helper is missing: $SELF_DIR/$helper"
+  [[ -f $SELF_DIR/$helper && -x $SELF_DIR/$helper && ! -L $SELF_DIR/$helper ]] ||
+    die "installer helper must be a regular executable file: $SELF_DIR/$helper"
+done
+
+mapfile -t LOCK_LINES < <(awk 'NF && $1 !~ /^#/ {print}' "$PACKAGE_LOCK")
+((${#LOCK_LINES[@]} > 0)) || die 'package lock is empty'
+PACKAGE_FILES=()
+LOCK_FILENAMES=()
+PACKAGE_DEPENDENCIES=()
+declare -A LOCKED_NAMES=()
+for line in "${LOCK_LINES[@]}"; do
+  read -r digest filename pkgname pkgver arch extra <<<"$line"
+  [[ $digest =~ ^[0-9a-f]{64}$ && $filename != */* && -n $pkgname && -n $pkgver && -n $arch && -z ${extra:-} ]] || \
+    die "invalid package lock line: $line"
+  [[ -f ${BUNDLE_DIR%/}/$filename ]] || die "locked package is missing: $filename"
+  actual=$(sha256sum "${BUNDLE_DIR%/}/$filename" | awk '{print $1}')
+  [[ $actual == "$digest" ]] || die "SHA-256 mismatch: $filename"
+  command -v bsdtar >/dev/null || die 'bsdtar is required to inspect locked packages'
+  pkginfo=$(bsdtar -xOf "${BUNDLE_DIR%/}/$filename" .PKGINFO 2>/dev/null) || die "cannot read .PKGINFO: $filename"
+  actual_pkgname=$(awk -F ' = ' '$1 == "pkgname" {print $2; exit}' <<<"$pkginfo")
+  actual_pkgver=$(awk -F ' = ' '$1 == "pkgver" {print $2; exit}' <<<"$pkginfo")
+  actual_arch=$(awk -F ' = ' '$1 == "arch" {print $2; exit}' <<<"$pkginfo")
+  [[ $actual_pkgname == "$pkgname" && $actual_pkgver == "$pkgver" && $actual_arch == "$arch" ]] || \
+    die "package metadata does not match lock: $filename"
+  PACKAGE_FILES+=("/var/cache/kibaos/repo/$filename")
+  LOCK_FILENAMES+=("$filename")
+  while IFS= read -r dependency; do
+    [[ -z $dependency ]] || PACKAGE_DEPENDENCIES+=("${dependency%%[<>=]*}")
+  done < <(awk -F ' = ' '$1 == "depend" {print $2}' <<<"$pkginfo")
+  LOCKED_NAMES[$pkgname]=1
+done
+[[ -n ${LOCKED_NAMES[kibaos]:-} ]] || die 'package lock must include kibaos'
+[[ -n ${LOCKED_NAMES[chromiumos-ash]:-} ]] || die 'package lock must include chromiumos-ash'
+
+declare -A BASE_PACKAGE_SET=()
+for package in "${BASE_PACKAGES[@]}"; do BASE_PACKAGE_SET[$package]=1; done
+mapfile -t SORTED_DEPENDENCIES < <(printf '%s\n' "${PACKAGE_DEPENDENCIES[@]}" | LC_ALL=C sort -u)
+for dependency in "${SORTED_DEPENDENCIES[@]}"; do
+  [[ -z $dependency ]] && continue
+  [[ $dependency =~ ^[A-Za-z0-9@._+:-]+$ ]] || die "unsupported package dependency: $dependency"
+  [[ -n ${LOCKED_NAMES[$dependency]:-} || -n ${BASE_PACKAGE_SET[$dependency]:-} ]] && continue
+  BASE_PACKAGES+=("$dependency")
+  BASE_PACKAGE_SET[$dependency]=1
+done
+
+if (( ! ALLOW_UNSIGNED )); then
+  [[ -r $REPO_KEY ]] || die '--repo-key is required unless --allow-unsigned is explicit'
+  compact_fingerprint=${REPO_FINGERPRINT//[[:space:]]/}
+  [[ $compact_fingerprint =~ ^[0-9A-Fa-f]{40,64}$ ]] || die 'a full --repo-fingerprint is required'
+  command -v gpg >/dev/null || die 'gpg is required to validate the repository key'
+  command -v gpgv >/dev/null || die 'gpgv is required to validate package signatures'
+  KEY_LISTING=$(gpg --batch --show-keys --with-colons "$REPO_KEY" 2>/dev/null) || \
+    die 'repository public key could not be parsed'
+  if awk -F: '$1 == "sec" {found=1} END {exit !found}' <<<"$KEY_LISTING"; then
+    die 'refusing to install a repository secret key'
+  fi
+  mapfile -t KEY_FINGERPRINTS < <(
+    awk -F: '$1 == "fpr" {print toupper($10)}' <<<"$KEY_LISTING"
+  )
+  expected_fingerprint=${compact_fingerprint^^}
+  found=0
+  for fingerprint in "${KEY_FINGERPRINTS[@]}"; do
+    [[ $fingerprint == "$expected_fingerprint" ]] && found=1
+  done
+  (( found )) || die 'repository key fingerprint does not match --repo-fingerprint'
+  for filename in "${LOCK_FILENAMES[@]}"; do
+    package="${BUNDLE_DIR%/}/$filename"
+    [[ -f ${package}.sig ]] || die "signed installation requires ${filename}.sig"
+    gpgv --keyring "$REPO_KEY" "${package}.sig" "$package" >/dev/null 2>&1 || \
+      die "invalid package signature: $filename"
+  done
+fi
+
+# The filesystem tools for a root that is not Btrfs, and the generator that
+# turns `--swap zram` into a running swap device. btrfs-progs is already in the
+# list unconditionally because the rollback tooling uses it whatever the root
+# filesystem is.
+case $FILESYSTEM in
+  ext4) BASE_PACKAGES+=(e2fsprogs) ;;
+  xfs)  BASE_PACKAGES+=(xfsprogs) ;;
+esac
+[[ $SWAP != zram ]] || BASE_PACKAGES+=(zram-generator)
+# The reader and the braille driver have to exist on the installed system, not
+# only on the image that installed it. This is the difference between a setting
+# that survives the reboot and a setting that was true for ten minutes.
+[[ $SCREEN_READER != yes ]] || BASE_PACKAGES+=(espeakup)
+[[ $BRAILLE != yes ]] || BASE_PACKAGES+=(brltty)
+# The face has to be on the installed system, not only on the image that
+# installed it. Both are in the pinned snapshot, which is what makes offering
+# them safe: a package that is not in the snapshot fails the whole install, and
+# a font name written for a face that is not there fails silently, which is
+# worse.
+case $TYPEFACE in
+  atkinson)     BASE_PACKAGES+=(ttf-atkinson-hyperlegible) ;;
+  opendyslexic) BASE_PACKAGES+=(otf-opendyslexic-nerd) ;;
+esac
+# What this machine needs beyond what every install carries, such as
+# Broadcom's own Wi-Fi driver. Worked out from the machine the installer runs
+# on; --hardware-support off is for an install made for a different machine.
+if [[ $HARDWARE_SUPPORT == auto ]]; then
+  kibaos_hw_detect
+else
+  HW_PACKAGES=() HW_NOTES=() HW_SERVICES=() HW_SUMMARY=generic
+fi
+log "hardware: ${HW_SUMMARY}"
+for note in "${HW_NOTES[@]}"; do
+  log "hardware: $note"
+done
+BASE_PACKAGES+=("${HW_PACKAGES[@]}")
+for _app in "${APP_LIST[@]}"; do
+  # shellcheck disable=SC2206  # the table holds plain package names
+  BASE_PACKAGES+=(${APP_PACKAGES[$_app]})
+done
+(( ${#APP_LIST[@]} == 0 )) || log "apps: ${APP_LIST[*]}"
+
+# The tools this shape needs, checked in both modes.
+#
+# This used to run only on the destructive path, immediately before the first
+# write. That is early enough to keep a disk intact, and far too late to be
+# useful: the image ships mkfs.btrfs and mkfs.ext4 and not every other one, so
+# choosing a root filesystem the image cannot make produced an installer that
+# asked every question, accepted the erase token, and then refused - after the
+# user had committed to erasing the disk.
+#
+# The dry run is the answer to "will this work". So the same check runs there,
+# where it is a plan that says no rather than an installation that stops.
+require_shape_tools() {
+  case $FILESYSTEM in
+    ext4) command -v mkfs.ext4 >/dev/null || die 'required command not found: mkfs.ext4' ;;
+    xfs)  command -v mkfs.xfs >/dev/null || die 'required command not found: mkfs.xfs' ;;
+  esac
+  if [[ $SWAP == file ]]; then
+    command -v mkswap >/dev/null || die 'required command not found: mkswap'
+    if [[ $FILESYSTEM == btrfs ]]; then
+      command -v btrfs >/dev/null || die 'required command not found: btrfs'
+      btrfs filesystem mkswapfile --help >/dev/null 2>&1 || \
+        die 'required btrfs-progs does not support filesystem mkswapfile'
+    fi
+    [[ $FILESYSTEM != ext4 ]] || command -v fallocate >/dev/null || \
+      die 'required command not found: fallocate'
+  fi
+}
+require_shape_tools
+
+ESP_PART=$(partition_path "$TARGET" 1)
+ROOT_PART=$(partition_path "$TARGET" 2)
+# The token says what is about to happen. `alongside` does not erase anything,
+# so demanding the word ERASE there would train people to type it when it is
+# not true, which is the one habit this gate exists to prevent.
+if [[ $LAYOUT == alongside ]]; then
+  ERASE_TOKEN="INSTALL:$TARGET"
+else
+  ERASE_TOKEN="ERASE:$TARGET"
+fi
+
+if [[ $MODE == execute ]]; then
+  (( EUID == 0 )) || die '--execute requires root'
+  [[ $CONFIRM == "$ERASE_TOKEN" ]] || die "refusing write: --confirm must exactly equal $ERASE_TOKEN"
+  [[ -d /sys/firmware/efi ]] || die 'KibaOS requires booting the installer in UEFI mode'
+  [[ -b $TARGET ]] || die "target is not a block device: $TARGET"
+  target_type=$(lsblk -dnro TYPE "$TARGET")
+  case "$target_type" in
+    disk) ;;
+    loop) (( ALLOW_LOOP )) || die 'loop targets require --allow-loop' ;;
+    *) die "target must be a whole disk or explicitly allowed loop device (found $target_type)" ;;
+  esac
+  root_source=$(findmnt -nro SOURCE / | sed 's/\[.*//')
+  if lsblk -snpo NAME "$root_source" 2>/dev/null | grep -Fxq "$TARGET"; then
+    die 'target contains the running root filesystem'
+  fi
+  while read -r mounted_source; do
+    [[ -z $mounted_source ]] && continue
+    die "target or a child partition is mounted: $mounted_source"
+  done < <(lsblk -lnpo NAME,MOUNTPOINTS "$TARGET" | awk '$2 != "" {print $1 " -> " $2}')
+  while read -r device device_type; do
+    case "$device_type" in
+      crypt|dm|lvm|md|md[0-9]*|mpath)
+        die "target has an active device-mapper/RAID relationship: $device ($device_type)" ;;
+    esac
+  done < <(lsblk -lnpo NAME,TYPE "$TARGET")
+  while read -r swap_device; do
+    [[ -z $swap_device ]] && continue
+    if [[ $swap_device == "$TARGET" ]] || lsblk -snpo NAME "$swap_device" 2>/dev/null | grep -Fxq "$TARGET"; then
+      die "target or a child partition is active swap: $swap_device"
+    fi
+  done < <(swapon --show=NAME --noheadings 2>/dev/null || true)
+  target_bytes=$(blockdev --getsize64 "$TARGET")
+  min_target_bytes=${KIBAOS_MIN_DISK_BYTES:-17179869184}
+  if [[ $LAYOUT == alongside ]]; then
+    # Nothing is moved, shrunk or deleted here. The free space has to be there
+    # already, and the partition table has to be the GPT the existing system
+    # boots from - installing a second ESP beside an MBR disk produces a
+    # machine whose firmware boots one operating system and cannot see the
+    # other, which is a worse outcome than refusing.
+    ALONGSIDE_ESP=$(existing_esp "$TARGET") || \
+      die 'this disk has no EFI system partition, so KibaOS cannot be added alongside what is already on it'
+    free_bytes=$(largest_free_bytes "$TARGET")
+    (( free_bytes >= min_target_bytes )) || \
+      die "the largest unallocated region on the target is ${free_bytes} bytes and --layout alongside needs at least ${min_target_bytes}. It never resizes an existing partition to make room."
+    log "alongside: reusing ESP ${ALONGSIDE_ESP}, ${free_bytes} bytes of free space available"
+  else
+    (( target_bytes >= min_target_bytes )) || die 'target is too small (need at least 16 GiB)'
+  fi
+  target_model=$(lsblk -dnro MODEL "$TARGET" | sed 's/[[:space:]]*$//' || true)
+  target_serial=$(lsblk -dnro SERIAL "$TARGET" | sed 's/[[:space:]]*$//' || true)
+  target_transport=$(lsblk -dnro TRAN "$TARGET" | sed 's/[[:space:]]*$//' || true)
+  target_by_id=
+  for candidate in /dev/disk/by-id/*; do
+    [[ -e $candidate ]] || continue
+    [[ $(readlink -f -- "$candidate") == "$TARGET" ]] || continue
+    target_by_id=$candidate
+    break
+  done
+  log "target identity: model=${target_model:-unknown} serial=${target_serial:-unknown} transport=${target_transport:-unknown} by-id=${target_by_id:-unavailable}"
+  for command in blockdev sgdisk wipefs partprobe udevadm mkfs.fat mkfs.btrfs mount umount btrfs pacman pacman-key arch-chroot genfstab bootctl blkid timeout tee findmnt tar gpg gpgv; do
+    command -v "$command" >/dev/null || die "required command not found: $command"
+  done
+  # Same rule as cryptsetup below: anything the chosen shape will need is
+  # checked here, before the first destructive command, so a missing binary
+  # cannot leave a half-partitioned disk. The plan ran this too, which is
+  # where it should first have been noticed; this is the copy that guarantees
+  # it, because a plan can be minutes old by the time anyone confirms it.
+  require_shape_tools
+  # The encrypted path invokes cryptsetup after partitioning.  Check it with
+  # the other pre-erase dependencies so a missing binary cannot leave a
+  # partially partitioned target.
+  if (( LUKS )); then
+    command -v cryptsetup >/dev/null || die 'required command not found: cryptsetup'
+  fi
+  secure_boot_state=$(bootctl is-secure-boot 2>/dev/null || true)
+  # The `is-secure-boot` verb is absent from older ArchISO snapshots. Read the
+  # firmware variable directly before treating the state as unreadable, so an
+  # older live image does not silently downgrade a known-enabled machine to the
+  # unknown branch. Only an explicit 0 or 1 is safe to carry forward.
+  case $secure_boot_state in
+    enabled|disabled) ;;
+    *)
+      case $(efi_boolean SecureBoot 2>/dev/null || true) in
+        1) secure_boot_state=enabled ;;
+        0) secure_boot_state=disabled ;;
+      esac ;;
+  esac
+  case $secure_boot_state in
+    enabled)
+      setup_mode=$(efi_boolean SetupMode 2>/dev/null || true)
+      case $setup_mode in
+        1)
+          SECURE_BOOT_SETUP_MODE=1
+          SECURE_BOOT_SIGN=1
+          log 'Secure Boot is enabled in firmware setup mode. KibaOS will prepare a signed boot chain and first-boot key enrollment.' ;;
+        0)
+          if [[ -n $SECURE_BOOT_KEY_FILE ]]; then
+            SECURE_BOOT_SIGN=1
+            log 'Secure Boot is enabled with existing firmware keys. Using the supplied pre-enrolled signing certificate.'
+          else
+            SECURE_BOOT_SIGN=0
+            log 'Secure Boot is enabled and no trusted KibaOS signing key was supplied. Continuing without signing. Turn Secure Boot off, or enroll a KibaOS key, before the first boot.'
+          fi ;;
+        *)
+          if [[ -n $SECURE_BOOT_KEY_FILE ]]; then
+            SECURE_BOOT_SIGN=1
+            log 'Secure Boot setup mode could not be read. Continuing with the supplied signing certificate.'
+          else
+            SECURE_BOOT_SIGN=0
+            log 'Secure Boot is enabled and firmware setup mode could not be read. Continuing without signing. Turn Secure Boot off, or enroll a KibaOS key, before the first boot.'
+          fi ;;
+      esac ;;
+    disabled)
+      [[ -z $SECURE_BOOT_KEY_FILE ]] || SECURE_BOOT_SIGN=1 ;;
+    *)
+      if [[ -n $SECURE_BOOT_KEY_FILE ]]; then
+        SECURE_BOOT_SIGN=1
+        log 'Secure Boot state could not be read. Continuing with the supplied signing certificate.'
+      else
+        SECURE_BOOT_SIGN=0
+        log 'Secure Boot state could not be read. Continuing without signing. If firmware has Secure Boot enabled, turn it off or enroll a KibaOS key before the first boot.'
+      fi ;;
+  esac
+  if (( SECURE_BOOT_SIGN )); then
+    for command in sbsign sbverify; do
+      command -v "$command" >/dev/null || die "required command not found for Secure Boot signing: $command"
+    done
+    if (( SECURE_BOOT_SETUP_MODE )) && ! bootctl --help 2>&1 | grep -Fq -- '--secure-boot-auto-enroll'; then
+      die 'this image is too old to enroll Secure Boot keys automatically'
+    fi
+  fi
+fi
+
+log "mode=$MODE target=$TARGET encrypted=$LUKS rootfs=live-squashfs"
+log "safety token: $ERASE_TOKEN"
+
+# Preflight is complete by this point: arguments are validated, the target is
+# resolved and proven not to back the running root, and the required commands
+# and Secure Boot state have been checked. Secure Boot is deliberately a
+# warning-only condition when no signing path is available. The installer can
+# still write a useful system, and the first-boot message tells the user that
+# firmware must be disabled or enrolled before that system can start.
+kibaos_journal_init "$MODE" "$TARGET" || {
+  die 'the install journal could not be started, and nothing runs without one'
+}
+kibaos_journal_begin preflight 'Checking the disk and this computer'
+kibaos_journal_ok preflight
+
+WORK_PARENT=${KIBAOS_INSTALL_WORK_DIR:-/var/tmp}
+WORK_PARENT_REQUESTED=$WORK_PARENT
+WORKSPACE_FS_PATH=$WORK_PARENT
+[[ $WORK_PARENT == /* && $WORK_PARENT != / ]] || die 'KIBAOS_INSTALL_WORK_DIR must be an absolute non-root path'
+if [[ -e $WORK_PARENT ]]; then
+  [[ -d $WORK_PARENT && -w $WORK_PARENT && -x $WORK_PARENT ]] || WORK_PARENT=
+else
+  install -d -m 0700 "$WORK_PARENT" 2>/dev/null || WORK_PARENT=
+fi
+if [[ -n $WORK_PARENT ]] && \
+    ! WORK_DIR=$(mktemp -d "$WORK_PARENT/kibaos-install.XXXXXX"); then
+  WORK_PARENT=
+fi
+if [[ -z $WORK_PARENT ]]; then
+  log "could not use ${WORK_PARENT_REQUESTED}. Falling back to /tmp for installer state."
+  [[ -d /tmp && -w /tmp && -x /tmp ]] || die 'neither the configured installer work directory nor /tmp is writable'
+  WORK_DIR=$(mktemp -d /tmp/kibaos-install.XXXXXX)
+  WORKSPACE_FS_PATH=/tmp
+fi
+chmod 700 "$WORK_DIR"
+check_workspace_capacity "$WORKSPACE_FS_PATH"
+if (( SECURE_BOOT_SIGN )) && [[ -z $SECURE_BOOT_KEY_FILE ]]; then
+  secure_boot_generate_material
+else
+  [[ $SECURE_BOOT_SIGN == 0 ]] || secure_boot_validate_material
+fi
+LIVE_ROOTFS=$(live_rootfs_source || true)
+if [[ -z $LIVE_ROOTFS ]]; then
+  [[ $MODE == dry-run ]] || die 'the live squashfs root is not mounted, so there is no system to copy'
+  log 'no live squashfs root on this machine. The plan assumes the usual archiso location.'
+  LIVE_ROOTFS=/run/archiso/sfs/airootfs
+else
+  check_live_rootfs "$LIVE_ROOTFS"
+fi
+
+# Everything above this line is reversible: the disk has not been touched and
+# an abandoned run costs only the downloads. Everything below it is not.
+kibaos_journal_begin confirm 'Erase confirmed'
+kibaos_journal_ok confirm
+
+kibaos_journal_begin partition 'Partitioning the disk'
+ROOT_PARTITION_TYPE=8300
+(( LUKS )) && ROOT_PARTITION_TYPE=8309
+if [[ $LAYOUT == alongside ]]; then
+  # No wipefs and no --zap-all: every existing partition, and the partition
+  # table itself, is left exactly as it was. sgdisk fills the largest free
+  # block and numbers the result itself.
+  run sgdisk --largest-new=0 --typecode="0:${ROOT_PARTITION_TYPE}" \
+    --change-name=0:KIBAOS_ROOT "$TARGET"
+  run partprobe "$TARGET"
+  run udevadm settle
+  if [[ $MODE == execute ]]; then
+    ESP_PART=$ALONGSIDE_ESP
+    ROOT_PART=$(lsblk -lnpo NAME,PARTLABEL "$TARGET" |
+      awk '$2 == "KIBAOS_ROOT" { print $1; exit }')
+    [[ -b $ROOT_PART ]] || die 'the new partition did not appear after partitioning the target'
+  else
+    ESP_PART='<existing-efi-system-partition>'
+    ROOT_PART='<new-partition-in-free-space>'
+  fi
+else
+  run wipefs --all --force "$TARGET"
+  run sgdisk --zap-all "$TARGET"
+  run sgdisk --clear --new=1:1MiB:+1GiB --typecode=1:ef00 --change-name=1:KIBAOS_ESP \
+    --new=2:0:0 --typecode="2:${ROOT_PARTITION_TYPE}" --change-name=2:KIBAOS_ROOT "$TARGET"
+  run partprobe "$TARGET"
+  run udevadm settle
+fi
+kibaos_journal_ok partition
+
+kibaos_journal_begin format 'Creating the filesystems'
+if [[ $LAYOUT == alongside ]]; then
+  # Formatting the ESP here would destroy the boot entries of whatever is
+  # already installed, which is the single most damaging thing this mode could
+  # do. It is mounted and written into, never made.
+  log "alongside: keeping the existing EFI system partition $ESP_PART as it is"
+else
+  run mkfs.fat -F 32 -n KIBAOS_ESP "$ESP_PART"
+fi
+
+ROOT_DEVICE=$ROOT_PART
+if (( LUKS )); then
+  run cryptsetup luksFormat --type luks2 --batch-mode --key-file "$LUKS_PASSPHRASE_FILE" "$ROOT_PART"
+  run cryptsetup open --key-file "$LUKS_PASSPHRASE_FILE" "$ROOT_PART" "$CRYPT_NAME"
+  if [[ $MODE == execute ]]; then
+    CRYPT_OPENED=1
+  fi
+  ROOT_DEVICE=/dev/mapper/$CRYPT_NAME
+fi
+case $FILESYSTEM in
+  btrfs) run mkfs.btrfs -f -L KIBAOS_ROOT "$ROOT_DEVICE" ;;
+  ext4)  run mkfs.ext4 -F -L KIBAOS_ROOT "$ROOT_DEVICE" ;;
+  xfs)   run mkfs.xfs -f -L KIBAOS_ROOT "$ROOT_DEVICE" ;;
+esac
+kibaos_journal_ok format
+
+kibaos_journal_begin mount 'Mounting the new filesystems'
+run install -d -m 0755 "$MOUNTPOINT"
+if [[ $FILESYSTEM == btrfs ]]; then
+  run mount "$ROOT_DEVICE" "$MOUNTPOINT"
+  if [[ $MODE == execute ]]; then TARGET_MOUNTED=1; fi
+  for subvolume in @ @home @var_log @snapshots; do
+    run btrfs subvolume create "$MOUNTPOINT/$subvolume"
+  done
+  run umount "$MOUNTPOINT"
+  if [[ $MODE == execute ]]; then TARGET_MOUNTED=0; fi
+  run mount -o noatime,compress=zstd:3,subvol=@ "$ROOT_DEVICE" "$MOUNTPOINT"
+  if [[ $MODE == execute ]]; then TARGET_MOUNTED=1; fi
+  run install -d -m 0755 "$MOUNTPOINT/boot" "$MOUNTPOINT/home" "$MOUNTPOINT/var/log" "$MOUNTPOINT/.snapshots" "$MOUNTPOINT/var/cache/kibaos/repo"
+  run mount "$ESP_PART" "$MOUNTPOINT/boot"
+  run mount -o noatime,compress=zstd:3,subvol=@home "$ROOT_DEVICE" "$MOUNTPOINT/home"
+  run mount -o noatime,compress=zstd:3,subvol=@var_log "$ROOT_DEVICE" "$MOUNTPOINT/var/log"
+  run mount -o noatime,compress=zstd:3,subvol=@snapshots "$ROOT_DEVICE" "$MOUNTPOINT/.snapshots"
+else
+  # One filesystem, no subvolumes, and therefore no snapshot to roll back to.
+  # That consequence is carried all the way through: the snapshot stage skips,
+  # the rollback boot entry is not written, and the installed manifest records
+  # it, so nothing on the installed system claims a rollback exists.
+  run mount -o noatime "$ROOT_DEVICE" "$MOUNTPOINT"
+  if [[ $MODE == execute ]]; then TARGET_MOUNTED=1; fi
+  run install -d -m 0755 "$MOUNTPOINT/boot" "$MOUNTPOINT/var/cache/kibaos/repo"
+  run mount "$ESP_PART" "$MOUNTPOINT/boot"
+fi
+kibaos_journal_ok mount
+
+# Swap, before pacstrap so the file is part of the filesystem the rest of the
+# install measures itself against, and before genfstab so the entry is written
+# by the same pass that writes every other mount.
+SWAP_FILE=
+SWAP_SIZE_MIB=$(swap_mib)
+if [[ $SWAP == file ]] && (( SWAP_SIZE_MIB > 0 )); then
+  SWAP_FILE=/swap/swapfile
+  run install -d -m 0755 "$MOUNTPOINT/swap"
+  case $FILESYSTEM in
+    btrfs)
+      # A Btrfs swap file must not be copy-on-write and must not be
+      # compressed; `mkswapfile` sets both, which is why it is used rather
+      # than fallocate plus chattr.
+      run btrfs filesystem mkswapfile --size "${SWAP_SIZE_MIB}m" \
+        --uuid clear "$MOUNTPOINT$SWAP_FILE"
+      ;;
+    ext4)
+      run fallocate -l "${SWAP_SIZE_MIB}M" "$MOUNTPOINT$SWAP_FILE"
+      run chmod 600 "$MOUNTPOINT$SWAP_FILE"
+      run mkswap "$MOUNTPOINT$SWAP_FILE"
+      ;;
+    xfs)
+      # xfs will not take a hole-punched file for swap, so it is written out.
+      run dd if=/dev/zero "of=$MOUNTPOINT$SWAP_FILE" bs=1M \
+        "count=$SWAP_SIZE_MIB" status=none
+      run chmod 600 "$MOUNTPOINT$SWAP_FILE"
+      run mkswap "$MOUNTPOINT$SWAP_FILE"
+      ;;
+  esac
+  log "swap: ${SWAP_SIZE_MIB} MiB swap file at $SWAP_FILE"
+fi
+
+kibaos_journal_begin rootfs 'Copying the live system'
+copy_live_rootfs "$LIVE_ROOTFS"
+scrub_live_identity
+kibaos_journal_ok rootfs
+run cp -a "${BUNDLE_DIR%/}/." "$MOUNTPOINT/var/cache/kibaos/repo/"
+
+if (( ! ALLOW_UNSIGNED )); then
+  run install -Dm0644 "$REPO_KEY" "$MOUNTPOINT/usr/share/pacman/keyrings/kibaos-repository.gpg"
+  run arch-chroot "$MOUNTPOINT" pacman-key --add /usr/share/pacman/keyrings/kibaos-repository.gpg
+  run arch-chroot "$MOUNTPOINT" pacman-key --lsign-key "$expected_fingerprint"
+  if [[ $MODE == execute ]]; then
+    sed -i -E 's/^LocalFileSigLevel.*/LocalFileSigLevel = Required/' "$MOUNTPOINT/etc/pacman.conf"
+  else
+    printf ' + require signatures for local package files in %q\n' "$MOUNTPOINT/etc/pacman.conf"
+  fi
+fi
+
+if (( ALLOW_UNSIGNED )); then
+  repo_siglevel='SigLevel = Never'
+else
+  repo_siglevel='SigLevel = Required DatabaseOptional'
+fi
+write_target_file /etc/pacman.d/kibaos-mirrorlist 0644 "$(kibaos_mirror_servers)"
+write_target_file /etc/pacman.d/kibaos.conf 0644 "[${REPO_NAME}]\n${repo_siglevel}\nInclude = /etc/pacman.d/kibaos-mirrorlist\n"
+if [[ $MODE == execute ]]; then
+  kibaos_wifi_copy_profiles "$MOUNTPOINT"
+fi
+# The install runs against a pinned archive snapshot, which is no place to
+# update from, and the stock mirrorlist has every server commented out.
+# Without real mirrors an installed system could not sync core or extra.
+write_target_file /etc/pacman.d/mirrorlist 0644 "Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch\nServer = https://mirror.rackspace.com/archlinux/\$repo/os/\$arch\nServer = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch\n"
+if [[ $MODE == execute ]]; then
+  printf '\nInclude = /etc/pacman.d/kibaos.conf\n' >>"$MOUNTPOINT/etc/pacman.conf"
+else
+  printf ' + append %q to %q\n' 'Include = /etc/pacman.d/kibaos.conf' "$MOUNTPOINT/etc/pacman.conf"
+fi
+
+run arch-chroot "$MOUNTPOINT" pacman -U --needed --noconfirm "${PACKAGE_FILES[@]}"
+
+kibaos_journal_begin configure 'Setting up the installed system'
+if [[ $MODE == execute ]]; then
+  genfstab -U "$MOUNTPOINT" >"$MOUNTPOINT/etc/fstab"
+else
+  printf ' + genfstab -U %q > %q\n' "$MOUNTPOINT" "$MOUNTPOINT/etc/fstab"
+fi
+# genfstab records mounted filesystems. A swap file has never been swapped on
+# here - activating it inside the installer would put the target's swap under
+# the live system - so its entry is written directly.
+if [[ -n $SWAP_FILE ]]; then
+  if [[ $MODE == execute ]]; then
+    printf '%s none swap defaults 0 0\n' "$SWAP_FILE" >>"$MOUNTPOINT/etc/fstab"
+  else
+    # %s rather than %q for the line itself: this is a fixed fstab entry, and
+    # the point of the dry run is that a person can read the plan.
+    printf ' + append "%s" to %q\n' "$SWAP_FILE none swap defaults 0 0" "$MOUNTPOINT/etc/fstab"
+  fi
+fi
+if [[ $SWAP == zram ]]; then
+  # Compressed swap in RAM. Nothing is written to the disk, so there is no
+  # hibernation and no wear, which is the trade this option exists to make.
+  write_target_file /etc/systemd/zram-generator.conf 0644 \
+    "[zram0]\nzram-size = min(ram / 2, 8192)\ncompression-algorithm = zstd\n"
+fi
+run arch-chroot "$MOUNTPOINT" ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
+run arch-chroot "$MOUNTPOINT" hwclock --systohc
+write_target_file /etc/hostname 0644 "$HOSTNAME\n"
+VCONSOLE_XKB=$(keymap_xkb_lines "$KEYMAP")
+write_target_file /etc/vconsole.conf 0644 "KEYMAP=$KEYMAP\n${VCONSOLE_XKB}"
+if [[ -n $VCONSOLE_XKB ]]; then
+  log "keyboard: KEYMAP=$KEYMAP with ${VCONSOLE_XKB//\\n/ }"
+else
+  log "keyboard: KEYMAP=$KEYMAP, which has no XKB layout, so the login screen stays on US"
+fi
+write_target_file /etc/locale.conf 0644 "LANG=$LOCALE\n"
+
+# --- the accessibility choices, written into the installed system --------
+#
+# Three destinations, because there is no single place a desktop reads.
+#
+# The record is the authoritative one and is plain text on purpose: it is what
+# the first boot check reads back to confirm the settings survived, and it is
+# what somebody can read with `cat` when they want to know what an install
+# actually did.
+#
+# The GTK defaults and the dconf defaults are the two mechanisms that make the
+# settings take effect. Writing both is deliberate belt and braces: a setting
+# that silently does nothing is the exact failure this whole feature exists to
+# prevent, and the cost of the redundant one is a file.
+write_target_file /etc/kibaos-install/accessibility 0644 \
+  "screen_reader=$SCREEN_READER\nbraille=$BRAILLE\ncontrast=$CONTRAST\ntext_scale=$TEXT_SCALE\nspacing=$SPACING\ntypeface=$TYPEFACE\nreduce_motion=$REDUCE_MOTION\ncursor_size=$CURSOR_SIZE\n"
+
+# What this install was, left where somebody can read it later.
+#
+# Six months from now the questions are "when did I install this", "which
+# snapshot is it built from" and "did I turn encryption on". All three are
+# known exactly once, here, and are guesswork forever afterwards. It is three
+# lines of writing and it answers a support conversation.
+#
+# Plain `key=value`, the same shape as the accessibility record beside it, so
+# a script can read it and so can a person. No secret goes in it: the disk is
+# named because the disk is not a secret and knowing which one the system came
+# from is the point.
+INSTALLED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# The mark this machine gets and no other machine has.
+#
+# Every KibaOS install is identical by design; that is what a pinned snapshot
+# is for. It also means there is nothing anywhere that says this one is mine.
+#
+# It is derived and never collected. The board identifiers and the one network
+# address that seed it go into a digest and the digest is the only thing that
+# is kept, so nothing recoverable about this hardware is written down. The
+# install time is part of the seed on purpose: a fingerprint that survived a
+# reinstall would be a hardware identifier, which is precisely what this is
+# not, and reinstalling should give a machine a new mark rather than the old
+# one back.
+#
+# Nothing announces it. It is written here and found later by somebody who
+# went looking, which is the whole of the idea.
+BADGE_SEED=
+BADGE_CODE=
+if declare -F kibaos_badge_seed >/dev/null 2>&1; then
+  BADGE_SEED=$(kibaos_badge_seed "$INSTALLED_AT" "$TARGET" 2>/dev/null || true)
+  BADGE_CODE=$(kibaos_badge_code "$BADGE_SEED" 2>/dev/null || true)
+fi
+if [[ -n $BADGE_CODE ]]; then
+  BADGE_ART=$(kibaos_badge_rows "$BADGE_SEED" '##' '  ' 2>/dev/null || true)
+  write_target_file /etc/kibaos-install/badge 0644 \
+    "${BADGE_ART}\n\n${BADGE_CODE}\n"
+fi
+
+write_target_file /etc/kibaos-install/summary 0644 \
+  "installed=${INSTALLED_AT}\ntarget=$TARGET\nlayout=$LAYOUT\nfilesystem=$FILESYSTEM\nencrypted=$LUKS\nswap=$SWAP\nhostname=$HOSTNAME\nusername=$USERNAME\nlocale=$LOCALE\nkeymap=$KEYMAP\ntimezone=$TIMEZONE\nrootfs=live-squashfs\nfingerprint=${BADGE_CODE:-none}\nfeature_profile=$FEATURE_PROFILE\nwallpaper=$WALLPAPER\ndisplay_scale=$DISPLAY_SCALE\napps=${APPS}\nauto_snapshots=$AUTO_SNAPSHOTS\n"
+
+if [[ $SCREEN_READER == yes || $BRAILLE == yes || $CONTRAST == high ||
+      $TEXT_SCALE != 100 || $REDUCE_MOTION == yes || $CURSOR_SIZE != 24 ||
+      $SPACING != normal || $TYPEFACE != system ]]; then
+  # GTK reads dpi in 1024ths of a point, which is why 100 is not 100 here.
+  _gtk_dpi=$(( TEXT_SCALE * 96 * 1024 / 100 ))
+  _gtk_anim=1
+  [[ $REDUCE_MOTION != yes ]] || _gtk_anim=0
+  # The face, by family name, which is what fontconfig matches on. Left out
+  # entirely for `system`, because writing the current default back is how a
+  # later change to that default silently stops applying.
+  _font=
+  case $TYPEFACE in
+    atkinson)     _font='\ngtk-font-name=Atkinson Hyperlegible 11' ;;
+    opendyslexic) _font='\ngtk-font-name=OpenDyslexic Nerd Font 11' ;;
+  esac
+  write_target_file /etc/xdg/gtk-4.0/settings.ini 0644 \
+    "[Settings]\ngtk-xft-dpi=$_gtk_dpi\ngtk-enable-animations=$_gtk_anim\ngtk-cursor-theme-size=$CURSOR_SIZE$_font\n"
+
+  _dconf_contrast=false
+  [[ $CONTRAST != high ]] || _dconf_contrast=true
+  _dconf_anim=true
+  [[ $REDUCE_MOTION != yes ]] || _dconf_anim=false
+  _dconf_scale=$(printf '%s.%02d' "$(( TEXT_SCALE / 100 ))" "$(( TEXT_SCALE % 100 ))")
+  write_target_file /etc/dconf/profile/user 0644 "user-db:user\nsystem-db:local\n"
+  write_target_file /etc/dconf/db/local.d/00-kibaos-accessibility 0644 \
+    "[org/gnome/desktop/a11y/interface]\nhigh-contrast=$_dconf_contrast\n\n[org/gnome/desktop/interface]\ntext-scaling-factor=$_dconf_scale\nenable-animations=$_dconf_anim\ncursor-size=$CURSOR_SIZE\n"
+  run arch-chroot "$MOUNTPOINT" dconf update
+
+  # Line spacing has no GTK setting and no dconf key: it is a property of the
+  # text, so it travels as stylesheet. /etc/xdg/gtk-4.0/gtk.css is the ordinary
+  # system wide place for that, loaded by every GTK 4 application on the
+  # installed system rather than only by this installer.
+  #
+  # Letter spacing moves with it. Both hold up better in the evidence than any
+  # typeface choice does, which is why they are here and the fonts are not.
+  if [[ $SPACING != normal ]]; then
+    _line=1.75
+    _letter=0.2
+    if [[ $SPACING == roomier ]]; then _line=2.0; _letter=0.4; fi
+    write_target_file /etc/xdg/gtk-4.0/gtk.css 0644 \
+      "label, entry, textview { line-height: $_line; letter-spacing: ${_letter}px; }\n"
+  fi
+fi
+
+# And the other half of the promise: something on the installed system that
+# reads that record back and confirms the settings actually survived.
+#
+# Writing them was never the hard part. The failure this exists for is silent:
+# the installer says it will carry them over, the record says it did, and the
+# machine in front of somebody who cannot see the screen says otherwise. A
+# write with nothing checking it is a promise nobody kept.
+#
+# It verifies and does not repair. Putting the settings back would hide the
+# fault that lost them, and finding that fault is the point.
+FIRST_BOOT_CHECK=${KIBAOS_FIRST_BOOT_CHECK:-/usr/local/bin/kibaos-first-boot-accessibility}
+[[ -x $FIRST_BOOT_CHECK ]] || FIRST_BOOT_CHECK="$SELF_DIR/kibaos-first-boot-accessibility"
+FIRST_BOOT_UNIT=${KIBAOS_FIRST_BOOT_UNIT:-/usr/local/share/kibaos/kibaos-first-boot-accessibility.service}
+[[ -r $FIRST_BOOT_UNIT ]] || FIRST_BOOT_UNIT="$SELF_DIR/../units/kibaos-first-boot-accessibility.service"
+# The unit is a file rather than a string built here, so that what a test reads
+# is what the installed system gets. Embedded in an escaped string it was
+# checked by grepping this file for a line that also appeared in the comment
+# above it, which passed against an engine that had stopped writing it.
+if [[ -x $FIRST_BOOT_CHECK && -r $FIRST_BOOT_UNIT ]]; then
+  run install -D -m 0755 "$FIRST_BOOT_CHECK" \
+    "$MOUNTPOINT/usr/local/bin/kibaos-first-boot-accessibility"
+  run install -D -m 0644 "$FIRST_BOOT_UNIT" \
+    "$MOUNTPOINT/etc/systemd/system/kibaos-first-boot-accessibility.service"
+  run arch-chroot "$MOUNTPOINT" systemctl enable kibaos-first-boot-accessibility.service
+fi
+
+# Enabling rather than starting: the target is not running. `systemctl enable`
+# in a chroot writes the wants symlink, which is what makes the daemon come up
+# on the first boot of the installed system.
+if [[ $SCREEN_READER == yes ]]; then
+  run arch-chroot "$MOUNTPOINT" systemctl enable espeakup.service
+fi
+if [[ $BRAILLE == yes ]]; then
+  run arch-chroot "$MOUNTPOINT" systemctl enable brltty.service
+fi
+if [[ $MODE == execute ]]; then
+  sed -i -E "s/^#(${LOCALE//./\\.}[[:space:]]+UTF-8)/\\1/" "$MOUNTPOINT/etc/locale.gen"
+else
+  printf ' + enable locale %q in %q\n' "$LOCALE" "$MOUNTPOINT/etc/locale.gen"
+fi
+run arch-chroot "$MOUNTPOINT" locale-gen
+target_groups=wheel,audio,video,input,storage,seat
+run arch-chroot "$MOUNTPOINT" useradd -m -G "$target_groups" -s /bin/bash "$USERNAME"
+if [[ $MODE == execute ]]; then
+  # Stream the validated file through the chroot instead of putting the
+  # password hash in a shell argument or environment entry visible to other
+  # processes. `chpasswd --encrypted` consumes USER:HASH on stdin.
+  awk -v username="$USERNAME" '{ print username ":" $0 }' "$PASSWORD_HASH_FILE" |
+    arch-chroot "$MOUNTPOINT" chpasswd --encrypted
+else
+  printf ' + stream a redacted crypt(3) hash to %q chpasswd --encrypted for %q\n' \
+    "$MOUNTPOINT" "$USERNAME"
+fi
+write_target_file /etc/sudoers.d/10-kibaos-wheel 0440 '%wheel ALL=(ALL:ALL) ALL\n'
+
+# --- the desktop as it was asked for --------------------------------------
+#
+# The feature set goes in the system file the session sources at every start,
+# which already carries the line for it. pacman keeps a changed copy of that
+# file over an update, so this choice outlives the package that shipped it.
+if [[ $FEATURE_PROFILE != auto ]]; then
+  if [[ $MODE == execute ]]; then
+    _features=$MOUNTPOINT/etc/kibaos/features.conf
+    if grep -q '^KIBAOS_FEATURE_PROFILE=' "$_features" 2>/dev/null; then
+      sed -i "s/^KIBAOS_FEATURE_PROFILE=.*/KIBAOS_FEATURE_PROFILE=$FEATURE_PROFILE/" "$_features"
+    else
+      install -d -m 0755 "$(dirname "$_features")"
+      printf 'KIBAOS_FEATURE_PROFILE=%s\n' "$FEATURE_PROFILE" >>"$_features"
+    fi
+  else
+    printf ' + set KIBAOS_FEATURE_PROFILE=%s in %q\n' "$FEATURE_PROFILE" "$MOUNTPOINT/etc/kibaos/features.conf"
+  fi
+  log "feature profile: $FEATURE_PROFILE"
+fi
+# The wallpaper is Ash's default, which the session hands it from
+# KIBAOS_DEFAULT_WALLPAPER in the same file. Ash shows it until somebody picks
+# another in Personalization, and the desktop's colours are taken from it.
+# One the installed set does not have, or a session too old to read the
+# setting, is left alone rather than half applied.
+if [[ $WALLPAPER != auto ]]; then
+  _wallpaper=/usr/share/kibaos/wallpapers/$WALLPAPER.png
+  _features=$MOUNTPOINT/etc/kibaos/features.conf
+  if [[ $MODE == execute && ! -r $MOUNTPOINT$_wallpaper ]]; then
+    log "wallpaper: this KibaOS has no $WALLPAPER, so the desktop keeps its own"
+  elif [[ $MODE == execute ]] && ! grep -q KIBAOS_DEFAULT_WALLPAPER "$MOUNTPOINT/usr/bin/chromiumos-ash" 2>/dev/null; then
+    log 'wallpaper: this KibaOS session cannot be given a wallpaper, so the desktop keeps its own'
+  else
+    if [[ $MODE == execute ]]; then
+      if grep -q '^KIBAOS_DEFAULT_WALLPAPER=' "$_features"; then
+        sed -i "s|^KIBAOS_DEFAULT_WALLPAPER=.*|KIBAOS_DEFAULT_WALLPAPER=$_wallpaper|" "$_features"
+      else
+        printf 'KIBAOS_DEFAULT_WALLPAPER=%s\n' "$_wallpaper" >>"$_features"
+      fi
+    else
+      printf ' + set the default wallpaper to %q in %q\n' "$_wallpaper" "$_features"
+    fi
+    log "wallpaper: $WALLPAPER"
+  fi
+fi
+# The display size is the account's own, in the file the desktop's Settings
+# writes when it is changed there. The one `scale=` line counts for every
+# monitor that has no size of its own yet, which on a first start is all of
+# them.
+if [[ $DISPLAY_SCALE != auto ]]; then
+  _scale=$(printf '%s.%02d' "$(( DISPLAY_SCALE / 100 ))" "$(( DISPLAY_SCALE % 100 ))")
+  _scale=${_scale%0}
+  _scale=${_scale%.0}
+  write_target_file "/home/$USERNAME/.config/kibaos/display.conf" 0644 \
+    "# KibaOS display settings\nscale=$_scale\n"
+  run arch-chroot "$MOUNTPOINT" chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/.config"
+  log "display size: ${DISPLAY_SCALE}%"
+fi
+# Flathub, for somebody who asked for Flatpak: Flatpak with no remote is a
+# program with nothing to install. It needs the network, and the install goes
+# on without it, because the remote can be added later and an install that
+# stops over it cannot be.
+if [[ " ${APP_LIST[*]} " == *' flatpak '* ]]; then
+  if [[ $MODE == execute ]]; then
+    arch-chroot "$MOUNTPOINT" flatpak remote-add --system --if-not-exists flathub \
+      https://dl.flathub.org/repo/flathub.flatpakrepo ||
+      log 'flatpak: Flathub could not be added now. Add it later with flatpak remote-add flathub https://dl.flathub.org/repo/flathub.flatpakrepo'
+  else
+    print_command arch-chroot "$MOUNTPOINT" flatpak remote-add --system --if-not-exists flathub \
+      https://dl.flathub.org/repo/flathub.flatpakrepo
+  fi
+fi
+if [[ " ${APP_LIST[*]} " == *' waydroid '* ]]; then
+  run arch-chroot "$MOUNTPOINT" systemctl enable waydroid-container.service
+fi
+# Guest tools and anything else the machine itself asked for.
+if (( ${#HW_SERVICES[@]} > 0 )); then
+  run arch-chroot "$MOUNTPOINT" systemctl enable "${HW_SERVICES[@]}"
+fi
+# A snapshot before every package change, through the same tool and the same
+# retention as one taken by hand, with the rollback entry moved to it. Not
+# AbortOnFail: an update that cannot be snapshotted is still an update somebody
+# asked for, and the snapshot's own error says why there is none.
+if [[ $AUTO_SNAPSHOTS == yes ]]; then
+  write_target_file /etc/pacman.d/hooks/00-kibaos-snapshot.hook 0644 \
+    "[Trigger]\nOperation = Install\nOperation = Upgrade\nOperation = Remove\nType = Package\nTarget = *\n\n[Action]\nDescription = Taking a recovery snapshot before the package change...\nWhen = PreTransaction\nExec = /usr/local/sbin/kibaos-recovery snapshot --label before-update --set-rollback\n"
+  log 'snapshots: one before every package change, the last three kept'
+fi
+run arch-chroot "$MOUNTPOINT" passwd --lock root
+
+run arch-chroot "$MOUNTPOINT" systemctl enable \
+  NetworkManager.service shill-nm-adapter.service bluetooth.service systemd-timesyncd.service \
+  seatd.service kibaos-powerd.service kibaos-host-bridge.service kibaos-greetd.service
+run arch-chroot "$MOUNTPOINT" systemctl set-default graphical.target
+
+# The graphical login screen, on a new install. kibaos-greeter ships its
+# config as an example rather than over kibaos-login's, so an upgrade never
+# switches the greeter on a machine somebody already set up. A new install has
+# nobody to surprise. tuigreet stays installed, and the greeter's session hands
+# the screen to it when the graphical greeter keeps failing to start.
+if [[ -n ${LOCKED_NAMES[kibaos-greeter]:-} ]]; then
+  run install -m 0644 "$MOUNTPOINT/usr/share/kibaos-greeter/kibaos.toml.example" \
+    "$MOUNTPOINT/etc/greetd/kibaos.toml"
+fi
+
+# The unlock screen: the disk passphrase asked for on a photograph, in the
+# greeter's type, instead of on a text console. It needs kibaos-boot from the
+# bundle, and plymouth in the initramfs ahead of `sd-encrypt` so the screen is
+# up before the question is. Without the package the question stays on the
+# console, which is how every encrypted install before it booted.
+BOOT_SCREEN=0
+BOOT_SCREEN_OPTIONS=''
+MKINITCPIO_ENV=()
+if (( LUKS )) && [[ -n ${LOCKED_NAMES[kibaos-boot]:-} ]]; then
+  BOOT_SCREEN=1
+  BOOT_SCREEN_OPTIONS=' splash'
+  # A keymap with no XKB layout beside it is read through the console, which
+  # holds exactly the keymap the passphrase was typed with in this installer.
+  if [[ -z $VCONSOLE_XKB && $KEYMAP != us ]]; then
+    BOOT_SCREEN_OPTIONS+=' plymouth.use-legacy-input'
+    # The hook names the layout on the screen, and the boot entry that tells
+    # it the keys come through the console is not written yet.
+    MKINITCPIO_ENV=(env KIBAOS_BOOT_LEGACY_INPUT=1)
+  fi
+fi
+
+if (( LUKS )); then
+  luks_hooks='base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck'
+  (( BOOT_SCREEN )) &&
+    luks_hooks='base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth kibaos-boot block sd-encrypt filesystems fsck'
+  if [[ $MODE == execute ]]; then
+    sed -i -E "s|^HOOKS=.*|HOOKS=(${luks_hooks})|" "$MOUNTPOINT/etc/mkinitcpio.conf"
+  else
+    printf ' + configure mkinitcpio hooks: %s\n' "$luks_hooks"
+  fi
+  if (( BOOT_SCREEN )); then
+    # The theme scales itself to the screen. Plymouth's own device scale
+    # would double it again on a high density panel, and soften every line.
+    write_target_file /etc/plymouth/plymouthd.conf 0644 \
+      "[Daemon]\nTheme=kibaos-boot\nDeviceScale=1\n"
+  fi
+elif [[ $SWAP_SIZE == hibernate && -n $SWAP_FILE ]]; then
+  # The systemd-based hook set the encrypted path uses already resumes from
+  # hibernation. The default busybox set does not, and needs the `resume` hook
+  # after `block` so the swap file is reachable before the root is mounted.
+  if [[ $MODE == execute ]]; then
+    sed -i -E 's|^(HOOKS=\(.*)\bfilesystems\b|\1resume filesystems|' "$MOUNTPOINT/etc/mkinitcpio.conf"
+  else
+    printf ' + add the mkinitcpio resume hook for hibernation\n'
+  fi
+fi
+run arch-chroot "$MOUNTPOINT" "${MKINITCPIO_ENV[@]}" mkinitcpio -P
+if (( SECURE_BOOT_SIGN )); then
+  # Keep the signing key on the installed system for the pacman hook, but
+  # never put it in a command line, journal, or diagnostic bundle.
+  run install -Dm0600 "$SECURE_BOOT_KEY_FILE" \
+    "$MOUNTPOINT/etc/kernel/secure-boot-private-key.pem"
+  run install -Dm0644 "$SECURE_BOOT_CERT_FILE" \
+    "$MOUNTPOINT/etc/kernel/secure-boot-certificate.pem"
+  run install -Dm0755 "$SELF_DIR/kibaos-secure-boot-sign" \
+    "$MOUNTPOINT/usr/local/libexec/kibaos-secure-boot-sign"
+  secure_boot_hook=${KIBAOS_SECURE_BOOT_HOOK:-$SELF_DIR/../share/kibaos/90-kibaos-secure-boot.hook}
+  [[ -r $secure_boot_hook ]] || secure_boot_hook="$SELF_DIR/../secure-boot/90-kibaos-secure-boot.hook"
+  run install -Dm0644 "$secure_boot_hook" \
+    "$MOUNTPOINT/usr/share/libalpm/hooks/90-kibaos-secure-boot.hook"
+  # Every kernel on the machine, so a second one installed later, such as
+  # linux-lts, is not one Secure Boot refuses to start.
+  for kernel_image in "$MOUNTPOINT"/boot/vmlinuz-*; do
+    [[ -e $kernel_image ]] || kernel_image=$MOUNTPOINT/boot/vmlinuz-linux
+    secure_boot_sign_in_place "$kernel_image"
+  done
+fi
+kibaos_journal_ok configure
+
+kibaos_journal_begin bootloader 'Installing the bootloader'
+secure_boot_sign_loader
+BOOTCTL_INSTALL=(bootctl --root="$MOUNTPOINT" --esp-path=/boot --no-variables)
+if (( SECURE_BOOT_SETUP_MODE )); then
+  BOOTCTL_INSTALL+=(
+    --secure-boot-auto-enroll yes
+    --private-key "$SECURE_BOOT_KEY_FILE"
+    --certificate "$SECURE_BOOT_CERT_FILE"
+  )
+fi
+run "${BOOTCTL_INSTALL[@]}" install
+
+# Ask again after a wrong passphrase for as long as it takes. systemd stops at
+# three, and what follows the third is an emergency shell on a machine whose
+# disk is still locked, which nobody at that screen can do anything with.
+LUKS_OPTIONS='rd.luks.options=tries=0'
+if [[ $MODE == execute ]]; then
+  ROOT_UUID=$(blkid -s UUID -o value "$ROOT_DEVICE")
+  if (( LUKS )); then
+    LUKS_UUID=$(cryptsetup luksUUID "$ROOT_PART")
+    ROOT_OPTIONS="rd.luks.name=${LUKS_UUID}=${CRYPT_NAME} ${LUKS_OPTIONS} root=/dev/mapper/${CRYPT_NAME} rw"
+  else
+    ROOT_OPTIONS="root=UUID=${ROOT_UUID} rw"
+  fi
+else
+  ROOT_UUID='<root-filesystem-uuid>'
+  ROOT_OPTIONS='root=UUID=<root-filesystem-uuid> rw'
+  (( LUKS )) && ROOT_OPTIONS="rd.luks.name=<luks-uuid>=kibaos-root ${LUKS_OPTIONS} root=/dev/mapper/kibaos-root rw"
+fi
+
+# Hibernation needs the kernel to be told which filesystem holds the swap file
+# and how far into the device the file physically starts. Both are read back
+# from the file that was just created rather than assumed, and if either cannot
+# be read the option is dropped: a resume= pointing at the wrong offset is a
+# corrupted resume, so no hibernation is the only safe fallback.
+HIBERNATION=unsupported
+if [[ $SWAP_SIZE == hibernate && -n $SWAP_FILE ]]; then
+  if [[ $MODE == execute ]]; then
+    resume_offset=
+    case $FILESYSTEM in
+      btrfs)
+        resume_offset=$(btrfs inspect-internal map-swapfile -r "$MOUNTPOINT$SWAP_FILE" 2>/dev/null | tr -dc '0-9') ;;
+      ext4)
+        resume_offset=$(filefrag -v "$MOUNTPOINT$SWAP_FILE" 2>/dev/null |
+          awk 'NR > 3 && $1 == "0:" { gsub(/\.\./, " ", $4); print $4; exit }' | tr -dc '0-9') ;;
+    esac
+    if [[ $resume_offset =~ ^[0-9]+$ ]]; then
+      ROOT_OPTIONS="$ROOT_OPTIONS resume=UUID=${ROOT_UUID} resume_offset=${resume_offset}"
+      HIBERNATION=supported
+    else
+      log 'could not read the swap file physical offset. Hibernation will not be configured.'
+    fi
+  else
+    ROOT_OPTIONS="$ROOT_OPTIONS resume=UUID=<root-filesystem-uuid> resume_offset=<swapfile-offset>"
+    HIBERNATION=supported
+  fi
+fi
+
+LOADER_SECURE_BOOT=''
+(( SECURE_BOOT_SETUP_MODE )) && LOADER_SECURE_BOOT="secure-boot-enroll ${SECURE_BOOT_ENROLL}\\n"
+write_target_file /boot/loader/loader.conf 0644 \
+  "default kibaos.conf\ntimeout 4\nconsole-mode max\neditor no\n${LOADER_SECURE_BOOT}"
+if [[ $MODE == execute ]]; then
+  cpu_vendor=$(awk -F: '$1 ~ /^[[:space:]]*vendor_id[[:space:]]*$/ {gsub(/[[:space:]]/, "", $2); print $2; exit}' /proc/cpuinfo)
+  case "$cpu_vendor" in
+    GenuineIntel) MICROCODE_IMAGE=intel-ucode.img ;;
+    AuthenticAMD) MICROCODE_IMAGE=amd-ucode.img ;;
+    *) log "unknown CPU vendor ${cpu_vendor:-unknown}. Omitting a microcode initrd." ;;
+  esac
+else
+  MICROCODE_IMAGE='<detected-microcode.img>'
+fi
+normal_entry="title KibaOS\nlinux /vmlinuz-linux\n"
+rollback_entry="title KibaOS factory rollback\nlinux /kibaos-rollback/factory/vmlinuz-linux\n"
+if [[ -n $MICROCODE_IMAGE ]]; then
+  normal_entry+="initrd /${MICROCODE_IMAGE}\n"
+  rollback_entry+="initrd /kibaos-rollback/factory/${MICROCODE_IMAGE}\n"
+fi
+ROOT_FLAGS=
+[[ $FILESYSTEM != btrfs ]] || ROOT_FLAGS=' rootflags=subvol=@'
+# The kernel command line, in the log. It is the single line that decides
+# whether the installed system finds its root, unlocks its disk and resumes
+# from hibernation, and until now the only way to see it was to boot the
+# result and read it off the running system.
+log "boot options: ${ROOT_OPTIONS}${ROOT_FLAGS} quiet${BOOT_SCREEN_OPTIONS}"
+normal_entry+="initrd /initramfs-linux.img\noptions ${ROOT_OPTIONS}${ROOT_FLAGS} quiet${BOOT_SCREEN_OPTIONS}\n"
+rollback_entry+="initrd /kibaos-rollback/factory/initramfs-linux.img\noptions ${ROOT_OPTIONS} rootflags=subvol=@snapshots/0/snapshot systemd.unit=multi-user.target\n"
+write_target_file /boot/loader/entries/kibaos.conf 0644 "$normal_entry"
+BOOT_ARTIFACTS=(vmlinuz-linux initramfs-linux.img)
+[[ -z $MICROCODE_IMAGE ]] || BOOT_ARTIFACTS=(vmlinuz-linux "$MICROCODE_IMAGE" initramfs-linux.img)
+# The rollback entry is written only when there is something to roll back to.
+# A menu entry that boots `subvol=@snapshots/0/snapshot` on a filesystem with
+# no subvolumes is an entry that drops the user at an initramfs prompt on the
+# day they most need it to work.
+if [[ $FILESYSTEM == btrfs ]]; then
+  run install -d -m 0755 "$MOUNTPOINT/boot/kibaos-rollback/factory"
+  for artifact in "${BOOT_ARTIFACTS[@]}"; do
+    run install -m 0644 "$MOUNTPOINT/boot/$artifact" \
+      "$MOUNTPOINT/boot/kibaos-rollback/factory/$artifact"
+  done
+  write_target_file /boot/loader/entries/kibaos-rollback.conf 0644 "$rollback_entry"
+else
+  log "filesystem is ${FILESYSTEM}: no factory snapshot and no rollback boot entry"
+fi
+
+# 0755, because services that run before anybody signs in have to read what
+# is in here.
+#
+# The accessibility record is written 0644 so the greeter can honour the
+# choices somebody made during the install. It cannot: greetd runs the greeter
+# as its own user, and a directory nobody but root can traverse makes the mode
+# on the file inside it meaningless. Somebody who turned on high contrast to
+# get through an installation then met a login screen without it, silently,
+# which is the exact failure the accessibility record exists to prevent.
+#
+# Nothing in here is a secret. Both files say so in their own comments: the
+# manifest names the disk because the disk is not a secret, and the
+# accessibility record is what somebody reads with `cat` to find out what an
+# install actually did. The snapshot directory beside it keeps 0750, because
+# that one holds a copy of the system.
+run install -d -m 0755 "$MOUNTPOINT/etc/kibaos-install"
+run install -d -m 0750 "$MOUNTPOINT/.snapshots/0"
+run cp "$PACKAGE_LOCK" "$MOUNTPOINT/etc/kibaos-install/packages.lock"
+run install -Dm0755 "$SELF_DIR/kibaos-recovery" "$MOUNTPOINT/usr/local/sbin/kibaos-recovery"
+run install -Dm0755 "$SELF_DIR/kibaos-hardware-qualify" "$MOUNTPOINT/usr/local/sbin/kibaos-hardware-qualify"
+kibaos_journal_ok bootloader
+
+kibaos_journal_begin snapshot 'Taking the first snapshot'
+SWAP_POLICY=$SWAP
+[[ $SWAP != file ]] || SWAP_POLICY="file:${SWAP_SIZE_MIB}M"
+if [[ $FILESYSTEM == btrfs ]]; then
+  ROOT_SUBVOLUME=@
+  FACTORY_SNAPSHOT=@snapshots/0/snapshot
+else
+  ROOT_SUBVOLUME=none
+  FACTORY_SNAPSHOT=none
+fi
+write_target_file /etc/kibaos-install/manifest 0644 "installer_version=1\ninstalled_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)\nrootfs_source=live-squashfs\nrepo_name=${REPO_NAME}\nrepo_url=${REPO_URL}\nrepo_fingerprint=${REPO_FINGERPRINT:-unsigned}\nencrypted=${LUKS}\nfilesystem=${FILESYSTEM}\nlayout=${LAYOUT}\nswap_policy=${SWAP_POLICY}\nhibernation=${HIBERNATION}\nsecure_boot=${SECURE_BOOT_SIGN}\nsecure_boot_enrollment=$([[ $SECURE_BOOT_SETUP_MODE == 1 ]] && printf 'pending' || printf 'pre-enrolled-or-disabled')\nroot_uuid=${ROOT_UUID}\nroot_subvolume=${ROOT_SUBVOLUME}\nfactory_snapshot=${FACTORY_SNAPSHOT}\n"
+if [[ $FILESYSTEM == btrfs ]]; then
+  run btrfs subvolume snapshot -r "$MOUNTPOINT" "$MOUNTPOINT/.snapshots/0/snapshot"
+fi
+run sync
+kibaos_journal_ok snapshot
+
+kibaos_journal_begin verify-install 'Checking the installation'
+if [[ $MODE == dry-run ]]; then
+  printf ' + verify installed package set, fstab/UUIDs, boot artifacts, enabled units, locked root, and repository URL\n'
+else
+  [[ -s $MOUNTPOINT/etc/fstab ]] || die 'post-install verification failed: fstab is empty'
+  [[ -r $MOUNTPOINT/boot/loader/entries/kibaos.conf ]] || \
+    die 'post-install verification failed: the systemd-boot entry is missing'
+  for artifact in "${BOOT_ARTIFACTS[@]}"; do
+    [[ -r $MOUNTPOINT/boot/$artifact ]] || \
+      die "post-install verification failed: boot artifact is missing: $artifact"
+  done
+  if [[ $FILESYSTEM == btrfs ]]; then
+    [[ -r $MOUNTPOINT/boot/loader/entries/kibaos-rollback.conf ]] || \
+      die 'post-install verification failed: the rollback boot entry is missing'
+    for artifact in "${BOOT_ARTIFACTS[@]}"; do
+      [[ -r $MOUNTPOINT/boot/kibaos-rollback/factory/$artifact ]] || \
+        die "post-install verification failed: rollback boot artifact is missing: $artifact"
+    done
+  else
+    # The rollback path is absent by choice on this filesystem, so verify that
+    # it is absent rather than leaving a half-written one behind.
+    [[ ! -e $MOUNTPOINT/boot/loader/entries/kibaos-rollback.conf ]] || \
+      die 'post-install verification failed: a rollback entry exists on a filesystem with no factory snapshot'
+  fi
+  if [[ -n $SWAP_FILE ]]; then
+    [[ -r $MOUNTPOINT$SWAP_FILE ]] || \
+      die 'post-install verification failed: the swap file is missing'
+    grep -Fq -- "$SWAP_FILE" "$MOUNTPOINT/etc/fstab" || \
+      die 'post-install verification failed: the swap file is not in fstab'
+  fi
+  arch-chroot "$MOUNTPOINT" pacman -Q kibaos chromiumos-ash >/dev/null || \
+    die 'post-install verification failed: expected KibaOS packages are not installed'
+  arch-chroot "$MOUNTPOINT" systemctl is-enabled NetworkManager.service shill-nm-adapter.service seatd.service kibaos-greetd.service >/dev/null || \
+    die 'post-install verification failed: required services are not enabled'
+  root_state=$(arch-chroot "$MOUNTPOINT" passwd -S root | awk '{print $2}')
+  [[ $root_state == L* ]] || die 'post-install verification failed: installed root account is not locked'
+  ! grep -Rqs 'repo\\.kibaos\\.invalid' "$MOUNTPOINT/etc" || \
+    die 'post-install verification failed: placeholder repository URL remains'
+  [[ -r $MOUNTPOINT/boot/EFI/BOOT/BOOTX64.EFI ]] || \
+    die 'post-install verification failed: UEFI fallback loader is missing'
+  log 'post-install verification passed'
+fi
+
+kibaos_journal_ok verify-install
+kibaos_journal_emit 'done' ok 'installation complete'
+
+log 'installation plan completed'
+if [[ $MODE == dry-run ]]; then
+  log "dry run only. Rerun with --execute --confirm '$ERASE_TOKEN' after review."
+else
+  log 'KibaOS installed. The factory rollback entry is available from the boot menu.'
+fi

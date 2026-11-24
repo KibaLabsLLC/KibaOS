@@ -1,0 +1,205 @@
+diff --git a/ui/file_manager/file_manager/foreground/css/file_manager.css b/ui/file_manager/file_manager/foreground/css/file_manager.css
+index fbf90177f48b..a287e962f115 100644
+--- a/ui/file_manager/file_manager/foreground/css/file_manager.css
++++ b/ui/file_manager/file_manager/foreground/css/file_manager.css
+@@ -2330,16 +2330,22 @@ body {
+   user-select: none;
+ }
+ 
+-/* The bar holds three spans and the right hand two share one slot, so
+- * space-between is wrong here: with the middle span empty it would centre
+- * whichever one had text. Pushing the count away from the others puts the
+- * count at the start and packs the rest at the end, which reads correctly
+- * whichever of the two is the one carrying text. */
+-#kibaos-status-count {
++/* The bar holds four spans and the right hand two share one slot, so
++ * space-between is wrong here: with a middle span empty it would centre
++ * whichever one had text. Pushing everything after the clipboard note away
++ * puts the count and the note together at the start and packs the rest at the
++ * end, which reads correctly whichever of the two is carrying text.
++ *
++ * The auto margin is on the clipboard note rather than on the count, so the
++ * note sits beside what is in this folder rather than out at the far end with
++ * the free space. What is here and what is pending belong together; how much
++ * room is left is a different subject. */
++#kibaos-status-clipboard {
+   margin-inline-end: auto;
+ }
+ 
+ #kibaos-status-count,
++#kibaos-status-clipboard,
+ #kibaos-status-space,
+ #kibaos-status-selection {
+   /* These are numbers that change in place as you move through a folder.
+@@ -2350,6 +2356,14 @@ body {
+   white-space: nowrap;
+ }
+ 
++/* Left in the bar's own on_surface_variant deliberately. The dimmed rows are
++ * the loud half of a cut; this is the quiet reference you go looking for once
++ * you have walked away from them, and it should not shout from every folder
++ * you pass through on the way. */
++#kibaos-status-clipboard {
++  font-style: italic;
++}
++
+ #kibaos-status-space {
+   /* Inherits the bar's own on_surface_variant. Free space is background
+    * information that should never compete with the selection for attention. */
+diff --git a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+index ab57790a9fd7..67b650656c08 100644
+--- a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
++++ b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+@@ -47,6 +47,17 @@ export function kibaOsClearCut(): boolean {
+   return true;
+ }
+ 
++/**
++ * How many files are waiting to be moved.
++ *
++ * The dimming only says which ones while you are looking at the folder they
++ * are in. Walk into another folder and the clipboard becomes invisible again,
++ * which is where the status bar picks it up.
++ */
++export function kibaOsCutCount(): number {
++  return cutUrls.size;
++}
++
+ /**
+  * Whether this entry is waiting to be moved.
+  */
+diff --git a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
+index 32c7b5df8347..67ada85ccb92 100644
+--- a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
++++ b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
+@@ -1290,19 +1290,26 @@ export class FileTransferController {
+   private kibaOsRedrawForCutMarks_() {
+     const list = this.listContainer_.currentList;
+     const model = list.dataModel;
+-    if (!model) {
+-      return;
+-    }
+-    for (const element of list.querySelectorAll<ListItem>('li')) {
+-      const index = element.listIndex;
+-      if (index < 0) {
+-        continue;
+-      }
+-      const entry = model.item(index);
+-      if (entry) {
+-        element.classList.toggle('kibaos-cut', kibaOsIsCut(entry));
++    // Not an early return when there is no model. The rows cannot be brought
++    // into line without one, but the count has still changed and whatever is
++    // reporting it still needs to hear so.
++    if (model) {
++      for (const element of list.querySelectorAll<ListItem>('li')) {
++        const index = element.listIndex;
++        if (index < 0) {
++          continue;
++        }
++        const entry = model.item(index);
++        if (entry) {
++          element.classList.toggle('kibaos-cut', kibaOsIsCut(entry));
++        }
+       }
+     }
++    // Anything else showing the clipboard follows from here. A cut does not
++    // change the selection and does not rescan the directory, so nothing the
++    // toolbar already listens to fires, and the status bar would keep whatever
++    // it last said.
++    this.document_.dispatchEvent(new CustomEvent('kibaos-cut-changed'));
+   }
+ 
+   /**
+diff --git a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
+index 951541383b60..b2ccf5a33b60 100644
+--- a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
++++ b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
+@@ -18,6 +18,7 @@ import {type State} from '../../state/state.js';
+ import {getStore, type Store} from '../../state/store.js';
+ import {XfCloudPanel} from '../../widgets/xf_cloud_panel.js';
+ 
++import {kibaOsCutCount} from './kibaos_cut_marks.js';
+ import {ICON_TYPES} from './constants.js';
+ import type {DirectoryChangeEvent, DirectoryModel} from './directory_model.js';
+ import type {FileSelectionHandler} from './file_selection.js';
+@@ -77,6 +78,7 @@ export class ToolbarController {
+   private kibaOsStatusCount_: HTMLElement|null = null;
+   private kibaOsStatusSelection_: HTMLElement|null = null;
+   private kibaOsStatusSpace_: HTMLElement|null = null;
++  private kibaOsStatusClipboard_: HTMLElement|null = null;
+ 
+   /**
+    * KibaOS: the last free space answer, kept so that selecting and deselecting
+@@ -206,6 +208,10 @@ export class ToolbarController {
+         'cur-dir-rescan-completed', this.kibaOsRefreshFreeSpace_.bind(this));
+     this.directoryModel_.getFileList().addEventListener(
+         'splice', this.kibaOsRefreshFreeSpace_.bind(this));
++    // A cut changes neither the selection nor the directory, so none of the
++    // events above fire for it and the bar would keep whatever it last said.
++    document.addEventListener(
++        'kibaos-cut-changed', this.kibaOsUpdateClipboard_.bind(this));
+ 
+     chrome.fileManagerPrivate.onAppsUpdated.addListener(
+         this.updateSharesheetCommand_.bind(this));
+@@ -481,6 +487,39 @@ export class ToolbarController {
+    * carries the forty two note. Reading the title before that call would show
+    * whatever the previous folder left behind.
+    */
++  /**
++   * KibaOS: says what is on the clipboard, in its own segment.
++   *
++   * The dimming from a cut only says which files while you are standing in the
++   * folder they live in. Walk somewhere else to paste and the clipboard is
++   * invisible again, which is exactly the moment you want to know whether
++   * there is still something on it and how much.
++   *
++   * Its own span rather than a share of the right hand end. Free space and the
++   * selection already compete for that slot, and this is the one piece of
++   * state that is most worth having precisely when you have navigated away
++   * from everything that would otherwise imply it.
++   *
++   * Only a cut, never a copy. A copy leaves the originals where they are, so
++   * nothing is pending and there is nothing to warn anyone about.
++   */
++  private kibaOsUpdateClipboard_() {
++    const el = this.kibaOsStatusClipboard_ ??
++        document.querySelector<HTMLElement>('#kibaos-status-clipboard');
++    if (!el) {
++      return;
++    }
++    this.kibaOsStatusClipboard_ = el;
++    const count = kibaOsCutCount();
++    el.textContent = count === 0 ?
++        '' :
++        (count === 1 ? '1 file ready to move' :
++                       `${count} files ready to move`);
++    el.title = count === 0 ?
++        '' :
++        'Cut with Ctrl+X. Paste to finish the move, or press Escape to keep them where they are.';
++  }
++
+   private kibaOsUpdateStatusBar_(selectionText: string) {
+     const count = this.kibaOsStatusCount_ ??
+         document.querySelector<HTMLElement>('#kibaos-status-count');
+@@ -494,6 +533,9 @@ export class ToolbarController {
+     this.kibaOsStatusCount_ = count;
+     this.kibaOsStatusSelection_ = selectionEl;
+     this.kibaOsStatusSpace_ = spaceEl;
++    // Also from here, not only from the event, so the segment is right the
++    // first time the bar is drawn rather than blank until the next cut.
++    this.kibaOsUpdateClipboard_();
+ 
+     const summary = this.kibaOsDirectorySummary_();
+     // An empty folder still says so. A blank bar reads as broken.
+diff --git a/ui/file_manager/file_manager/main.html b/ui/file_manager/file_manager/main.html
+index 3071a3120fc7..9eed97885afc 100644
+--- a/ui/file_manager/file_manager/main.html
++++ b/ui/file_manager/file_manager/main.html
+@@ -485,6 +485,7 @@ found in the LICENSE file.
+                 </div>
+                 <div id="kibaos-status-bar" visibleif="full-page">
+                   <span id="kibaos-status-count"></span>
++                  <span id="kibaos-status-clipboard"></span>
+                   <span id="kibaos-status-space"></span>
+                   <span id="kibaos-status-selection"></span>
+                 </div>

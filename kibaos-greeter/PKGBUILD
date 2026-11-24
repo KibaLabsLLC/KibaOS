@@ -1,0 +1,91 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-greeter
+pkgver=0.1.0
+pkgrel=7
+pkgdesc="Graphical greeter for KibaOS, on the installer's design system"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+install='kibaos-greeter.install'
+depends=(
+  'greetd'
+  'networkmanager'
+  'polkit'
+  'gtk4'
+  'libadwaita'
+  'python'
+  'python-cairo'
+  'python-gobject'
+)
+# tuigreet stays alongside rather than being replaced. It is the way in when
+# this greeter will not start, and a machine whose only greeter is broken
+# needs a rescue disk to log into.
+optdepends=(
+  'greetd-tuigreet: text greeter, kept as the way in if this one will not start'
+  'accountsservice: user pictures and real names on the sign in list'
+)
+checkdepends=('python' 'weston')
+# Basenames, because makepkg resolves every local source to its basename and
+# refuses a path. The repository keeps the real tree; the top level entries
+# are symlinks into it, which is how kibaos-host-bridge exposes its test too.
+source=(
+  'kibaos-greeter'
+  'kibaos-greeter-session'
+  'kibaos.toml.example'
+  'README.md'
+  'LICENSE'
+  'run-tests.sh'
+  '49-kibaos-greeter-network.rules'
+  '__init__.py'
+  'accounts.py'
+  'app.py'
+  'copy.py'
+  'glass.py'
+  'alerts.py'
+  'backlight.py'
+  'alertui.py'
+  'alerts_test.py'
+  'copy_test.py'
+  'glass_test.py'
+  'glyphs.py'
+  'greeter.css'
+  'network.py'
+  'outlook.py'
+  'locate.py'
+  'locate_test.py'
+  'nmlive.py'
+  'preferences.py'
+  'protocol.py'
+  'sessions.py'
+  'settings.py'
+  'shade.py'
+  'weather.py'
+  'weatherdraw.py'
+  'weatherui.py'
+  'a11y.py'
+  'brand.py'
+  'status.py'
+  'tokens.py'
+  'theme.css'
+  'theme-dark.css'
+  'theme-hc.css'
+  'theme-dark-hc.css'
+  'theme-oled.css'
+  'accounts_test.py'
+  'network_test.py'
+  'preferences_test.py'
+  'protocol_test.py'
+  'runtime_test.py'
+  'sessions_test.py'
+  'settings_test.py'
+  'shade_test.py'
+  'shared_test.py'
+  'weather_test.py'
+  'outlook_test.py'
+  'packaging_test.py'
+  'test-runtime.sh'
+  'extract-copy.py'
+  'kibaos-greeter.pot'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

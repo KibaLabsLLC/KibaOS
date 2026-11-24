@@ -1,0 +1,23 @@
+pkgbase = shill-nm-adapter
+	pkgdesc = Shill-to-NetworkManager DBus bridge for ChromeOS Ash
+	pkgver = 0.1.0
+	pkgrel = 9
+	url = https://github.com/KibaLabsLLC/KibaDE
+	install = shill-nm-adapter.install
+	arch = any
+	license = BSD-3-Clause
+	checkdepends = python
+	depends = dbus
+	depends = python
+	depends = python-dbus
+	depends = python-gobject
+	depends = glib2
+	depends = networkmanager
+	source = shill_nm_adapter.py
+	source = test_shill_nm_adapter.py
+	source = shill-nm-adapter.service
+	source = shill-nm-adapter.install
+	source = org.chromium.flimflam.conf
+	source = LICENSE
+
+pkgname = shill-nm-adapter

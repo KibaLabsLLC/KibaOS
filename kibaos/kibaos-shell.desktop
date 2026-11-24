@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=KibaOS Shell
+Comment=Start KibaOS inside the current graphical session
+Exec=/usr/bin/kibaos-shell
+Type=Application
+NoDisplay=true

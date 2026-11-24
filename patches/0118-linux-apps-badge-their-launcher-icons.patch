@@ -1,0 +1,361 @@
+diff --git a/chrome/browser/apps/app_service/publishers/BUILD.gn b/chrome/browser/apps/app_service/publishers/BUILD.gn
+index a27d4137f0b5..e6449bac8038 100644
+--- a/chrome/browser/apps/app_service/publishers/BUILD.gn
++++ b/chrome/browser/apps/app_service/publishers/BUILD.gn
+@@ -86,6 +86,7 @@ source_set("publishers") {
+       "//chrome/browser/ash/borealis",
+       "//chrome/browser/ash/bruschetta",
+       "//chrome/browser/ash/child_accounts",
++      "//dbus",
+       "//chrome/browser/ash/child_accounts/time_limits",
+       "//chrome/browser/ash/crostini",
+       "//chrome/browser/ash/extensions",
+diff --git a/chrome/browser/apps/app_service/publishers/crostini_apps.cc b/chrome/browser/apps/app_service/publishers/crostini_apps.cc
+index f3e213ba8891..f1f06ea784b0 100644
+--- a/chrome/browser/apps/app_service/publishers/crostini_apps.cc
++++ b/chrome/browser/apps/app_service/publishers/crostini_apps.cc
+@@ -6,6 +6,7 @@
+ 
+ #include <algorithm>
+ #include <array>
++#include <cstring>
+ #include <map>
+ #include <memory>
+ #include <optional>
+@@ -13,6 +14,8 @@
+ #include <utility>
+ #include <vector>
+ 
++#include <dbus/dbus.h>
++
+ #include "ash/constants/ash_switches.h"
+ #include "ash/public/cpp/app_menu_constants.h"
+ #include "ash/public/cpp/style/dark_light_mode_controller.h"
+@@ -47,6 +50,8 @@
+ #include "chromeos/ash/components/dbus/vm_applications/apps.pb.h"
+ #include "components/services/app_service/public/cpp/app_types.h"
+ #include "components/services/app_service/public/cpp/intent.h"
++#include "dbus/bus.h"
++#include "dbus/message.h"
+ #include "third_party/skia/include/core/SkBitmap.h"
+ #include "third_party/skia/include/core/SkColor.h"
+ #include "ui/base/window_open_disposition.h"
+@@ -811,10 +816,138 @@ class KibaOsHostAppsWatcher {
+   std::vector<std::unique_ptr<base::FilePathWatcher>> watchers_;
+ };
+ 
++// Read on the launcher entry D-Bus thread while it is a filter there.
++struct KibaOsLauncherEntryFilter {
++  base::RepeatingCallback<void(KibaOsLauncherEntryUpdate)> on_update;
++};
++
+ }  // namespace apps
+ 
+ namespace {
+ 
++constexpr char kLauncherEntryInterface[] = "com.canonical.Unity.LauncherEntry";
++constexpr char kLauncherEntryMatch[] =
++    "type='signal',interface='com.canonical.Unity.LauncherEntry',"
++    "member='Update'";
++
++bool PopLauncherEntryBool(dbus::MessageReader* value, bool* out) {
++  return value->GetDataType() == dbus::Message::BOOL && value->PopBool(out);
++}
++
++// A count arrives as whichever integer the toolkit chose: int64 is what the
++// specification says, int32 and uint32 are what some applications send.
++bool PopLauncherEntryCount(dbus::MessageReader* value, int64_t* out) {
++  switch (value->GetDataType()) {
++    case dbus::Message::INT64:
++      return value->PopInt64(out);
++    case dbus::Message::INT32: {
++      int32_t count = 0;
++      if (!value->PopInt32(&count)) {
++        return false;
++      }
++      *out = count;
++      return true;
++    }
++    case dbus::Message::UINT32: {
++      uint32_t count = 0;
++      if (!value->PopUint32(&count)) {
++        return false;
++      }
++      *out = count;
++      return true;
++    }
++    default:
++      return false;
++  }
++}
++
++DBusHandlerResult KibaOsLauncherEntryFilterFunction(DBusConnection* connection,
++                                                    DBusMessage* raw_message,
++                                                    void* data) {
++  if (!dbus_message_is_signal(raw_message, kLauncherEntryInterface,
++                              "Update")) {
++    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
++  }
++  // The Signal unrefs the message when it goes, and the message is still
++  // libdbus's to hand to the next filter.
++  dbus_message_ref(raw_message);
++  std::unique_ptr<dbus::Signal> signal =
++      dbus::Signal::FromRawMessage(raw_message);
++  dbus::MessageReader reader(signal.get());
++  apps::KibaOsLauncherEntryUpdate update;
++  dbus::MessageReader properties(nullptr);
++  if (!reader.PopString(&update.app_uri) || !reader.PopArray(&properties)) {
++    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
++  }
++  while (properties.HasMoreData()) {
++    dbus::MessageReader entry(nullptr);
++    std::string key;
++    dbus::MessageReader value(nullptr);
++    if (!properties.PopDictEntry(&entry) || !entry.PopString(&key) ||
++        !entry.PopVariant(&value)) {
++      break;
++    }
++    if (key == "count") {
++      int64_t count = 0;
++      if (PopLauncherEntryCount(&value, &count)) {
++        update.count = count;
++      }
++    } else if (key == "count-visible") {
++      bool visible = false;
++      if (PopLauncherEntryBool(&value, &visible)) {
++        update.count_visible = visible;
++      }
++    } else if (key == "urgent") {
++      bool urgent = false;
++      if (PopLauncherEntryBool(&value, &urgent)) {
++        update.urgent = urgent;
++      }
++    }
++  }
++  static_cast<apps::KibaOsLauncherEntryFilter*>(data)->on_update.Run(
++      std::move(update));
++  return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
++}
++
++void AddKibaOsLauncherEntryFilter(scoped_refptr<dbus::Bus> bus,
++                                  apps::KibaOsLauncherEntryFilter* filter) {
++  // Connected alone, the bus never reads its socket; an object proxy would
++  // set that up, and a filter has none.
++  if (!bus->Connect() || !bus->SetUpAsyncOperations()) {
++    LOG(ERROR) << "KibaOS could not reach the session bus for launcher badges";
++    return;
++  }
++  bus->AddFilterFunction(&KibaOsLauncherEntryFilterFunction, filter);
++  dbus::Error error;
++  bus->AddMatch(kLauncherEntryMatch, &error);
++  LOG_IF(ERROR, error.IsValid())
++      << "KibaOS could not listen for launcher badges: " << error.message();
++}
++
++void StopKibaOsLauncherEntryWatch(
++    std::unique_ptr<base::Thread> thread,
++    scoped_refptr<dbus::Bus> bus,
++    std::unique_ptr<apps::KibaOsLauncherEntryFilter> filter) {
++  bus->GetDBusTaskRunner()->PostTask(
++      FROM_HERE,
++      base::BindOnce(
++          [](scoped_refptr<dbus::Bus> bus,
++             std::unique_ptr<apps::KibaOsLauncherEntryFilter> filter) {
++            if (bus->IsConnected()) {
++              dbus::Error error;
++              bus->RemoveMatch(kLauncherEntryMatch, &error);
++              bus->RemoveFilterFunction(&KibaOsLauncherEntryFilterFunction,
++                                        filter.get());
++            }
++            filter.reset();
++            bus->ShutdownAndBlock();
++          },
++          bus, std::move(filter)));
++  // Stopping the thread waits for the task above, which is why it is done
++  // here, off the UI thread.
++  thread->Stop();
++}
++
+ std::vector<KibaOsHostDesktopApp> ScanKibaOsHostDesktopApps() {
+   const std::vector<base::FilePath> dirs = KibaOsHostApplicationDirs();
+   auto environment = base::Environment::Create();
+@@ -1039,6 +1172,14 @@ namespace apps {
+ CrostiniApps::CrostiniApps(AppServiceProxy* proxy) : GuestOSApps(proxy) {}
+ 
+ CrostiniApps::~CrostiniApps() {
++  if (kibaos_launcher_entry_bus_) {
++    base::ThreadPool::PostTask(
++        FROM_HERE, {base::MayBlock(), base::TaskPriority::BEST_EFFORT},
++        base::BindOnce(&StopKibaOsLauncherEntryWatch,
++                       std::move(kibaos_launcher_entry_thread_),
++                       std::move(kibaos_launcher_entry_bus_),
++                       std::move(kibaos_launcher_entry_filter_)));
++  }
+   if (auto* dark_light_mode_controller = ash::DarkLightModeController::Get()) {
+     dark_light_mode_controller->RemoveObserver(this);
+   }
+@@ -1062,7 +1203,87 @@ void CrostiniApps::Initialize() {
+       dark_light_mode_controller->AddObserver(this);
+       OnColorModeChanged(dark_light_mode_controller->IsDarkModeEnabled());
+     }
++    StartKibaOsLauncherEntryWatch();
++  }
++}
++
++// KibaOS compatibility: Linux applications put a count or an urgent mark on
++// their launcher icon with com.canonical.Unity.LauncherEntry, which KDE, Dash
++// to Dock and Plank all honour. Ash's shelf and launcher show it as the
++// notification badge its own apps get.
++void CrostiniApps::StartKibaOsLauncherEntryWatch() {
++  auto thread =
++      std::make_unique<base::Thread>("KibaOS launcher entry D-Bus thread");
++  base::Thread::Options thread_options;
++  thread_options.message_pump_type = base::MessagePumpType::IO;
++  if (!thread->StartWithOptions(std::move(thread_options))) {
++    return;
++  }
++  dbus::Bus::Options bus_options;
++  bus_options.bus_type = dbus::Bus::SESSION;
++  bus_options.connection_type = dbus::Bus::PRIVATE;
++  bus_options.dbus_task_runner = thread->task_runner();
++  kibaos_launcher_entry_bus_ = new dbus::Bus(std::move(bus_options));
++  kibaos_launcher_entry_thread_ = std::move(thread);
++  kibaos_launcher_entry_filter_ = std::make_unique<KibaOsLauncherEntryFilter>();
++  kibaos_launcher_entry_filter_->on_update = base::BindPostTaskToCurrentDefault(
++      base::BindRepeating(&CrostiniApps::OnKibaOsLauncherEntryUpdate,
++                          weak_ptr_factory_.GetWeakPtr()));
++  // Unretained: the filter is only destroyed by a task posted to the same
++  // D-Bus thread after this one.
++  kibaos_launcher_entry_bus_->GetDBusTaskRunner()->PostTask(
++      FROM_HERE, base::BindOnce(&AddKibaOsLauncherEntryFilter,
++                                kibaos_launcher_entry_bus_,
++                                base::Unretained(
++                                    kibaos_launcher_entry_filter_.get())));
++}
++
++void CrostiniApps::OnKibaOsLauncherEntryUpdate(
++    KibaOsLauncherEntryUpdate update) {
++  // "application://org.kde.kate.desktop" names the desktop file the app was
++  // published from.
++  std::string desktop_id = update.app_uri;
++  if (base::StartsWith(desktop_id, "application://")) {
++    desktop_id = desktop_id.substr(strlen("application://"));
+   }
++  if (desktop_id.empty()) {
++    return;
++  }
++  if (!base::EndsWith(desktop_id, ".desktop")) {
++    desktop_id += ".desktop";
++  }
++  std::string app_id;
++  for (const auto& [id, host_app] : kibaos_host_apps_) {
++    if (base::EqualsCaseInsensitiveASCII(host_app.desktop_file_id,
++                                         desktop_id)) {
++      app_id = id;
++      break;
++    }
++  }
++  if (app_id.empty()) {
++    return;
++  }
++  KibaOsLauncherEntry& entry = kibaos_launcher_entries_[app_id];
++  if (update.count) {
++    entry.count = *update.count;
++  }
++  if (update.count_visible) {
++    entry.count_visible = *update.count_visible;
++  }
++  if (update.urgent) {
++    entry.urgent = *update.urgent;
++  }
++  PublishKibaOsBadge(app_id);
++}
++
++void CrostiniApps::PublishKibaOsBadge(const std::string& app_id) {
++  auto it = kibaos_launcher_entries_.find(app_id);
++  const bool badge =
++      it != kibaos_launcher_entries_.end() &&
++      ((it->second.count_visible && it->second.count > 0) || it->second.urgent);
++  auto app = std::make_unique<App>(AppType(), app_id);
++  app->has_badge = badge;
++  Publish(std::move(app));
+ }
+ 
+ void CrostiniApps::OnColorModeChanged(bool dark_mode_enabled) {
+diff --git a/chrome/browser/apps/app_service/publishers/crostini_apps.h b/chrome/browser/apps/app_service/publishers/crostini_apps.h
+index 95626ce61f25..e8cbe814e06b 100644
+--- a/chrome/browser/apps/app_service/publishers/crostini_apps.h
++++ b/chrome/browser/apps/app_service/publishers/crostini_apps.h
+@@ -8,13 +8,16 @@
+ #include <cstdint>
+ #include <map>
+ #include <memory>
++#include <optional>
+ #include <string>
+ #include <vector>
+ 
+ #include "ash/public/cpp/style/color_mode_observer.h"
+ #include "base/files/file_path.h"
++#include "base/memory/scoped_refptr.h"
+ #include "base/memory/weak_ptr.h"
+ #include "base/threading/sequence_bound.h"
++#include "base/threading/thread.h"
+ #include "base/timer/timer.h"
+ #include "chrome/browser/apps/app_service/app_service_proxy.h"
+ #include "chrome/browser/apps/app_service/publishers/guest_os_apps.h"
+@@ -24,6 +27,10 @@
+ #include "components/services/app_service/public/cpp/launch_result.h"
+ #include "components/services/app_service/public/cpp/menu.h"
+ 
++namespace dbus {
++class Bus;
++}  // namespace dbus
++
+ namespace apps {
+ 
+ // How a request to remove a Linux app's package ended.
+@@ -40,6 +47,16 @@ struct KibaOsUninstallResult {
+ };
+ 
+ class KibaOsHostAppsWatcher;
++struct KibaOsLauncherEntryFilter;
++
++// What one com.canonical.Unity.LauncherEntry.Update said. A field the
++// application left out keeps the value it had.
++struct KibaOsLauncherEntryUpdate {
++  std::string app_uri;
++  std::optional<int64_t> count;
++  std::optional<bool> count_visible;
++  std::optional<bool> urgent;
++};
+ 
+ struct KibaOsHostDesktopApp {
+   std::string desktop_file_id;
+@@ -112,12 +129,27 @@ class CrostiniApps : public GuestOSApps, public ash::ColorModeObserver {
+   bool LaunchKibaOsHostApp(const std::string& app_id);
+   void OnKibaOsPackageUninstalled(const std::string& app_name,
+                                   KibaOsUninstallResult result);
++  void StartKibaOsLauncherEntryWatch();
++  void OnKibaOsLauncherEntryUpdate(KibaOsLauncherEntryUpdate update);
++  void PublishKibaOsBadge(const std::string& app_id);
+ 
+   std::map<std::string, std::string> kibaos_host_execs_;
+   std::map<std::string, KibaOsHostDesktopApp> kibaos_host_apps_;
+   base::SequenceBound<KibaOsHostAppsWatcher> kibaos_host_apps_watcher_;
+   base::OneShotTimer kibaos_host_apps_refresh_timer_;
+ 
++  // Badges Linux applications ask for on the session bus, by app id.
++  struct KibaOsLauncherEntry {
++    int64_t count = 0;
++    bool count_visible = false;
++    bool urgent = false;
++  };
++  std::map<std::string, KibaOsLauncherEntry> kibaos_launcher_entries_;
++  std::unique_ptr<base::Thread> kibaos_launcher_entry_thread_;
++  scoped_refptr<dbus::Bus> kibaos_launcher_entry_bus_;
++  // Used on the D-Bus thread; destroyed there after the filter is removed.
++  std::unique_ptr<KibaOsLauncherEntryFilter> kibaos_launcher_entry_filter_;
++
+   base::WeakPtrFactory<CrostiniApps> weak_ptr_factory_{this};
+ };
+ 

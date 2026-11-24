@@ -1,0 +1,30 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-hardware
+pkgver=0.1.0
+pkgrel=4
+_mbpfan_ver=2.4.0
+pkgdesc="Hardware support for KibaOS: Wi-Fi tuning, Surface laptops and Intel Macs"
+arch=('x86_64')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause' 'GPL-3.0-only')
+depends=('glibc' 'iw' 'mkinitcpio' 'systemd' 'tzdata')
+provides=('mbpfan')
+conflicts=('mbpfan')
+backup=('etc/mkinitcpio.conf.d/90-kibaos-hardware.conf'
+        'etc/mbpfan.conf')
+source=(
+  "mbpfan-${_mbpfan_ver}.tar.gz::https://github.com/linux-on-mac/mbpfan/archive/refs/tags/v${_mbpfan_ver}.tar.gz"
+  '90-kibaos-hardware.conf'
+  'kibaos-hardware-initcpio.conf'
+  'kibaos-mbpfan.service'
+  'test-hardware-initramfs.sh'
+  '90-kibaos-wifi.conf'
+  'kibaos-wifi-country'
+  'kibaos-wifi-country.service'
+  '90-kibaos-wifi-country.dispatcher'
+  '90-kibaos-wifi-country.rules'
+  'test-wifi-country.sh'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')

@@ -1,0 +1,16 @@
+pkgbase = kibaos-account-helper
+	pkgdesc = PAM-backed local account helper for KibaOS
+	pkgver = 0.1.0
+	pkgrel = 2
+	url = https://github.com/KibaLabsLLC/KibaDE
+	arch = x86_64
+	license = BSD-3-Clause
+	makedepends = gcc
+	depends = gcc-libs
+	depends = glibc
+	depends = pam
+	source = kibaos-account-helper.cc
+	source = kibaos.pam
+	source = LICENSE
+	
+pkgname = kibaos-account-helper

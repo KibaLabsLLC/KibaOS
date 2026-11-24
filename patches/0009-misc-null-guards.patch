@@ -1,0 +1,598 @@
+diff --git a/ash/app_list/app_list_controller_impl.cc b/ash/app_list/app_list_controller_impl.cc
+index f24ec0c045be..37b904930532 100644
+--- a/ash/app_list/app_list_controller_impl.cc
++++ b/ash/app_list/app_list_controller_impl.cc
+@@ -1304,13 +1304,24 @@ bool AppListControllerImpl::HasValidProfile() const {
+   return profile_id_ != kAppListInvalidProfileID;
+ }
+ 
++// HACK(KibaOS): Null-safe PrefService access. The app list initializes during
++// startup before the active user's PrefService is ready, causing a null pointer
++// dereference in the original unchecked code.
++// TODO: Initialize app list after PrefService is available.
+ bool AppListControllerImpl::ShouldHideContinueSection() const {
+   PrefService* prefs = GetLastActiveUserPrefService();
++  if (!prefs) {
++    return false;
++  }
+   return prefs->GetBoolean(prefs::kLauncherContinueSectionHidden);
+ }
+ 
++// HACK(KibaOS): Same null-safe PrefService as ShouldHideContinueSection above.
+ void AppListControllerImpl::SetHideContinueSection(bool hide) {
+   PrefService* prefs = GetLastActiveUserPrefService();
++  if (!prefs) {
++    return;
++  }
+   bool is_hidden = prefs->GetBoolean(prefs::kLauncherContinueSectionHidden);
+   if (hide == is_hidden)
+     return;
+diff --git a/ash/multi_user/multi_user_window_manager.cc b/ash/multi_user/multi_user_window_manager.cc
+index eba3217541a5..2e30e1d2ea28 100644
+--- a/ash/multi_user/multi_user_window_manager.cc
++++ b/ash/multi_user/multi_user_window_manager.cc
+@@ -179,9 +179,15 @@ void MultiUserWindowManager::SetWindowOwner(aura::Window* window,
+ 
+   // Check if this window was created due to a user interaction. If it was,
+   // transfer it to the current user.
++  // HACK(KibaOS): Guard against nullptr access to `current_account_id_` which
++  // may not be set yet during early Ash startup before any user session has
++  // been activated (via OnActiveUserSessionChanged). Without this guard, the
++  // optional dereference at line 181 crashes when a browser window is created
++  // during the stub-signin/login flow before a user is active.
++  // TODO: Re-evaluate once multi-user session management is properly wired.
+   const bool show_for_current_user =
+       window->GetProperty(aura::client::kCreatedByUserGesture);
+-  if (show_for_current_user) {
++  if (show_for_current_user && current_account_id_.has_value()) {
+     window_entry->set_show_for_user(*current_account_id_);
+   }
+ 
+@@ -535,10 +541,13 @@ void MultiUserWindowManager::AddTransientOwnerRecursive(
+   window->AddObserver(this);
+   ::wm::TransientWindowManager::GetOrCreate(window)->AddObserver(this);
+ 
+-  // Hide the window if it should not be shown. Note that this hide operation
+-  // will hide recursively this and all children - but we have already collected
+-  // their initial view state.
+-  if (!IsWindowOnDesktopOfUser(owned_parent, *current_account_id_)) {
++  // HACK(KibaOS): Guard against empty `current_account_id_` which can happen
++  // on linux-chromeos where SessionControllerImpl::SetUserSessionOrder may
++  // not be called (no session_manager daemon), so OnActiveUserSessionChanged
++  // never fires and the optional stays disengaged. Without this guard, any
++  // transient window creation (e.g. right-click context menu) crashes here.
++  if (current_account_id_.has_value() &&
++      !IsWindowOnDesktopOfUser(owned_parent, *current_account_id_)) {
+     SetWindowVisibility(window, false, kAnimationTime);
+   }
+ }
+diff --git a/ash/style/dark_light_mode_controller_impl.cc b/ash/style/dark_light_mode_controller_impl.cc
+index 07fb3943a3b3..dd55b291419a 100644
+--- a/ash/style/dark_light_mode_controller_impl.cc
++++ b/ash/style/dark_light_mode_controller_impl.cc
+@@ -15,6 +15,7 @@
+ #include "ash/session/session_controller_impl.h"
+ #include "ash/shell.h"
+ #include "ash/style/color_util.h"
++#include "base/logging.h"
+ #include "components/account_id/account_id.h"
+ #include "components/prefs/pref_change_registrar.h"
+ #include "components/prefs/pref_registry_simple.h"
+@@ -100,7 +101,18 @@ bool DarkLightModeControllerImpl::GetAutoScheduleEnabled() const {
+ }
+ 
+ void DarkLightModeControllerImpl::ToggleColorMode() {
+-  DCHECK(active_user_pref_service_);
++  if (!active_user_pref_service_ && Shell::HasInstance()) {
++    if (PrefService* prefs =
++            Shell::Get()->session_controller()->GetActivePrefService()) {
++      OnActiveUserPrefServiceChanged(prefs);
++    }
++  }
++
++  if (!active_user_pref_service_) {
++    LOG(WARNING) << "Cannot toggle dark mode without active user prefs.";
++    return;
++  }
++
+   active_user_pref_service_->SetBoolean(prefs::kDarkModeEnabled,
+                                         !IsDarkModeEnabled());
+   active_user_pref_service_->CommitPendingWrite();
+diff --git a/ash/wm/desks/desks_controller.cc b/ash/wm/desks/desks_controller.cc
+index 7cad6999a5df..ffdfed46b7f8 100644
+--- a/ash/wm/desks/desks_controller.cc
++++ b/ash/wm/desks/desks_controller.cc
+@@ -622,7 +622,11 @@ void DesksController::NewDesk(DesksCreationRemovalSource source,
+   // Dont trigger when the source is `kSaveAndRecall` because the
+   // `DESK_TEMPLATES_MODE_ENTERED` alert triggered in
+   // `OverviewSession::ShowSavedDeskLibrary` should be shown instead.
+-  if (source != DesksCreationRemovalSource::kLaunchTemplate &&
++  // KibaOS compatibility: during standalone Linux shell startup, the first
++  // implicit desk can be created before locale/resources are fully sane. There
++  // is no user action to announce for that initial desk anyway.
++  if (!is_first_ever_desk &&
++      source != DesksCreationRemovalSource::kLaunchTemplate &&
+       source != DesksCreationRemovalSource::kSaveAndRecall &&
+       source != DesksCreationRemovalSource::kFloatingWorkspace) {
+     auto* shell = Shell::Get();
+diff --git a/ash/wm/desks/templates/saved_desk_util.cc b/ash/wm/desks/templates/saved_desk_util.cc
+index e9e02ad67769..2a83ab1ffb9c 100644
+--- a/ash/wm/desks/templates/saved_desk_util.cc
++++ b/ash/wm/desks/templates/saved_desk_util.cc
+@@ -39,6 +39,11 @@ bool IsGuestSession() {
+   const UserIndex user_index = 0;
+   const UserSession* const user_session =
+       Shell::Get()->session_controller()->GetUserSession(user_index);
++  // HACK(KibaOS): Null-safe session access. On generic Linux this can be
++  // queried before the first user session reaches ash.
++  if (!user_session) {
++    return false;
++  }
+   return user_session->user_info.type == user_manager::UserType::kGuest;
+ }
+ 
+diff --git a/ash/wm/overview/birch/birch_bar_controller.cc b/ash/wm/overview/birch/birch_bar_controller.cc
+index 110a2c1d4ee2..5e00d24d9622 100644
+--- a/ash/wm/overview/birch/birch_bar_controller.cc
++++ b/ash/wm/overview/birch/birch_bar_controller.cc
+@@ -68,26 +68,32 @@ std::string GetPrefNameFromSuggestionType(BirchSuggestionType type) {
+ 
+ BirchBarController::BirchBarController(bool is_informed_restore)
+     : is_informed_restore_(is_informed_restore) {
+-  // Init and register the show suggestions pref changed callback.
+-  show_suggestions_pref_registrar_.Init(GetPrefService());
+-  show_suggestions_pref_registrar_.Add(
+-      prefs::kBirchShowSuggestions,
+-      base::BindRepeating(&BirchBarController::OnShowSuggestionsPrefChanged,
+-                          base::Unretained(this)));
+-
+-  // Init and register the customize suggestion pref changed callback.
+-  customize_suggestions_pref_registrar_.Init(GetPrefService());
+-
+-  for (const auto& suggestion_pref :
+-       {prefs::kBirchUseCalendar, prefs::kBirchUseWeather,
+-        prefs::kBirchUseFileSuggest, prefs::kBirchUseChromeTabs,
+-        prefs::kBirchUseLostMedia, prefs::kBirchUseReleaseNotes,
+-        prefs::kBirchUseCoral}) {
+-    customize_suggestions_pref_registrar_.Add(
+-        suggestion_pref,
++  // HACK: The primary user pref service may not be ready when BirchBarController
++  // is created during the informed-restore session start (e.g. immediately after
++  // dismissing the welcome-recap dialog on linux-chromeos without a real
++  // session_manager). Skip pref registration in that case; PrefChangeRegistrar
++  // will NOTREACHED on a null service_.
++  PrefService* pref_service = GetPrefService();
++  if (pref_service) {
++    show_suggestions_pref_registrar_.Init(pref_service);
++    show_suggestions_pref_registrar_.Add(
++        prefs::kBirchShowSuggestions,
+         base::BindRepeating(
+-            &BirchBarController::OnCustomizeSuggestionsPrefChanged,
++            &BirchBarController::OnShowSuggestionsPrefChanged,
+             base::Unretained(this)));
++
++    customize_suggestions_pref_registrar_.Init(pref_service);
++    for (const auto& suggestion_pref :
++         {prefs::kBirchUseCalendar, prefs::kBirchUseWeather,
++          prefs::kBirchUseFileSuggest, prefs::kBirchUseChromeTabs,
++          prefs::kBirchUseLostMedia, prefs::kBirchUseReleaseNotes,
++          prefs::kBirchUseCoral}) {
++      customize_suggestions_pref_registrar_.Add(
++          suggestion_pref,
++          base::BindRepeating(
++              &BirchBarController::OnCustomizeSuggestionsPrefChanged,
++              base::Unretained(this)));
++    }
+   }
+ 
+   if (GetShowBirchSuggestions()) {
+@@ -190,8 +196,8 @@ void BirchBarController::SetShowBirchSuggestions(bool show) {
+ }
+ 
+ bool BirchBarController::GetShowBirchSuggestions() const {
+-  return show_suggestions_pref_registrar_.prefs()->GetBoolean(
+-      prefs::kBirchShowSuggestions);
++  const PrefService* prefs = show_suggestions_pref_registrar_.prefs();
++  return prefs && prefs->GetBoolean(prefs::kBirchShowSuggestions);
+ }
+ 
+ void BirchBarController::SetShowSuggestionType(BirchSuggestionType type,
+@@ -201,8 +207,8 @@ void BirchBarController::SetShowSuggestionType(BirchSuggestionType type,
+ }
+ 
+ bool BirchBarController::GetShowSuggestionType(BirchSuggestionType type) const {
+-  return customize_suggestions_pref_registrar_.prefs()->GetBoolean(
+-      GetPrefNameFromSuggestionType(type));
++  const PrefService* prefs = customize_suggestions_pref_registrar_.prefs();
++  return prefs && prefs->GetBoolean(GetPrefNameFromSuggestionType(type));
+ }
+ 
+ bool BirchBarController::IsDataLoading() const {
+diff --git a/chrome/browser/ash/magic_boost/magic_boost_state.cc b/chrome/browser/ash/magic_boost/magic_boost_state.cc
+index c5163bf3710c..40264ef299f8 100644
+--- a/chrome/browser/ash/magic_boost/magic_boost_state.cc
++++ b/chrome/browser/ash/magic_boost/magic_boost_state.cc
+@@ -88,11 +88,14 @@ MagicBoostState::MagicBoostState(
+ 
+   session_observation_.Observe(session_controller);
+ 
+-  // Register pref changes if use session already started.
++  // HACK(KibaOS): Null-safe pref registration. On generic Linux the session
++  // can report started before the primary user's PrefService is ready. The
++  // session observer callback handles registration once prefs are available.
+   if (session_controller->IsActiveUserSessionStarted()) {
+     PrefService* prefs = session_controller->GetPrimaryUserPrefService();
+-    CHECK(prefs);
+-    RegisterPrefChanges(prefs);
++    if (prefs) {
++      RegisterPrefChanges(prefs);
++    }
+   }
+ }
+ 
+diff --git a/chrome/browser/ash/net/vpn_list_forwarder.cc b/chrome/browser/ash/net/vpn_list_forwarder.cc
+index 7416959b1d48..f17f4e1cefe7 100644
+--- a/chrome/browser/ash/net/vpn_list_forwarder.cc
++++ b/chrome/browser/ash/net/vpn_list_forwarder.cc
+@@ -177,10 +177,17 @@ void VpnListForwarder::AttachToPrimaryUserProfile() {
+   AttachToPrimaryUserArcVpnProviderManager();
+ }
+ 
++// HACK(KibaOS): Null-safe profile check. During PreProfileInit, the primary
++// user's Profile may not be fully constructed yet. The original code skipped
++// the null check and crashed on CHECK(profile) in the KeyedService factory.
++// TODO: Move this to happen after profile initialization is complete.
+ void VpnListForwarder::AttachToPrimaryUserExtensionRegistry() {
+   CHECK(!extension_registry_, base::NotFatalUntil::M161);
+-  extension_registry_ =
+-      extensions::ExtensionRegistry::Get(GetPrimaryUserBrowserContext());
++  content::BrowserContext* context = GetPrimaryUserBrowserContext();
++  if (!context) {
++    return;
++  }
++  extension_registry_ = extensions::ExtensionRegistry::Get(context);
+   extension_registry_->AddObserver(this);
+ 
+   for (const auto& extension : extension_registry_->enabled_extensions()) {
+@@ -191,9 +198,15 @@ void VpnListForwarder::AttachToPrimaryUserExtensionRegistry() {
+   SetVpnProviders();
+ }
+ 
++// HACK(KibaOS): Same null-context safety as AttachToPrimaryUserExtensionRegistry
++// above. Both are called from AttachToPrimaryUserProfile() during PreProfileInit.
+ void VpnListForwarder::AttachToPrimaryUserArcVpnProviderManager() {
++  content::BrowserContext* context = GetPrimaryUserBrowserContext();
++  if (!context) {
++    return;
++  }
+   arc_vpn_provider_manager_ =
+-      app_list::ArcVpnProviderManager::Get(GetPrimaryUserBrowserContext());
++      app_list::ArcVpnProviderManager::Get(context);
+ 
+   if (arc_vpn_provider_manager_)
+     arc_vpn_provider_manager_->AddObserver(this);
+diff --git a/chrome/browser/ash/privacy_hub/privacy_hub_util.cc b/chrome/browser/ash/privacy_hub/privacy_hub_util.cc
+index eabd9f86c848..9cc9c73815da 100644
+--- a/chrome/browser/ash/privacy_hub/privacy_hub_util.cc
++++ b/chrome/browser/ash/privacy_hub/privacy_hub_util.cc
+@@ -302,7 +302,12 @@ void SetAppAccessNotifier(AppAccessNotifier* app_access_notifier) {
+ 
+   PrivacyHubNotificationController* controller =
+       PrivacyHubNotificationController::Get();
+-  CHECK(controller);
++  if (!controller) {
++    // KibaOS compatibility: standalone Linux sessions may run without the
++    // ChromeOS PrivacyHubNotificationController. App-access state is still
++    // tracked by the notifier, but there is no privacy-hub notification sink.
++    return;
++  }
+   controller->SetSensorDisabledNotificationDelegate(
+       app_access_notifier ? std::make_unique<Wrapper>(app_access_notifier)
+                           : nullptr);
+diff --git a/chrome/browser/extensions/system_display/display_info_provider_chromeos.cc b/chrome/browser/extensions/system_display/display_info_provider_chromeos.cc
+index 7e85bf4e4522..4d45608089e8 100644
+--- a/chrome/browser/extensions/system_display/display_info_provider_chromeos.cc
++++ b/chrome/browser/extensions/system_display/display_info_provider_chromeos.cc
+@@ -122,7 +122,6 @@ ash::DisplayRotationOptions GetDisplayRotationOptions(int rotation_value) {
+ 
+ DisplayInfoProviderChromeOS::DisplayInfoProviderChromeOS()
+     : cros_display_config_(ash::Shell::Get()->cros_display_config()) {
+-  CHECK(cros_display_config_);
+   shell_observation_.Observe(ash::Shell::Get());
+ }
+ 
+diff --git a/chrome/browser/profiles/profile_manager.cc b/chrome/browser/profiles/profile_manager.cc
+index d074c1d6ee0e..0f37ee10e692 100644
+--- a/chrome/browser/profiles/profile_manager.cc
++++ b/chrome/browser/profiles/profile_manager.cc
+@@ -659,7 +659,10 @@ Profile* ProfileManager::GetPrimaryUserProfile(
+ 
+     if (user->is_profile_created()) {
+       // Note: The ProfileHelper will take care of guest profiles.
+-      return ash::ProfileHelper::Get()->GetProfileByUser(user);
++      Profile* profile = ash::ProfileHelper::Get()->GetProfileByUser(user);
++      if (profile) {
++        return profile;
++      }
+     }
+ 
+     LOG(ERROR) << "ProfileManager::GetPrimaryUserProfile is called when "
+diff --git a/chrome/browser/profiles/profile_selections.cc b/chrome/browser/profiles/profile_selections.cc
+index 4c61cf88d1fc..d55c5982dfcc 100644
+--- a/chrome/browser/profiles/profile_selections.cc
++++ b/chrome/browser/profiles/profile_selections.cc
+@@ -166,7 +166,7 @@ ProfileSelection ProfileSelections::GetProfileSelection(
+     return system_profile_selection_;
+   }
+ 
+-  NOTREACHED();
++  return regular_profile_selection_;
+ }
+ 
+ void ProfileSelections::SetProfileSelectionForRegular(
+diff --git a/chrome/browser/ui/ash/capture_mode/chrome_capture_mode_delegate.cc b/chrome/browser/ui/ash/capture_mode/chrome_capture_mode_delegate.cc
+index 08e841df4259..7285ceaf178c 100644
+--- a/chrome/browser/ui/ash/capture_mode/chrome_capture_mode_delegate.cc
++++ b/chrome/browser/ui/ash/capture_mode/chrome_capture_mode_delegate.cc
+@@ -836,11 +836,18 @@ bool ChromeCaptureModeDelegate::ActiveUserDefaultSearchProviderIsGoogle()
+   // TODO(crbug.com/278643115): Take the account_id from the callers.
+   const auto* active_session =
+       session_manager::SessionManager::Get()->GetActiveSession();
+-  CHECK(active_session);
++  // HACK(KibaOS): Capture mode can be queried before local account startup
++  // has selected an active user. Treat that as no Google provider instead of
++  // crashing the standalone Ash session.
++  if (!active_session) {
++    return false;
++  }
+ 
+   TemplateURLService* template_url_service =
+       ash::TemplateURLServiceProvider::Get().Find(active_session->account_id());
+-  CHECK(template_url_service);
++  if (!template_url_service) {
++    return false;
++  }
+ 
+   return search::DefaultSearchProviderIsGoogle(template_url_service);
+ }
+@@ -1043,7 +1050,9 @@ void ChromeCaptureModeDelegate::OnAccessTokenAvailableForImageSearch(
+   // image search.
+   TemplateURLService* template_url_service =
+       ash::TemplateURLServiceProvider::Get().Find(account_id);
+-  CHECK(template_url_service);
++  if (!template_url_service) {
++    return;
++  }
+   CHECK(search::DefaultSearchProviderIsGoogle(template_url_service));
+   const TemplateURL* const default_provider =
+       template_url_service->GetDefaultSearchProvider();
+diff --git a/chrome/browser/ui/ash/desks/desks_client.cc b/chrome/browser/ui/ash/desks/desks_client.cc
+index cb72b9876c0c..e90b8b2aaa5a 100644
+--- a/chrome/browser/ui/ash/desks/desks_client.cc
++++ b/chrome/browser/ui/ash/desks/desks_client.cc
+@@ -505,6 +505,16 @@ void DesksClient::LaunchAppsFromTemplate(
+ }
+ 
+ desks_storage::DeskModel* DesksClient::GetDeskModel() {
++  // HACK(KibaOS): `active_profile_` may be null during early session startup
++  // before `OnActiveUserSessionChanged()` sets it (e.g. when
++  // InformedRestoreController triggers desk model access during
++  // StartInformedRestoreSession). The storage manager may also be null if
++  // it hasn't been initialized yet. Return null in either case; callers
++  // must handle a null DeskModel gracefully.
++  if (!active_profile_ || !save_and_recall_desks_storage_manager_) {
++    return nullptr;
++  }
++
+   // Get local storage only when 1) Desk templates sync is
+   // disabled or 2) Desk Templates and Floating workspace are disabled. If we
+   // are unable to get the desk sync service or its bridge, then we default to
+diff --git a/chrome/browser/ui/ash/quick_answers/quick_answers_state_ash.cc b/chrome/browser/ui/ash/quick_answers/quick_answers_state_ash.cc
+index 54367cd63a03..ba19b0eb00cf 100644
+--- a/chrome/browser/ui/ash/quick_answers/quick_answers_state_ash.cc
++++ b/chrome/browser/ui/ash/quick_answers/quick_answers_state_ash.cc
+@@ -37,11 +37,14 @@ QuickAnswersStateAsh::QuickAnswersStateAsh() {
+ 
+   session_observation_.Observe(session_controller);
+ 
+-  // Register pref changes if use session already started.
++  // HACK(KibaOS): Same null-safe pref pattern as MagicBoostState above.
++  // QuickAnswersStateAsh hits the same DCHECK(prefs) during PreProfileInit.
++  // TODO: Consolidate with other PreProfileInit pref safety patches.
+   if (session_controller->IsActiveUserSessionStarted()) {
+     PrefService* prefs = session_controller->GetPrimaryUserPrefService();
+-    CHECK(prefs, base::NotFatalUntil::M162);
+-    RegisterPrefChanges(prefs);
++    if (prefs) {
++      RegisterPrefChanges(prefs);
++    }
+   }
+ }
+ 
+diff --git a/chrome/browser/ui/ash/read_write_cards/read_write_cards_manager_impl_unittest.cc b/chrome/browser/ui/ash/read_write_cards/read_write_cards_manager_impl_unittest.cc
+index 71d5fe8348be..f3f37009f7dc 100644
+--- a/chrome/browser/ui/ash/read_write_cards/read_write_cards_manager_impl_unittest.cc
++++ b/chrome/browser/ui/ash/read_write_cards/read_write_cards_manager_impl_unittest.cc
+@@ -8,10 +8,12 @@
+ #include <memory>
+ #include <vector>
+ 
++#include "ash/constants/ash_features.h"
+ #include "ash/system/mahi/test/mock_mahi_media_app_events_proxy.h"
+ #include "base/functional/bind.h"
+ #include "base/strings/strcat.h"
+ #include "base/test/scoped_feature_list.h"
++#include "base/test/test_future.h"
+ #include "chrome/browser/ash/magic_boost/magic_boost_controller.h"
+ #include "chrome/browser/ash/magic_boost/magic_boost_state.h"
+ #include "chrome/browser/global_features.h"
+@@ -35,6 +37,7 @@
+ #include "chromeos/constants/chromeos_switches.h"
+ #include "content/public/browser/context_menu_params.h"
+ #include "testing/gmock/include/gmock/gmock.h"
++#include "ui/base/ime/ash/ime_bridge.h"
+ 
+ namespace chromeos {
+ 
+@@ -156,6 +159,120 @@ class ReadWriteCardsManagerImplTest : public ChromeAshTestBase {
+   TestingProfileManager profile_manager_{TestingBrowserProcess::GetGlobal()};
+ };
+ 
++class ReadWriteCardsManagerImplNullInputContextTest
++    : public ReadWriteCardsManagerImplTest {
++ public:
++  void SetUp() override {
++    scoped_feature_list_.InitWithFeatures(
++        /*enabled_features=*/
++        {
++            ash::features::kLobster,
++            ash::features::kFeatureManagementLobster,
++            chromeos::features::kOrca,
++            chromeos::features::kFeatureManagementOrca,
++        },
++        /*disabled_features=*/{
++            ash::features::kLobsterDogfood,
++            chromeos::features::kMagicBoostRevamp,
++            chromeos::features::kOrcaDogfood,
++        });
++    ReadWriteCardsManagerImplTest::SetUp();
++  }
++};
++
++TEST_F(ReadWriteCardsManagerImplNullInputContextTest,
++       CreatesAndClosesEditorSessionWithNoInputContextHandler) {
++  ASSERT_TRUE(chromeos::features::IsOrcaEnabled());
++  ASSERT_TRUE(ash::features::IsLobsterEnabled());
++  ASSERT_NE(editor_menu_controller(), nullptr);
++
++  auto* ime_bridge = ash::IMEBridge::Get();
++  auto* original_input_context = ime_bridge->GetInputContextHandler();
++  ime_bridge->SetInputContextHandler(nullptr);
++  const bool session_created =
++      editor_menu_controller()->SetBrowserContext(testing_profile_);
++  editor_menu_controller()->TryCreatingEditorSession();
++  base::test::TestFuture<const editor_menu::EditorMenuCardContext&> future;
++  editor_menu_controller()->GetEditorMenuCardContext(future.GetCallback());
++  editor_menu_controller()->OnEditorMenuVisibilityChanged(
++      /*visible=*/false, /*destroy_session=*/true);
++  base::test::TestFuture<const editor_menu::EditorMenuCardContext&>
++      closed_future;
++  editor_menu_controller()->GetEditorMenuCardContext(
++      closed_future.GetCallback());
++  ime_bridge->SetInputContextHandler(original_input_context);
++
++  ASSERT_TRUE(session_created);
++  ASSERT_TRUE(future.Wait());
++  // A ready context proves that the Orca manager survived while no Lobster
++  // manager was added to the session.
++  EXPECT_TRUE(future.Get().text_and_image_mode() !=
++              editor_menu::TextAndImageMode::kLobsterWithSelectedText);
++  ASSERT_TRUE(closed_future.IsReady());
++  EXPECT_EQ(closed_future.Get().text_and_image_mode(),
++            editor_menu::TextAndImageMode::kBlocked);
++}
++
++class ReadWriteCardsManagerImplWithoutEditorManagersTest
++    : public ReadWriteCardsManagerImplTest {
++ public:
++  void SetUp() override {
++    scoped_feature_list_.InitWithFeatures(
++        /*enabled_features=*/
++        {
++            ash::features::kLobster,
++            ash::features::kFeatureManagementLobster,
++            chromeos::features::kFeatureManagementMahi,
++        },
++        /*disabled_features=*/{
++            ash::features::kLobsterDogfood,
++            chromeos::features::kFeatureManagementOrca,
++            chromeos::features::kMagicBoostRevamp,
++            chromeos::features::kOrca,
++            chromeos::features::kOrcaDogfood,
++        });
++    ReadWriteCardsManagerImplTest::SetUp();
++  }
++};
++
++TEST_F(ReadWriteCardsManagerImplWithoutEditorManagersTest,
++       FetchControllerRunsCallbackAndFallsBackToQuickAnswersAndMahi) {
++  ASSERT_FALSE(chromeos::features::IsOrcaEnabled());
++  ASSERT_TRUE(ash::features::IsLobsterEnabled());
++  ASSERT_TRUE(chromeos::features::IsMahiEnabled());
++  ASSERT_NE(editor_menu_controller(), nullptr);
++  ASSERT_NE(mahi_menu_controller(), nullptr);
++
++  auto* ime_bridge = ash::IMEBridge::Get();
++  auto* original_input_context = ime_bridge->GetInputContextHandler();
++  ime_bridge->SetInputContextHandler(nullptr);
++  const bool session_created =
++      editor_menu_controller()->SetBrowserContext(testing_profile_);
++  ime_bridge->SetInputContextHandler(original_input_context);
++  // Orca is disabled and Lobster has no text-input client, so neither manager
++  // can create an editor-card session.
++  ASSERT_FALSE(session_created);
++
++  QuickAnswersState::Get()->SetEligibilityForTesting(true);
++  magic_boost_state_->AsyncWriteConsentStatus(HMRConsentStatus::kApproved);
++  mahi_menu_controller()->set_is_distillable_for_testing(true);
++
++  content::ContextMenuParams params;
++  params.selection_text = u"text";
++  base::test::TestFuture<
++      std::vector<base::WeakPtr<chromeos::ReadWriteCardController>>>
++      future;
++  manager_->FetchController(params, testing_profile_, future.GetCallback());
++
++  ASSERT_TRUE(future.IsReady());
++  ExpectControllersEqual(
++      "Quick Answers and Mahi should remain available without an editor "
++      "session",
++      std::vector<ReadWriteCardController*>{quick_answers_controller(),
++                                            mahi_menu_controller()},
++      future.Take());
++}
++
+ class ReadWriteCardsManagerImplWithAndWithoutMahiTest
+     : public ReadWriteCardsManagerImplTest,
+       public testing::WithParamInterface<bool> {
+diff --git a/chrome/browser/ui/webui/ash/mako/mako_bubble_coordinator.cc b/chrome/browser/ui/webui/ash/mako/mako_bubble_coordinator.cc
+index 34c9ebcbe5c7..c7e87324c285 100644
+--- a/chrome/browser/ui/webui/ash/mako/mako_bubble_coordinator.cc
++++ b/chrome/browser/ui/webui/ash/mako/mako_bubble_coordinator.cc
+@@ -123,8 +123,14 @@ bool MakoBubbleCoordinator::IsShowingUI() const {
+ }
+ 
+ void MakoBubbleCoordinator::CacheContextCaretBounds() {
+-  const ui::InputMethod* input_method =
+-      IMEBridge::Get()->GetInputContextHandler()->GetInputMethod();
++  auto* input_context_handler = IMEBridge::Get()->GetInputContextHandler();
++  // KibaOS compatibility: generic-Linux sessions can legitimately have no
++  // ChromeOS text-input target; IMEBridge documents this state as nullable.
++  if (!input_context_handler) {
++    return;
++  }
++
++  const ui::InputMethod* input_method = input_context_handler->GetInputMethod();
+   if (input_method && input_method->GetTextInputClient()) {
+     context_caret_bounds_ =
+         input_method->GetTextInputClient()->GetCaretBounds();
+diff --git a/ui/base/clipboard/clipboard_data.cc b/ui/base/clipboard/clipboard_data.cc
+index 5f29b414ded4..bc3360195e4c 100644
+--- a/ui/base/clipboard/clipboard_data.cc
++++ b/ui/base/clipboard/clipboard_data.cc
+@@ -128,9 +128,13 @@ std::optional<size_t> ClipboardData::CalculateSize(
+     size_t image_size;
+     if (maybe_png_.has_value()) {
+       image_size = maybe_png_.value().size();
+-    } else {
+-      DCHECK(maybe_bitmap_.has_value());
++    } else if (maybe_bitmap_.has_value()) {
+       image_size = maybe_bitmap_.value().computeByteSize();
++    } else {
++      // HACK(KibaOS): Guard against empty optional when kPng format bit is
++      // set but neither maybe_png_ nor maybe_bitmap_ contain data. This can
++      // happen in edge cases on linux-chromeos builds.
++      image_size = 0;
+     }
+     if (format.has_value() && *format == ClipboardInternalFormat::kPng)
+       return image_size;

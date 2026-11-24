@@ -1,0 +1,142 @@
+diff --git a/ui/file_manager/file_manager/foreground/js/command_handler.ts b/ui/file_manager/file_manager/foreground/js/command_handler.ts
+index 15ec3a3314c0..b126420f2252 100644
+--- a/ui/file_manager/file_manager/foreground/js/command_handler.ts
++++ b/ui/file_manager/file_manager/foreground/js/command_handler.ts
+@@ -18,7 +18,7 @@ import {DEFAULT_BRUSCHETTA_VM, DEFAULT_CROSTINI_VM} from './constants.js';
+ import type {FileFilter} from './directory_contents.js';
+ import type {DirectoryModel} from './directory_model.js';
+ import type {DirectoryTreeNamingController} from './directory_tree_naming_controller.js';
+-import {AboutKibaOsCommand, BrowserBackCommand, CalculateSizeCommand, ConfigureCommand, CopyNameCommand, CopyPathCommand, CutCopyCommand, DefaultTaskCommand, DeleteCommand, DlpRestrictionDetailsCommand, DriveBuyMoreSpaceCommand, DriveGoToDriveCommand, DriveSyncSettingsCommand, EmptyTrashCommand, ExtractAllCommand, FilesSettingsCommand, FocusActionBarCommand, FormatCommand, GetInfoCommand, GoToFileLocationCommand, GuestOsManagingSharingCommand, GuestOsManagingSharingGearCommand, GuestOsShareCommand, InspectConsoleCommand, InspectElementCommand, InspectNormalCommand, InvokeSharesheetCommand, ManageInDriveCommand, NewFolderCommand, NewWindowCommand, OpenGearMenuCommand, OpenWithCommand, PasteCommand, PasteIntoCurrentFolderCommand, PasteIntoFolderCommand, PinFolderCommand, RefreshCommand, RenameCommand, RestoreFromTrashCommand, SearchCommand, SelectAllCommand, SendFeedbackCommand, SetWallpaperCommand, ShowProvidersSubmenuCommand, SortByDateCommand, SortByNameCommand, SortBySizeCommand, SortByTypeCommand, ToggleHiddenAndroidFoldersCommand, ToggleHiddenFilesCommand, ToggleHoldingSpaceCommand, TogglePinnedCommand, UnmountCommand, UnpinFolderCommand, VolumeHelpCommand, VolumeStorageCommand, VolumeSwitchCommand, ZipSelectionCommand, ZoomInCommand, ZoomOutCommand, ZoomResetCommand} from './file_manager_commands.js';
++import {AboutKibaOsCommand, BrowserBackCommand, CalculateSizeCommand, ConfigureCommand, CopyNameCommand, CopyPathCommand, CutCopyCommand, DefaultTaskCommand, DeleteCommand, DlpRestrictionDetailsCommand, DriveBuyMoreSpaceCommand, DriveGoToDriveCommand, DriveSyncSettingsCommand, DuplicateCommand, EmptyTrashCommand, ExtractAllCommand, FilesSettingsCommand, FocusActionBarCommand, FormatCommand, GetInfoCommand, GoToFileLocationCommand, GuestOsManagingSharingCommand, GuestOsManagingSharingGearCommand, GuestOsShareCommand, InspectConsoleCommand, InspectElementCommand, InspectNormalCommand, InvokeSharesheetCommand, ManageInDriveCommand, NewFolderCommand, NewWindowCommand, OpenGearMenuCommand, OpenWithCommand, PasteCommand, PasteIntoCurrentFolderCommand, PasteIntoFolderCommand, PinFolderCommand, RefreshCommand, RenameCommand, RestoreFromTrashCommand, SearchCommand, SelectAllCommand, SendFeedbackCommand, SetWallpaperCommand, ShowProvidersSubmenuCommand, SortByDateCommand, SortByNameCommand, SortBySizeCommand, SortByTypeCommand, ToggleHiddenAndroidFoldersCommand, ToggleHiddenFilesCommand, ToggleHoldingSpaceCommand, TogglePinnedCommand, UnmountCommand, UnpinFolderCommand, VolumeHelpCommand, VolumeStorageCommand, VolumeSwitchCommand, ZipSelectionCommand, ZoomInCommand, ZoomOutCommand, ZoomResetCommand} from './file_manager_commands.js';
+ import {shouldIgnoreEvents} from './file_manager_commands_util.js';
+ import type {FileSelection, FileSelectionHandler} from './file_selection.js';
+ import type {FileTransferController} from './file_transfer_controller.js';
+@@ -161,6 +161,7 @@ const FilesCommands = {
+   'volume-storage': new VolumeStorageCommand(),
+   'copy-name': new CopyNameCommand(),
+   'copy-path': new CopyPathCommand(),
++  'duplicate': new DuplicateCommand(),
+   'calculate-size': new CalculateSizeCommand(),
+   'about-kibaos-files': new AboutKibaOsCommand(),
+   'show-providers-submenu': new ShowProvidersSubmenuCommand(),
+diff --git a/ui/file_manager/file_manager/foreground/js/file_manager_commands.ts b/ui/file_manager/file_manager/foreground/js/file_manager_commands.ts
+index 0eb2a1ec639a..5ff83e1e8a5b 100644
+--- a/ui/file_manager/file_manager/foreground/js/file_manager_commands.ts
++++ b/ui/file_manager/file_manager/foreground/js/file_manager_commands.ts
+@@ -2611,6 +2611,96 @@ export class CalculateSizeCommand extends FilesCommand {
+   }
+ }
+ 
++/**
++ * KibaOS: whether this entry sits directly in this folder.
++ *
++ * The selection is not always in the folder on screen. In search results and
++ * in Recent, the rows come from wherever they happen to live, and a copy into
++ * the current folder would then be a fetch rather than a duplicate: a file
++ * would appear in a folder it was never in, from a command that promised to
++ * leave things where they are.
++ *
++ * The volume is compared as well as the path, because fullPath is relative to
++ * its own filesystem and two volumes can hold the same one.
++ */
++function kibaOsSitsIn(
++    entry: Entry|FilesAppEntry, dirEntry: Entry|FilesAppEntry,
++    volumeManager: VolumeManager): boolean {
++  const path = entry.fullPath;
++  const dir = dirEntry.fullPath;
++  if (!path || !dir) {
++    return false;
++  }
++  const slash = path.lastIndexOf('/');
++  const parent = slash <= 0 ? '/' : path.slice(0, slash);
++  if (parent !== dir) {
++    return false;
++  }
++  return volumeManager.getVolumeInfo(entry) ===
++      volumeManager.getVolumeInfo(dirEntry);
++}
++
++/**
++ * KibaOS: makes a second copy of the selection, beside the first.
++ *
++ * Every desktop file manager has this and Files does not, so the way to get a
++ * spare copy before editing something is copy, then paste, then find the thing
++ * that paste put somewhere. Three steps and a guess, for what is one intention.
++ *
++ * The rename is not ours. A copy task always runs its destination through
++ * GenerateUnusedFilename, so copying into the folder the file is already in
++ * lands as "report (1).pdf" with no conflict dialog and nothing to answer.
++ * That is the whole implementation: the naming, the progress panel, the undo
++ * entry and the error reporting are the ones Files already has.
++ *
++ * No keyboard shortcut, for the same reason as Copy name and Copy path: ash
++ * reads every chord in this window first, and Ctrl+D in particular is already
++ * spoken for.
++ */
++export class DuplicateCommand extends FilesCommand {
++  execute(_event: CommandEvent, fileManager: CommandHandlerDeps) {
++    if (isOnTrashRoot(fileManager)) {
++      return;
++    }
++    const dirEntry = fileManager.getCurrentDirectoryEntry();
++    const entries = fileManager.getSelection().entries;
++    if (!dirEntry || entries.length === 0) {
++      return;
++    }
++    // Checked again here and not only in canExecute, because canExecute runs
++    // when the menu is built and the selection can change under a command
++    // invoked from anywhere else.
++    if (!entries.every(
++            entry => kibaOsSitsIn(entry, dirEntry, fileManager.volumeManager))) {
++      return;
++    }
++    startIOTask(
++        chrome.fileManagerPrivate.IoTaskType.COPY, entries,
++        {destinationFolder: dirEntry as DirectoryEntry});
++    const message = entries.length === 1 ?
++        `Duplicating ${entries[0]!.name}` :
++        `Duplicating ${entries.length} items`;
++    fileManager.ui.speakA11yMessage(message);
++  }
++
++  override canExecute(event: CanExecuteEvent, fileManager: CommandHandlerDeps) {
++    const dirEntry = fileManager.getCurrentDirectoryEntry();
++    const entries = fileManager.getSelection().entries;
++    const canDuplicate = !!dirEntry && entries.length > 0 &&
++        !isOnTrashRoot(fileManager) &&
++        !fileManager.directoryModel.isReadOnly() &&
++        entries.every(
++            entry => kibaOsSitsIn(entry, dirEntry, fileManager.volumeManager)) &&
++        entries.every(shouldShowMenuItemsForEntry.bind(
++            null, fileManager.volumeManager));
++    event.canExecute = canDuplicate;
++    event.command.setHidden(!canDuplicate);
++    event.command.label = entries.length > 1 ?
++        `Duplicate ${entries.length} items` :
++        'Duplicate';
++  }
++}
++
+ /**
+  * KibaOS: says what this is and what it is running on.
+  *
+diff --git a/ui/file_manager/file_manager/main.html b/ui/file_manager/file_manager/main.html
+index 065d6ff4ae17..cb6e864e7709 100644
+--- a/ui/file_manager/file_manager/main.html
++++ b/ui/file_manager/file_manager/main.html
+@@ -39,6 +39,7 @@ found in the LICENSE file.
+            trade than one extra trip to the context menu. -->
+       <command id="copy-name" label="Copy name">
+       <command id="copy-path" label="Copy path">
++      <command id="duplicate" label="Duplicate">
+       <command id="calculate-size" label="Calculate size">
+       <command id="paste" label="$i18n{PASTE_BUTTON_LABEL}"
+                shortcut="v|Ctrl">
+@@ -180,6 +181,7 @@ found in the LICENSE file.
+         <cr-menu-item command="#copy" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#copy-name" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#copy-path" visibleif="full-page"></cr-menu-item>
++        <cr-menu-item command="#duplicate" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#calculate-size" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#paste" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#paste-into-folder" visibleif="full-page"></cr-menu-item>

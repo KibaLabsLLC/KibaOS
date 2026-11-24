@@ -1,0 +1,313 @@
+#!/usr/bin/env bash
+# The graphical installer's model process, over its real protocol.
+#
+# The graphical front end reaches the destructive engine through exactly one
+# path, and this is it. So the fixtures here are the ones that let the whole
+# path run without root, without a disk and without a display: a recording stub
+# engine, an injectable disk table, fixture keymap/zone/locale roots, and stub
+# helpers for the diagnostics the failure and network pages call.
+#
+# The assertions live in gui_bridge_test.py, which drives the shipped Python
+# client against the shipped shell model, so a quoting or buffering bug between
+# the two fails here rather than on a machine with a disk in it.
+set -Eeuo pipefail
+
+ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd -P)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+command -v python3 >/dev/null 2>&1 || {
+  echo 'installer GUI bridge test: SKIP (python3 not available)'
+  exit 0
+}
+command -v openssl >/dev/null 2>&1 || {
+  echo 'installer GUI bridge test: SKIP (openssl not available)'
+  exit 0
+}
+
+install -d "$TMP/zoneinfo/America" "$TMP/locales" "$TMP/keymaps/i386/qwerty" \
+  "$TMP/block/sda" "$TMP/block/sda1" "$TMP/block/sdb" "$TMP/dri" \
+  "$TMP/empty-dri" "$TMP/run" "$TMP/stub" "$TMP/export" "$TMP/bundle"
+: >"$TMP/zoneinfo/UTC"; : >"$TMP/zoneinfo/America/Chicago"
+: >"$TMP/locales/en_US"; : >"$TMP/locales/fr_FR"
+# `xx` is a console keymap with no XKB layout, which this screen cannot type on.
+for _keymap in us fr de xx; do : >"$TMP/keymaps/i386/qwerty/$_keymap.map.gz"; done
+printf '%s\n' '# consolelayout xlayout xmodel xvariant xoptions' \
+  'us	us	pc105+inet	-	terminate:ctrl_alt_bksp' \
+  'fr	fr	pc105	-	terminate:ctrl_alt_bksp' \
+  'de	de	pc105	-	terminate:ctrl_alt_bksp' >"$TMP/kbd-model-map"
+# One keyboard and one mouse, for the keyboards udev is asked to plug in again.
+install -d "$TMP/input/event1" "$TMP/input/event2"
+: >"$TMP/input/event1/keyboard"
+: >"$TMP/dri/renderD128"
+# The kernel driver behind the node, read from sysfs. Two fixtures, because the
+# graphics page prints different advice for "a named driver is loaded" and
+# "something published a node and we cannot tell what".
+install -d "$TMP/drm/renderD128/device"
+printf 'DRIVER=i915\n' >"$TMP/drm/renderD128/device/uevent"
+install -d "$TMP/drm-unknown"
+install -d "$TMP/drm-virtual/renderD128/device"
+printf 'DRIVER=vgem\n' >"$TMP/drm-virtual/renderD128/device/uevent"
+# A partition carries this attribute; a whole disk does not.
+: >"$TMP/block/sda1/partition"
+printf '%s\n' '2026/07/12' >"$TMP/snapshot"
+printf 'MemAvailable:   16000000 kB\n' >"$TMP/meminfo"
+printf '%s\n' \
+  '/dev/sda|931.5G|WDC WD10EZEX|sata|WD-WCC6Y4KP1234' \
+  '/dev/sdb|28.7G|SanDisk Ultra|usb|4C5300011212' >"$TMP/disks"
+
+# A stub engine that records its argv, copies the secret files it was handed so
+# the test can prove they arrived unaltered, and writes journal records for the
+# stages it claims to have run.
+cat >"$TMP/stub-engine" <<'STUB'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+printf '%s\n' "$*" >>"$KIBAOS_STUB_CALLS"
+mode=dry-run
+target=''
+previous=''
+for arg in "$@"; do
+  [[ $arg != --execute ]] || mode=execute
+  case $previous in
+    --target) target=$arg ;;
+    --luks-passphrase-file) cp -- "$arg" "$KIBAOS_STUB_DIR/passphrase.seen" ;;
+    --password-hash-file) cp -- "$arg" "$KIBAOS_STUB_DIR/hash.seen" ;;
+  esac
+  previous=$arg
+done
+printf 'stub engine invoked in %s mode\n' "$mode"
+[[ $mode == execute ]] || exit "${KIBAOS_STUB_DRYRUN_STATUS:-0}"
+
+. "$KIBAOS_JOURNAL_LIB"
+# The real engine traps TERM, records a `cancelled` stage failure and exits
+# 143. The stop path is only worth testing against a stub that does the same.
+handle_cancel() {
+  trap - INT TERM
+  [[ -z ${_J_ACTIVE_STAGE:-} ]] || kibaos_journal_fail "$_J_ACTIVE_STAGE" 143 cancelled \
+    'installer cancelled. The private install log records how far it got.' \
+    log shell reboot || true
+  exit 143
+}
+trap handle_cancel TERM INT
+kibaos_journal_init execute "$target"
+staging=${KIBAOS_STUB_STAGING:-workspace}
+run_stage() {
+  local stage=$1 message=${2:-}
+  [[ -n $message ]] || message="finished $stage"
+  kibaos_journal_begin "$stage" "starting $stage"
+  if [[ ${KIBAOS_STUB_LINGER_AT:-} == "$stage" ]]; then
+    : >"$KIBAOS_STUB_DIR/lingering"
+    for _ in $(seq 1 600); do sleep 0.1; done
+  fi
+  if [[ ${KIBAOS_STUB_FAIL_AT:-} == "$stage" ]]; then
+    kibaos_journal_fail "$stage" 1 unexpected_exit \
+      'a step ended without reporting why' export log reboot
+    exit 1
+  fi
+  kibaos_journal_ok "$stage" "$message"
+}
+run_stage preflight
+run_stage package-check "$staging"
+if [[ $staging == workspace ]]; then
+  run_stage acquire
+fi
+for stage in confirm partition format mount; do
+  run_stage "$stage"
+done
+if [[ $staging == target ]]; then
+  run_stage acquire-target
+fi
+for stage in pacstrap configure bootloader snapshot verify-install; do
+  run_stage "$stage"
+done
+exit 0
+STUB
+
+cat >"$TMP/stub/loadkeys" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$1" >>"$KIBAOS_TEST_LOADKEYS_LOG"
+[[ ${KIBAOS_TEST_LOADKEYS_REJECT:-} != "$1" ]] || exit 1
+exit 0
+STUB
+
+# xkbcli spells a layout's symbols the way the rules would, and compiles the
+# layout file `cage` reads; udevadm says which input devices are keyboards and
+# records every trigger. Enough of both for the layout this screen types on.
+cat >"$TMP/stub/xkbcli" <<'STUB'
+#!/usr/bin/env bash
+kccgst=0 layout='' variant=''
+shift
+while (($#)); do
+  case $1 in
+    --kccgst) kccgst=1; shift ;;
+    --layout) layout=$2; shift 2 ;;
+    --variant) variant=$2; shift 2 ;;
+    *) shift 2 ;;
+  esac
+done
+if (( kccgst )); then
+  printf '  xkb_symbols { include "pc+%s%s+inet(evdev)" };\n' "$layout" "${variant:+($variant)}"
+  exit 0
+fi
+[[ -z ${KIBAOS_TEST_XKBCLI_REJECT:-} ]] || exit 1
+[[ -r ${XKB_CONFIG_EXTRA_PATH:?}/symbols/$layout ]]
+STUB
+
+cat >"$TMP/stub/udevadm" <<'STUB'
+#!/usr/bin/env bash
+case $1 in
+  info)
+    path=''
+    for arg in "$@"; do [[ $arg != --path=* ]] || path=${arg#--path=}; done
+    printf 'DEVNAME=/dev/input/%s\nID_INPUT=1\n' "${path##*/}"
+    if [[ -e $path/keyboard ]]; then
+      printf 'ID_INPUT_KEYBOARD=1\n'
+    else
+      printf 'ID_INPUT_MOUSE=1\n'
+    fi
+    ;;
+  trigger)
+    shift
+    printf 'trigger %s\n' "$*" >>"$KIBAOS_TEST_UDEVADM_LOG"
+    [[ ! -e $KIBAOS_TEST_UDEVADM_LOG.fail || $1 != --action=add ]] || exit 1
+    ;;
+esac
+STUB
+
+cat >"$TMP/stub/systemctl" <<'STUB'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$KIBAOS_STUB_DIR/systemctl.calls"
+[[ $* == "--no-block reboot" ]]
+STUB
+
+# Exits non-zero and writes nothing. Its exit status is deliberately 2, which
+# is also a status a real install can exit with, which is exactly why the
+# export check looks at the artifact instead.
+cat >"$TMP/stub/broken-helper" <<'STUB'
+#!/usr/bin/env bash
+printf 'kibaos-install-failure: the export directory is not writable\n' >&2
+exit 2
+STUB
+
+cat >"$TMP/stub/nmcli" <<'STUB'
+#!/usr/bin/env bash
+# Records every invocation, so the test can prove a Wi-Fi passphrase never
+# reaches a command line.
+printf '%s\n' "$*" >>"$KIBAOS_STUB_DIR/nmcli.calls"
+args=("$@")
+case "$*" in
+  *"-t radio wifi"*) printf '%s\n' "${KIBAOS_STUB_RADIO:-enabled}" ;;
+  "radio wifi on"|"radio wifi off") exit 0 ;;
+  *"device status"*)
+    printf '%s\n' 'eno1:ethernet:unavailable:' \
+      "wlan0:wifi:${KIBAOS_STUB_WIFI_STATE:-disconnected}:${KIBAOS_STUB_SSID:-}"
+    ;;
+  *"general status"*) printf '%s\n' "${KIBAOS_STUB_CONNECTIVITY:-full}" ;;
+  *"device wifi rescan"*) exit 0 ;;
+  *"device wifi list"*)
+    # A colon inside an SSID arrives escaped, the same access point is seen
+    # once per band, and one network is open.
+    printf '%s\n' \
+      ':22:WPA2:no' \
+      'Ferry\: Cross:82:WPA2:no' \
+      'Ferry\: Cross:44:WPA2:no' \
+      'kestrel-5g:67:WPA2:*' \
+      'Guest Lounge:38:--:no' \
+      'Pure WPA3:30:WPA3:no' \
+      'Cafe OWE:24:OWE:no' \
+      'Company:18:WPA2 802.1X:no'
+    ;;
+  *"connection show"*) printf '%s\n' 'kestrel-5g:802-11-wireless' 'eno1:802-3-ethernet' ;;
+  *"connection load"*) exit 0 ;;
+  *"connection up"*)
+    if [[ -n ${KIBAOS_STUB_NM_FAIL:-} ]]; then
+      printf '%s\n' "$KIBAOS_STUB_NM_FAIL" >&2
+      exit 4
+    fi
+    exit 0
+    ;;
+  *"connection delete"*) exit 0 ;;
+esac
+exit 0
+STUB
+
+cat >"$TMP/stub/net-ok" <<'STUB'
+#!/usr/bin/env bash
+printf '  A network connection is up.\n'
+printf '  the package archive answered\n'
+exit 0
+STUB
+
+cat >"$TMP/stub/net-bad" <<'STUB'
+#!/usr/bin/env bash
+printf '  A network connection is up.\n'
+printf "  ERROR: This computer's clock is wrong. Package signatures will not verify until it is right.\n" >&2
+exit 1
+STUB
+
+chmod +x "$TMP/stub-engine" "$TMP/stub/loadkeys" "$TMP/stub/broken-helper" \
+  "$TMP/stub/net-ok" "$TMP/stub/net-bad" "$TMP/stub/nmcli" \
+  "$TMP/stub/systemctl" "$TMP/stub/xkbcli" "$TMP/stub/udevadm"
+: >"$TMP/loadkeys.log"
+: >"$TMP/udevadm.log"
+
+# A search path with everything the bridge needs and no loadkeys, so the
+# "a console tool this image does not carry is not a failure" case can be
+# exercised through the real protocol. An empty PATH cannot be used for this:
+# the bridge would not find its own interpreter, and the test would prove that
+# instead.
+install -d "$TMP/nokeys"
+for _tool in bash sh env awk sed grep sort find cat head tr wc printf mktemp \
+  chmod chown install dirname basename date rm cp mv ln readlink id uname \
+  openssl lsblk blockdev shred timeout systemd-detect-virt stat mkdir rmdir \
+  touch tee cut; do
+  _path=$(command -v "$_tool" 2>/dev/null) || continue
+  ln -sfn "$_path" "$TMP/nokeys/$_tool"
+done
+[[ ! -e $TMP/nokeys/loadkeys ]] || {
+  echo 'test-gui-bridge: the restricted search path still carries loadkeys' >&2
+  exit 1
+}
+
+# A second copy laid out the way the installation image lays it out, with the
+# diagnostic helpers deliberately absent. The front ends resolve their helpers
+# next to themselves, so "this image does not carry that helper" is only
+# reachable from a tree that genuinely does not carry it - and running the
+# bridge from here also proves the image's own library resolution works.
+install -d "$TMP/image/sbin" "$TMP/image/lib"
+install -m 0755 "$ROOT/installer/bin/kibaos-installer-tui" \
+  "$ROOT/installer/bin/kibaos-installer-gui-bridge" "$TMP/image/sbin/"
+# Every shell library in the tree, not a list typed here. The text installer
+# sources them all by name and exits if one is missing, so a library added to
+# the tree and forgotten in this list is a bridge that cannot start on a fake
+# image and starts fine everywhere else. That has already happened once, and
+# the staging test derives its list the same way for the same reason.
+install -m 0644 "$ROOT"/installer/lib/kibaos-*.sh "$TMP/image/lib/"
+install -m 0644 "$ROOT/installer/lib/kibaos-tips" "$TMP/image/lib/"
+[[ ! -e $TMP/image/sbin/kibaos-install-failure ]] || {
+  echo 'test-gui-bridge: the bare image copy carries a diagnostic helper' >&2
+  exit 1
+}
+
+export KIBAOS_ZONEINFO_DIR="$TMP/zoneinfo" KIBAOS_LOCALE_DIR="$TMP/locales"
+export KIBAOS_KEYMAP_DIR="$TMP/keymaps" KIBAOS_BLOCK_DIR="$TMP/block"
+export KIBAOS_SNAPSHOT_FILE="$TMP/snapshot" KIBAOS_DISK_TABLE="$TMP/disks"
+export KIBAOS_PROBE_MEMINFO="$TMP/meminfo" KIBAOS_PROBE_DRI_DIR="$TMP/dri"
+export KIBAOS_INSTALL_ENGINE="$TMP/stub-engine"
+export KIBAOS_JOURNAL_LIB="$ROOT/installer/lib/kibaos-journal.sh"
+export KIBAOS_JOURNAL_PATH="$TMP/run/journal.jsonl"
+export KIBAOS_JOURNAL_RAW="$TMP/run/install.log"
+export KIBAOS_FAILURE_HELPER="$ROOT/installer/bin/kibaos-install-failure"
+export KIBAOS_FAILURE_EXPORT_DIR="$TMP/export"
+export KIBAOS_NETWORK_HELPER="$TMP/stub/net-ok"
+export KIBAOS_BUNDLE_DIR="$TMP/bundle"
+export KIBAOS_STUB_CALLS="$TMP/calls"
+export KIBAOS_STUB_DIR="$TMP"
+export KIBAOS_NMCLI="$TMP/stub/nmcli"
+export KIBAOS_NM_PROFILE_DIR="$TMP/nm-profiles"
+export KIBAOS_TEST_LOADKEYS_LOG="$TMP/loadkeys.log"
+export KIBAOS_TEST_UDEVADM_LOG="$TMP/udevadm.log"
+export KIBAOS_KBD_MODEL_MAP="$TMP/kbd-model-map"
+export TMPDIR="$TMP"
+
+exec python3 "$ROOT/installer/tests/gui_bridge_test.py" "$TMP"

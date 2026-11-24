@@ -1,0 +1,17 @@
+pkgbase = kibaos-system-helper
+	pkgdesc = Privileged system helper for KibaOS desktop integration
+	pkgver = 0.1.0
+	pkgrel = 3
+	url = https://github.com/KibaLabsLLC/KibaDE
+	arch = any
+	license = BSD-3-Clause
+	depends = bash
+	depends = pacman
+	depends = polkit
+	depends = systemd
+	source = kibaos-system-helper
+	source = org.kibaos.system-helper.policy
+	source = 49-kibaos-power.rules
+	source = LICENSE
+
+pkgname = kibaos-system-helper

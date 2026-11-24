@@ -1,0 +1,17 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-system-helper
+pkgver=0.1.0
+pkgrel=3
+pkgdesc="Privileged system helper for KibaOS desktop integration"
+arch=('any')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=('bash' 'pacman' 'polkit' 'systemd')
+source=(
+  'kibaos-system-helper'
+  'org.kibaos.system-helper.policy'
+  '49-kibaos-power.rules'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')

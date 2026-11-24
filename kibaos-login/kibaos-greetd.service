@@ -1,0 +1,19 @@
+[Unit]
+Description=KibaOS PAM greeter
+Documentation=man:greetd(1)
+Wants=seatd.service
+After=systemd-user-sessions.service plymouth-quit-wait.service seatd.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/greetd --config /etc/greetd/kibaos.toml
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+TimeoutStopSec=30s
+KeyringMode=shared
+Restart=always
+RestartSec=1s
+
+[Install]
+Alias=display-manager.service

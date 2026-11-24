@@ -1,0 +1,20 @@
+# Copy to /etc/kibaos/weekly-upstream.conf and adjust for the builder.
+KIBAOS_UPDATE_STATE_ROOT=/var/lib/kibaos/chromium-update
+KIBAOS_CHROMIUM_REMOTE=https://chromium.googlesource.com/chromium/src.git
+KIBAOS_CHROMIUM_BRANCH=refs/heads/main
+KIBAOS_CHROMIUM_REFERENCE=/var/lib/kibaos/chromium-reference/src
+KIBAOS_CANDIDATE_CHECKOUT_ROOT=/var/lib/kibaos/chromium-candidate
+# KIBAOS_CANDIDATE_USER=aurabuild
+# KIBAOS_DEPOT_TOOLS=/var/lib/kibaos/depot_tools
+KIBAOS_UPDATE_KEEP=8
+
+# The build commands use the one materialized warm checkout and re-exec as its
+# owner. The final VM command must deploy this candidate before running smoke.
+KIBAOS_UPDATE_GATES=replay,materialize,gn,targeted,full-build,package,repo,vm
+# KIBAOS_MATERIALIZE_COMMAND=/usr/local/src/kibaos/ci/materialize-chromium-candidate.sh
+KIBAOS_GN_COMMAND=/usr/local/src/kibaos/ci/chromium-candidate-gate.sh gn
+KIBAOS_TARGETED_COMMAND=/usr/local/src/kibaos/ci/chromium-candidate-gate.sh targeted
+KIBAOS_FULL_BUILD_COMMAND=/usr/local/src/kibaos/ci/chromium-candidate-gate.sh full-build
+# KIBAOS_PACKAGE_COMMAND=/usr/local/src/kibaos/ci/build-release-candidate.sh
+# KIBAOS_REPO_COMMAND="REPO_DIR=/var/lib/kibaos/private-repo /usr/local/src/kibaos/ci/verify-release-repo.sh"
+# KIBAOS_VM_COMMAND=/usr/local/lib/kibaos/gates/vm-release-smoke

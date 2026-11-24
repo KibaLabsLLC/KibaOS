@@ -1,0 +1,187 @@
+#!/usr/bin/python3
+"""Small fixes to Waydroid's host tools, applied once.
+
+A Waydroid upgrade puts its stock files back and the pacman hook runs this
+again. Each fix is skipped when it is already in, and says so on stderr when
+the file it expects has changed so far that the fix no longer fits.
+"""
+import os
+import sys
+
+FIXES = [
+    # Android 17 mounts its APEX files through loop devices.
+    (
+        "/usr/lib/waydroid/tools/helpers/lxc.py",
+        "loop-control",
+        '    make_entry("/dev/char", options="bind,create=dir,optional 0 0")\n',
+        '''    make_entry("/dev/char", options="bind,create=dir,optional 0 0")
+
+    # KibaOS: Android 17 mounts its APEX files through loop devices
+    make_entry("/dev/loop-control")
+    for i in range(128):
+        make_entry("/dev/loop%d" % i, "dev/block/loop%d" % i)
+''',
+    ),
+    # dbus-python cannot guess the type of an empty action list, so a
+    # notification with no buttons was never shown.
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        'signature="s")',
+        '        actions_flat = [s for action in actions for s in (action.id, action.label)]\n',
+        '        actions_flat = dbus.Array([s for action in actions for s in (action.id, action.label)], signature="s")\n',
+    ),
+    # gbinder hands back None or bytes for empty or odd strings, which
+    # dbus-python refuses ("Expected a string or unicode object").
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        "KibaOS: plain strings",
+        '        app_icon = ""\n',
+        '''        app_icon = ""
+        # KibaOS: plain strings for D-Bus
+        def _s(v):
+            if isinstance(v, (bytes, bytearray)):
+                return bytes(v).decode("utf-8", "replace")
+            return "" if v is None else str(v)
+        app_name, summary, body = _s(app_name), _s(summary), _s(body)
+        package_name, category = _s(package_name), _s(category)
+        replaces_id = dbus.UInt32(replaces_id or 0)
+        expire_timeout = dbus.Int32(expire_timeout)
+''',
+    ),
+    # With mixed value types dbus-python cannot guess the hints dictionary's
+    # type and raises, so no Android notification ever reached the desktop.
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        'dbus.Dictionary(hints, signature="sv")',
+        "actions_flat, hints, expire_timeout)",
+        'actions_flat, dbus.Dictionary(hints, signature="sv"), expire_timeout)',
+    ),
+    # Swiping a notification away on the desktop dismisses it in Android too:
+    # remember what each desktop notification was, and when the user closes
+    # one leave a note for the bridge app's notification listener.
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        "KibaOS: sent notifications",
+        '            return dbus_proxy.Notify(app_name, replaces_id, app_icon, summary, body, actions_flat, dbus.Dictionary(hints, signature="sv"), expire_timeout)\n',
+        '''            # KibaOS: sent notifications
+            nid = dbus_proxy.Notify(app_name, replaces_id, app_icon, summary, body, actions_flat, dbus.Dictionary(hints, signature="sv"), expire_timeout)
+            sent[int(nid)] = (package_name, summary, body)
+            return nid
+''',
+    ),
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        "KibaOS: closed on the desktop",
+        '    bus_signals.append(dbus_proxy.connect_to_signal("ActionInvoked", onActionInvoked))\n',
+        '''    bus_signals.append(dbus_proxy.connect_to_signal("ActionInvoked", onActionInvoked))
+
+    # KibaOS: closed on the desktop
+    sent = dict()
+
+    def onNotificationClosed(notification_id, reason):
+        info = sent.pop(int(notification_id), None)
+        if info is None or int(reason) != 2:
+            return
+        import json, time
+        base = os.path.expanduser("~/.local/share/waydroid/data/media/0/Android/data/org.kibaos.bridge/files/cmd")
+        try:
+            os.makedirs(base, exist_ok=True)
+            tmp = os.path.join(base, "%d.tmp" % time.time_ns())
+            with open(tmp, "w") as f:
+                json.dump({"type": "dismiss", "pkg": info[0], "title": info[1], "text": info[2]}, f)
+            os.rename(tmp, tmp[:-4] + ".json")
+        except OSError as e:
+            logging.warning("could not tell Android about a dismissed notification: %s", e)
+    bus_signals.append(dbus_proxy.connect_to_signal("NotificationClosed", onNotificationClosed))
+''',
+    ),
+    # Messaging notifications get a Reply box on the desktop (an action named
+    # inline-reply); what the user types goes to the bridge app, which fills
+    # in the notification's own reply field in Android.
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        "KibaOS: reply action",
+        '        hints = {\n            "desktop-entry"',
+        '''        # KibaOS: reply action
+        # An action called Reply becomes the desktop's text box. Android's own
+        # button would fire the app's reply with no text in it.
+        replyable = False
+        for i in range(0, len(actions_flat), 2):
+            if str(actions_flat[i + 1]).strip().lower() in ("reply", "respond", "answer"):
+                actions_flat[i] = "inline-reply"
+                replyable = True
+        if category == "msg" and not replyable:
+            actions_flat.extend(["inline-reply", "Reply"])
+        hints = {
+            "desktop-entry"''',
+    ),
+    (
+        "/usr/lib/waydroid/tools/services/notification_manager.py",
+        "KibaOS: replied on the desktop",
+        '    bus_signals.append(dbus_proxy.connect_to_signal("NotificationClosed", onNotificationClosed))\n',
+        '''    bus_signals.append(dbus_proxy.connect_to_signal("NotificationClosed", onNotificationClosed))
+
+    # KibaOS: replied on the desktop
+    def onNotificationReplied(notification_id, text):
+        info = sent.get(int(notification_id))
+        if info is None:
+            return
+        import json, time
+        base = os.path.expanduser("~/.local/share/waydroid/data/media/0/Android/data/org.kibaos.bridge/files/cmd")
+        try:
+            os.makedirs(base, exist_ok=True)
+            tmp = os.path.join(base, "%d.tmp" % time.time_ns())
+            with open(tmp, "w") as f:
+                json.dump({"type": "reply", "pkg": info[0], "title": info[1], "text": info[2], "reply": str(text)}, f)
+            os.rename(tmp, tmp[:-4] + ".json")
+        except OSError as e:
+            logging.warning("could not pass a reply to Android: %s", e)
+    bus_signals.append(dbus_proxy.connect_to_signal("NotificationReplied", onNotificationReplied))
+''',
+    ),
+    # Waydroid shares the clipboard through the pyclip module, which Arch does
+    # not ship. wl-clipboard is already a dependency and does the same job.
+    (
+        "/usr/lib/waydroid/tools/services/clipboard_manager.py",
+        "KibaOS: wl-clipboard",
+        "try:\n    import pyclip\n    canClip = True\n",
+        '''# KibaOS: wl-clipboard
+import subprocess
+
+
+class _WlClip:
+    def copy(self, value):
+        if isinstance(value, bytes):
+            value = value.decode("utf-8", "replace")
+        subprocess.run(["wl-copy", "--", str(value)], timeout=5, check=False,
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
+
+    def paste(self):
+        res = subprocess.run(["wl-paste", "--no-newline"], timeout=5, check=False,
+                             stdin=subprocess.DEVNULL, capture_output=True)
+        return res.stdout.decode("utf-8", "replace")
+
+
+try:
+    try:
+        import pyclip
+    except ImportError:
+        pyclip = _WlClip()
+    canClip = True
+''',
+    ),
+]
+
+for path, marker, anchor, replacement in FIXES:
+    if not os.path.exists(path):
+        continue
+    with open(path, encoding="utf-8") as f:
+        src = f.read()
+    if marker in src:
+        continue
+    if anchor not in src:
+        print(f"kibaos-android: {path} has changed, a fix was not applied", file=sys.stderr)
+        continue
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(src.replace(anchor, replacement, 1))

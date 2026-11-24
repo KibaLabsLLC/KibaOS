@@ -1,0 +1,524 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+# These assertions are bare `grep -Fq` under `set -e`, so a stale expectation
+# ends the run with an exit code and not one word about where. This makes each
+# of them name itself on the way out. Guarded on errexit still being on,
+# because a non-zero exit inside a deliberate `set +e` block is an expected
+# result being collected, not an assertion giving up.
+trap 'case $- in *e*) printf "%s: line %s gave up: %s\n" "${0##*/}" "$LINENO" "$BASH_COMMAND" >&2 ;; esac' ERR
+# shellcheck source=assert.sh
+. "$(dirname -- "$0")/assert.sh"
+
+
+ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd -P)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+install -d -m 0755 "$TMP/repo" "$TMP/package"
+
+make_package() {
+  local name=$1 filename digest
+  printf 'pkgname = %s\npkgver = 1.0-1\narch = any\n' "$name" \
+    >"$TMP/package/.PKGINFO"
+  filename=${name}-1.0-1-any.pkg.tar.zst
+  bsdtar -cf "$TMP/repo/$filename" -C "$TMP/package" .PKGINFO
+  digest=$(sha256sum "$TMP/repo/$filename" | awk '{print $1}')
+  printf '%s %s %s 1.0-1 any\n' "$digest" "$filename" "$name" \
+    >>"$TMP/packages.lock.unsorted"
+}
+
+make_package kibaos
+make_package chromiumos-ash
+make_package kibaos-boot
+{
+  printf '%s\n' '# sha256 filename pkgname pkgver arch'
+  LC_ALL=C sort -k3,3 "$TMP/packages.lock.unsorted"
+} >"$TMP/packages.lock"
+# systemd's keymap table, two lines of it: the dry run should not depend on
+# the version this machine happens to have.
+printf '%s\n' '# Generated' \
+  'us	us	pc105+inet	-	terminate:ctrl_alt_bksp	en-US,en' \
+  'de-latin1	de	pc105	-	terminate:ctrl_alt_bksp	-' >"$TMP/kbd-model-map"
+export KIBAOS_KBD_MODEL_MAP="$TMP/kbd-model-map"
+printf '%s\n' "\$6\$audit\$not-a-plaintext-password" >"$TMP/password.hash"
+printf '%s\n' 'audit-passphrase' >"$TMP/luks.passphrase"
+chmod 0600 "$TMP/password.hash" "$TMP/luks.passphrase"
+export KIBAOS_JOURNAL_PATH="$TMP/journal.jsonl" KIBAOS_JOURNAL_RAW="$TMP/install.log"
+# Whatever machine runs the test, the install it plans is for a machine with
+# no special hardware, unless a case says otherwise.
+mkdir -p "$TMP/generic-hw"
+export KIBAOS_HW_ROOT="$TMP/generic-hw"
+
+common=(
+  --target /dev/kibaos-test-disk
+  --username audit
+  --password-hash-file "$TMP/password.hash"
+  --arch-snapshot 2026/07/12
+  --bundle-dir "$TMP/repo"
+  --package-lock "$TMP/packages.lock"
+  --allow-unsigned
+  --dry-run
+)
+
+if ! "$ROOT/installer/bin/kibaos-install" "${common[@]}" \
+    >"$TMP/plain.out" 2>&1; then
+  cat "$TMP/plain.out" >&2
+  exit 1
+fi
+grep -Fq -- '--typecode=2:8300' "$TMP/plain.out"
+grep -Fq -- 'kibaos-powerd.service kibaos-host-bridge.service kibaos-greetd.service' \
+  "$TMP/plain.out"
+grep -Fq -- 'seatd.service kibaos-powerd.service' "$TMP/plain.out"
+grep -Fq -- 'useradd -m -G wheel\,audio\,video\,input\,storage\,seat' "$TMP/plain.out"
+grep -Fq -- 'chpasswd --encrypted' "$ROOT/installer/bin/kibaos-install"
+refute grep -Fq -- 'usermod --password "$(<"$PASSWORD_HASH_FILE")"' \
+  "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- '/boot/kibaos-rollback/factory/vmlinuz-linux' "$TMP/plain.out"
+grep -Fq -- 'intel-ucode' "$TMP/plain.out"
+grep -Fq -- 'amd-ucode' "$TMP/plain.out"
+grep -Fq -- 'sof-firmware' "$TMP/plain.out"
+# Surface Laptop 1 and 2, Pro 4 to 7 and Book 1 and 2 have Marvell Wi-Fi, and
+# linux-firmware stopped pulling in its firmware when it was split up.
+grep -Fq -- 'linux-firmware-marvell' "$TMP/plain.out"
+grep -Fq -- 'file:///var/cache/kibaos/repo' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'pacstrap -M -G -C' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'GPGDir = ${ARCH_GPG_DIR}' "$ROOT/installer/bin/kibaos-install"
+# pacstrap prefixes CacheDir with the target root, so the local config keeps its default.
+local_pacman_conf=$(sed -n '/^write_arch_local_pacman_conf()/,/^}/p' \
+  "$ROOT/installer/bin/kibaos-install")
+refute grep -Eq '^[[:space:]]*CacheDir[[:space:]]*=' <<<"$local_pacman_conf"
+# The installed mirrorlist follows the published repository only for a
+# release-key install on the default URL, with the disk copy behind it.
+eval "$(sed -n '/^kibaos_mirror_servers() {/,/^}/p' "$ROOT/installer/bin/kibaos-install")"
+DEFAULT_REPO_URL=file:///var/cache/kibaos/repo
+RELEASE_FINGERPRINT=BC390DCF360B2184DBBF008B8B2AB2EFE667CB69
+HOSTED_REPO_URL=https://github.com/KibaLabsLLC/KibaDE/releases/download/repo-x86_64
+REPO_URL=$DEFAULT_REPO_URL ALLOW_UNSIGNED=0 expected_fingerprint=$RELEASE_FINGERPRINT
+[[ $(printf '%b' "$(kibaos_mirror_servers)") == "Server = $HOSTED_REPO_URL"$'\n'"Server = $DEFAULT_REPO_URL" ]]
+expected_fingerprint=410C994F8F82F45247DEAC74570659A8F9EB45A7
+[[ $(printf '%b' "$(kibaos_mirror_servers)") == "Server = $DEFAULT_REPO_URL" ]]
+expected_fingerprint=$RELEASE_FINGERPRINT REPO_URL=https://mirror.example.invalid/kibaos/
+[[ $(printf '%b' "$(kibaos_mirror_servers)") == "Server = https://mirror.example.invalid/kibaos" ]]
+REPO_URL=$DEFAULT_REPO_URL ALLOW_UNSIGNED=1
+[[ $(printf '%b' "$(kibaos_mirror_servers)") == "Server = $DEFAULT_REPO_URL" ]]
+grep -Fq -- "RELEASE_FINGERPRINT=$RELEASE_FINGERPRINT" "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'kibaos-mirrorlist 0644 "$(kibaos_mirror_servers)"' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'LocalFileSigLevel = Required' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'pacman-key --gpgdir "$ARCH_GPG_DIR" --populate archlinux' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- '/usr/share/pacman/keyrings/archlinux.gpg' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'gpgv --keyring "$ARCH_GPG_DIR/pubring.gpg"' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'invalid Arch package signature' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'cause=keyring_error' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'cause=capacity_error' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'cause=network_error' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'kibaos_journal_fail "$_J_ACTIVE_STAGE" "$status" cancelled' \
+  "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'trap '\''handle_cancel 130'\'' INT' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'journal_message=${message:0:256}' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'Everything above this line is reversible: the disk has not been touched' \
+  "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'private keys excluded' "$TMP/plain.out"
+
+# --- the first boot check, which is the other half of a promise -------------
+#
+# Writing the accessibility settings into the installed system was never the
+# hard part. The failure this guards is silent: the installer says it will
+# carry them over, the record says it did, and the machine in front of
+# somebody who cannot see the screen says otherwise.
+#
+# Asserted against the plan rather than the engine's source, because a grep
+# for a path cannot tell `install` from `:` and passed against an engine that
+# had stopped installing the unit while still naming it.
+grep -Eq 'install .*-m 0755 .*kibaos-first-boot-accessibility .*/usr/local/bin/kibaos-first-boot-accessibility' \
+  "$TMP/plain.out" ||
+  { echo 'the plan never installs the first boot check' >&2; exit 1; }
+grep -Eq 'install .*-m 0644 .*kibaos-first-boot-accessibility\.service .*/etc/systemd/system/kibaos-first-boot-accessibility\.service' \
+  "$TMP/plain.out" ||
+  { echo 'the plan never installs the first boot unit' >&2; exit 1; }
+grep -Fq 'systemctl enable kibaos-first-boot-accessibility.service' "$TMP/plain.out" ||
+  { echo 'the plan installs the first boot unit and never enables it' >&2; exit 1; }
+
+# --- the mark this machine gets and no other machine has --------------------
+#
+# Written into the installed system and announced nowhere, which is the whole
+# of the idea: it is found by somebody who went looking. The summary carries
+# the short code beside it so a support conversation can name an install
+# without anybody having to read a mosaic down a telephone.
+grep -Fq '/etc/kibaos-install/badge' "$TMP/plain.out" ||
+  { echo 'the plan never writes a fingerprint into the installed system' >&2; exit 1; }
+grep -Fq '/etc/kibaos-install/summary' "$TMP/plain.out"
+# The seed is derived from board identifiers and one network address, and none
+# of them may survive into anything written down. The engine holds them in
+# BADGE_SEED only long enough to hash, so what must never appear in a plan is
+# the material itself.
+refute grep -Eq 'product_uuid|board_serial|product_serial' "$TMP/plain.out"
+# A keyring failure stops rather than retries. This used to be asserted by
+# grepping for a phrase inside the error message, which pinned the wording of
+# a sentence in place of the behaviour it described. The behaviour is that
+# `pacman_keyring_failure` short circuits into a `die`, and the wording is
+# free to improve.
+grep -Fq -- 'pacman_keyring_failure' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'die_keyring_failure() {' "$ROOT/installer/bin/kibaos-install"
+awk '/^die_keyring_failure\(\) \{/,/^\}/' "$ROOT/installer/bin/kibaos-install" |
+  grep -Fq -- 'die ' ||
+  { echo 'die_keyring_failure no longer dies' >&2; exit 1; }
+# ...and the message it dies with still classifies as a keyring failure, which
+# is what tests/test-die-cause.sh pins by name.
+grep -Fq -- 'installer staging capacity is ' "$TMP/plain.out"
+grep -Fq -- 'Set KIBAOS_INSTALL_WORK_DIR to a disk with more free space' "$ROOT/installer/bin/kibaos-install"
+# The three Secure Boot states each get told to the user before the erase gate:
+# on and trusted, on and untrusted, and unreadable. Matched on the state rather
+# than on the sentence, because the sentences have been rewritten once already.
+#
+# These used to be asserted against `bin/kibaos-installer`, a third front end
+# that was packaged onto the image and reachable from nothing. Testing the
+# engine's behaviour by grepping a front end's source is the wrong shape twice
+# over: it passes when the front end is unreachable, and it passes when the
+# engine changes underneath it. They now point at the two front ends that ship,
+# and at the engine itself.
+BRIDGE=$ROOT/installer/bin/kibaos-installer-gui-bridge
+TUI=$ROOT/installer/bin/kibaos-installer-tui
+grep -Fq -- 'Secure Boot' "$BRIDGE"
+grep -Fq -- 'setup mode' "$BRIDGE"
+grep -Fq -- 'Could not tell whether Secure Boot is on' "$BRIDGE"
+grep -Fq -- 'Secure Boot state could not be read' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'without signing' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- '--secure-boot-auto-enroll yes' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'firmware setup mode' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'pre-enrolled signing certificate' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'sbsigntools' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'secure-boot-enroll' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- 'KIBAOS_SECURE_BOOT_KEY' "$ROOT/installer/bin/kibaos-installer-tui"
+# The rules themselves are exercised by test-prompt-validation.sh against
+# fixture roots. Assert only that the front ends delegate to them instead of
+# re-implementing the checks inline, where they cannot be tested.
+#
+# One shared manifest, one validator per question, and both front ends reaching
+# them through `kibaos_question_validate`. That is the property worth pinning:
+# a front end that grew its own copy of a rule is a front end that will
+# disagree with the engine about what a valid hostname is.
+grep -Fq -- 'kibaos_question_validate' "$TUI"
+grep -Fq -- 'kibaos_question_validate' "$BRIDGE"
+grep -Fq -- 'loadkeys' "$TUI"
+# The two things said before the disk question: KibaOS takes the whole disk,
+# and there is no swap unless you add one.
+acquire_line=$(grep -n -- '--disable-sandbox -Syy' "$TMP/plain.out" | head -1 | cut -d: -f1)
+wipe_line=$(grep -n -- 'wipefs --all --force' "$TMP/plain.out" | head -1 | cut -d: -f1)
+(( acquire_line < wipe_line ))
+if grep -Fq -- 'cryptsetup luksFormat' "$TMP/plain.out"; then
+  echo 'unencrypted plan unexpectedly formats LUKS' >&2
+  exit 1
+fi
+
+if ! "$ROOT/installer/bin/kibaos-install" "${common[@]}" --encrypt \
+    --luks-passphrase-file "$TMP/luks.passphrase" >"$TMP/encrypted.out" 2>&1; then
+  cat "$TMP/encrypted.out" >&2
+  exit 1
+fi
+grep -Fq -- '--typecode=2:8309' "$TMP/encrypted.out"
+grep -Fq -- 'cryptsetup luksFormat --type luks2 --batch-mode' "$TMP/encrypted.out"
+grep -Fq -- '/boot/kibaos-rollback/factory/initramfs-linux.img' "$TMP/encrypted.out"
+
+# The unlock screen. An encrypted install with kibaos-boot in the bundle asks
+# for the passphrase through plymouth, and asks again after a wrong one for as
+# long as it takes; an unencrypted one is left exactly as it was.
+grep -Fq -- 'configure mkinitcpio hooks: base systemd autodetect microcode modconf kms keyboard sd-vconsole plymouth kibaos-boot block sd-encrypt filesystems fsck' "$TMP/encrypted.out"
+grep -Fq -- '/etc/plymouth/plymouthd.conf' "$TMP/encrypted.out"
+grep -Fq -- 'rd.luks.options=tries=0 root=/dev/mapper/kibaos-root rw rootflags=subvol=@ quiet splash' "$TMP/encrypted.out"
+grep -Fq -- 'keyboard: KEYMAP=us with XKBLAYOUT=us XKBMODEL=pc105+inet XKBOPTIONS=terminate:ctrl_alt_bksp' "$TMP/encrypted.out"
+refute grep -Fq -- 'use-legacy-input' "$TMP/encrypted.out"
+refute grep -Fq -- 'plymouth' "$TMP/plain.out"
+refute grep -Fq -- 'splash' "$TMP/plain.out"
+
+# ---------------------------------------------------------------------------
+# Storage shape
+#
+# The default is the only shape this product shipped before these options
+# existed, and the first assertion here is that it did not move: no swap file,
+# a Btrfs root, subvolumes, a factory snapshot and a rollback entry. Everything
+# after it checks that choosing something else actually changes the plan, and -
+# more importantly - that the consequences of choosing it are carried through
+# rather than left as a half-configured system.
+# ---------------------------------------------------------------------------
+
+refute grep -Fq -- 'mkswap' "$TMP/plain.out"
+refute grep -Fq -- 'mkswapfile' "$TMP/plain.out"
+refute grep -Fq -- 'zram' "$TMP/plain.out"
+grep -Fq -- 'mkfs.btrfs' "$TMP/plain.out"
+grep -Fq -- 'btrfs subvolume create' "$TMP/plain.out"
+grep -Fq -- 'boot options: root=UUID=<root-filesystem-uuid> rw rootflags=subvol=@ quiet' "$TMP/plain.out"
+
+plan() {
+  local name=$1
+  shift
+  if ! "$ROOT/installer/bin/kibaos-install" "${common[@]}" "$@" \
+      >"$TMP/$name.out" 2>&1; then
+    echo "dry run failed: $name" >&2
+    cat "$TMP/$name.out" >&2
+    exit 1
+  fi
+}
+
+# The keyboard, written for everything that reads keys through XKB. A keymap
+# systemd's table converts gets its XKB lines beside KEYMAP; `cz` comes from
+# KibaOS's own short list, as the QWERTY variant the console keymap is; one
+# neither knows gets KEYMAP alone, and a login screen that stays on US.
+grep -Fq -- 'keyboard: KEYMAP=us with XKBLAYOUT=us XKBMODEL=pc105+inet XKBOPTIONS=terminate:ctrl_alt_bksp' "$TMP/plain.out"
+plan kb-de --keymap de-latin1
+grep -Fq -- 'keyboard: KEYMAP=de-latin1 with XKBLAYOUT=de XKBMODEL=pc105 XKBOPTIONS=terminate:ctrl_alt_bksp' "$TMP/kb-de.out"
+plan kb-cz --keymap cz
+grep -Fq -- 'keyboard: KEYMAP=cz with XKBLAYOUT=cz XKBMODEL=pc105 XKBVARIANT=qwerty' "$TMP/kb-cz.out"
+plan kb-ua --keymap ua
+grep -Fq -- 'keyboard: KEYMAP=ua, which has no XKB layout, so the login screen stays on US' "$TMP/kb-ua.out"
+
+# The keyboard the passphrase is typed with at the unlock screen. A keymap
+# with an XKB layout gets it written beside it, which is what plymouth reads.
+# One without is read through the console instead, with the keymap the
+# passphrase was typed with here, and the first initramfs build is told so,
+# because the boot entry that says it is written after that build.
+plan luks-de --encrypt --luks-passphrase-file "$TMP/luks.passphrase" --keymap de-latin1
+grep -Fq -- 'keyboard: KEYMAP=de-latin1 with XKBLAYOUT=de XKBMODEL=pc105 XKBOPTIONS=terminate:ctrl_alt_bksp' "$TMP/luks-de.out"
+refute grep -Fq -- 'use-legacy-input' "$TMP/luks-de.out"
+plan luks-ua --encrypt --luks-passphrase-file "$TMP/luks.passphrase" --keymap ua
+grep -Fq -- 'keyboard: KEYMAP=ua, which has no XKB layout' "$TMP/luks-ua.out"
+grep -Fq -- 'quiet splash plymouth.use-legacy-input' "$TMP/luks-ua.out"
+grep -Fq -- 'env KIBAOS_BOOT_LEGACY_INPUT=1 mkinitcpio -P' "$TMP/luks-ua.out"
+plan plain-ua --keymap ua
+refute grep -Fq -- 'use-legacy-input' "$TMP/plain-ua.out"
+refute grep -Fq -- 'KIBAOS_BOOT_LEGACY_INPUT' "$TMP/plain-ua.out"
+
+grep -Fq 'compare package size with available memory and swap' "$TMP/plain.out"
+grep -Fq 'download to the target disk after mount when memory headroom is low' "$TMP/plain.out"
+plan stage_workspace --staging workspace
+workspace_download=$(grep -n -- '--disable-sandbox -Sw' "$TMP/stage_workspace.out" | head -1 | cut -d: -f1)
+workspace_erase=$(grep -n -- 'wipefs --all --force' "$TMP/stage_workspace.out" | head -1 | cut -d: -f1)
+(( workspace_download < workspace_erase ))
+plan stage_target --staging target
+target_mount=$(grep -n -- 'mount ' "$TMP/stage_target.out" | head -1 | cut -d: -f1)
+target_download=$(grep -n -- '--disable-sandbox -Sw' "$TMP/stage_target.out" | head -1 | cut -d: -f1)
+(( target_mount < target_download ))
+
+# --- accessibility survives the reboot, or it is not accessibility ---------
+#
+# The whole point of collecting these in the installer is that they reach the
+# installed system. A setting that is true for the ten minutes of an install
+# and gone after the restart has moved the wall rather than removed it, so this
+# checks the writes actually happen rather than that the flags parse.
+plan a11y --screen-reader yes --braille yes --contrast high \
+  --text-scale 125 --reduce-motion yes --cursor-size 32 --spacing roomy \
+  --typeface atkinson
+# The record, which is what the installed system reads back to confirm.
+grep -Fq -- '/etc/kibaos-install/accessibility' "$TMP/a11y.out" ||
+  { echo 'the accessibility record is not written into the target' >&2; exit 1; }
+# The two mechanisms that make the settings take effect.
+grep -Fq -- '/etc/xdg/gtk-4.0/settings.ini' "$TMP/a11y.out" ||
+  { echo 'the GTK defaults are not written into the target' >&2; exit 1; }
+grep -Fq -- '/etc/dconf/db/local.d/00-kibaos-accessibility' "$TMP/a11y.out" ||
+  { echo 'the dconf defaults are not written into the target' >&2; exit 1; }
+# And the daemons, which have to be enabled rather than started because the
+# target is not running.
+grep -Fq -- 'systemctl enable espeakup.service' "$TMP/a11y.out" ||
+  { echo 'espeakup is not enabled on the installed system' >&2; exit 1; }
+grep -Fq -- 'systemctl enable brltty.service' "$TMP/a11y.out" ||
+  { echo 'brltty is not enabled on the installed system' >&2; exit 1; }
+# Line spacing has no GTK setting and no dconf key, so it travels as the one
+# thing it can: a stylesheet every GTK 4 application on the target reads.
+grep -Fq -- '/etc/xdg/gtk-4.0/gtk.css' "$TMP/a11y.out" ||
+  { echo 'line spacing is not written into the installed system' >&2; exit 1; }
+# The face has to be installed on the target, not only named there. A font name
+# written for a family that is not present does not error: it renders in the
+# default face, and somebody who needed the other one cannot tell.
+grep -Fq -- 'ttf-atkinson-hyperlegible' "$TMP/a11y.out" ||
+  { echo 'the chosen typeface is not installed onto the target' >&2; exit 1; }
+# The reader has to exist on the installed system, not only on the image.
+grep -Fq -- 'espeakup' "$TMP/a11y.out" ||
+  { echo 'espeakup is not installed onto the target' >&2; exit 1; }
+
+# An install that asks for none of this is the install it was before. The
+# default path must not gain files, services or packages.
+plan a11y_default
+! grep -Fq -- '/etc/dconf/db/local.d/00-kibaos-accessibility' "$TMP/a11y_default.out" ||
+  { echo 'a default install writes accessibility dconf defaults it was not asked for' >&2; exit 1; }
+! grep -Fq -- 'systemctl enable espeakup.service' "$TMP/a11y_default.out" ||
+  { echo 'a default install enables a screen reader nobody asked for' >&2; exit 1; }
+! grep -Fq -- '/etc/xdg/gtk-4.0/gtk.css' "$TMP/a11y_default.out" ||
+  { echo 'a default install restyles every GTK application on the target' >&2; exit 1; }
+
+refuses() {
+  local expected=$1
+  shift
+  if "$ROOT/installer/bin/kibaos-install" "${common[@]}" "$@" \
+      >"$TMP/refusal.out" 2>&1; then
+    echo "expected a refusal for: $*" >&2
+    exit 1
+  fi
+  grep -Fq -- "$expected" "$TMP/refusal.out" || {
+    echo "wrong refusal for: $*" >&2
+    cat "$TMP/refusal.out" >&2
+    exit 1
+  }
+}
+
+# A swap file on Btrfs must be made by mkswapfile, which is the call that turns
+# copy-on-write and compression off. fallocate plus mkswap produces a file the
+# kernel refuses to swap to, so the tool used here is the assertion.
+plan swapfile --swap file --swap-size 4G
+grep -Fq -- 'btrfs filesystem mkswapfile --size 4096m' "$TMP/swapfile.out"
+grep -Fq -- '/swap/swapfile none swap defaults 0 0' "$TMP/swapfile.out"
+refute grep -Fq -- 'resume_offset' "$TMP/swapfile.out"
+
+plan hibernate --swap file --swap-size hibernate
+grep -Fq -- 'resume=UUID=<root-filesystem-uuid> resume_offset=<swapfile-offset>' "$TMP/hibernate.out"
+grep -Fq -- 'add the mkinitcpio resume hook' "$TMP/hibernate.out"
+
+plan zram --swap zram
+grep -Fq -- 'zram-generator.conf' "$TMP/zram.out"
+refute grep -Fq -- 'mkswapfile' "$TMP/zram.out"
+
+# ext4 has no subvolumes, so it has no factory snapshot; the rollback entry
+# must be absent rather than present and broken.
+plan ext4 --filesystem ext4
+grep -Fq -- 'mkfs.ext4' "$TMP/ext4.out"
+refute grep -Fq -- 'btrfs subvolume create' "$TMP/ext4.out"
+refute grep -Fq -- 'kibaos-rollback.conf' "$TMP/ext4.out"
+refute grep -Fq -- 'rootflags=subvol=@' "$TMP/ext4.out"
+grep -Fq -- 'boot options: root=UUID=<root-filesystem-uuid> rw quiet' "$TMP/ext4.out"
+grep -Fq -- 'no factory snapshot and no rollback boot entry' "$TMP/ext4.out"
+
+# xfs, on a machine that can make one. The build host frequently cannot, and
+# that is the point of the second half: a plan for a shape whose mkfs is
+# missing has to fail here, in the plan, rather than after the erase token has
+# been typed. The image ships xfsprogs so that this shape is real.
+install -d "$TMP/fsbin"
+printf '#!/usr/bin/env bash\nexit 0\n' >"$TMP/fsbin/mkfs.xfs"
+chmod +x "$TMP/fsbin/mkfs.xfs"
+saved_path=$PATH
+PATH="$TMP/fsbin:$saved_path"
+plan xfs --filesystem xfs
+grep -Fq -- 'mkfs.xfs' "$TMP/xfs.out"
+
+# The same shape on an image without the tool. This is the failure a real
+# image produced: every question answered, the disk confirmed by name, and
+# then a stopped install. Hide only mkfs.xfs so ordinary test tools remain
+# available when the host keeps it in /usr/bin.
+PATH=$saved_path
+command() {
+  [[ $1 != -v || ${2:-} != mkfs.xfs ]] || return 1
+  builtin command "$@"
+}
+export -f command
+command -v mkfs.xfs >/dev/null 2>&1 && { echo 'could not stage a host without mkfs.xfs' >&2; exit 1; }
+refuses 'required command not found: mkfs.xfs' --filesystem xfs
+unset -f command
+
+# A Btrfs swap file needs the native mkswapfile helper. An older btrfs-progs
+# can still provide the btrfs command while lacking that subcommand, which is
+# exactly how a plan can look valid and then produce a copy-on-write swap file.
+# Refuse that image before the confirmation boundary instead.
+printf '#!/usr/bin/env bash\nexit 1\n' >"$TMP/fsbin/btrfs"
+chmod +x "$TMP/fsbin/btrfs"
+PATH="$TMP/fsbin:$saved_path"
+refuses 'required btrfs-progs does not support filesystem mkswapfile' \
+  --swap file --swap-size 4G
+PATH=$saved_path
+
+# Installing alongside must not wipe, must not zap, and must not reformat the
+# EFI system partition it was asked to share.
+plan alongside --layout alongside
+refute grep -Fq -- 'wipefs --all --force' "$TMP/alongside.out"
+refute grep -Fq -- 'sgdisk --zap-all' "$TMP/alongside.out"
+refute grep -Fq -- 'mkfs.fat' "$TMP/alongside.out"
+grep -Fq -- 'sgdisk --largest-new=0' "$TMP/alongside.out"
+grep -Fq -- 'keeping the existing EFI system partition' "$TMP/alongside.out"
+grep -Fq -- 'INSTALL:/dev/kibaos-test-disk' "$TMP/alongside.out"
+grep -Fq -- 'ERASE:/dev/kibaos-test-disk' "$TMP/plain.out"
+
+# A MacBook whose Wi-Fi only Broadcom's own driver runs: the driver, and the
+# headers it is built against, join the package set. Switched off, and on any
+# other machine, they do not.
+mkdir -p "$TMP/macbook/sys/class/dmi/id" "$TMP/macbook/sys/bus/pci/devices/0000:03:00.0"
+printf '%s\n' 'Apple Inc.' >"$TMP/macbook/sys/class/dmi/id/sys_vendor"
+printf '%s\n' 'MacBookPro11,1' >"$TMP/macbook/sys/class/dmi/id/product_name"
+printf '0x14e4\n' >"$TMP/macbook/sys/bus/pci/devices/0000:03:00.0/vendor"
+printf '0x43a0\n' >"$TMP/macbook/sys/bus/pci/devices/0000:03:00.0/device"
+if ! KIBAOS_HW_ROOT="$TMP/macbook" "$ROOT/installer/bin/kibaos-install" "${common[@]}" \
+    >"$TMP/macbook.out" 2>&1; then
+  cat "$TMP/macbook.out" >&2
+  exit 1
+fi
+grep -Fq -- 'hardware: Mac (MacBookPro11,1)' "$TMP/macbook.out"
+grep -Eq -- '--needed --noconfirm .* broadcom-wl-dkms linux-headers' "$TMP/macbook.out"
+KIBAOS_HW_ROOT="$TMP/macbook" "$ROOT/installer/bin/kibaos-install" "${common[@]}" \
+  --hardware-support off >"$TMP/macbook-off.out" 2>&1
+refute grep -Fq -- 'broadcom-wl' "$TMP/macbook-off.out"
+refute grep -Fq -- 'broadcom-wl' "$TMP/plain.out"
+grep -Fq -- 'hardware: generic' "$TMP/plain.out"
+
+# A VMware virtual machine: its guest tools join the package set and their
+# service is enabled. Real hardware, the plain plan above, gets neither.
+mkdir -p "$TMP/vmware/sys/class/dmi/id"
+printf '%s\n' 'VMware, Inc.' >"$TMP/vmware/sys/class/dmi/id/sys_vendor"
+printf '%s\n' 'VMware20,1' >"$TMP/vmware/sys/class/dmi/id/product_name"
+KIBAOS_HW_ROOT="$TMP/vmware" plan vmware
+grep -Fq -- 'hardware: VMware virtual machine' "$TMP/vmware.out"
+grep -Eq -- '--needed --noconfirm .* open-vm-tools' "$TMP/vmware.out"
+grep -Fq -- 'systemctl enable vmtoolsd.service' "$TMP/vmware.out"
+refute grep -Fq -- 'open-vm-tools' "$TMP/plain.out"
+refute grep -Fq -- 'vmtoolsd' "$TMP/plain.out"
+
+# The desktop as it was asked for: the feature set, the display size, the
+# extra apps from the same snapshot, and a snapshot before every update.
+plan desktop --feature-profile plus --display-scale 125 \
+  --apps firefox,vscode,flatpak,waydroid,devtools --auto-snapshots yes
+grep -Eq -- '--needed --noconfirm .* firefox code flatpak waydroid base-devel git' "$TMP/desktop.out"
+grep -Fq -- 'apps: firefox vscode flatpak waydroid devtools' "$TMP/desktop.out"
+grep -Fq -- 'set KIBAOS_FEATURE_PROFILE=plus' "$TMP/desktop.out"
+grep -Fq -- '/home/audit/.config/kibaos/display.conf' "$TMP/desktop.out"
+grep -Fq -- 'display size: 125%' "$TMP/desktop.out"
+grep -Fq -- 'flatpak remote-add --system --if-not-exists flathub' "$TMP/desktop.out"
+grep -Fq -- 'systemctl enable waydroid-container.service' "$TMP/desktop.out"
+grep -Fq -- '/etc/pacman.d/hooks/00-kibaos-snapshot.hook' "$TMP/desktop.out"
+for absent in KIBAOS_FEATURE_PROFILE= display.conf flathub waydroid 00-kibaos-snapshot.hook 'apps:'; do
+  refute grep -Fq -- "$absent" "$TMP/plain.out"
+done
+# The scale is written the way the desktop's Settings writes it.
+grep -Fq -- 'scale=$_scale' "$ROOT/installer/bin/kibaos-install"
+for percent in 100:1 125:1.25 150:1.5 175:1.75 200:2; do
+  DISPLAY_SCALE=${percent%%:*}
+  _scale=$(printf '%s.%02d' "$(( DISPLAY_SCALE / 100 ))" "$(( DISPLAY_SCALE % 100 ))")
+  _scale=${_scale%0}
+  _scale=${_scale%.0}
+  [[ $_scale == "${percent#*:}" ]] || { echo "display size $DISPLAY_SCALE was written as $_scale" >&2; exit 1; }
+done
+# A duplicated app is installed once.
+plan twice --apps firefox,firefox
+grep -Fq -- 'apps: firefox' "$TMP/twice.out"
+refute grep -Fq -- 'apps: firefox firefox' "$TMP/twice.out"
+
+plan wallpaper --wallpaper quiet-rainleaves
+grep -Fq -- 'set the default wallpaper to /usr/share/kibaos/wallpapers/quiet-rainleaves.png' "$TMP/wallpaper.out"
+grep -Fq -- 'wallpaper: quiet-rainleaves' "$TMP/wallpaper.out"
+refute grep -Fq -- 'default wallpaper' "$TMP/plain.out"
+# The session turns this setting into Ash's default wallpaper.
+grep -Fq -- 'KIBAOS_DEFAULT_WALLPAPER=%s' "$ROOT/installer/bin/kibaos-install"
+grep -Fq -- '--default-wallpaper-large="${KIBAOS_DEFAULT_WALLPAPER}"' "$ROOT/chromiumos-ash/chromiumos-ash.sh"
+grep -Fq -- 'KIBAOS_DEFAULT_WALLPAPER=' "$ROOT/chromiumos-ash/kibaos.features.conf"
+refuses '--wallpaper must be auto or the name' --wallpaper ../../etc/shadow
+refuses '--wallpaper must be auto or the name' --wallpaper 'quiet rainleaves'
+refuses '--wallpaper must be auto or the name' --wallpaper 'x;reboot'
+
+refuses '--feature-profile must be' --feature-profile everything
+refuses '--display-scale must be' --display-scale 130
+refuses '--apps must be none or a list' --apps firefox,steam
+refuses '--apps must be none or a list' --apps 'firefox;reboot'
+refuses '--apps must be none or a list' --apps ,
+refuses '--auto-snapshots must be yes or no' --auto-snapshots maybe
+refuses 'automatic snapshots need btrfs' --filesystem ext4 --auto-snapshots yes
+
+refuses '--filesystem must be btrfs, ext4 or xfs' --filesystem zfs
+refuses '--swap must be none, file or zram' --swap partition
+refuses '--swap-size must be auto, hibernate, or a size like 8G' --swap-size huge
+refuses '--layout must be wipe or alongside' --layout resize
+refuses 'zram swap lives in memory' --swap zram --swap-size hibernate
+refuses 'which xfs does not provide' --filesystem xfs --swap file --swap-size hibernate
+
+echo 'installer dry-run test: PASS'

@@ -1,0 +1,2036 @@
+diff --git a/ui/file_manager/file_manager/kibaos/adapter/chromeos_backend.ts b/ui/file_manager/file_manager/kibaos/adapter/chromeos_backend.ts
+index e3ab1f0c1a9b..c75070e2c688 100644
+--- a/ui/file_manager/file_manager/kibaos/adapter/chromeos_backend.ts
++++ b/ui/file_manager/file_manager/kibaos/adapter/chromeos_backend.ts
+@@ -12,11 +12,69 @@
+  * passing over them quietly.
+  */
+ import type {FilesBackendPort} from '../port/port.js';
+-import type {ChangeEvent, DialogKind, DialogMode, EntryDto, EntryPage, FileKey, IoKind, IoProgress, IoRequest, IoState, ListOptions, Metadata, MetadataField, MetadataSnapshot, TaskDescriptor, TaskId, Volume, VolumeKind} from '../port/types.js';
++import type {ChangeEvent, DialogKind, DialogMode, EntryDto, EntryPage, FileKey, IoKind, IoProgress, IoRequest, IoState, ListOptions, Metadata, MetadataField, MetadataSnapshot, TaskDescriptor, TaskId, Volume, VolumeKind, VolumePurpose} from '../port/types.js';
+ import {asFileKey, FilesError} from '../port/types.js';
+ import type {Platform, PlatformEntry, PlatformIoProgress, PlatformIoState, PlatformIoType, PlatformMetadata, PlatformResultingTasks, PlatformTaskDescriptor, PlatformVolume} from './platform.js';
+ 
+ /** ChromeOS volume types, as they are actually spelled. */
++/**
++ * What a place is for, keyed by the tail of its volume id.
++ *
++ * The id and not the label. `local_root:Pictures` is spelled that way whatever
++ * language the desktop is in, and its label is whatever XDG decided to call it,
++ * so matching on the label would give a French install a sidebar of identical
++ * disk glyphs. Anything not listed simply has no purpose, which is the ordinary
++ * case and draws the disk it always drew.
++ */
++const PURPOSES: Record<string, VolumePurpose> = {
++  Desktop: 'desktop',
++  Documents: 'documents',
++  Downloads: 'downloads',
++  Music: 'music',
++  Pictures: 'pictures',
++  Videos: 'videos',
++};
++
++/** The part of `local_root:Pictures` after the colon, or '' if there is none. */
++function suffixOf(volumeId: string): string {
++  const colon = volumeId.indexOf(':');
++  return colon < 0 ? '' : volumeId.slice(colon + 1);
++}
++
++/**
++ * Which id suffix names the account's own home directory.
++ *
++ * Nothing in a single volume says "this one is home". ChromeOS's `downloads`
++ * volume is My files and its id carries the account name, and the same account
++ * home is published separately as `local_root:<account>`, so the downloads
++ * volume is read for the name and whatever local_root shares it is home.
++ *
++ * Undefined where there is no downloads volume, which means no place is marked
++ * as home rather than that the wrong one is.
++ */
++function homeSuffixOf(volumes: readonly PlatformVolume[]): string|undefined {
++  const downloads = volumes.find(volume => volume.volumeType === 'downloads');
++  const suffix = downloads ? suffixOf(downloads.volumeId) : '';
++  return suffix || undefined;
++}
++
++function purposeOf(volume: PlatformVolume, home: string|undefined):
++    VolumePurpose|undefined {
++  // My files is the account's own files whatever its id looks like. Usually
++  // the test below would catch it anyway, because the account name is read off
++  // this very volume and so always matches it. Usually is not always: an id
++  // with no colon in it yields no account name at all, and then this is the
++  // only line that marks a home.
++  if (volume.volumeType === 'downloads') {
++    return 'home';
++  }
++  const suffix = suffixOf(volume.volumeId);
++  if (home !== undefined && suffix === home) {
++    return 'home';
++  }
++  return PURPOSES[suffix];
++}
++
+ const VOLUME_KINDS: Record<string, VolumeKind> = {
+   downloads: 'system',
+   // The ordinary local volume, and the one this machine has most of: Home,
+@@ -536,7 +594,8 @@ export class ChromeOsBackend implements FilesBackendPort {
+     }
+   }
+ 
+-  private async toVolume(volume: PlatformVolume): Promise<Volume> {
++  private async toVolume(volume: PlatformVolume, home: string|undefined):
++      Promise<Volume> {
+     const kind = VOLUME_KINDS[volume.volumeType] ?? 'provided';
+     let capacity: {total: number, free: number}|null = null;
+     try {
+@@ -556,17 +615,21 @@ export class ChromeOsBackend implements FilesBackendPort {
+       removable: DETACHABLE.has(volume.volumeType),
+       readOnly: volume.isReadOnly,
+       capacity,
++      purpose: purposeOf(volume, home),
+     };
+   }
+ 
+   async volumes(): Promise<readonly Volume[]> {
+     const found = await this.platform.listVolumes();
+-    return Promise.all(found.map(volume => this.toVolume(volume)));
++    // Worked out once over the whole list, because which volume is home is a
++    // fact about the set rather than about any one of them.
++    const home = homeSuffixOf(found);
++    return Promise.all(found.map(volume => this.toVolume(volume, home)));
+   }
+ 
+   async * search(query: string, scope: FileKey, options: ListOptions = {}):
+       AsyncIterable<EntryPage> {
+-    let root: PlatformEntry|null = null;
++    let root: PlatformEntry;
+     try {
+       root = await this.platform.resolve(scope);
+     } catch (error) {
+diff --git a/ui/file_manager/file_manager/kibaos/adapter/chromeos_platform.ts b/ui/file_manager/file_manager/kibaos/adapter/chromeos_platform.ts
+index d9f1793ed4a3..2d2a444cf224 100644
+--- a/ui/file_manager/file_manager/kibaos/adapter/chromeos_platform.ts
++++ b/ui/file_manager/file_manager/kibaos/adapter/chromeos_platform.ts
+@@ -24,6 +24,34 @@ interface ChromeEvent<T> {
+   removeListener(listener: (value: T) => void): void;
+ }
+ 
++/**
++ * What ChromeOS hands these listeners, before the edge narrows it.
++ *
++ * `eventType`, `type` and `state` are `string` here rather than the unions
++ * `platform.ts` uses, and that is not laziness. Each of them is a member of a
++ * TypeScript string enum on the ChromeOS side, and a string enum is nominal:
++ * no union of string literals is assignable to one in either direction, so a
++ * description naming the literals cannot be satisfied by the real API at all.
++ * `string` is the largest true thing this file can say. The exact unions live
++ * one layer in, on `Platform`, where they are ours to enforce.
++ */
++interface RawWatchEvent {
++  entry: PlatformEntry;
++  eventType: string;
++}
++
++interface RawIoProgress {
++  taskId: number;
++  type: string;
++  state: string;
++  bytesTransferred: number;
++  totalBytes: number;
++  sourceName: string;
++  itemCount: number;
++  numRemainingItems: number;
++  errorName?: string;
++}
++
+ /**
+  * The slice of `chrome.fileManagerPrivate` this touches, and no more.
+  *
+@@ -40,10 +68,11 @@ export interface FileManagerPrivateSlice {
+   addFileWatch(entry: PlatformEntry, callback: (success?: boolean) => void): void;
+   removeFileWatch(entry: PlatformEntry, callback: (success?: boolean) => void):
+       void;
+-  onDirectoryChanged: ChromeEvent<PlatformWatchEvent>;
++  onDirectoryChanged: ChromeEvent<RawWatchEvent>;
+   searchFiles(
+       params: {
+-        rootDir: PlatformEntry|null,
++        /** Absent, never null. The bindings declare it optional. */
++        rootDir?: PlatformEntry,
+         query: string,
+         types: string,
+         maxResults: number,
+@@ -56,11 +85,12 @@ export interface FileManagerPrivateSlice {
+       descriptor: PlatformTaskDescriptor, entries: readonly PlatformEntry[],
+       callback: (result: string) => void): void;
+   startIOTask(
+-      type: PlatformIoType, entries: readonly PlatformEntry[],
++      // `string`, for the nominal enum reason above.
++      type: string, entries: readonly PlatformEntry[],
+       params: {destinationFolder?: PlatformEntry, showNotification?: boolean},
+       callback: (taskId: number) => void): void;
+   cancelIOTask(taskId: number): void;
+-  onIOTaskProgressStatus: ChromeEvent<PlatformIoProgress>;
++  onIOTaskProgressStatus: ChromeEvent<RawIoProgress>;
+   selectFiles(
+       paths: readonly string[], shouldReturnLocalPath: boolean,
+       callback: () => void): void;
+@@ -223,12 +253,28 @@ export class ChromeOsPlatform implements Platform {
+   }
+ 
+   onDirectoryChanged(listener: (event: PlatformWatchEvent) => void): () => void {
+-    this.api.onDirectoryChanged.addListener(listener);
+-    return () => this.api.onDirectoryChanged.removeListener(listener);
++    // Wrapped rather than passed straight through, because this is the line
++    // where ChromeOS's vocabulary becomes ours. Its eventType is a member of a
++    // nominal string enum whose values are exactly the union in `platform.ts`,
++    // copied from the same declaration, so the narrowing is a rename and not a
++    // guess. If that enum ever grows a third value this is the one place that
++    // has to learn about it.
++    const forward = (raw: RawWatchEvent) =>
++        listener({entry: raw.entry, eventType: raw.eventType as 'changed' | 'error'});
++    this.api.onDirectoryChanged.addListener(forward);
++    return () => this.api.onDirectoryChanged.removeListener(forward);
+   }
+ 
+   searchFiles(params: {
+-    rootDir: PlatformEntry|null,
++    /**
++     * Where to search. Absent means everywhere.
++     *
++     * Absent, never null. The bindings declare it optional and a null is not
++     * the same thing as an omission to them. Nothing ever passed one, so this
++     * was a wrong description rather than a live defect, and it was invisible
++     * until `kibaos/` was compiled against the app's own definitions.
++     */
++    rootDir?: PlatformEntry,
+     query: string,
+     types: 'ALL'|'EXCLUDE_DIRECTORIES'|'OFFLINE'|'SHARED_WITH_ME',
+     maxResults: number,
+@@ -268,8 +314,13 @@ export class ChromeOsPlatform implements Platform {
+   }
+ 
+   onIoProgress(listener: (progress: PlatformIoProgress) => void): () => void {
+-    this.api.onIOTaskProgressStatus.addListener(listener);
+-    return () => this.api.onIOTaskProgressStatus.removeListener(listener);
++    // Narrowed here for the same reason as onDirectoryChanged: `type` and
++    // `state` are members of nominal string enums whose values are exactly the
++    // unions in `platform.ts`.
++    const forward = (raw: RawIoProgress) =>
++        listener(raw as unknown as PlatformIoProgress);
++    this.api.onIOTaskProgressStatus.addListener(forward);
++    return () => this.api.onIOTaskProgressStatus.removeListener(forward);
+   }
+ 
+   async getLaunchDialog(): Promise<PlatformLaunchDialog|null> {
+diff --git a/ui/file_manager/file_manager/kibaos/adapter/platform.ts b/ui/file_manager/file_manager/kibaos/adapter/platform.ts
+index 150c629c50eb..2aeb1f95d330 100644
+--- a/ui/file_manager/file_manager/kibaos/adapter/platform.ts
++++ b/ui/file_manager/file_manager/kibaos/adapter/platform.ts
+@@ -206,7 +206,15 @@ export interface Platform {
+    * TypeError from the bindings before the call is made.
+    */
+   searchFiles(params: {
+-    rootDir: PlatformEntry|null,
++    /**
++     * Where to search. Absent means everywhere.
++     *
++     * Absent, never null. The bindings declare it optional and a null is not
++     * the same thing as an omission to them. Nothing ever passed one, so this
++     * was a wrong description rather than a live defect, and it was invisible
++     * until `kibaos/` was compiled against the app's own definitions.
++     */
++    rootDir?: PlatformEntry,
+     query: string,
+     types: 'ALL'|'EXCLUDE_DIRECTORIES'|'OFFLINE'|'SHARED_WITH_ME',
+     maxResults: number,
+diff --git a/ui/file_manager/file_manager/kibaos/app/mount.ts b/ui/file_manager/file_manager/kibaos/app/mount.ts
+new file mode 100644
+index 000000000000..92f9cf52b407
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/app/mount.ts
+@@ -0,0 +1,97 @@
++/**
++ * The redesign, mounted by the app rather than pushed into it.
++ *
++ * `tests/harness/live_shell.js` proved this assembly by injecting it over the
++ * debugger, which was enough to see it and not enough to ship it: nothing in
++ * the Files app constructed any of this, so opening the window normally still
++ * gave you the stock one. This is the same three lines, run by the app itself.
++ *
++ * The stock UI is not torn down. It is still initialised and still holds every
++ * piece we have not replaced: the dialogs, the IO progress panel, the context
++ * menus, the crostini share flow. This draws over it, opaque and full window,
++ * so the machinery underneath stays alive and reachable while the surface is
++ * ours. Remove `#kibaos-shell` and the old window is exactly as it was, which
++ * is the property that makes it safe to put this in front of a real
++ * filesystem before all of those have an answer.
++ *
++ * Every collaborator arrives as an argument. Nothing here reads a global, so
++ * the local loop can compile it without the ChromeOS type definitions and the
++ * hardware harness can build the same thing from the running app's own
++ * objects.
++ */
++import type {FileManagerPrivateSlice, LastErrorSource, MetadataModelSlice, ResolveUrl, VolumeManagerSlice} from '../adapter/chromeos_platform.js';
++import {ChromeOsPlatform} from '../adapter/chromeos_platform.js';
++import {ChromeOsBackend} from '../adapter/chromeos_backend.js';
++import {TOKENS_CSS} from '../ui/tokens_css.js';
++import {FilesShell} from '../ui/shell.js';
++
++export interface MountOptions {
++  readonly api: FileManagerPrivateSlice;
++  readonly runtime: LastErrorSource;
++  readonly volumes: VolumeManagerSlice;
++  readonly metadata: MetadataModelSlice;
++  readonly resolveUrl: ResolveUrl;
++  /** Defaults to the document body. */
++  readonly container?: HTMLElement;
++}
++
++/** The id of the element the shell lives in, so it can be found and removed. */
++export const MOUNT_ID = 'kibaos-shell';
++
++/** The id of the style element, so a second mount replaces rather than repeats. */
++const STYLE_ID = 'kibaos-tokens';
++
++/**
++ * Puts the stylesheet in the document.
++ *
++ * As a `<style>` rather than a `<link>`, because the stylesheet cannot be its
++ * own pak resource: a new resource is a new id, the id map is compiled into
++ * chrome, and that is a full link rather than a pak swap. `tools/gen_tokens.py`
++ * turns `ui/tokens.css` into the string this writes, and `tests/run.sh` fails
++ * if the two have drifted.
++ */
++function applyTokens(): void {
++  let style = document.getElementById(STYLE_ID);
++  if (!style) {
++    style = document.createElement('style');
++    style.id = STYLE_ID;
++    document.head.appendChild(style);
++  }
++  style.textContent = TOKENS_CSS;
++}
++
++/**
++ * Builds the window and starts it.
++ *
++ * Returns null rather than throwing when it cannot start. A window that fails
++ * halfway is worse than the old window, so the host element goes away again
++ * and the app underneath is what you see. Deciding that here rather than in
++ * the caller means there is one place that knows what the fallback is.
++ */
++export async function mountKibaosShell(options: MountOptions):
++    Promise<FilesShell|null> {
++  const existing = document.getElementById(MOUNT_ID);
++  if (existing) {
++    existing.remove();
++  }
++  applyTokens();
++  const host = document.createElement('div');
++  host.id = MOUNT_ID;
++  (options.container ?? document.body).appendChild(host);
++
++  try {
++    const platform = new ChromeOsPlatform(
++        options.api, options.runtime, options.volumes, options.metadata,
++        options.resolveUrl,
++        // Null is an ordinary window rather than a picker. Dialog mode comes
++        // later, and passing the launch parameters here is all it will need.
++        null);
++    const shell = new FilesShell(host, new ChromeOsBackend(platform));
++    await shell.start();
++    return shell;
++  } catch (error) {
++    host.remove();
++    console.error('KibaOS Files did not start, leaving the stock window', error);
++    return null;
++  }
++}
+diff --git a/ui/file_manager/file_manager/kibaos/port/mock_backend.ts b/ui/file_manager/file_manager/kibaos/port/mock_backend.ts
+index 18e1a24a5d64..b761ff2fd7de 100644
+--- a/ui/file_manager/file_manager/kibaos/port/mock_backend.ts
++++ b/ui/file_manager/file_manager/kibaos/port/mock_backend.ts
+@@ -319,6 +319,12 @@ export class MockBackend implements FilesBackendPort {
+     for (const key of keys) {
+       this.require(key);
+     }
++    // A task id the backend never offered is a caller bug, and the real one
++    // refuses it. Ignoring it here made the mock kinder than the platform,
++    // which is the direction that hides mistakes rather than finding them.
++    if (taskId !== 'mock-view' && taskId !== 'mock-edit') {
++      throw new FilesError('not-found', 'There is no such task.');
++    }
+   }
+ 
+   async startIo(request: IoRequest): Promise<TaskId> {
+diff --git a/ui/file_manager/file_manager/kibaos/port/types.ts b/ui/file_manager/file_manager/kibaos/port/types.ts
+index a6bdad296e53..9bb4989cce25 100644
+--- a/ui/file_manager/file_manager/kibaos/port/types.ts
++++ b/ui/file_manager/file_manager/kibaos/port/types.ts
+@@ -58,6 +58,18 @@ export type MetadataSnapshot = ReadonlyMap<FileKey, Metadata>;
+ export type VolumeKind = 'system'|'removable'|'archive'|'provided'|'drive'|
+     'android'|'crostini'|'mtp'|'trash'|'recent';
+ 
++/**
++ * What a place is for, as opposed to what kind of storage it is made of.
++ *
++ * A pictures folder on the internal disk is a `system` volume with a
++ * `pictures` purpose, and the two answers are wanted for different things: the
++ * kind decides which group the sidebar files it under, the purpose decides what
++ * it looks like. Absent when the platform does not say so, which is most
++ * volumes and is not a failure.
++ */
++export type VolumePurpose =
++    'home'|'desktop'|'documents'|'downloads'|'music'|'pictures'|'videos';
++
+ export interface Volume {
+   readonly id: string;
+   readonly root: FileKey;
+@@ -67,6 +79,7 @@ export interface Volume {
+   readonly readOnly: boolean;
+   /** Null where the notion does not apply, such as Recent. */
+   readonly capacity: {readonly total: number, readonly free: number}|null;
++  readonly purpose?: VolumePurpose;
+ }
+ 
+ /**
+diff --git a/ui/file_manager/file_manager/kibaos/tests/adapter/adapter_test.ts b/ui/file_manager/file_manager/kibaos/tests/adapter/adapter_test.ts
+index 4e88a09f1edd..f415fc420731 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/adapter/adapter_test.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/adapter/adapter_test.ts
+@@ -535,6 +535,95 @@ const CHECKS: Check[] = [
+             'a local folder was not treated as part of this computer');
+     },
+   },
++  {
++    name: 'a user folder says what it is for, read off the id not the label',
++    async run() {
++      // The Dell's actual volume list. The label is localised and the id is
++      // not, so the id is what decides: a French install would call Pictures
++      // something else and still be `local_root:Pictures`.
++      const platform = new FakePlatform();
++      const listed: Array<[string, string, string]> = [
++        ['local_root:Desktop', 'local_root', 'Desktop'],
++        ['local_root:Documents', 'local_root', 'Documents'],
++        ['local_root:Downloads', 'local_root', 'Downloads'],
++        ['local_root:Music', 'local_root', 'Music'],
++        ['local_root:Pictures', 'local_root', 'Pictures'],
++        ['local_root:Videos', 'local_root', 'Videos'],
++        ['local_root:root', 'local_root', 'Filesystem Root'],
++      ];
++      for (const [volumeId, volumeType, label] of listed) {
++        platform.addVolume({
++          volumeId,
++          volumeType,
++          label,
++          url: `filesystem:chrome://file-manager/external/${volumeId}/`,
++        });
++      }
++      const volumes = await new ChromeOsBackend(platform).volumes();
++      const purposes = volumes.map(volume => volume.purpose);
++      equal(purposes.join(','),
++            'desktop,documents,downloads,music,pictures,videos,',
++            'the wrong glyph would be drawn for these places');
++    },
++  },
++  {
++    name: 'home is worked out from the account name, not from the word Home',
++    async run() {
++      // Nothing in one volume says it is home. My files carries the account
++      // name in its id, and the local_root sharing that name is the home
++      // directory. On the Dell that is downloads:cam and local_root:cam, and
++      // local_root:home is /home, which is somewhere else entirely.
++      const platform = new FakePlatform();
++      for (const [volumeId, volumeType, label] of [
++             ['downloads:cam', 'downloads', 'My files'],
++             ['local_root:cam', 'local_root', 'Home'],
++             ['local_root:home', 'local_root', 'Users'],
++           ] as Array<[string, string, string]>) {
++        platform.addVolume({
++          volumeId,
++          volumeType,
++          label,
++          url: `filesystem:chrome://file-manager/external/${volumeId}/`,
++        });
++      }
++      const volumes = await new ChromeOsBackend(platform).volumes();
++      equal(volumes[0]?.purpose, 'home', 'My files is the account own files');
++      equal(volumes[1]?.purpose, 'home', 'the account home was not recognised');
++      equal(volumes[2]?.purpose, undefined,
++            '/home holds every account and is not one account home');
++    },
++  },
++  {
++    name: 'My files is a home even when its id carries no account name',
++    async run() {
++      // The account name is read off this volume, so on ordinary ids the two
++      // rules agree and either one alone would look sufficient. An id with no
++      // colon yields no account name and leaves only the first.
++      const platform = new FakePlatform().addVolume({
++        volumeId: 'downloads',
++        volumeType: 'downloads',
++        label: 'My files',
++        url: 'filesystem:chrome://file-manager/external/downloads/',
++      });
++      const volumes = await new ChromeOsBackend(platform).volumes();
++      equal(volumes[0]?.purpose, 'home',
++            'My files is the account own files whatever its id looks like');
++    },
++  },
++  {
++    name: 'with no My files there is no home rather than the wrong home',
++    async run() {
++      const platform = new FakePlatform().addVolume({
++        volumeId: 'local_root:cam',
++        volumeType: 'local_root',
++        label: 'Home',
++        url: 'filesystem:chrome://file-manager/external/cam/',
++      });
++      const volumes = await new ChromeOsBackend(platform).volumes();
++      equal(volumes[0]?.purpose, undefined,
++            'guessing at home from a label is how the wrong one gets marked');
++    },
++  },
+   {
+     name: 'restriction is asked for by the name the platform knows',
+     async run() {
+diff --git a/ui/file_manager/file_manager/kibaos/tests/adapter/fake_platform.ts b/ui/file_manager/file_manager/kibaos/tests/adapter/fake_platform.ts
+index 57950c460d39..335615d851bd 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/adapter/fake_platform.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/adapter/fake_platform.ts
+@@ -241,7 +241,15 @@ export class FakePlatform implements Platform {
+   }
+ 
+   async searchFiles(params: {
+-    rootDir: PlatformEntry|null,
++    /**
++     * Where to search. Absent means everywhere.
++     *
++     * Absent, never null. The bindings declare it optional and a null is not
++     * the same thing as an omission to them. Nothing ever passed one, so this
++     * was a wrong description rather than a live defect, and it was invisible
++     * until `kibaos/` was compiled against the app's own definitions.
++     */
++    rootDir?: PlatformEntry,
+     query: string,
+     types: 'ALL'|'EXCLUDE_DIRECTORIES'|'OFFLINE'|'SHARED_WITH_ME',
+     maxResults: number,
+@@ -306,6 +314,13 @@ export class FakePlatform implements Platform {
+   async executeTask(
+       descriptor: PlatformTaskDescriptor,
+       entries: readonly PlatformEntry[]): Promise<string> {
++    // A descriptor naming an app that was never offered is not something the
++    // platform quietly runs. Accepting anything made the fake kinder than the
++    // real thing, which is the direction that hides a bad task id rather than
++    // finding it.
++    if (descriptor.appId !== 'text-app' && descriptor.appId !== 'viewer') {
++      throw domError('NotFoundError');
++    }
+     this.ran = {descriptor, count: entries.length};
+     return this.taskResult;
+   }
+diff --git a/ui/file_manager/file_manager/kibaos/tests/contract/port_contract.ts b/ui/file_manager/file_manager/kibaos/tests/contract/port_contract.ts
+index afb7ba8b1f71..7103c14c7644 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/contract/port_contract.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/contract/port_contract.ts
+@@ -337,6 +337,16 @@ export const CASES: Case[] = [
+       assert(tasks.some(t => t.isDefault), 'one task is the default');
+     },
+   },
++  {
++    name: 'a task that was never offered is refused',
++    capability: 'task-execution',
++    async run({port, root, add}) {
++      const file = await add(root, 'openable.txt', false);
++      await rejects(
++          () => port.executeTask('no-such-task', [file]), 'not-found',
++          'running a task the backend never offered');
++    },
++  },
+   {
+     name: 'a task can be handed to whatever handles it',
+     capability: 'task-execution',
+diff --git a/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts b/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts
+index 2d18edd5d9f9..f0a13d585ebc 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/dom/list_test.ts
+@@ -41,20 +41,36 @@ interface Harness {
+   destroy(): void;
+ }
+ 
+-function makeHarness(count = 20, height = 400): Harness {
++function entriesOf(count: number): EntryDto[] {
++  const entries: EntryDto[] = [];
++  for (let i = 0; i < count; i++) {
++    const name = i % 4 === 0 ? `folder-${i}` : `file-${i}.txt`;
++    entries.push({
++      key: asFileKey(`${ROOT}/${name}`),
++      name,
++      isDirectory: i % 4 === 0,
++      parent: ROOT,
++    });
++  }
++  return entries;
++}
++
++function stage(height = 400): HTMLElement {
+   const host = document.createElement('div');
+   host.style.height = `${height}px`;
+   host.style.width = '760px';
+   document.body.appendChild(host);
++  return host;
++}
+ 
+-  const entries: EntryDto[] = [];
++function makeHarness(count = 20, height = 400): Harness {
++  const host = stage(height);
++
++  const entries = entriesOf(count);
+   const metadata = new Map<ReturnType<typeof asFileKey>, Metadata>();
+-  for (let i = 0; i < count; i++) {
+-    const name = i % 4 === 0 ? `folder-${i}` : `file-${i}.txt`;
+-    const key = asFileKey(`${ROOT}/${name}`);
+-    entries.push({key, name, isDirectory: i % 4 === 0, parent: ROOT});
+-    metadata.set(key, {size: (i + 1) * 1024, modificationTime: NOW});
+-  }
++  entries.forEach((entry, i) => {
++    metadata.set(entry.key, {size: (i + 1) * 1024, modificationTime: NOW});
++  });
+ 
+   const list = new FileList(host, {rowHeight: 40});
+   list.setEntries(entries, NOW);
+@@ -340,6 +356,40 @@ const CASES: Case[] = [
+       }
+     },
+   },
++  {
++    name: 'a folder that changes under an unmoved window reports its range',
++    run() {
++      // This is the whole reason a new file gets a size. The window fetches
++      // details for the rows it can see, and it learns which those are from
++      // this report. A file arriving in the folder you are already looking at
++      // scrolls nothing, so if the report is skipped as an unchanged window,
++      // the row sits there blank until you scroll it away and back.
++      const host = stage();
++      const reports: Array<{first: number, count: number}> = [];
++      const list = new FileList(host, {
++        rowHeight: 40,
++        onRangeChange: (first, count) => reports.push({first, count}),
++      });
++      try {
++        list.setEntries(entriesOf(20), NOW);
++        const before = reports.length;
++        assert(before > 0, 'the first render reported no range at all');
++        // Same length and the same scroll position, so first and count are
++        // identical to last time and nothing but an explicit invalidation
++        // makes this report.
++        list.setEntries(entriesOf(20), NOW);
++        assert(
++            reports.length > before,
++            'the range was never reported, so nothing would fetch the details');
++        const last = reports[reports.length - 1]!;
++        equal(last.first, 0, 'reported the wrong first row');
++        assert(last.count > 0, 'reported an empty range');
++      } finally {
++        list.destroy();
++        host.remove();
++      }
++    },
++  },
+   {
+     name: 'a selection set programmatically reads back as those entries',
+     run() {
+diff --git a/ui/file_manager/file_manager/kibaos/tests/dom/shell_test.ts b/ui/file_manager/file_manager/kibaos/tests/dom/shell_test.ts
+index dc909f5c8e57..eb573f35a4ba 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/dom/shell_test.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/dom/shell_test.ts
+@@ -33,6 +33,8 @@ function equal<T>(actual: T, expected: T, message: string): void {
+ class CountingPort implements FilesBackendPort {
+   metadataCalls = 0;
+   metadataKeys = 0;
++  /** Every key the shell has asked about, in order. */
++  readonly metadataAsked: FileKey[] = [];
+   constructor(private readonly inner: FilesBackendPort) {}
+   list(key: FileKey, options?: Parameters<FilesBackendPort['list']>[1]) {
+     return this.inner.list(key, options);
+@@ -40,6 +42,7 @@ class CountingPort implements FilesBackendPort {
+   metadata(keys: readonly FileKey[], fields: readonly MetadataField[]) {
+     this.metadataCalls++;
+     this.metadataKeys += keys.length;
++    this.metadataAsked.push(...keys);
+     return this.inner.metadata(keys, fields);
+   }
+   watch(key: FileKey, signal?: AbortSignal) {
+@@ -224,6 +227,32 @@ interface DomResult {
+ }
+ 
+ const CASES: Array<{name: string, run: () => Promise<void>}> = [
++  {
++    name: 'a file that appears in the folder you are looking at gets its details',
++    run: async () => {
++      // The window fetches metadata for the rows it can see, driven by the list
++      // telling it the visible range changed. A file arriving in a folder you
++      // are already looking at does not change that range, so nothing asked for
++      // its size, and the row sat there blank until you scrolled it out of
++      // sight and back. The shell remembers the range for exactly this.
++      const backend = backendWith();
++      const h = makeHarness(backend);
++      await h.shell.start();
++      await settle();
++      const arrived = asFileKey('mock://myfiles/arrived.txt');
++      assert(!h.port.metadataAsked.includes(arrived),
++             'the file was asked about before it existed');
++      backend.add(asFileKey('mock://myfiles'), 'arrived.txt', false,
++                  {size: 4096});
++      await settle();
++      assert(h.names().includes('arrived.txt'), 'the new row never appeared');
++      // The key, not the call count. Any metadata call at all satisfies a
++      // count, which is how this passed for an hour while proving nothing.
++      assert(h.port.metadataAsked.includes(arrived),
++             'nothing asked for the details of the row that just appeared');
++      h.destroy();
++    },
++  },
+   {
+     name: 'the window asks the backend what places exist',
+     run: async () => {
+diff --git a/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts b/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts
+index d42d73d1a144..030843c589a1 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/dom/sidebar_test.ts
+@@ -56,8 +56,24 @@ function places(): Place[] {
+     {key: asFileKey('fake://recent'), label: 'Recent', kind: 'recent'},
+     {key: asFileKey('fake://starred'), label: 'Starred', kind: 'starred'},
+     {key: asFileKey('fake://trash'), label: 'Trash', kind: 'trash'},
+-    {key: internal.root, label: internal.label, kind: 'volume', volume: internal},
+-    {key: stick.root, label: stick.label, kind: 'volume', volume: stick},
++    // capacity is set here and not read off the volume, because the sidebar
++    // draws what it is handed. Which volumes are worth measuring is decided
++    // once, in placesFor, so that one disk behind fourteen folders does not
++    // draw fourteen identical bars. These are two different disks, so both.
++    {
++      key: internal.root,
++      label: internal.label,
++      kind: 'volume',
++      volume: internal,
++      capacity: internal.capacity!,
++    },
++    {
++      key: stick.root,
++      label: stick.label,
++      kind: 'volume',
++      volume: stick,
++      capacity: stick.capacity!,
++    },
+     {key: asFileKey('fake://basket'), label: 'Basket', kind: 'basket', badge: 3},
+   ];
+ }
+@@ -313,6 +329,42 @@ const CASES: Array<{name: string, run: () => void}> = [
+       h.destroy();
+     },
+   },
++  {
++    name: 'a place that says what it is for does not draw the generic disk',
++    run: () => {
++      // Every user folder on the Dell is a local disk, so before this the
++      // sidebar drew the same laptop fourteen times down the column.
++      const purposes = ['home', 'desktop', 'documents', 'downloads', 'music',
++                        'pictures', 'videos'] as const;
++      const list: Place[] = purposes.map(purpose => {
++        const disk = volume({id: purpose, kind: 'system', purpose});
++        return {
++          key: disk.root,
++          label: purpose,
++          kind: 'volume' as const,
++          volume: disk,
++        };
++      });
++      const plain = volume({id: 'plain', kind: 'system'});
++      list.push({
++        key: plain.root,
++        label: 'plain',
++        kind: 'volume',
++        volume: plain,
++      });
++      const h = makeHarness(list);
++      const drawn = [...h.host.querySelectorAll('.kibaos-place-glyph path')]
++                        .map(node => node.getAttribute('d'));
++      equal(drawn.length, purposes.length + 1, 'a glyph per place');
++      equal(new Set(drawn).size, drawn.length,
++            'two places that are for different things drew the same glyph');
++      const generic = drawn[drawn.length - 1];
++      assert(
++          drawn.slice(0, -1).every(d => d !== generic),
++          'a place that says what it is for still drew the generic disk');
++      h.destroy();
++    },
++  },
+   {
+     name: 'a place with no notion of capacity draws none',
+     run: () => {
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/dom.html b/ui/file_manager/file_manager/kibaos/tests/harness/dom.html
+index 61409e548aec..3dcde2ddaf84 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/dom.html
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/dom.html
+@@ -1,5 +1,7 @@
+ <!doctype html>
+ <meta charset="utf-8">
++<meta http-equiv="Content-Security-Policy"
++      content="require-trusted-types-for 'script'">
+ <title>KibaOS Files DOM tests</title>
+ <link rel="stylesheet" href="../../ui/tokens.css">
+ <style>html, body { margin: 0; background: var(--kibaos-ground); }</style>
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/golden.py b/ui/file_manager/file_manager/kibaos/tests/harness/golden.py
+index 505a80ee218e..c8cc54b2d39f 100755
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/golden.py
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/golden.py
+@@ -264,6 +264,7 @@ def main():
+         stories = {s["name"]: [s["width"], s["height"]] for s in published}
+         names = [args.only] if args.only else [s["name"] for s in published]
+         failures = []
++        recorded = []
+         for name in names:
+             width, height = stories.get(name, [720, 260])
+             shot = os.path.join(artifacts, name + ".png")
+@@ -275,6 +276,7 @@ def main():
+             golden = os.path.join(GOLDENS, name + ".png")
+             if args.update or not os.path.exists(golden):
+                 shutil.copy(shot, golden)
++                recorded.append(name)
+                 print("  recorded  %s (%dx%d)" % (name, width, height))
+                 continue
+             ok, why = compare(golden, shot, os.path.join(artifacts,
+@@ -294,7 +296,17 @@ def main():
+               % (len(failures), artifacts))
+         print("If the change is intended, re-run with --update.")
+         return 1
+-    print("\ngolden renders: %d matched" % len(names))
++    # Recorded and matched are not the same claim. A story whose golden did not
++    # exist yet was written from this very run and compared against nothing, so
++    # counting it as matched tells the next reader it was verified when it was
++    # only recorded.
++    if recorded:
++        print("\ngolden renders: %d matched, %d recorded for the first time "
++              "and compared against nothing: %s"
++              % (len(names) - len(recorded), len(recorded),
++                 ", ".join(recorded)))
++    else:
++        print("\ngolden renders: %d matched" % len(names))
+     return 0
+ 
+ 
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-purposes.png b/ui/file_manager/file_manager/kibaos/tests/harness/goldens/sidebar-purposes.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..055be519dfad7bf8a89bad714dd19ef9e7ad9fba
+GIT binary patch
+literal 9915
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/index.html b/ui/file_manager/file_manager/kibaos/tests/harness/index.html
+index 73acc0243cb2..ac92ada728c2 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/index.html
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/index.html
+@@ -1,5 +1,7 @@
+ <!doctype html>
+ <meta charset="utf-8">
++<meta http-equiv="Content-Security-Policy"
++      content="require-trusted-types-for 'script'">
+ <title>KibaOS Files harness</title>
+ <link rel="stylesheet" href="../../ui/tokens.css">
+ <style>
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.js b/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.js
+new file mode 100644
+index 000000000000..cf6b816fbe40
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.js
+@@ -0,0 +1,90 @@
++/**
++ * Mounts the KibaOS shell in a live Files window, over the real backend.
++ *
++ * Not a test. This is the thing you look at. It builds `ChromeOsPlatform` from
++ * the running app's own collaborators, wraps it in `ChromeOsBackend`, and hands
++ * that to `FilesShell`, so what appears on screen is the redesign driven by the
++ * actual filesystem rather than a mock and rather than a screenshot.
++ *
++ * It overlays rather than replacing, so nothing about the existing app is torn
++ * down: remove `#kibaos-live` from the page, or close the window, and the
++ * stock Files app is exactly as it was.
++ *
++ * Assembled and sent by `live_shell.py`. Do not run directly.
++ */
++(() => {
++const kibaosModules = {};
++const kibaosExports = {};
++function define(name, deps, factory) {
++  kibaosModules[name] = {deps: deps, factory: factory};
++}
++function requireModule(name) {
++  if (Object.prototype.hasOwnProperty.call(kibaosExports, name)) {
++    return kibaosExports[name];
++  }
++  const module = kibaosModules[name];
++  if (!module) {
++    throw new Error('no such module in the bundle: ' + name);
++  }
++  const exported = (kibaosExports[name] = {});
++  const args = module.deps.map(function(dep) {
++    if (dep === 'require') return requireModule;
++    if (dep === 'exports') return exported;
++    return requireModule(dep);
++  });
++  module.factory.apply(null, args);
++  return exported;
++}
++
++// @BUNDLE@
++
++return (async () => {
++  const {ChromeOsBackend} = requireModule('adapter/chromeos_backend');
++  const {ChromeOsPlatform} = requireModule('adapter/chromeos_platform');
++  const {FilesShell} = requireModule('ui/shell');
++
++  const app = window.fileManager;
++  if (!app || !app.volumeManager || !app.metadataModel_) {
++    return JSON.stringify({error: 'the Files app is not open in this renderer'});
++  }
++
++  const platform = new ChromeOsPlatform(
++      chrome.fileManagerPrivate, chrome.runtime, app.volumeManager,
++      app.metadataModel_,
++      (url, ok, fail) => webkitResolveLocalFileSystemURL(url, ok, fail),
++      null);
++
++  let style = document.getElementById('kibaos-tokens');
++  if (!style) {
++    style = document.createElement('style');
++    style.id = 'kibaos-tokens';
++    document.head.appendChild(style);
++  }
++  style.textContent = "@TOKENS@";
++
++  const existing = document.getElementById('kibaos-live');
++  if (existing) {
++    existing.remove();
++  }
++  const host = document.createElement('div');
++  host.id = 'kibaos-live';
++  host.style.cssText =
++      'position:fixed;inset:0;z-index:2147483647;overflow:hidden;';
++  document.body.appendChild(host);
++
++  const shell = new FilesShell(host, new ChromeOsBackend(platform));
++  await shell.start();
++  await new Promise(done => setTimeout(done, 1200));
++
++  const text = (selector) =>
++      [...host.querySelectorAll(selector)].map(node => node.textContent.trim());
++  return JSON.stringify({
++    mounted: true,
++    places: text('.kibaos-place-label'),
++    headings: text('.kibaos-place-heading'),
++    rows: text('.kibaos-name').slice(0, 12),
++    rowCount: host.querySelectorAll('.kibaos-row').length,
++    status: (host.querySelector('.kibaos-status-summary') || {}).textContent,
++  }, null, 1);
++})();
++})()
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.py b/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.py
+new file mode 100644
+index 000000000000..c67084a581ad
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/live_shell.py
+@@ -0,0 +1,90 @@
++#!/usr/bin/env python3
++"""Puts the KibaOS shell on screen in a live Files window, over the real backend.
++
++Not a test, and not a screenshot. This compiles the shell, the adapter and the
++ChromeOS wiring into one bundle, sends it into a running Files renderer, and
++mounts it as an overlay driven by the actual filesystem.
++
++  python3 live_shell.py
++
++It adds `#kibaos-live` and a `#kibaos-tokens` style to the page and touches
++nothing else, so removing that element, or closing the window, leaves the stock
++app exactly as it was.
++"""
++import json
++import os
++import subprocess
++import sys
++import tempfile
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++KIBAOS = os.path.dirname(os.path.dirname(HERE))
++SRC = os.path.abspath(os.path.join(KIBAOS, "..", "..", "..", ".."))
++NODE = os.path.join(SRC, "third_party/node/linux/node-linux-x64/bin/node")
++TSC = os.path.join(SRC, "third_party/node/node_modules/typescript/bin/tsc")
++LAB = os.environ.get("KIBAOS_LAB", "/mnt/build/kibaos-work/lab")
++
++# ui/shell.ts drags in the whole window: sidebar, toolbar, path bar, list, rows,
++# status bar, copy and format. Naming it is enough.
++MODULES = [
++    "port/types.ts",
++    "port/port.ts",
++    "adapter/chromeos_backend.ts",
++    "adapter/chromeos_platform.ts",
++    "ui/shell.ts",
++]
++
++
++def build_bundle(out_path):
++    command = [
++        NODE, TSC, "--strict", "--skipLibCheck", "--target", "es2022",
++        "--module", "amd", "--outFile", out_path, "--lib", "es2022,dom",
++        "--ignoreDeprecations", "6.0",
++    ] + [os.path.join(KIBAOS, module) for module in MODULES]
++    finished = subprocess.run(command, capture_output=True, text=True)
++    if not os.path.exists(out_path):
++        sys.stdout.write(finished.stdout + finished.stderr)
++        raise SystemExit("the bundle did not compile")
++    return open(out_path).read()
++
++
++def main():
++    for needed in (NODE, TSC, LAB):
++        if not os.path.exists(needed):
++            raise SystemExit("not found: %s" % needed)
++
++    with tempfile.TemporaryDirectory() as scratch:
++        bundle = build_bundle(os.path.join(scratch, "bundle.js"))
++    harness = open(os.path.join(HERE, "live_shell.js")).read()
++    tokens = open(os.path.join(KIBAOS, "ui/tokens.css")).read()
++
++    for marker in ("// @BUNDLE@", '"@TOKENS@"'):
++        if harness.count(marker) != 1:
++            raise SystemExit("the harness has no single %s to splice" % marker)
++    # json.dumps rather than a naive quote: the stylesheet is full of braces,
++    # quotes and newlines, and one unescaped character turns the whole payload
++    # into a syntax error a long way from its cause.
++    payload = harness.replace("// @BUNDLE@", bundle)
++    payload = payload.replace('"@TOKENS@"', json.dumps(tokens))
++
++    print("sending %d bytes to the renderer" % len(payload))
++    environment = dict(os.environ, KIBAOS_CDP_TIMEOUT="120")
++    # Through a file, not an argument. A bundled application is well past the
++    # 128KB Linux allows in a single argv entry, and the failure for that is an
++    # OSError from posix_spawn that says nothing about size.
++    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as handle:
++        handle.write(payload)
++        payload_path = handle.name
++    try:
++        finished = subprocess.run([LAB, "eval", "@" + payload_path],
++                                  capture_output=True, text=True,
++                                  env=environment)
++    finally:
++        os.unlink(payload_path)
++    sys.stderr.write(finished.stderr)
++    print(finished.stdout.strip())
++    return finished.returncode
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/perf.html b/ui/file_manager/file_manager/kibaos/tests/harness/perf.html
+index c3fecb30be2f..b1398fe8646c 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/perf.html
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/perf.html
+@@ -1,5 +1,7 @@
+ <!doctype html>
+ <meta charset="utf-8">
++<meta http-equiv="Content-Security-Policy"
++      content="require-trusted-types-for 'script'">
+ <title>KibaOS Files list benchmark</title>
+ <link rel="stylesheet" href="../../ui/tokens.css">
+ <style>
+diff --git a/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts b/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
+index 4fd6643f7bba..b6d95e316e79 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/harness/stories.ts
+@@ -5,7 +5,7 @@
+  * noticing until it is on the hardware. Each one is deterministic: a fixed
+  * clock, fixed sizes, no randomness, no network.
+  */
+-import type {EntryDto, Metadata} from '../../port/types.js';
++import type {EntryDto, Metadata, Volume} from '../../port/types.js';
+ import {asFileKey} from '../../port/types.js';
+ import type {EmptyReason} from '../../ui/copy.js';
+ import {FileList} from '../../ui/file_list.js';
+@@ -14,6 +14,7 @@ import {MockBackend} from '../../port/mock_backend.js';
+ import {Sidebar} from '../../ui/sidebar.js';
+ import {FilesShell} from '../../ui/shell.js';
+ import type {Place} from '../../ui/sidebar.js';
++import {placesFor} from '../../ui/places.js';
+ 
+ export interface Story {
+   readonly name: string;
+@@ -138,7 +139,7 @@ function emptyStory(name: string, reason: EmptyReason, subject?: string): Story
+  */
+ const PLACES: Place[] = (() => {
+   const gib = 1024 * 1024 * 1024;
+-  const internal = {
++  const internal: Volume = {
+     id: 'internal',
+     root: asFileKey('mock://internal'),
+     label: 'Home',
+@@ -147,7 +148,7 @@ const PLACES: Place[] = (() => {
+     readOnly: false,
+     capacity: {total: 32 * gib, free: 8 * gib},
+   };
+-  const stick = {
++  const stick: Volume = {
+     id: 'stick',
+     root: asFileKey('mock://stick'),
+     label: 'CRUZER',
+@@ -160,12 +161,43 @@ const PLACES: Place[] = (() => {
+     {key: asFileKey('fake://recent'), label: 'Recent', kind: 'recent'},
+     {key: asFileKey('fake://starred'), label: 'Starred', kind: 'starred'},
+     {key: asFileKey('fake://trash'), label: 'Trash', kind: 'trash'},
+-    {key: internal.root, label: internal.label, kind: 'volume', volume: internal},
+-    {key: stick.root, label: stick.label, kind: 'volume', volume: stick},
++    // Through placesFor rather than written out, so the golden shows the
++    // meters the app would actually draw rather than the ones a fixture felt
++    // like asking for. Two different disks here, so two bars.
++    ...placesFor([internal, stick]),
+     {key: asFileKey('fake://basket'), label: 'Basket', kind: 'basket', badge: 3},
+   ];
+ })();
+ 
++/**
++ * One place per purpose, which is the whole point of having purposes.
++ *
++ * Every one of these is the same kind of storage, a local disk, so before the
++ * purpose existed this was seven identical laptop glyphs in a column. Left as
++ * its own story rather than folded into the ones above, because those are
++ * about grouping and capacity and are worth keeping still.
++ */
++const PURPOSED: Place[] = placesFor(
++    (['home', 'desktop', 'documents', 'downloads', 'music', 'pictures',
++      'videos'] as const)
++        .map(purpose => ({
++               id: purpose,
++               root: asFileKey(`mock://${purpose}`),
++               label: purpose[0]!.toUpperCase() + purpose.slice(1),
++               kind: 'system' as const,
++               removable: false,
++               readOnly: false,
++               capacity: null,
++               purpose,
++             })));
++
++function purposes(root: HTMLElement): void {
++  const host = document.createElement('div');
++  host.className = 'kibaos-panel';
++  root.appendChild(host);
++  new Sidebar(host).setPlaces(PURPOSED);
++}
++
+ function sidebar(root: HTMLElement, selected?: string): void {
+   const host = document.createElement('div');
+   host.className = 'kibaos-panel';
+@@ -303,6 +335,13 @@ export const STORIES: Story[] = [
+     theme: 'dark',
+     render: root => sidebar(root, 'mock://internal'),
+   },
++  {
++    name: 'sidebar-purposes',
++    width: 268,
++    height: 340,
++    theme: 'dark',
++    render: root => purposes(root),
++  },
+   {
+     name: 'rows-light',
+     width: 720,
+diff --git a/ui/file_manager/file_manager/kibaos/tests/run.sh b/ui/file_manager/file_manager/kibaos/tests/run.sh
+index f639262bf117..520f8e2920bd 100755
+--- a/ui/file_manager/file_manager/kibaos/tests/run.sh
++++ b/ui/file_manager/file_manager/kibaos/tests/run.sh
+@@ -21,11 +21,22 @@ fail() { printf 'kibaos port contract: %s\n' "$*" >&2; exit 1; }
+ # skipLibCheck applies to the shipped .d.ts files only: lib.dom.d.ts refers to
+ # TrustedHTML, which needs a package this tree does not put on our path. Our own
+ # sources are still checked in full, and --strict stays on.
++# The generated module and the stylesheet it came from cannot be allowed to
++# drift, and this is the loop that runs every time.
++"$KIBAOS"/tools/gen_tokens.py --check || fail "ui/tokens_css.ts is stale"
++
+ echo "==> check and emit"
+-"$NODE" "$TSC" --strict --skipLibCheck --target es2022 --module es2022 \
++# noUnusedLocals and noUnusedParameters because the Files app's own tsconfig
++# sets them, and the first time this code was compiled by the real build it
++# failed on two declarations this invocation was happy to ignore. A local loop
++# that is laxer than the build it feeds is a local loop that hands you a
++# surprise at the worst moment.
++"$NODE" "$TSC" --strict --skipLibCheck --noUnusedLocals --noUnusedParameters \
++  --target es2022 --module es2022 \
+   --moduleResolution bundler --lib es2022,dom \
+   --rootDir "$KIBAOS" --outDir "$OUT" \
+   "$KIBAOS"/port/*.ts "$KIBAOS"/session/*.ts "$KIBAOS"/ui/*.ts "$KIBAOS"/adapter/*.ts \
++  "$KIBAOS"/app/*.ts \
+   "$KIBAOS"/tests/contract/*.ts "$KIBAOS"/tests/session/*.ts \
+   "$KIBAOS"/tests/ui/*.ts "$KIBAOS"/tests/adapter/*.ts \
+   || fail "the types do not check"
+diff --git a/ui/file_manager/file_manager/kibaos/tests/ui/places_test.ts b/ui/file_manager/file_manager/kibaos/tests/ui/places_test.ts
+index db1012c0aa88..81a70fcb8766 100644
+--- a/ui/file_manager/file_manager/kibaos/tests/ui/places_test.ts
++++ b/ui/file_manager/file_manager/kibaos/tests/ui/places_test.ts
+@@ -97,9 +97,45 @@ const CHECKS: Check[] = [
+         ...volume('a', 'system'),
+         capacity: {total: 100, free: 50},
+       };
+-      const [place] = placesFor([disk]);
++      const other: Volume = {
++        ...volume('b', 'system'),
++        capacity: {total: 200, free: 80},
++      };
++      const [place] = placesFor([disk, other]);
+       equal(place!.volume?.capacity?.free, 50,
+             'the sidebar cannot draw what the mapping threw away');
++      equal(place!.capacity?.free, 50, 'and it should be asked to draw it');
++    },
++  },
++  {
++    name: 'one disk behind many folders is measured once, not many times',
++    run() {
++      // What the Dell actually reports: every user folder is its own volume on
++      // the same 28 GB disk. Reading a capacity off each of them is how the
++      // sidebar ended up saying "8.7 GB free of 28 GB" fourteen times.
++      const capacity = {total: 28, free: 8};
++      const folders = ['Desktop', 'Documents', 'Downloads', 'Home'].map(
++          name => ({...volume(name, 'system'), capacity}));
++      const places = placesFor(folders);
++      equal(places.length, 4, 'every folder is still a place you can go');
++      equal(places.filter(place => place.capacity).length, 0,
++            'one disk needs no bar at all, the status bar already says it');
++    },
++  },
++  {
++    name: 'a second disk is worth measuring, and both get exactly one bar',
++    run() {
++      const internal = {total: 28, free: 8};
++      const stick = {total: 64, free: 61};
++      const places = placesFor([
++        {...volume('Desktop', 'system'), capacity: internal},
++        {...volume('Home', 'system'), capacity: internal},
++        {...volume('stick', 'system', true), capacity: stick},
++      ]);
++      const measured = places.filter(place => place.capacity);
++      equal(measured.length, 2, 'one bar per disk, not one per folder');
++      equal(measured[0]!.label, 'Desktop', 'on the first place that names it');
++      equal(measured[1]!.label, 'stick', 'and the removable one is its own disk');
+     },
+   },
+   {
+diff --git a/ui/file_manager/file_manager/kibaos/tools/gen_tokens.py b/ui/file_manager/file_manager/kibaos/tools/gen_tokens.py
+new file mode 100755
+index 000000000000..2f422c2e5bef
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/tools/gen_tokens.py
+@@ -0,0 +1,69 @@
++#!/usr/bin/env python3
++"""Turns ui/tokens.css into a TypeScript module.
++
++The stylesheet cannot ship as its own pak resource. A new resource is a new id,
++the id map is compiled into chrome, and adding one means a full link: 43,084
++edges and about six hours on hardware that overheats. `pak-swap-resources.py`
++refuses to insert an id for exactly this reason. So the tokens travel inside a
++resource that already exists, which is the bundled JavaScript.
++
++`ui/tokens.css` stays the single source. The harness pages and the goldens link
++it directly; the app imports the module this writes. `tests/run.sh` regenerates
++and fails if the result would differ, so the two cannot drift.
++
++  python3 gen_tokens.py [--check]
++"""
++import argparse
++import json
++import os
++import sys
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++KIBAOS = os.path.dirname(HERE)
++SOURCE = os.path.join(KIBAOS, "ui/tokens.css")
++OUTPUT = os.path.join(KIBAOS, "ui/tokens_css.ts")
++
++HEADER = """/**
++ * The stylesheet, as a string the bundle can carry.
++ *
++ * Generated by `tools/gen_tokens.py` from `ui/tokens.css`, which is the source
++ * of truth. Do not edit this file; edit the stylesheet and run the generator,
++ * or just run `tests/run.sh`, which checks that this is current.
++ *
++ * It exists because a new pak resource needs a new id, a new id is compiled
++ * into chrome, and that is a full link. See the generator for the details.
++ */
++"""
++
++
++def render():
++    with open(SOURCE) as handle:
++        css = handle.read()
++    return HEADER + "export const TOKENS_CSS = " + json.dumps(css) + ";\n"
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--check", action="store_true",
++                        help="exit non zero if the file is not current")
++    args = parser.parse_args()
++
++    wanted = render()
++    current = None
++    if os.path.exists(OUTPUT):
++        with open(OUTPUT) as handle:
++            current = handle.read()
++    if current == wanted:
++        return 0
++    if args.check:
++        sys.stderr.write(
++            "ui/tokens_css.ts is stale. Run tools/gen_tokens.py\n")
++        return 1
++    with open(OUTPUT, "w") as handle:
++        handle.write(wanted)
++    print("wrote %s" % os.path.relpath(OUTPUT, KIBAOS))
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/ui/file_manager/file_manager/kibaos/ui/file_list.ts b/ui/file_manager/file_manager/kibaos/ui/file_list.ts
+index 81c55f6e8f50..b6066defa04e 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/file_list.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/file_list.ts
+@@ -78,8 +78,11 @@ export class FileList {
+     this.empty.className = 'kibaos-empty';
+     this.empty.setAttribute('role', 'status');
+     this.empty.hidden = true;
+-    this.empty.innerHTML =
+-        '<p class="kibaos-empty-title"></p><p class="kibaos-empty-detail"></p>';
++    const emptyTitle = document.createElement('p');
++    emptyTitle.className = 'kibaos-empty-title';
++    const emptyDetail = document.createElement('p');
++    emptyDetail.className = 'kibaos-empty-detail';
++    this.empty.append(emptyTitle, emptyDetail);
+ 
+     this.spacer.appendChild(this.surface);
+     this.viewport.appendChild(this.spacer);
+@@ -143,6 +146,10 @@ export class FileList {
+     this.recomputeShares();
+     this.spacer.style.height = `${entries.length * this.rowHeight}px`;
+     this.viewport.setAttribute('aria-setsize', String(entries.length));
++    // Invalidated even when the window has not moved, so render() takes the
++    // full path and reports the range. A file arriving in the folder you are
++    // already looking at does not scroll anything, and whoever fetches the
++    // details for visible rows only hears about them through that report.
+     this.lastFirst = -1;
+     this.renderEmpty();
+     this.render();
+diff --git a/ui/file_manager/file_manager/kibaos/ui/file_row.ts b/ui/file_manager/file_manager/kibaos/ui/file_row.ts
+index 5624683207a5..5ce7fcaf4a2d 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/file_row.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/file_row.ts
+@@ -14,6 +14,7 @@
+ import type {EntryDto, Metadata} from '../port/types.js';
+ import type {FileKind} from './format.js';
+ import {formatDate, formatSize, kindOf, labelForKind} from './format.js';
++import {drawPath, glyphElement} from './svg.js';
+ 
+ export interface RowModel {
+   readonly entry: EntryDto;
+@@ -53,12 +54,17 @@ export function createRow(): HTMLElement {
+   row.className = 'kibaos-row';
+   row.setAttribute('role', 'option');
+   row.tabIndex = -1;
+-  row.innerHTML = `
+-    <span class="kibaos-tile"><svg class="kibaos-glyph" viewBox="0 0 20 20" aria-hidden="true"><path/></svg></span>
+-    <span class="kibaos-name"></span>
+-    <span class="kibaos-size"></span>
+-    <span class="kibaos-type"></span>
+-    <span class="kibaos-date"></span>`;
++
++  const tile = document.createElement('span');
++  tile.className = 'kibaos-tile';
++  tile.appendChild(glyphElement('kibaos-glyph'));
++  row.appendChild(tile);
++
++  for (const field of ['name', 'size', 'type', 'date']) {
++    const cell = document.createElement('span');
++    cell.className = `kibaos-${field}`;
++    row.appendChild(cell);
++  }
+   return row;
+ }
+ 
+@@ -71,18 +77,8 @@ export function updateRow(row: HTMLElement, model: RowModel): void {
+   row.dataset['cut'] = String(cut);
+   row.setAttribute('aria-selected', String(selected));
+ 
+-  const path = row.querySelector('path')!;
+-  path.setAttribute('d', GLYPHS[kind]);
+-  if (STROKED.has(kind)) {
+-    path.setAttribute('fill', 'none');
+-    path.setAttribute('stroke', 'currentColor');
+-    path.setAttribute('stroke-width', '1.6');
+-    path.setAttribute('stroke-linejoin', 'round');
+-    path.setAttribute('stroke-linecap', 'round');
+-  } else {
+-    path.setAttribute('fill', 'currentColor');
+-    path.removeAttribute('stroke');
+-  }
++  drawPath(
++      row.querySelector('path')!, GLYPHS[kind], {stroked: STROKED.has(kind)});
+ 
+   row.querySelector('.kibaos-name')!.textContent = entry.name;
+   // A folder has no meaningful size of its own, and printing a dash for one is
+diff --git a/ui/file_manager/file_manager/kibaos/ui/path_bar.ts b/ui/file_manager/file_manager/kibaos/ui/path_bar.ts
+index eb3c6095e96e..eb2664c0eb62 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/path_bar.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/path_bar.ts
+@@ -11,6 +11,7 @@
+  */
+ import type {Trail, Visit} from './history.js';
+ import {History} from './history.js';
++import {glyph} from './svg.js';
+ 
+ export interface PathBarOptions {
+   readonly onGo?: (trail: Trail) => void;
+@@ -22,10 +23,11 @@ export interface PathBarOptions {
+   readonly siblings?: (level: number) => Promise<readonly Visit[]>;
+ }
+ 
+-const CHEVRON =
+-    '<svg class="kibaos-chevron-glyph" viewBox="0 0 20 20" aria-hidden="true">' +
+-    '<path d="M8 6l4 4-4 4" fill="none" stroke="currentColor" ' +
+-    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
++// A function rather than a constant: a node lives in one place, and a deep
++// path draws six of these.
++function chevron(): SVGElement {
++  return glyph('kibaos-chevron-glyph', 'M8 6l4 4-4 4', {stroked: true});
++}
+ 
+ export class PathBar {
+   private readonly nav: HTMLElement;
+@@ -98,7 +100,7 @@ export class PathBar {
+     // The name has to say which folder is about to be listed, because on a
+     // deep path there are five of these and they are otherwise identical.
+     button.setAttribute('aria-label', `What else is in ${at?.label ?? 'here'}`);
+-    button.innerHTML = CHEVRON;
++    button.appendChild(chevron());
+     item.appendChild(button);
+     return item;
+   }
+diff --git a/ui/file_manager/file_manager/kibaos/ui/places.ts b/ui/file_manager/file_manager/kibaos/ui/places.ts
+index bfe6b1b3599d..0e3823ed8a8b 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/places.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/places.ts
+@@ -30,6 +30,36 @@ export function placeKindFor(volume: Volume): PlaceKind {
+   return 'volume';
+ }
+ 
++/**
++ * Which places get a free space meter.
++ *
++ * On this hardware every user folder is exposed as its own volume backed by the
++ * same disk, so reading a capacity off each place puts fourteen identical
++ * "8.7 GB free of 28 GB" bars down the sidebar. Fourteen copies of one fact
++ * state it less clearly than one does, and the status bar is already saying it.
++ *
++ * So a meter has to earn its place by having something to be compared against.
++ * One device gets none. Two or more get exactly one each, on the first place
++ * that names them. Devices are told apart by the numbers they report, which is
++ * all the port offers and is enough: two disks reporting byte-identical size
++ * and free space are indistinguishable to a person looking at a sidebar too.
++ */
++function metered(volumes: readonly Volume[]): ReadonlySet<string> {
++  const firstOfDevice = new Map<string, string>();
++  for (const volume of volumes) {
++    const capacity = volume.capacity;
++    if (!capacity || capacity.total <= 0) {
++      continue;
++    }
++    const device = `${capacity.total}/${capacity.free}`;
++    if (!firstOfDevice.has(device)) {
++      firstOfDevice.set(device, volume.id);
++    }
++  }
++  return firstOfDevice.size > 1 ? new Set(firstOfDevice.values()) :
++                                  new Set<string>();
++}
++
+ export interface PlacesOptions {
+   /** Omitted or zero means the basket is not offered at all. */
+   readonly basketCount?: number;
+@@ -38,12 +68,18 @@ export interface PlacesOptions {
+ 
+ export function placesFor(
+     volumes: readonly Volume[], options: PlacesOptions = {}): Place[] {
+-  const places: Place[] = volumes.map(volume => ({
+-    key: volume.root,
+-    label: volume.label,
+-    kind: placeKindFor(volume),
+-    volume,
+-  }));
++  const meters = metered(volumes);
++  const places: Place[] = volumes.map(volume => {
++    const place: Place = {
++      key: volume.root,
++      label: volume.label,
++      kind: placeKindFor(volume),
++      volume,
++    };
++    return meters.has(volume.id) && volume.capacity ?
++        {...place, capacity: volume.capacity} :
++        place;
++  });
+   const {basketCount, basketKey} = options;
+   if (basketCount !== undefined && basketKey !== undefined) {
+     places.push({
+diff --git a/ui/file_manager/file_manager/kibaos/ui/shell.ts b/ui/file_manager/file_manager/kibaos/ui/shell.ts
+index c9a8b5130550..ffdbb39d7d6e 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/shell.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/shell.ts
+@@ -71,7 +71,6 @@ export class FilesShell {
+    * work done on behalf of a screen that no longer exists.
+    */
+   private generation = 0;
+-  private range: {first: number, count: number} = {first: 0, count: 0};
+ 
+   constructor(
+       container: HTMLElement,
+@@ -280,6 +279,10 @@ export class FilesShell {
+ 
+   private apply(state: SessionState): void {
+     this.entries = state.entries;
++    // Details for the new rows are not fetched here. setEntries reports its
++    // range unconditionally, precisely so a folder that changed under a window
++    // that has not scrolled still asks for what just arrived, and doing it
++    // again here only asks twice with a staler range. list_test pins that.
+     this.list.setEntries(state.entries);
+     this.refreshStatus();
+     if (state.error) {
+@@ -290,7 +293,6 @@ export class FilesShell {
+   }
+ 
+   private async fillMetadata(first: number, count: number): Promise<void> {
+-    this.range = {first, count};
+     const generation = this.generation;
+     const wanted = this.entries.slice(first, first + count)
+                        .filter(entry => !this.metadata.has(entry.key))
+diff --git a/ui/file_manager/file_manager/kibaos/ui/sidebar.ts b/ui/file_manager/file_manager/kibaos/ui/sidebar.ts
+index 1aff1aa6cf22..12f8819b2fb6 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/sidebar.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/sidebar.ts
+@@ -12,8 +12,9 @@
+  * reader will describe as nested. This is a flat set of destinations in
+  * labelled groups, so it says so.
+  */
+-import type {FileKey, Volume} from '../port/types.js';
++import type {FileKey, Volume, VolumePurpose} from '../port/types.js';
+ import {formatSize} from './format.js';
++import {glyph} from './svg.js';
+ 
+ export type PlaceKind =
+     'recent'|'starred'|'trash'|'basket'|'volume'|'network';
+@@ -23,6 +24,14 @@ export interface Place {
+   readonly label: string;
+   readonly kind: PlaceKind;
+   readonly volume?: Volume;
++  /**
++   * The free space meter to draw, when this place has earned one.
++   *
++   * Deliberately not `volume.capacity`. Every place on this machine has a
++   * capacity, and drawing all of them is what put fourteen identical bars down
++   * the sidebar. `placesFor` decides which ones are worth showing.
++   */
++  readonly capacity?: {readonly total: number, readonly free: number};
+   /** Shown as a count beside the label, for the basket. */
+   readonly badge?: number;
+ }
+@@ -31,7 +40,16 @@ export interface SidebarOptions {
+   readonly onSelect?: (place: Place) => void;
+ }
+ 
+-const GLYPHS: Record<PlaceKind|'removable'|'system', string> = {
++const GLYPHS: Record<PlaceKind|'removable'|'system'|VolumePurpose, string> = {
++  // Drawn from the same family as the row glyphs in `file_row.ts`, so a
++  // Pictures place and a picture in the list read as the same idea.
++  home: 'M3.2 9.6 10 3.8l6.8 5.8M5.6 8.4V16.2h8.8V8.4M8.4 16.2v-4.1h3.2v4.1',
++  desktop: 'M3.5 4.8h13v8.4h-13zM7.6 16.2h4.8M10 13.2v3',
++  documents: 'M6 3.4h5.2l3.6 3.6v9.6H6zM11.2 3.4V7h3.6M8 10.5h5M8 13h5',
++  downloads: 'M10 3.8v7.8m0 0-3.2-3.2M10 11.6l3.2-3.2M4.6 15.8h10.8',
++  music: 'M7.4 13.1V4.6l7.2-1.4v8.5M7.4 13.1a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0zM14.6 11.7a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 0 1 3.6 0z',
++  pictures: 'M3.5 5.5h13v9h-13zM5.5 12.5l3-3.5 2.5 3 2-2.5 2.5 3M7.4 8.6a1 1 0 1 1-2 0 1 1 0 0 1 2 0z',
++  videos: 'M3.5 5.5h9v9h-9zM12.5 10l4-2.5v5zM6.5 5.5v9M9.5 5.5v9',
+   recent: 'M10 5v5l3.5 2M10 3.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z',
+   starred: 'M10 3.5l2 4.2 4.5.6-3.3 3.2.8 4.5-4-2.2-4 2.2.8-4.5L3.5 8.3l4.5-.6z',
+   trash: 'M4.5 6h11M8 6V4.5h4V6M6 6l.7 9.5h6.6L14 6M8.5 8.5v5M11.5 8.5v5',
+@@ -42,20 +60,27 @@ const GLYPHS: Record<PlaceKind|'removable'|'system', string> = {
+   removable: 'M7 3.5h6v5h2v8H5v-8h2zM9 5v2M11 5v2',
+ };
+ 
++// Everything except the two pictorial fills. A frame with something inside it,
++// filled with a single non zero winding path, floods to a solid block, which is
++// the same trap `file_row.ts` records.
+ const STROKED = new Set<string>(['recent', 'trash', 'volume', 'system',
+-                                 'removable', 'basket', 'network']);
++                                 'removable', 'basket', 'network', 'home',
++                                 'desktop', 'documents', 'downloads', 'music',
++                                 'pictures', 'videos']);
+ 
+-function glyph(kind: string): string {
+-  const path = GLYPHS[kind as keyof typeof GLYPHS] ?? GLYPHS.volume;
+-  const stroke = STROKED.has(kind) ?
+-      'fill="none" stroke="currentColor" stroke-width="1.5" ' +
+-          'stroke-linejoin="round" stroke-linecap="round"' :
+-      'fill="currentColor"';
+-  return `<svg class="kibaos-place-glyph" viewBox="0 0 20 20" aria-hidden="true">` +
+-      `<path d="${path}" ${stroke}/></svg>`;
++function placeGlyph(kind: string): SVGElement {
++  return glyph(
++      'kibaos-place-glyph', GLYPHS[kind as keyof typeof GLYPHS] ?? GLYPHS.volume,
++      {stroked: STROKED.has(kind), width: 1.5});
+ }
+ 
+ function volumeGlyphKind(volume: Volume): string {
++  // What a place is for beats what it is made of. Every user folder on this
++  // machine is a local disk, and drawing the disk on all of them is what made
++  // the sidebar a column of fourteen identical laptops.
++  if (volume.purpose) {
++    return volume.purpose;
++  }
+   if (volume.removable) {
+     return 'removable';
+   }
+@@ -172,7 +197,7 @@ export class Sidebar {
+     label.className = 'kibaos-place-label';
+     label.textContent = place.label;
+ 
+-    button.innerHTML = glyph(kind);
++    button.appendChild(placeGlyph(kind));
+     button.appendChild(label);
+ 
+     if (place.badge !== undefined && place.badge > 0) {
+@@ -189,7 +214,7 @@ export class Sidebar {
+ 
+     item.appendChild(button);
+ 
+-    const capacity = place.volume?.capacity;
++    const {capacity} = place;
+     if (capacity && capacity.total > 0) {
+       // Exact free space in words, with the bar as the supplement. A ring or a
+       // bar on its own is poor for comparison and worse for anybody who cannot
+diff --git a/ui/file_manager/file_manager/kibaos/ui/svg.ts b/ui/file_manager/file_manager/kibaos/ui/svg.ts
+new file mode 100644
+index 000000000000..c5d41fd165e7
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/ui/svg.ts
+@@ -0,0 +1,73 @@
++/**
++ * Glyphs as nodes rather than as markup.
++ *
++ * Every glyph in this app used to be a template string assigned to innerHTML.
++ * That works in a plain page and throws on chrome://file-manager, which
++ * requires Trusted Types and refuses a bare string at that sink. Nothing local
++ * caught it, because the harness pages carried no such policy. They do now, so
++ * this particular way of being wrong cannot come back quietly.
++ *
++ * Building the nodes is the right way round for SVG regardless.
++ * `createElement('svg')` makes an HTMLUnknownElement that renders nothing,
++ * which is why the string form was reached for in the first place.
++ */
++
++const SVG_NS = 'http://www.w3.org/2000/svg';
++
++/** How a glyph's path is painted. */
++export interface Stroke {
++  /** Drawn as an outline rather than filled. */
++  readonly stroked: boolean;
++  /** Line width when stroked. Ignored when filled. */
++  readonly width?: number;
++}
++
++/**
++ * An `<svg>` holding one empty `<path>`.
++ *
++ * Empty because a recycled row keeps the element it already has and only ever
++ * changes the path's attributes. See `file_row.ts` for why that split matters.
++ */
++export function glyphElement(className: string): SVGElement {
++  const svg = document.createElementNS(SVG_NS, 'svg');
++  // setAttribute rather than `.className`: on an SVGElement that property is a
++  // read only SVGAnimatedString, and assigning a string to it does nothing at
++  // all rather than failing.
++  svg.setAttribute('class', className);
++  svg.setAttribute('viewBox', '0 0 20 20');
++  svg.setAttribute('aria-hidden', 'true');
++  svg.appendChild(document.createElementNS(SVG_NS, 'path'));
++  return svg;
++}
++
++/**
++ * Points an existing path at a shape.
++ *
++ * Every attribute the other branch sets is cleared here, because a recycled row
++ * that goes from a stroked glyph to a filled one keeps whatever the last one
++ * left behind.
++ */
++export function drawPath(path: Element, d: string, stroke: Stroke): void {
++  path.setAttribute('d', d);
++  if (stroke.stroked) {
++    path.setAttribute('fill', 'none');
++    path.setAttribute('stroke', 'currentColor');
++    path.setAttribute('stroke-width', String(stroke.width ?? 1.6));
++    path.setAttribute('stroke-linejoin', 'round');
++    path.setAttribute('stroke-linecap', 'round');
++  } else {
++    path.setAttribute('fill', 'currentColor');
++    path.removeAttribute('stroke');
++    path.removeAttribute('stroke-width');
++    path.removeAttribute('stroke-linejoin');
++    path.removeAttribute('stroke-linecap');
++  }
++}
++
++/** A finished glyph, for the places that draw one and never change it. */
++export function glyph(
++    className: string, d: string, stroke: Stroke): SVGElement {
++  const svg = glyphElement(className);
++  drawPath(svg.firstElementChild!, d, stroke);
++  return svg;
++}
+diff --git a/ui/file_manager/file_manager/kibaos/ui/tokens.css b/ui/file_manager/file_manager/kibaos/ui/tokens.css
+index 0a5ae6292f34..fd03e4bf2e14 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/tokens.css
++++ b/ui/file_manager/file_manager/kibaos/ui/tokens.css
+@@ -364,6 +364,21 @@
+ .kibaos-place-bar-fill[data-level="full"] { background: var(--kibaos-danger); }
+ 
+ 
++/* Where the app mounts us.
++
++   Opaque and over everything, because the stock window is still underneath and
++   still running: it owns the dialogs, the progress panel and the menus we have
++   not replaced. Drawing over it rather than deleting it is what makes this
++   reversible, and `mountKibaosShell` removes this element if the shell fails
++   to start, which puts the old window straight back. */
++#kibaos-shell {
++  background: var(--kibaos-ground);
++  inset: 0;
++  overflow: hidden;
++  position: fixed;
++  z-index: 2147483647;
++}
++
+ /* The window. Places on the left, what is in them on the right, each on its
+    own panel so the ground shows between them: the greeter does the same thing,
+    and it is what stops a file manager reading as one undifferentiated grid. */
+diff --git a/ui/file_manager/file_manager/kibaos/ui/tokens_css.ts b/ui/file_manager/file_manager/kibaos/ui/tokens_css.ts
+new file mode 100644
+index 000000000000..3a5ca568b384
+--- /dev/null
++++ b/ui/file_manager/file_manager/kibaos/ui/tokens_css.ts
+@@ -0,0 +1,11 @@
++/**
++ * The stylesheet, as a string the bundle can carry.
++ *
++ * Generated by `tools/gen_tokens.py` from `ui/tokens.css`, which is the source
++ * of truth. Do not edit this file; edit the stylesheet and run the generator,
++ * or just run `tests/run.sh`, which checks that this is current.
++ *
++ * It exists because a new pak resource needs a new id, a new id is compiled
++ * into chrome, and that is a full link. See the generator for the details.
++ */
++export const TOKENS_CSS = "/**\n * The KibaOS surface vocabulary.\n *\n * The accent is not a new decision. The greeter already defines it, in GTK\n * theme variables rather than in its stylesheet: accent_bg_color is #6d4ea1 in\n * theme.css and #d1bcff in theme-dark.css, and the installer's token table\n * carries the same pair. Counting literal hex in greeter.css and concluding the\n * greeter was achromatic was a mistake; it uses @accent_color for focus rings\n * and the active pod.\n *\n * Surfaces are taken from the greeter's own values: translucent grounds, white\n * hairlines, white overlay interactive states, and deep soft shadows.\n */\n\n:root {\n  --kibaos-accent: #6d4ea1;\n  --kibaos-on-accent: #ffffff;\n\n  --kibaos-ground: #f4f2f9;\n  --kibaos-panel: #ffffff;\n  --kibaos-line: #e6e2f0;\n  --kibaos-ink: #1c1a24;\n  --kibaos-quiet: #6b6580;\n\n  --kibaos-row-hover: rgba(0, 0, 0, .04);\n  --kibaos-row-selected: rgba(109, 78, 161, .12);\n  --kibaos-tile: #f0edf7;\n  --kibaos-tile-dir: #e4dbf8;\n  --kibaos-tile-selected: #dbcdf6;\n  --kibaos-glyph: #6f6885;\n  --kibaos-tag-bg: #f7f5fc;\n  --kibaos-warn: #a1651a;\n  --kibaos-danger: #b3261e;\n\n  --kibaos-radius-row: 11px;\n  --kibaos-radius-tile: 11px;\n  --kibaos-radius-panel: 16px;\n  --kibaos-radius-pill: 999px;\n\n  --kibaos-row-height: 40px;\n  --kibaos-tile-size: 32px;\n}\n\n@media (prefers-color-scheme: dark) {\n  :root:not([data-kibaos-theme=\"light\"]) {\n    --kibaos-accent: #d1bcff;\n    --kibaos-on-accent: #3f1d6c;\n\n    --kibaos-ground: #100f16;\n    --kibaos-panel: #191823;\n    --kibaos-line: #262433;\n    --kibaos-ink: #efecf8;\n    --kibaos-quiet: #948ea8;\n\n    --kibaos-row-hover: rgba(255, 255, 255, .06);\n    --kibaos-row-selected: rgba(209, 188, 255, .16);\n    --kibaos-tile: #23212f;\n    --kibaos-tile-dir: #372c57;\n    --kibaos-tile-selected: #4a3b74;\n    --kibaos-glyph: #a79dc4;\n    --kibaos-tag-bg: #211f2c;\n  --kibaos-warn: #e6b062;\n  --kibaos-danger: #f2b8b5;\n  }\n}\n\n/* Repeated rather than shared, because a media query and an attribute cannot\n   select the same block. The attribute form is what lets both themes be\n   rendered and diffed without emulating the reader's system setting. */\n:root[data-kibaos-theme=\"dark\"] {\n    --kibaos-accent: #d1bcff;\n    --kibaos-on-accent: #3f1d6c;\n\n    --kibaos-ground: #100f16;\n    --kibaos-panel: #191823;\n    --kibaos-line: #262433;\n    --kibaos-ink: #efecf8;\n    --kibaos-quiet: #948ea8;\n\n    --kibaos-row-hover: rgba(255, 255, 255, .06);\n    --kibaos-row-selected: rgba(209, 188, 255, .16);\n    --kibaos-tile: #23212f;\n    --kibaos-tile-dir: #372c57;\n    --kibaos-tile-selected: #4a3b74;\n    --kibaos-glyph: #a79dc4;\n    --kibaos-tag-bg: #211f2c;\n  --kibaos-warn: #e6b062;\n  --kibaos-danger: #f2b8b5;\n}\n\n/* Density is fixed per mode, never measured. Dynamic row heights across a\n   hundred thousand entries make the scrollbar thumb jitter and drop frames. */\n:root[data-kibaos-density=\"compact\"] { --kibaos-row-height: 32px; --kibaos-tile-size: 26px; }\n:root[data-kibaos-density=\"relaxed\"] { --kibaos-row-height: 52px; --kibaos-tile-size: 38px; }\n\n.kibaos-row {\n  align-items: center;\n  block-size: var(--kibaos-row-height);\n  border-radius: var(--kibaos-radius-row);\n  box-sizing: border-box;\n  color: var(--kibaos-ink);\n  display: grid;\n  gap: 12px;\n  grid-template-columns: var(--kibaos-tile-size) 1fr 84px 96px 132px;\n  margin-inline: 8px;\n  padding-inline: 8px;\n  position: relative;\n  user-select: none;\n}\n\n.kibaos-row:hover { background: var(--kibaos-row-hover); }\n\n/* Selection and focus differ by shape as well as colour, because colour alone\n   is not a distinction everyone can see. */\n.kibaos-row[aria-selected=\"true\"] {\n  background: var(--kibaos-row-selected);\n  box-shadow: inset 3px 0 0 0 var(--kibaos-accent);\n}\n.kibaos-row:focus-visible {\n  outline: 2px solid var(--kibaos-accent);\n  outline-offset: -2px;\n}\n\n/* A cut entry is dashed as well as dimmed, so it reads as pending rather than\n   as disabled. */\n.kibaos-row[data-cut=\"true\"] { opacity: .55; }\n.kibaos-row[data-cut=\"true\"] .kibaos-tile {\n  border: 1px dashed var(--kibaos-quiet);\n}\n\n.kibaos-tile {\n  align-items: center;\n  background: var(--kibaos-tile);\n  block-size: var(--kibaos-tile-size);\n  border-radius: var(--kibaos-radius-tile);\n  box-sizing: border-box;\n  display: flex;\n  inline-size: var(--kibaos-tile-size);\n  justify-content: center;\n}\n.kibaos-row[data-directory=\"true\"] .kibaos-tile { background: var(--kibaos-tile-dir); }\n.kibaos-row[aria-selected=\"true\"] .kibaos-tile { background: var(--kibaos-tile-selected); }\n\n.kibaos-glyph {\n  block-size: 18px;\n  color: var(--kibaos-glyph);\n  inline-size: 18px;\n}\n.kibaos-row[data-directory=\"true\"] .kibaos-glyph { color: var(--kibaos-accent); }\n\n.kibaos-name {\n  font-size: 13px;\n  font-weight: 550;\n  letter-spacing: -.005em;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.kibaos-size, .kibaos-date {\n  color: var(--kibaos-quiet);\n  font-size: 12px;\n  font-variant-numeric: tabular-nums;\n}\n\n/* A quiet proportional bar behind the size, so the large item in a folder of\n   five hundred is visible without reading a digit. */\n.kibaos-size { position: relative; }\n.kibaos-size::before {\n  background: currentColor;\n  block-size: 100%;\n  content: '';\n  inset-block-start: 0;\n  inset-inline-start: 0;\n  inline-size: var(--kibaos-share, 0%);\n  opacity: .10;\n  position: absolute;\n  border-radius: 3px;\n}\n\n.kibaos-type {\n  background: var(--kibaos-tag-bg);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-pill);\n  color: var(--kibaos-quiet);\n  font-size: 10.5px;\n  font-weight: 600;\n  justify-self: start;\n  letter-spacing: .04em;\n  line-height: 15px;\n  padding: 2px 9px;\n}\n\n/* The list owns its scrolling. The spacer carries the full extent so the\n   scrollbar is honest about how much there is, and the surface holding the\n   recycled rows is moved rather than repositioned per row. */\n.kibaos-list {\n  block-size: 100%;\n  overflow-y: auto;\n  overflow-x: hidden;\n  position: relative;\n}\n.kibaos-list:focus-visible { outline: none; }\n.kibaos-list-spacer { position: relative; }\n.kibaos-list-surface {\n  inset-block-start: 0;\n  inset-inline: 0;\n  position: absolute;\n  will-change: transform;\n}\n\n/* An empty view should read as prepared rather than abandoned, so it is\n   centred and quiet rather than a message pinned to the top left. */\n/* An author `display` beats the user agent's `[hidden] { display: none }`\n   regardless of specificity, because author styles win on origin. So setting\n   .hidden on this element did nothing at all and every folder with files in it\n   also announced that it was empty. */\n.kibaos-empty[hidden] { display: none; }\n.kibaos-empty {\n  align-items: center;\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n  justify-content: center;\n  min-block-size: 220px;\n  padding: 32px 24px;\n  text-align: center;\n}\n.kibaos-empty-title {\n  color: var(--kibaos-ink);\n  font-size: 14px;\n  font-weight: 600;\n  margin: 0;\n}\n.kibaos-empty-detail {\n  color: var(--kibaos-quiet);\n  font-size: 13px;\n  margin: 0;\n  /* Wide enough that a two line detail breaks after a clause rather than\n     stranding \"files.\" on its own. */\n  max-inline-size: 48ch;\n}\n\n\n/* The sidebar: where you can go, as opposed to what is in front of you.\n\n   Group headings are quiet and small rather than uppercase and tracked out.\n   Small caps at this size is a legibility cost paid for a filing cabinet\n   aesthetic nobody asked for, and these are three or four words that want to\n   be skimmed past on the way to the thing underneath. */\n.kibaos-sidebar {\n  box-sizing: border-box;\n  display: flex;\n  flex-direction: column;\n  gap: 18px;\n  inline-size: 232px;\n  overflow-y: auto;\n  padding: 12px 10px;\n}\n.kibaos-place-heading {\n  color: var(--kibaos-quiet);\n  font-size: 11px;\n  font-weight: 600;\n  letter-spacing: .01em;\n  margin: 0 0 4px;\n  padding-inline: 10px;\n}\n.kibaos-place-list {\n  display: flex;\n  flex-direction: column;\n  gap: 1px;\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n.kibaos-place {\n  align-items: center;\n  background: none;\n  border: 0;\n  border-radius: var(--kibaos-radius-row);\n  color: var(--kibaos-ink);\n  cursor: default;\n  display: flex;\n  font: inherit;\n  gap: 10px;\n  inline-size: 100%;\n  padding: 7px 10px;\n  position: relative;\n  text-align: start;\n}\n.kibaos-place:hover { background: var(--kibaos-row-hover); }\n.kibaos-place:focus-visible {\n  outline: 2px solid var(--kibaos-accent);\n  outline-offset: -2px;\n}\n.kibaos-place[aria-current=\"page\"] {\n  background: var(--kibaos-row-selected);\n  color: var(--kibaos-accent);\n  font-weight: 600;\n}\n/* A rail rather than a full bleed fill. The fill alone reads as a hover that\n   got stuck; the rail is what says this is where you are. */\n.kibaos-place[aria-current=\"page\"]::before {\n  background: var(--kibaos-accent);\n  block-size: 16px;\n  border-radius: var(--kibaos-radius-pill);\n  content: \"\";\n  inline-size: 3px;\n  inset-block-start: 50%;\n  inset-inline-start: 1px;\n  position: absolute;\n  translate: 0 -50%;\n}\n.kibaos-place-glyph {\n  block-size: 18px;\n  color: var(--kibaos-glyph);\n  flex: none;\n  inline-size: 18px;\n}\n.kibaos-place[aria-current=\"page\"] .kibaos-place-glyph { color: inherit; }\n.kibaos-place-label {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.kibaos-place-badge {\n  background: var(--kibaos-tag-bg);\n  border-radius: var(--kibaos-radius-pill);\n  color: var(--kibaos-quiet);\n  font-size: 11px;\n  font-variant-numeric: tabular-nums;\n  margin-inline-start: auto;\n  padding: 1px 7px;\n}\n.kibaos-place[aria-current=\"page\"] .kibaos-place-badge {\n  background: var(--kibaos-panel);\n  color: var(--kibaos-accent);\n}\n\n/* Capacity sits under the drive it belongs to, indented to the label rather\n   than the glyph, so the eye reads it as a note about that row. */\n.kibaos-place-capacity {\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n  padding: 1px 10px 6px 38px;\n}\n.kibaos-place-free {\n  color: var(--kibaos-quiet);\n  font-size: 11px;\n}\n.kibaos-place-bar {\n  background: var(--kibaos-line);\n  block-size: 3px;\n  border-radius: var(--kibaos-radius-pill);\n  overflow: hidden;\n}\n.kibaos-place-bar-fill {\n  background: var(--kibaos-accent);\n  block-size: 100%;\n  border-radius: inherit;\n}\n.kibaos-place-bar-fill[data-level=\"high\"] { background: var(--kibaos-warn); }\n.kibaos-place-bar-fill[data-level=\"full\"] { background: var(--kibaos-danger); }\n\n\n/* Where the app mounts us.\n\n   Opaque and over everything, because the stock window is still underneath and\n   still running: it owns the dialogs, the progress panel and the menus we have\n   not replaced. Drawing over it rather than deleting it is what makes this\n   reversible, and `mountKibaosShell` removes this element if the shell fails\n   to start, which puts the old window straight back. */\n#kibaos-shell {\n  background: var(--kibaos-ground);\n  inset: 0;\n  overflow: hidden;\n  position: fixed;\n  z-index: 2147483647;\n}\n\n/* The window. Places on the left, what is in them on the right, each on its\n   own panel so the ground shows between them: the greeter does the same thing,\n   and it is what stops a file manager reading as one undifferentiated grid. */\n.kibaos-shell {\n  background: var(--kibaos-ground);\n  block-size: 100%;\n  box-sizing: border-box;\n  display: flex;\n  gap: 8px;\n  padding: 8px;\n}\n.kibaos-shell-aside {\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-panel);\n  display: flex;\n  flex: none;\n  overflow: hidden;\n}\n.kibaos-shell-main {\n  display: flex;\n  flex: 1;\n  flex-direction: column;\n  gap: 8px;\n  /* Without this a long file name makes the whole window wider instead of\n     being truncated, and the sidebar gets pushed off the left edge. */\n  min-inline-size: 0;\n}\n.kibaos-shell-list {\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-panel);\n  flex: 1;\n  min-block-size: 0;\n  overflow: hidden;\n  padding: 4px 0;\n}\n.kibaos-shell-notice {\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-panel);\n  color: var(--kibaos-quiet);\n  font-size: 13px;\n  margin: 0;\n  padding: 11px 15px;\n}\n\n\n/* The toolbar. Back, forward, up, then where you are.\n\n   The buttons are disabled rather than removed when there is nowhere to go: a\n   control that appears and disappears shifts everything beside it, and the one\n   thing you need from back and forward is that they are always in the same\n   place. */\n.kibaos-toolbar {\n  align-items: center;\n  /* The containing block for a sibling popover, which cannot live inside the\n     path bar because that clips. */\n  position: relative;\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-panel);\n  display: flex;\n  flex: none;\n  gap: 8px;\n  min-block-size: 44px;\n  padding: 5px 8px;\n}\n.kibaos-tool-group {\n  display: flex;\n  flex: none;\n  gap: 2px;\n}\n.kibaos-tool {\n  align-items: center;\n  background: none;\n  border: 0;\n  border-radius: var(--kibaos-radius-tile);\n  block-size: 30px;\n  color: var(--kibaos-glyph);\n  cursor: default;\n  display: flex;\n  inline-size: 30px;\n  justify-content: center;\n  padding: 0;\n}\n.kibaos-tool:hover:not(:disabled) {\n  background: var(--kibaos-row-hover);\n  color: var(--kibaos-ink);\n}\n.kibaos-tool:focus-visible {\n  outline: 2px solid var(--kibaos-accent);\n  outline-offset: -2px;\n}\n/* Not display:none and not 0.3 either. A disabled control still has to read as\n   a control, or the row looks like it lost something. */\n.kibaos-tool:disabled { opacity: .38; }\n.kibaos-tool-glyph { block-size: 18px; inline-size: 18px; }\n\n.kibaos-path {\n  flex: 1;\n  min-inline-size: 0;\n  overflow: hidden;\n}\n.kibaos-path-list {\n  align-items: center;\n  display: flex;\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n.kibaos-path-list > li { display: flex; position: relative; }\n.kibaos-crumb {\n  background: none;\n  border: 0;\n  border-radius: var(--kibaos-radius-tile);\n  color: var(--kibaos-quiet);\n  cursor: default;\n  font: inherit;\n  max-inline-size: 22ch;\n  overflow: hidden;\n  padding: 5px 8px;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.kibaos-crumb:hover { background: var(--kibaos-row-hover); }\n.kibaos-crumb:focus-visible,\n.kibaos-chevron:focus-visible,\n.kibaos-path-option:focus-visible {\n  outline: 2px solid var(--kibaos-accent);\n  outline-offset: -2px;\n}\n/* Where you are is the one crumb that is not a link to somewhere else, so it\n   is the one that reads as text rather than as an action. */\n.kibaos-crumb[aria-current=\"page\"] {\n  color: var(--kibaos-ink);\n  font-weight: 600;\n}\n.kibaos-chevron {\n  align-items: center;\n  background: none;\n  border: 0;\n  border-radius: var(--kibaos-radius-tile);\n  block-size: 24px;\n  color: var(--kibaos-glyph);\n  cursor: default;\n  display: flex;\n  inline-size: 20px;\n  justify-content: center;\n  opacity: .6;\n  padding: 0;\n}\n.kibaos-chevron:hover,\n.kibaos-chevron[aria-expanded=\"true\"] {\n  background: var(--kibaos-row-hover);\n  color: var(--kibaos-ink);\n  opacity: 1;\n}\n.kibaos-chevron-glyph { block-size: 16px; inline-size: 16px; }\n\n.kibaos-path-popover {\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-tile);\n  box-shadow: 0 12px 32px rgba(0, 0, 0, .22), 0 2px 6px rgba(0, 0, 0, .12);\n  display: flex;\n  flex-direction: column;\n  max-block-size: 320px;\n  min-inline-size: 200px;\n  overflow-y: auto;\n  padding: 5px;\n  position: absolute;\n  z-index: 20;\n}\n.kibaos-path-option {\n  background: none;\n  border: 0;\n  border-radius: var(--kibaos-radius-tile);\n  color: var(--kibaos-ink);\n  cursor: default;\n  font: inherit;\n  overflow: hidden;\n  padding: 7px 10px;\n  text-align: start;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.kibaos-path-option:hover { background: var(--kibaos-row-hover); }\n.kibaos-path-popover-empty {\n  color: var(--kibaos-quiet);\n  margin: 0;\n  padding: 8px 10px;\n}\n\n\n/* The status bar. What is in front of you on the left, how much room is left\n   on the right, and nothing in the middle until there is an undo to put there. */\n.kibaos-status {\n  align-items: center;\n  background: var(--kibaos-panel);\n  border: 1px solid var(--kibaos-line);\n  border-radius: var(--kibaos-radius-panel);\n  color: var(--kibaos-quiet);\n  display: flex;\n  flex: none;\n  font-size: 12px;\n  gap: 16px;\n  justify-content: space-between;\n  min-block-size: 34px;\n  padding: 6px 14px;\n}\n.kibaos-status-summary {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.kibaos-status-space {\n  align-items: center;\n  display: flex;\n  flex: none;\n  gap: 8px;\n}\n.kibaos-status-track {\n  background: var(--kibaos-line);\n  block-size: 3px;\n  border-radius: var(--kibaos-radius-pill);\n  inline-size: 72px;\n  overflow: hidden;\n}\n.kibaos-status-fill {\n  background: var(--kibaos-accent);\n  block-size: 100%;\n  border-radius: inherit;\n}\n.kibaos-status-fill[data-level=\"high\"] { background: var(--kibaos-warn); }\n.kibaos-status-fill[data-level=\"full\"] { background: var(--kibaos-danger); }\n";
+diff --git a/ui/file_manager/file_manager/kibaos/ui/toolbar.ts b/ui/file_manager/file_manager/kibaos/ui/toolbar.ts
+index 583993ab8b40..42db48b6183d 100644
+--- a/ui/file_manager/file_manager/kibaos/ui/toolbar.ts
++++ b/ui/file_manager/file_manager/kibaos/ui/toolbar.ts
+@@ -8,6 +8,7 @@
+ import type {Trail} from './history.js';
+ import type {PathBarOptions} from './path_bar.js';
+ import {PathBar} from './path_bar.js';
++import {glyph} from './svg.js';
+ 
+ const GLYPHS = {
+   back: 'M12.5 4.5 7 10l5.5 5.5',
+@@ -30,10 +31,8 @@ function button(kind: keyof typeof GLYPHS, label: string): HTMLButtonElement {
+   // not a name and a glyph on its own has none.
+   element.setAttribute('aria-label', label);
+   element.disabled = true;
+-  element.innerHTML =
+-      `<svg class="kibaos-tool-glyph" viewBox="0 0 20 20" aria-hidden="true">` +
+-      `<path d="${GLYPHS[kind]}" fill="none" stroke="currentColor" ` +
+-      `stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
++  element.appendChild(
++      glyph('kibaos-tool-glyph', GLYPHS[kind], {stroked: true}));
+   return element;
+ }
+ 
+diff --git a/ui/file_manager/file_manager/foreground/js/main.ts b/ui/file_manager/file_manager/foreground/js/main.ts
+index a93256608114..d1388ccdaded 100644
+--- a/ui/file_manager/file_manager/foreground/js/main.ts
++++ b/ui/file_manager/file_manager/foreground/js/main.ts
+@@ -13,7 +13,9 @@ import '/strings.m.js';
+ 
+ import {loadTimeData} from 'chrome://resources/ash/common/load_time_data.m.js';
+ 
++import {mountKibaosShell} from '../../kibaos/app/mount.js';
+ import {GlitchType, reportGlitch} from '../../common/js/glitch.js';
++import {DialogType} from '../../common/js/shared_types.js';
+ import {testSendMessage} from '../../common/js/util.js';
+ 
+ import {FileManager} from './file_manager.js';
+@@ -34,7 +36,27 @@ async function run() {
+ run().then(() => {
+   fileManager.initializeCore();
+ 
+-  fileManager.initializeUi(document.body).then(() => {
++  fileManager.initializeUi(document.body).then(async () => {
++    // KibaOS draws over the window the line above just built. The stock UI
++    // stays initialised underneath, because it still owns the dialogs, the
++    // progress panel and the menus that have no replacement yet, and
++    // mountKibaosShell takes its own element away again if the shell cannot
++    // start, which puts that window straight back on screen.
++    //
++    // Not over a file picker. A picker has Open and Cancel and a selection
++    // contract this shell does not implement, so drawing over one would leave
++    // every application on the machine unable to choose a file. The port has a
++    // dialogMode for this and nothing uses it yet.
++    if (fileManager.dialogType === DialogType.FULL_PAGE) {
++      await mountKibaosShell({
++        api: chrome.fileManagerPrivate,
++        runtime: chrome.runtime,
++        volumes: fileManager.volumeManager,
++        metadata: fileManager.metadataModel,
++        resolveUrl: (url, onSuccess, onError) =>
++            window.webkitResolveLocalFileSystemURL(url, onSuccess, onError),
++      });
++    }
+     testSendMessage('ready');
+   });
+ });
+diff --git a/ui/file_manager/file_names.gni b/ui/file_manager/file_names.gni
+index 33103db76c02..15f29551d2dc 100644
+--- a/ui/file_manager/file_names.gni
++++ b/ui/file_manager/file_names.gni
+@@ -34,6 +34,30 @@ foreach(_f, image_loader_ts) {
+ }
+ 
+ ts_files = [
++  # KibaOS Files: the port, its ChromeOS adapter, and the shell above
++  # it. The tests stay out of the shipping list on purpose.
++  "file_manager/kibaos/adapter/chromeos_backend.ts",
++  "file_manager/kibaos/app/mount.ts",
++  "file_manager/kibaos/adapter/chromeos_platform.ts",
++  "file_manager/kibaos/adapter/platform.ts",
++  "file_manager/kibaos/port/mock_backend.ts",
++  "file_manager/kibaos/port/port.ts",
++  "file_manager/kibaos/port/types.ts",
++  "file_manager/kibaos/session/navigation_session.ts",
++  "file_manager/kibaos/ui/copy.ts",
++  "file_manager/kibaos/ui/file_list.ts",
++  "file_manager/kibaos/ui/file_row.ts",
++  "file_manager/kibaos/ui/format.ts",
++  "file_manager/kibaos/ui/history.ts",
++  "file_manager/kibaos/ui/path_bar.ts",
++  "file_manager/kibaos/ui/places.ts",
++  "file_manager/kibaos/ui/shell.ts",
++  "file_manager/kibaos/ui/sidebar.ts",
++  "file_manager/kibaos/ui/status_bar.ts",
++  "file_manager/kibaos/ui/svg.ts",
++  "file_manager/kibaos/ui/tokens_css.ts",
++  "file_manager/kibaos/ui/toolbar.ts",
++
+   # Common:
+   "file_manager/common/js/api.ts",
+   "file_manager/common/js/array_data_model.ts",

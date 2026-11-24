@@ -1,0 +1,6 @@
+[D-BUS Service]
+Name=org.kibaos.HostBridge
+Exec=/usr/bin/kibaos-host-bridge
+User=root
+SystemdService=kibaos-host-bridge.service
+

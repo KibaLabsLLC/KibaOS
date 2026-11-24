@@ -1,0 +1,60 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-kai
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Kiba voice assistant daemon for the KibaDE shell (port of kAI)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/KibaLabsLLC/KibaDE"
+# kAI is GPL-3.0-or-later; the daemon is derived from it.
+license=('GPL-3.0-or-later')
+depends=('qt6-base' 'alsa-utils' 'curl' 'systemd')
+makedepends=('cmake' 'ninja' 'dbus' 'glib2')
+# The engine (llama.cpp + whisper.cpp + Piper) is built by kAI's own recipe,
+# not here: its CMake fetches sources at build time, which a clean chroot
+# build forbids. The daemon runs `kibavoice` as a child process.
+depends+=('kibavoice')
+optdepends=('pipewire-pulse: microphone and speaker through PipeWire')
+source=(
+  'CMakeLists.txt'
+  'org.kibaos.Kiba1.xml'
+  'kibavoiced.cpp'
+  'audio.cpp'
+  'audio.h'
+  'backend.cpp'
+  'backend.h'
+  'wake.h'
+  'kibavoice.cpp'
+  'org.kibaos.Kiba.service'
+  'kibavoiced.service'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+prepare() {
+  mkdir -p src data
+  mv audio.cpp audio.h backend.cpp backend.h wake.h kibavoice.cpp kibavoiced.cpp src/
+  mv org.kibaos.Kiba.service kibavoiced.service data/
+}
+
+build() {
+  cmake -S . -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=None -DCMAKE_INSTALL_PREFIX=/usr \
+    -DKIBAVOICE_ENGINE=OFF
+  cmake --build build
+}
+
+check() {
+  # The daemon needs a session bus and a microphone to do anything; here we
+  # only prove it starts, takes the bus name and quits.
+  dbus-run-session -- bash -c '
+    ./build/kibavoiced & pid=$!; sleep 1
+    gdbus call --session --dest org.kibaos.Kiba --object-path /org/kibaos/Kiba \
+      --method org.freedesktop.DBus.Properties.Get org.kibaos.Kiba1 State >/dev/null
+    rc=$?; ./build/kibavoiced --quit; wait $pid; exit $rc'
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

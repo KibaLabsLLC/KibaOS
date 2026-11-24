@@ -1,0 +1,18 @@
+# Optional KibaOS Google API/OAuth configuration.
+#
+# The package includes an empty configuration by default. A private build can
+# supply a project configuration through KIBAOS_GOOGLE_API_CONFIG; values are
+# never stored in this repository.
+# A per-user file at ~/.config/kibaos/google-api.conf overrides the package
+# defaults, and environment variables take precedence over both files.
+#
+# Chromium/Ash reads these environment variables at startup.
+
+GOOGLE_API_KEY=
+GOOGLE_DEFAULT_CLIENT_ID=
+GOOGLE_DEFAULT_CLIENT_SECRET=
+
+# Optional main-client-specific overrides. Leave blank unless a Google Cloud
+# project explicitly issues separate main client credentials.
+GOOGLE_CLIENT_ID_MAIN=
+GOOGLE_CLIENT_SECRET_MAIN=

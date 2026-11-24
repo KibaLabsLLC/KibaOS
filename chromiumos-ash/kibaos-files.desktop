@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Files
+GenericName=File Manager
+Comment=Show folders in KibaOS Files
+Exec=kibaos-open-folder %U
+Icon=system-file-manager
+MimeType=inode/directory;
+NoDisplay=true
+Terminal=false
+StartupNotify=false

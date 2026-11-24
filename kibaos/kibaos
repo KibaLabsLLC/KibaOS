@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Start a full KibaOS desktop session.
+exec /usr/bin/kibaos-session "$@"

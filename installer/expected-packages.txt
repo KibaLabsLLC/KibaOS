@@ -1,0 +1,17 @@
+kibaos
+kibaos-account-helper
+kibaos-ai
+kibaos-android
+kibaos-boot
+kibaos-full
+kibaos-greeter
+kibaos-hardware
+kibaos-host-bridge
+kibaos-login
+kibaos-power
+kibaos-system-helper
+kibaos-wallpapers
+kibaos-webapp-shortcuts
+kibaosfs
+chromiumos-ash
+shill-nm-adapter

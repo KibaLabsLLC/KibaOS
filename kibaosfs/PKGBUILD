@@ -1,0 +1,39 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaosfs
+pkgver=0.1.0
+pkgrel=6
+pkgdesc="The file service behind the KibaOS Files app"
+arch=('x86_64')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('MIT')
+# libgit2 is linked, not vendored, and was missing here: the binary shipped
+# with a DT_NEEDED on libgit2.so.1.9 that nothing declared, so it installed
+# cleanly onto a machine without the library and died on every start with
+# "error while loading shared libraries". Pinned by soname rather than by
+# package name so the same mismatch fails at install time instead of at
+# runtime; a libgit2 that bumps its soname is a rebuild, and this is what
+# makes that a decision rather than a surprise.
+depends=('gcc-libs' 'glibc' 'xz' 'bzip2' 'zlib' 'libgit2.so=1.9-64')
+makedepends=('cargo' 'rust')
+# The vendored zstd is C, and makepkg's lto option compiles it to GCC bitcode
+# that the Rust link cannot read: every ZSTD_ symbol comes out undefined.
+options=('!lto')
+optdepends=(
+  'ffmpeg: video thumbnails, media details and the covers of sound files'
+  'poppler: PDF thumbnails and previews'
+  'gnupg: signature verification in Properties'
+  'polkit: Run as administrator, through pkexec'
+)
+# The source is the Cargo workspace beside this file, under workspace/. It is
+# not a tarball and it is not listed here: the tree is copied into
+# ${srcdir}/kibaosfs-src by ci/build-kibaosfs-package.sh, which is the only
+# supported way to drive this PKGBUILD. Everything the tree needs from
+# crates.io is fetched in prepare() and pinned by Cargo.lock; the one
+# dependency this project patches, sevenz-rust2, is vendored in the tree.
+source=(
+  'README.md'
+  'LICENSE'
+  'kibaosfs.service'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP')

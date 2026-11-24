@@ -1,0 +1,351 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034  # the KIBAOS_PROBE_* results are read by whichever
+#                              front end sources this file, which shellcheck
+#                              cannot see across the source boundary.
+# Renderer probe: decides whether a graphical installer can run, and explains
+# itself when it cannot.
+#
+# This is the black-screen guarantee, and it is worth being precise about what
+# it is guarding. The worst failure this product can have is not a failed
+# install; it is a successful one, followed by a permanently black screen on
+# first boot, on a machine whose disk has already been erased. The installer
+# runs on the same graphics stack the desktop will, so the conditions for that
+# failure are all observable here, while the disk is still intact and the user
+# can still walk away.
+#
+# So the probe has two jobs, and the second is the important one. It picks a
+# renderer, and it tells the user - before the erase gate, not after - that the
+# desktop they are about to install will not start on this machine.
+#
+# Every lookup root is injectable. A probe that can only be tested on hardware
+# that reproduces the failure is a probe that ships untested.
+
+KIBAOS_PROBE_DRI_DIR=${KIBAOS_PROBE_DRI_DIR:-/dev/dri}
+KIBAOS_PROBE_MEMINFO=${KIBAOS_PROBE_MEMINFO:-/proc/meminfo}
+KIBAOS_PROBE_DRM_DIR=${KIBAOS_PROBE_DRM_DIR:-/sys/class/drm}
+KIBAOS_PROBE_EFI_DIR=${KIBAOS_PROBE_EFI_DIR:-/sys/firmware/efi}
+KIBAOS_PROBE_EFIVARS_DIR=${KIBAOS_PROBE_EFIVARS_DIR:-/sys/firmware/efi/efivars}
+
+# Render nodes that exist but are not a GPU. vgem and vkms are kernel test and
+# virtual devices; both publish a renderD* node, so a check that stops at "a
+# render node exists" counts them as working graphics.
+KIBAOS_PROBE_EXCLUDED_DRIVERS=${KIBAOS_PROBE_EXCLUDED_DRIVERS:-vgem vkms}
+
+# The optional GL probe is bounded and may be absent. mesa-utils is on the
+# installation image, so eglinfo is normally there, but the probe must never be
+# the reason an install cannot start: a missing or slow eglinfo leaves the
+# result exactly as the sysfs evidence alone made it.
+KIBAOS_PROBE_GL_TIMEOUT=${KIBAOS_PROBE_GL_TIMEOUT:-5}
+
+# Archiso's copy-on-write layer is RAM-backed by default. Extracting the shell
+# packages into the live overlay and then running Chromium against them costs
+# well over a gigabyte on top of the running system, so a machine that would
+# technically start a compositor can still be one that should be given the text
+# installer instead. The floor is a conservative default, not a hard minimum: it
+# is the point below which the live graphical installer is at real risk of an out
+# of memory kill, and it says nothing about the installed system, which has the
+# whole disk and no RAM-backed overlay to contend with. It was 6 GiB, which sent
+# 8 GiB machines to the text installer once the live image had taken its share;
+# 4 GiB leaves those machines the graphical path, and KIBAOS_FORCE_GUI is there
+# for anyone who wants to try below it anyway.
+KIBAOS_PROBE_MIN_GUI_MIB=${KIBAOS_PROBE_MIN_GUI_MIB:-4096}
+
+# An explicit request to run the graphical installer past the soft checks: the
+# ones where the compositor can still start and the probe only declined out of
+# caution. It overrides low memory, software rendering, and the unproven VMware
+# display path. It deliberately cannot override a missing or virtual-only GPU:
+# forcing a compositor onto a machine with no render node only trades the text
+# installer for a black one, which is the single failure this file exists to
+# prevent.
+KIBAOS_FORCE_GUI=${KIBAOS_FORCE_GUI:-0}
+
+KIBAOS_PROBE_RENDERER=
+KIBAOS_PROBE_REASON=
+KIBAOS_PROBE_GRAPHICS=
+KIBAOS_PROBE_MEMORY=
+KIBAOS_PROBE_VIRT=
+KIBAOS_PROBE_MEM_MIB=0
+KIBAOS_PROBE_NODE=
+KIBAOS_PROBE_DRIVER=
+KIBAOS_PROBE_GL=
+
+# These two checks are deliberately kept with the renderer probe. They are
+# read-only platform facts that decide whether the installed boot path can be
+# trusted, not GTK policy. The installer engine repeats the destructive check
+# immediately before writing the disk; this is the earlier explanation that
+# lets a person fix firmware before reaching that gate.
+kibaos_probe_uefi() {
+  [[ -d $KIBAOS_PROBE_EFI_DIR ]]
+}
+
+kibaos_probe_secure_boot() {
+  local state secure_file byte
+  if command -v bootctl >/dev/null 2>&1; then
+    state=$(bootctl is-secure-boot 2>/dev/null || true)
+    case $state in
+      enabled|disabled) printf '%s\n' "$state"; return 0 ;;
+    esac
+  fi
+  [[ -d $KIBAOS_PROBE_EFI_DIR ]] || {
+    printf 'not-applicable\n'
+    return 0
+  }
+  for secure_file in "$KIBAOS_PROBE_EFIVARS_DIR"/SecureBoot-*; do
+    [[ -e $secure_file ]] || continue
+    byte=$(dd if="$secure_file" bs=1 skip=4 count=1 2>/dev/null |
+      od -An -t u1 2>/dev/null | awk 'NF {print $1; exit}')
+    case $byte in
+      1) printf 'enabled\n'; return 0 ;;
+      0) printf 'disabled\n'; return 0 ;;
+    esac
+  done
+  printf 'unknown\n'
+}
+
+_probe_mem_mib() {
+  local kib=0
+  [[ -r $KIBAOS_PROBE_MEMINFO ]] || { printf '0'; return 0; }
+  kib=$(awk '/^MemAvailable:/ { print $2; exit }' "$KIBAOS_PROBE_MEMINFO" 2>/dev/null || true)
+  [[ $kib =~ ^[0-9]+$ ]] || kib=0
+  printf '%s' "$(( kib / 1024 ))"
+}
+
+# The kernel driver behind a render node, from sysfs. Always available, needs
+# no tools, and is the difference between "something published a device file"
+# and "a graphics driver is loaded".
+_probe_driver_for() {
+  local node=$1 uevent driver=''
+  uevent="$KIBAOS_PROBE_DRM_DIR/${node##*/}/device/uevent"
+  if [[ -r $uevent ]]; then
+    driver=$(awk -F= '/^DRIVER=/ { print $2; exit }' "$uevent" 2>/dev/null || true)
+  fi
+  printf '%s' "$driver"
+}
+
+_probe_driver_excluded() {
+  local driver=$1 excluded
+  [[ -n $driver ]] || return 1
+  for excluded in $KIBAOS_PROBE_EXCLUDED_DRIVERS; do
+    [[ $driver != "$excluded" ]] || return 0
+  done
+  return 1
+}
+
+# Pick the first render node backed by a real driver.
+#   0  a usable node was found
+#   1  no render node at all
+#   2  render nodes exist, but every one of them is a virtual device
+_probe_select_node() {
+  local node driver excluded_driver=''
+  KIBAOS_PROBE_NODE=
+  KIBAOS_PROBE_DRIVER=
+  [[ -d $KIBAOS_PROBE_DRI_DIR ]] || return 1
+  for node in "$KIBAOS_PROBE_DRI_DIR"/renderD*; do
+    [[ -e $node ]] || continue
+    driver=$(_probe_driver_for "$node")
+    if _probe_driver_excluded "$driver"; then
+      [[ -n $excluded_driver ]] || excluded_driver=$driver
+      continue
+    fi
+    KIBAOS_PROBE_NODE=$node
+    KIBAOS_PROBE_DRIVER=$driver
+    return 0
+  done
+  if [[ -n $excluded_driver ]]; then
+    KIBAOS_PROBE_DRIVER=$excluded_driver
+    return 2
+  fi
+  return 1
+}
+
+# The renderer string, if a tool on the image will tell us. Optional and time
+# bounded; failure returns 1 and the caller carries on with sysfs evidence.
+_probe_gl_renderer() {
+  local output renderer
+  command -v eglinfo >/dev/null 2>&1 || return 1
+  command -v timeout >/dev/null 2>&1 || return 1
+  output=$(timeout "$KIBAOS_PROBE_GL_TIMEOUT" eglinfo -B 2>/dev/null || true)
+  [[ -n $output ]] || return 1
+  renderer=$(printf '%s\n' "$output" |
+    awk -F': *' 'tolower($0) ~ /renderer string/ { print $2; exit }')
+  [[ -n $renderer ]] || return 1
+  printf '%s' "$renderer"
+}
+
+# Mesa's software rasterisers. A desktop on one of these starts and draws, so
+# this is not a black screen; it is a machine that will be painful to use.
+_probe_is_software_renderer() {
+  case ${1,,} in
+    *llvmpipe*|*softpipe*|*swrast*|*"software rasterizer"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_probe_virt() {
+  local virt=none
+  if command -v systemd-detect-virt >/dev/null 2>&1; then
+    virt=$(systemd-detect-virt 2>/dev/null || printf 'none')
+  fi
+  [[ -n $virt ]] || virt=none
+  printf '%s' "$virt"
+}
+
+# Always returns 0. The engine and the front end both run under `set -e`, and a
+# probe that exits non-zero for the ordinary "no graphics here" case would
+# abort the installer rather than fall back to it, which is precisely the
+# failure mode this file exists to prevent.
+_kibaos_probe_renderer() {
+  local selection=0
+  KIBAOS_PROBE_VIRT=$(_probe_virt)
+  KIBAOS_PROBE_MEM_MIB=$(_probe_mem_mib)
+  # A field value, not a sentence. It used to carry the threshold with it, so
+  # a healthy machine showed its own requirement back to itself on a row that
+  # had already passed. When it has not passed, the advice says the number.
+  KIBAOS_PROBE_MEMORY="$(( KIBAOS_PROBE_MEM_MIB / 1024 )).$(( (KIBAOS_PROBE_MEM_MIB % 1024) * 10 / 1024 )) GB"
+
+  if [[ ${KIBAOS_FORCE_TUI:-0} == 1 ]]; then
+    KIBAOS_PROBE_RENDERER=tui
+    KIBAOS_PROBE_REASON=forced
+    KIBAOS_PROBE_GRAPHICS='not checked'
+    return 0
+  fi
+
+  if ! [[ -d $KIBAOS_PROBE_DRI_DIR ]]; then
+    KIBAOS_PROBE_RENDERER=tui
+    KIBAOS_PROBE_REASON=no-dri-dir
+    KIBAOS_PROBE_GRAPHICS='none found'
+    return 0
+  fi
+
+  selection=0
+  _probe_select_node || selection=$?
+  case $selection in
+    1)
+      KIBAOS_PROBE_RENDERER=tui
+      # A display device with no render node is what plain VGA in a virtual
+      # machine, or a GPU whose driver has no 3D, looks like. The installed
+      # desktop draws in software there (chromiumos-ash-session.sh), so it
+      # is slow, not black. Only a /dev/dri with no display device at all
+      # has nothing to put a picture on.
+      if compgen -G "$KIBAOS_PROBE_DRI_DIR/card*" >/dev/null; then
+        KIBAOS_PROBE_REASON=display-only
+        KIBAOS_PROBE_GRAPHICS='a display with no 3D acceleration'
+      else
+        KIBAOS_PROBE_REASON=no-render-node
+        KIBAOS_PROBE_GRAPHICS='none found'
+      fi
+      return 0
+      ;;
+    2)
+      KIBAOS_PROBE_RENDERER=tui
+      KIBAOS_PROBE_REASON=virtual-gpu-only
+      KIBAOS_PROBE_GRAPHICS="$KIBAOS_PROBE_DRIVER, a virtual device"
+      return 0
+      ;;
+  esac
+  KIBAOS_PROBE_GRAPHICS="$KIBAOS_PROBE_NODE${KIBAOS_PROBE_DRIVER:+, driver $KIBAOS_PROBE_DRIVER}"
+
+  # Optional, bounded, and never fatal. When it says nothing, the result stands
+  # on the sysfs evidence and the wording claims no more than that.
+  KIBAOS_PROBE_GL=$(_probe_gl_renderer || true)
+  if [[ -n $KIBAOS_PROBE_GL ]]; then
+    KIBAOS_PROBE_GRAPHICS="$KIBAOS_PROBE_GRAPHICS, renderer $KIBAOS_PROBE_GL"
+    if _probe_is_software_renderer "$KIBAOS_PROBE_GL" &&
+       [[ $KIBAOS_FORCE_GUI != 1 ]]; then
+      KIBAOS_PROBE_RENDERER=tui
+      KIBAOS_PROBE_REASON=software-rendering
+      return 0
+    fi
+  fi
+
+  if (( KIBAOS_PROBE_MEM_MIB < KIBAOS_PROBE_MIN_GUI_MIB )) &&
+     [[ $KIBAOS_FORCE_GUI != 1 ]]; then
+    KIBAOS_PROBE_RENDERER=tui
+    KIBAOS_PROBE_REASON=low-memory
+    return 0
+  fi
+
+  # VMware's vmwgfx render node is useful evidence that a driver loaded, but
+  # a headless VMware console can still reject the first DRM frame when Cage
+  # tries to take over the VT.  Treat that unproven display path as text mode
+  # by default so `kibaos-installer-start` never leaves a user staring at a
+  # blank compositor screen.  An explicit diagnostic override keeps the GUI
+  # testable on a VMware setup with a known-good visible 3D output.
+  if [[ $KIBAOS_PROBE_VIRT == vmware && $KIBAOS_PROBE_DRIVER == vmwgfx &&
+        -z ${WAYLAND_DISPLAY:-} && -z ${DISPLAY:-} &&
+        ${KIBAOS_ALLOW_VMWARE_GUI:-0} != 1 && $KIBAOS_FORCE_GUI != 1 ]]; then
+    KIBAOS_PROBE_RENDERER=tui
+    KIBAOS_PROBE_REASON=vmware-kms-uncertain
+    return 0
+  fi
+
+  KIBAOS_PROBE_RENDERER=gui
+  KIBAOS_PROBE_REASON=ok
+  return 0
+}
+
+# A seam for rendering tests that need a graphics field of a chosen length.
+# It replaces what is displayed and never what was decided, so a test cannot
+# use it to talk the probe into a verdict it did not reach.
+kibaos_probe_renderer() {
+  local status=0
+  _kibaos_probe_renderer "$@" || status=$?
+  [[ -z ${KIBAOS_PROBE_FORCE_GRAPHICS:-} ]] ||
+    KIBAOS_PROBE_GRAPHICS=$KIBAOS_PROBE_FORCE_GRAPHICS
+  return "$status"
+}
+
+# The sentence that turns a reason code into something a person can act on.
+# Bounded set: adding a reason means writing its advice, which is the point.
+kibaos_probe_advice() {
+  case ${1:-$KIBAOS_PROBE_REASON} in
+    ok)
+      # Narrow to what was actually established. A render node proves a driver
+      # published a device file, not that 3D acceleration works, and claiming
+      # the latter is how a user ends up trusting this screen and then meeting
+      # a black desktop.
+      if [[ -n $KIBAOS_PROBE_GL ]]; then
+        printf '%s' "Graphics are being drawn by $KIBAOS_PROBE_GL."
+      elif [[ -n $KIBAOS_PROBE_DRIVER ]]; then
+        printf '%s' "The $KIBAOS_PROBE_DRIVER driver is loaded. Whether 3D acceleration really works is only proven once the desktop starts."
+      else
+        printf '%s' 'A graphics device is here, but its driver could not be identified. Whether 3D acceleration really works is only proven once the desktop starts.'
+      fi
+      ;;
+    virtual-gpu-only)
+      printf '%s' "The only graphics device here is $KIBAOS_PROBE_DRIVER, and it has no display output. Without 3D acceleration from a real graphics adapter, the desktop will not start."
+      ;;
+    software-rendering|display-only)
+      printf '%s' "Graphics are being drawn by the processor rather than by a graphics card. The desktop will start, and it will be slow. On a virtual machine, turning on 3D acceleration usually fixes it."
+      ;;
+    forced)
+      printf '%s' 'The text installer does exactly the same thing as the graphical one.'
+      ;;
+    no-dri-dir|no-render-node)
+      if [[ $KIBAOS_PROBE_VIRT != none ]]; then
+        printf '%s' "KibaOS's desktop needs 3D acceleration, and this virtual machine ($KIBAOS_PROBE_VIRT) has none. Turn it on in the machine's display settings before installing."
+      else
+        printf '%s' "This computer has no working graphics driver, and KibaOS's desktop needs one. It will install, and it will start to a blank screen."
+      fi
+      ;;
+    low-memory)
+      printf '%s' "The graphical installer needs $(( KIBAOS_PROBE_MIN_GUI_MIB / 1024 )) GB of free memory, and there is less than that here. The installed system will have more to work with, so the desktop itself is not affected."
+      ;;
+    vmware-kms-uncertain)
+      printf '%s' 'VMware exposed a vmwgfx render node, but this live console could not prove that a visible DRM output is available. Staying in text mode avoids a blank compositor screen. Enable a visible VMware 3D display, or set KIBAOS_ALLOW_VMWARE_GUI=1 only for diagnostic testing.'
+      ;;
+    *)
+      printf '%s' 'Continuing in text mode.'
+      ;;
+  esac
+}
+
+# Whether the probe result predicts a black screen after installation, as
+# opposed to merely declining to run a graphical installer now. Low memory on
+# the live image says nothing about the installed system; a missing GPU does.
+kibaos_probe_predicts_black_screen() {
+  case ${1:-$KIBAOS_PROBE_REASON} in
+    no-dri-dir|no-render-node|virtual-gpu-only) return 0 ;;
+    *) return 1 ;;
+  esac
+}

@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ -r /run/kibaos/power-state.json ]]; then
+  cat /run/kibaos/power-state.json
+  exit 0
+fi
+
+if command -v gdbus >/dev/null 2>&1 && \
+   gdbus call --system --dest org.kibaos.Power \
+     --object-path /org/kibaos/Power --method org.kibaos.Power.GetState \
+     2>/dev/null | sed -E "s/^\('//; s/',\)$//; s/\\\\'/\x27/g"; then
+  exit 0
+else
+  echo "kibaos-power-status: power service state is unavailable" >&2
+  exit 1
+fi

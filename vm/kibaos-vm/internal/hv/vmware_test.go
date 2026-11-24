@@ -1,0 +1,124 @@
+package hv
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func TestVMXHasWhatKibaOSNeeds(t *testing.T) {
+	spec := Spec{Name: "kibaos", Dir: "/x", ISO: `C:\KibaOS\kibaos.iso`, AnswersISO: "answers.iso", MemoryMB: 6144, CPUs: 4, DiskGB: 40, Accel3D: true}
+	vmx := VMX(spec)
+	if !strings.HasPrefix(vmx, ".encoding = \"UTF-8\"\n") {
+		t.Fatal(".encoding is not the first line")
+	}
+	for _, want := range []string{
+		`firmware = "efi"`, `nvme0:0.fileName = "kibaos.vmdk"`, `memsize = "6144"`, `numvcpus = "4"`,
+		`mks.enable3d = "TRUE"`, `sata0:0.fileName = "C:\KibaOS\kibaos.iso"`, `sata0:1.fileName = "answers.iso"`,
+		`uefi.secureBoot.enabled = "FALSE"`,
+	} {
+		if !strings.Contains(vmx, want+"\n") {
+			t.Errorf("missing %s", want)
+		}
+	}
+	if strings.Contains(VMX(Spec{Name: "a", MemoryMB: 4096, CPUs: 2}), "sata0:1") {
+		t.Error("an answers drive with no answers disk")
+	}
+}
+
+func TestFinishDropsTheAnswersDisk(t *testing.T) {
+	dir := t.TempDir()
+	spec := Spec{Name: "kibaos", Dir: dir, ISO: "kibaos.iso", AnswersISO: filepath.Join(dir, "answers.iso"), MemoryMB: 4096, CPUs: 2}
+	os.WriteFile(spec.AnswersISO, []byte("x"), 0o600)
+	v := &VMware{goos: "linux"}
+	os.WriteFile(v.vmx(spec), []byte(VMX(spec)), 0o644)
+	if err := v.Finish(context.Background(), spec); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(v.vmx(spec))
+	if strings.Contains(string(b), "sata0:1") || !strings.Contains(string(b), "sata0:0.fileName") {
+		t.Fatalf("finish left the wrong drives:\n%s", b)
+	}
+	if _, err := os.Stat(spec.AnswersISO); !os.IsNotExist(err) {
+		t.Fatal("the answers disk was not deleted")
+	}
+	// Twice is harmless.
+	if err := v.Finish(context.Background(), spec); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAppleSiliconIsExplained(t *testing.T) {
+	v := &VMware{goos: "darwin", goarch: "arm64", lookup: func(string) string { return "/x" }}
+	d := v.Detect(context.Background())
+	if d.Available || !strings.Contains(d.Why, "Apple Silicon") {
+		t.Fatalf("%+v", d)
+	}
+	if v.Name() != "VMware Fusion" || v.hostType() != "fusion" {
+		t.Fatal("a Mac is not Fusion")
+	}
+}
+
+func TestMissingVMwareSaysWhereToGetIt(t *testing.T) {
+	v := &VMware{goos: "windows", goarch: "amd64", lookup: func(string) string { return "" }}
+	d := v.Detect(context.Background())
+	if d.Available || !strings.Contains(d.Why, "not installed") {
+		t.Fatalf("%+v", d)
+	}
+}
+
+func TestProductVersion(t *testing.T) {
+	for banner, want := range map[string]int{
+		"\nvmrun version 1.17.0.25388281\n": 17,
+		"vmrun version 1.16.2 build-1":      16,
+		"vmrun version 13.5.0":              13,
+	} {
+		if got, ok := productVersion(banner); !ok || got != want {
+			t.Errorf("%q: got %d want %d", banner, got, want)
+		}
+	}
+	if _, ok := productVersion("nothing"); ok {
+		t.Error("parsed a version out of nothing")
+	}
+}
+
+func TestListed(t *testing.T) {
+	list := "Total running VMs: 2\r\nD:\\VMs\\kibaos\\kibaos.vmx\r\n/home/a/KibaOS/x/x.vmx\n"
+	if !listed(list, `d:\vms\kibaos\kibaos.vmx`) || !listed(list, "/home/a/KibaOS/x/x.vmx") {
+		t.Fatal("a running VM was not found")
+	}
+	if listed(list, "/home/a/KibaOS/X/X.vmx") || listed(list, `D:\VMs\other\other.vmx`) {
+		t.Fatal("a VM that is not running was found")
+	}
+}
+
+// What VMware leaves behind on Windows: CRLF, literal backslashes.
+func TestFinishReadsAFileVMwareRewrote(t *testing.T) {
+	dir := t.TempDir()
+	spec := Spec{Name: "kibaos", Dir: dir}
+	answers := filepath.Join(dir, AnswersFile)
+	os.WriteFile(answers, []byte("x"), 0o600)
+	v := &VMware{goos: "windows"}
+	vmx := ".encoding = \"UTF-8\"\r\nsata0:1.present = \"TRUE\"\r\nsata0:1.fileName = \"" + answers + "\"\r\nnvme0:0.present = \"TRUE\"\r\n"
+	os.WriteFile(v.vmx(spec), []byte(vmx), 0o644)
+	if err := v.Finish(context.Background(), spec); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(v.vmx(spec))
+	if strings.Contains(string(b), "sata0:1") || !strings.Contains(string(b), "nvme0:0.present") {
+		t.Fatalf("finish left:\n%s", b)
+	}
+	if _, err := os.Stat(answers); !os.IsNotExist(err) {
+		t.Fatal("the answers disk was not deleted")
+	}
+}
+
+func TestVMXEscaping(t *testing.T) {
+	in := `D:\Virtual Machines\a|b "q" #1\x.iso`
+	line := "k = \"" + vmxEscape(in) + "\""
+	if strings.Contains(line, `\\`) || vmxValue(line) != in {
+		t.Fatalf("%s -> %q", line, vmxValue(line))
+	}
+}

@@ -1,0 +1,19 @@
+diff --git a/ui/file_manager/file_manager/main.html b/ui/file_manager/file_manager/main.html
+index cb6e864e7709..3071a3120fc7 100644
+--- a/ui/file_manager/file_manager/main.html
++++ b/ui/file_manager/file_manager/main.html
+@@ -181,12 +181,12 @@ found in the LICENSE file.
+         <cr-menu-item command="#copy" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#copy-name" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#copy-path" visibleif="full-page"></cr-menu-item>
+-        <cr-menu-item command="#duplicate" visibleif="full-page"></cr-menu-item>
+-        <cr-menu-item command="#calculate-size" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#paste" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#paste-into-folder" visibleif="full-page"></cr-menu-item>
++        <cr-menu-item command="#duplicate" visibleif="full-page"></cr-menu-item>
+         <hr visibleif="full-page">
+         <cr-menu-item command="#get-info"></cr-menu-item>
++        <cr-menu-item command="#calculate-size" visibleif="full-page"></cr-menu-item>
+         <cr-menu-item command="#dlp-restriction-details"></cr-menu-item>
+         <cr-menu-item command="#rename"></cr-menu-item>
+         <cr-menu-item command="#pin-folder"></cr-menu-item>

@@ -1,0 +1,43 @@
+diff --git a/ui/file_manager/file_manager/foreground/js/file_list_model.ts b/ui/file_manager/file_manager/foreground/js/file_list_model.ts
+index 0123875bf512..aa2e759d3152 100644
+--- a/ui/file_manager/file_manager/foreground/js/file_list_model.ts
++++ b/ui/file_manager/file_manager/foreground/js/file_list_model.ts
+@@ -14,6 +14,7 @@ import type {FilesAppEntry} from '../../common/js/files_app_entry_types.js';
+ import {getRecentDateBucket, getTranslationKeyForDateBucket} from '../../common/js/recent_date_bucket.js';
+ import {collator, str, strf} from '../../common/js/translations.js';
+ 
++import {kibaOsMeasuredFolderSize} from './kibaos_folder_size.js';
+ import type {MetadataItem} from './metadata/metadata_item.js';
+ import type {MetadataModel} from './metadata/metadata_model.js';
+ 
+@@ -457,6 +458,30 @@ export class FileListModel extends ArrayDataModel<UniversalEntry> {
+       return a.isDirectory === this.isDescendingOrder_ ? 1 : -1;
+     }
+ 
++    // KibaOS: folders sort by the size the Size column is showing.
++    //
++    // That column stopped saying nothing for a folder and started saying what
++    // the folder weighs, and then sorting by it ignored the number and left
++    // every folder in name order. Somebody who clicks Size is asking what is
++    // taking up the room, and the folders are usually the answer, so ranking
++    // the files and not them answers the wrong question.
++    //
++    // Only the cache is read here, never a fresh measurement. A comparator runs
++    // O(n log n) times and a measurement is a recursive walk of the filesystem,
++    // so starting one here would turn a single sort into thousands of them.
++    // Folders nobody has measured keep name order, which is the honest answer:
++    // there is no ordering to claim between a size that is known and one that
++    // is not.
++    if (a.isDirectory && b.isDirectory) {
++      const aMeasured = kibaOsMeasuredFolderSize(a);
++      const bMeasured = kibaOsMeasuredFolderSize(b);
++      if (aMeasured !== undefined && bMeasured !== undefined &&
++          aMeasured !== bMeasured) {
++        return aMeasured - bMeasured;
++      }
++      return compareName(a, b);
++    }
++
+     const properties = this.metadataModel_.getCache([a, b], ['size']);
+     const aSize = properties[0]!.size || 0;
+     const bSize = properties[1]!.size || 0;

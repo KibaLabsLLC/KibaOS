@@ -1,0 +1,570 @@
+# Maintainer: KibaOS Contributors
+#
+# ChromiumOS Ash: the ChromeOS desktop environment for Linux, built with
+# ChromeOS features (OOBE, login manager, Ash shell) but runs on a
+# standard Linux system via Ozone/X11, Ozone/Wayland, or direct DRM.
+#
+# This package requires shill-nm-adapter for network management via
+# NetworkManager and dbus-glib for session management.
+
+pkgname=chromiumos-ash
+# Version mirrors the upstream ChromeOS milestone + build revision.
+# Run the update-patches script to refresh before bumping.
+pkgver=158.0.8115.0
+pkgrel=2
+pkgdesc="ChromeOS Ash desktop environment for Linux (Ozone X11/Wayland/DRM build)"
+arch=('x86_64')
+url="https://www.chromium.org/chromium-os/"
+license=('BSD-3-Clause')
+depends=(
+    'shill-nm-adapter'
+    'bash'
+    'dbus'
+    'dbus-glib'
+    'util-linux'
+    'python'
+    'python-dbus'
+    'python-gobject'
+    'libgl'
+    'wayland'
+    'weston'
+    'xwayland-satellite'
+    'xorg-xrdb'
+    'gnome-themes-extra'
+    'seatd'
+    'xorg-xwayland'
+    'libxkbcommon'
+    'libx11'
+    'libxcb'
+    'libxcomposite'
+    'libxdamage'
+    'libxext'
+    'libxfixes'
+    'libxi'
+    'libxrandr'
+    'libxrender'
+    'libxss'
+    'libxtst'
+    'pango'
+    'cairo'
+    'nss'
+    'nspr'
+    'alsa-lib'
+    'pipewire'
+    'minizip'
+    'libevent'
+    'libdrm'
+    'mesa'
+    'hwdata'
+    'harfbuzz'
+    'freetype2'
+    'ttf-roboto'
+    'libpng'
+    'libjpeg-turbo'
+    'tar'
+    'gzip'
+    'bzip2'
+    'xz'
+    'zstd'
+    'lzip'
+    '7zip'
+    'unrar'
+    'kibaos-system-helper'
+    'kibaos-account-helper'
+    'polkit'
+    'pam'
+    'shadow'
+    'accountsservice'
+    'plasma-integration'
+    'breeze'
+)
+optdepends=(
+    'lm_sensors: userspace sensor discovery and setup tools for host hwmon devices'
+    'vulkan-driver: hardware Vulkan acceleration when supported by the GPU'
+    'mesa-utils: GPU smoke-test tools such as glxinfo and eglinfo'
+    'kibaos-ai: Advanced Plus AI local Gemma model bootstrap'
+    'kibaos-login: PAM greeter, lock screen, and logind session controls'
+    'kibaos-power: event-driven Linux laptop suspend and power lifecycle bridge'
+    'kibaosfs: the file service the Files app reads and changes the machine through'
+    'kibaos-host-bridge: BlueZ, udisks2, MIME, and pacman host integration'
+    'udiskie: opt-in recovery automounter when KIBAOS_REMOVABLE_AUTOMOUNT=1'
+)
+makedepends=(
+    'git'
+    'python'
+    'ninja'
+    'pkgconf'
+    'bison'
+    'flex'
+    'gperf'
+    'nodejs'
+    'patch'
+    'clang'
+    'lld'
+    'gn'
+    'python-pip'
+)
+# The source is Chromium's monolithic depot_tools+gclient checkout.
+# This is NOT a tarball. See the CI/CD build script for how to
+# prepare the source tree before invoking makepkg.
+#
+# The PKGBUILD expects ${srcdir}/chromiumos-src/ to contain a fully
+# synced ChromiumOS checkout with patches already applied.
+#
+# For a fresh pinned build, first run ci/bootstrap-chromium-src.sh. For a
+# warm checkout, ci/build-current-chromiumos-ash-package.sh refreshes the
+# current series and drives this PKGBUILD in an isolated work directory.
+source=(
+    'chromiumos-ash.sh'
+    'chromiumos-ash-session.sh'
+    'chromiumos-ash-session-child.sh'
+    'kibaos-session-error'
+    'test-session-error.sh'
+    'chromiumos-ash.desktop'
+    'chromiumos-ash-wayland.desktop'
+    'kibaos.features.conf'
+    'google-api.conf.example'
+    'test-google-api-config.sh'
+    'test-local-account-flags.sh'
+    'kibaos-session-manager-shim.py'
+    'kibaos-session-manager.service'
+    'org.chromium.SessionManager.conf'
+    'org.chromium.SessionManager.service'
+    'chromiumos-ash.sysusers.conf'
+    'chromiumos-ash.tmpfiles.conf'
+    'kibaos-gtk-settings.ini'
+    '90_kibaos.gschema.override'
+    'kibaos-Xresources'
+    'kibaos-gtk4.css'
+    'kibaos.portal'
+    'kibaos-portals.conf'
+    'kibaos-breezerc'
+    'kibaos-kdeglobals'
+    'kibaos-mimeapps.list'
+    'kibaos-files.desktop'
+    'kibaos-open-folder'
+    'kibaos-open-url'
+    'kibaos-browser.desktop'
+    'kibaos-timezone.rules'
+    'kibaos-weston-shell.c'
+    'kibaos-unlock-check.c'
+    'kibaos-lock.pam'
+    'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+noextract=()
+backup=('etc/kibaos/features.conf' 'etc/kibaos/google-api.conf')
+
+check() {
+    bash "${srcdir}/test-session-error.sh" "${srcdir}/kibaos-session-error"
+    KIBAOS_PKGBUILD_PATH="${startdir}/PKGBUILD" \
+        KIBAOS_CI_DIR="${startdir}/../ci" \
+        bash "${srcdir}/test-google-api-config.sh"
+    bash "${srcdir}/test-local-account-flags.sh"
+}
+
+# The Files window is a resource rather than something compiled into Chromium,
+# so it is placed into resources.pak after the build rather than by the build.
+# It runs here, in the package, because the two paks that shipped a page which
+# drew perfectly and ran nothing were both assembled by hand.
+#
+# ci/build-current-chromiumos-ash-package.sh copies this PKGBUILD out of the
+# repo and away from ci/, so it exports KIBAOS_FILES_PAK_TOOL; a build run from
+# the repo finds the tool beside it instead.
+_place_files_page() {
+    local out_dir="$1"
+    local pak_tool="${KIBAOS_FILES_PAK_TOOL:-${startdir}/../ci/build-files-pak.sh}"
+
+    if [ ! -x "${pak_tool}" ]; then
+        echo "ERROR: cannot place the Files page: no build-files-pak.sh at ${pak_tool}" >&2
+        echo "       Set KIBAOS_FILES_PAK_TOOL, or build from a full repo checkout." >&2
+        return 1
+    fi
+    # Into the package's own staging area, never over the Chromium output.
+    # That output is an input here, it belongs to whoever built it, and a
+    # package build that writes into its inputs is not reproducible and not
+    # permitted: as aurabuild against a root-owned out directory it simply
+    # fails with "Permission denied" in the middle of build().
+    install -dm755 "${srcdir}/kibaos-pak"
+    "${pak_tool}" "${out_dir}" "${srcdir}/kibaos-pak/resources.pak"
+}
+
+# The session's weston shell, which spreads the desktop over every monitor.
+# It is built against the libweston that is installed; a newer weston that
+# can no longer load it gets kiosk-shell from the session instead.
+_build_weston_shell() {
+    local libweston
+    libweston="$(pkg-config --list-all | grep -o '^libweston-[0-9]*' | sort -V | tail -n 1)"
+    if [ -z "${libweston}" ]; then
+        echo "ERROR: no libweston development files for the weston shell" >&2
+        return 1
+    fi
+    # shellcheck disable=SC2046,SC2086
+    cc ${CFLAGS} -std=gnu11 -fPIC -shared -fvisibility=hidden \
+        $(pkg-config --cflags weston "${libweston}" wayland-server) \
+        -o "${srcdir}/kibaos-shell.so" "${srcdir}/kibaos-weston-shell.c" \
+        ${LDFLAGS} $(pkg-config --libs "${libweston}" wayland-server) \
+        -L/usr/lib/weston -l:libexec_weston.so.0 \
+        -Wl,-rpath,/usr/lib/weston -Wl,-z,defs
+}
+
+# The lock screen's password check, which goes through PAM like any other
+# Linux locker's.
+_build_unlock_check() {
+    # shellcheck disable=SC2086
+    cc ${CFLAGS} -std=gnu11 -Wall -Wextra \
+        -o "${srcdir}/kibaos-unlock-check" "${srcdir}/kibaos-unlock-check.c" \
+        ${LDFLAGS} -lpam
+}
+
+build() {
+    _build_weston_shell
+    _build_unlock_check
+
+    # CHROME_SRC must point to a synced+patched ChromiumOS src dir
+    local chrome_src="${CHROME_SRC:-${srcdir}/chromiumos-src}"
+    # Keep the completed output separate from the source checkout. This lets
+    # a release package the exact verified Chromium build without copying a
+    # multi-gigabyte Ninja tree into the Arch build root.
+    local out_dir="${KIBAOS_OUT_DIR:-${chrome_src}/out/Ash}"
+
+    if [ ! -d "${chrome_src}" ]; then
+        echo "ERROR: CHROME_SRC not found at ${chrome_src}"
+        echo "Run 'ci/bootstrap-chromium-src.sh --run' first."
+        exit 1
+    fi
+
+    cd "${chrome_src}"
+
+    if [ "${KIBAOS_SKIP_CHROMIUM_BUILD:-0}" = "1" ]; then
+        if [ ! -x "${out_dir}/chrome" ] || [ ! -x "${out_dir}/chrome_sandbox" ]; then
+            echo "ERROR: KIBAOS_SKIP_CHROMIUM_BUILD=1 but chrome artifacts are missing."
+            echo "Expected ${out_dir}/chrome and ${out_dir}/chrome_sandbox."
+            exit 1
+        fi
+        echo "Using existing ChromiumOS Ash build artifacts from ${out_dir}."
+        _place_files_page "${out_dir}"
+        return
+    fi
+
+    # Generate GN args without Google credentials. KibaOS uses local accounts
+    # for the public release, while the runtime config remains an optional
+    # user-owned hook for a future private build.
+    gn gen "${out_dir}" --args="
+        target_os = \"chromeos\"
+        target_cpu = \"x64\"
+        is_debug = false
+        is_component_build = false
+        is_official_build = false
+        is_chrome_branded = false
+        is_chromeos_device = false
+        symbol_level = 0
+        blink_symbol_level = 0
+        v8_symbol_level = 0
+        treat_warnings_as_errors = false
+        use_goma = false
+        use_sysroot = true
+        use_ozone = true
+        ozone_platform_wayland = true
+        use_system_minigbm = true
+        enable_rust = true
+        use_official_google_api_keys = false
+
+        # Chromium turns DCHECKs on and makes them fatal for any build that is
+        # not is_official_build, which this is not and cannot be without Google
+        # branding. Left at that default the desktop inherits every DCHECK in
+        # Chromium as an abort: ash::help_app's search handler drops a mojo
+        # callback about a hundred seconds into a session and takes the whole
+        # session down with it, and that is one of hundreds. A release logs
+        # where a development build asserts, so the assert comes off here and
+        # the bring up tree keeps it.
+        dcheck_always_on = false
+
+        # The browser's built-in AI (the Prompt, Summarizer, Writer, Rewriter
+        # and Proofreader web APIs) on Gemma 4 through KibaOS's llama.cpp
+        # backend, patch 0142, in place of Gemini Nano. It stays idle until
+        # the optional kibaos-ai package and its model are installed.
+        use_on_device_model_service = true
+        kibaos_local_model = true
+    "
+
+    if grep -Eq '^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"' "${out_dir}/args.gn"; then
+        echo 'ERROR: no-key KibaOS build contains a Google credential' >&2
+        exit 1
+    fi
+
+    # Fail closed if the build would publish the desktop fake network services,
+    # which look like real connections in Ash. What makes them real on generic
+    # Linux is patch 0038: ash_dbus_helper routes the Shill clients to their own
+    # narrowly scoped bus rather than to the global one, which does not exist
+    # here. Check for that routing.
+    #
+    # This used to check toolchain.ninja for -DUSE_REAL_DBUS_CLIENTS. That flag
+    # was the mechanism before 0038 existed, and it stopped being safe on
+    # 2026-08-20 when upstream gave about seventy clients under
+    # chromeos/ash/components/dbus a CHECK(bus) on Initialize. Setting it also
+    # sets use_real_chromeos_services via chromeos/features.gni, which drops the
+    # fake mojo service manager from the build entirely, so a build carrying the
+    # define aborts in PostEarlyInitialization before any window appears. The
+    # binary that boots does not have it.
+    local shill_router="${chrome_src}/chrome/browser/ash/dbus/ash_dbus_helper.cc"
+    if [[ ! -r "${shill_router}" ]] ||
+       ! grep -Fq 'shill_clients::InitializeKibaOs' "${shill_router}"; then
+        echo 'ERROR: Chromium source is missing the real Shill routing from patch 0038' >&2
+        return 1
+    fi
+
+    # Build the chrome target and its setuid sandbox helper.
+    ninja -C "${out_dir}" -j"$(nproc)" chrome chrome_sandbox
+
+    _place_files_page "${out_dir}"
+}
+
+package() {
+    local chrome_src="${CHROME_SRC:-${srcdir}/chromiumos-src}"
+    local out_dir="${KIBAOS_OUT_DIR:-${chrome_src}/out/Ash}"
+    local gn_bin="gn"
+    local runtime_deps="${srcdir}/chromiumos-ash.runtime_deps"
+
+    # Fail early and clearly if there is no built Chromium output to package.
+    if [ ! -x "${out_dir}/chrome" ] || [ ! -x "${out_dir}/chrome_sandbox" ]; then
+        echo "ERROR: no built Chromium output in ${out_dir}" >&2
+        echo "Expected ${out_dir}/chrome and ${out_dir}/chrome_sandbox." >&2
+        echo "Check CHROME_SRC / KIBAOS_OUT_DIR, and that build() ran (or the" >&2
+        echo "prebuilt tree was mounted) before package()." >&2
+        return 1
+    fi
+
+    if [ -x "${chrome_src}/buildtools/linux64/gn" ]; then
+        gn_bin="${chrome_src}/buildtools/linux64/gn"
+    elif [ -x "${chrome_src}/third_party/depot_tools/gn" ]; then
+        # Source checkouts keep the bootstrap GN wrapper in depot_tools when
+        # the standalone buildtools binary was not materialized.
+        gn_bin="${chrome_src}/third_party/depot_tools/gn"
+    fi
+
+    copy_runtime_dep() {
+        local rel="${1#./}"
+        local src
+        local dest
+
+        if [ -z "${rel}" ]; then
+            return
+        fi
+
+        case "${rel}" in
+            *.TOC|*.rsp|*.runtime_deps)
+                return
+                ;;
+        esac
+
+        src="${out_dir}/${rel}"
+        dest="${pkgdir}/usr/lib/chromiumos-ash/${rel}"
+
+        # build() places the Files page into a pak of its own rather than
+        # over the Chromium output, so anything staged there wins.
+        if [ -e "${srcdir}/kibaos-pak/${rel}" ]; then
+            src="${srcdir}/kibaos-pak/${rel}"
+        fi
+
+        if [ ! -e "${src}" ]; then
+            printf 'warning: runtime dependency not found: %s\n' "${rel}" >&2
+            return
+        fi
+
+        if [ -d "${src}" ]; then
+            mkdir -p "${dest}"
+            cp -a "${src}/." "${dest}/"
+        else
+            install -Dm644 "${src}" "${dest}"
+            if [ -x "${src}" ]; then
+                chmod 755 "${dest}"
+            fi
+        fi
+    }
+
+    (
+        cd "${chrome_src}"
+        if ! "${gn_bin}" desc "${out_dir}" //chrome:chrome runtime_deps >"${runtime_deps}"; then
+            cat >"${runtime_deps}" <<'EOF'
+./chrome
+./chrome_crashpad_handler
+./chrome_sandbox
+chrome_100_percent.pak
+chrome_200_percent.pak
+icudtl.dat
+keyboard_resources.pak
+resources.pak
+snapshot_blob.bin
+libEGL.so
+libGLESv2.so
+libvk_swiftshader.so
+libvulkan.so.1
+liboptimization_guide_internal.so
+kibaos_local_model
+vk_swiftshader_icd.json
+IwaKeyDistribution
+MEIPreload
+PrivacySandboxAttestationsPreloaded
+dbus
+locales
+mojo_service_manager
+resources
+EOF
+        fi
+    )
+
+    while IFS= read -r runtime_dep; do
+        copy_runtime_dep "${runtime_dep}"
+    done < <(sort -u "${runtime_deps}")
+
+    # KibaOS compatibility: Chromium's ChromeOS accessibility extensions are
+    # emitted as generated files under resources/.  GN runtime_deps currently
+    # lists their manifests but not every extension payload, so copying only
+    # runtime_deps leaves ChromeVox and Select-to-Speak unable to start.
+    # Preserve the complete generated trees in the package.
+    for resource_dir in \
+        accessibility \
+        chromeos/accessibility; do
+        if [ -d "${out_dir}/resources/${resource_dir}" ]; then
+            mkdir -p "${pkgdir}/usr/lib/chromiumos-ash/resources/${resource_dir}"
+            cp -a "${out_dir}/resources/${resource_dir}/." \
+                "${pkgdir}/usr/lib/chromiumos-ash/resources/${resource_dir}/"
+        fi
+    done
+
+    if [ -e "${pkgdir}/usr/lib/chromiumos-ash/chrome_sandbox" ]; then
+        mv "${pkgdir}/usr/lib/chromiumos-ash/chrome_sandbox" \
+            "${pkgdir}/usr/lib/chromiumos-ash/chrome-sandbox"
+    fi
+
+    chmod -R u+rwX,go+rX "${pkgdir}/usr/lib/chromiumos-ash"
+
+    if [ -e "${pkgdir}/usr/lib/chromiumos-ash/chrome-sandbox" ]; then
+        chown root:root "${pkgdir}/usr/lib/chromiumos-ash/chrome-sandbox"
+        chmod 4755 "${pkgdir}/usr/lib/chromiumos-ash/chrome-sandbox"
+    fi
+
+    # KibaOS compatibility: a few ChromiumOS/Chrome paths still probe the
+    # historical Google Chrome install prefix. Keep the real payload in
+    # /usr/lib/chromiumos-ash and expose stable symlinks for those probes.
+    install -dm755 "${pkgdir}/opt/google/chrome"
+    for rel in \
+        chrome \
+        chrome_100_percent.pak \
+        chrome_200_percent.pak \
+        icudtl.dat \
+        resources.pak; do
+        if [ -e "${pkgdir}/usr/lib/chromiumos-ash/${rel}" ]; then
+            ln -s "/usr/lib/chromiumos-ash/${rel}" \
+                "${pkgdir}/opt/google/chrome/${rel}"
+        fi
+    done
+
+    # KibaOS compatibility: Arch's ttf-roboto package installs under
+    # /usr/share/fonts/TTF, while some ChromeOS readahead paths still probe the
+    # ChromeOS-style /usr/share/fonts/roboto directory.
+    install -dm755 "${pkgdir}/usr/share/fonts/roboto"
+    ln -s /usr/share/fonts/TTF/Roboto-Regular.ttf \
+        "${pkgdir}/usr/share/fonts/roboto/Roboto-Regular.ttf"
+    ln -s /usr/share/fonts/TTF/Roboto-Medium.ttf \
+        "${pkgdir}/usr/share/fonts/roboto/Roboto-Medium.ttf"
+
+    # Install launcher script
+    install -Dm755 "${srcdir}/chromiumos-ash.sh" \
+        "${pkgdir}/usr/bin/chromiumos-ash"
+    install -Dm755 "${srcdir}/chromiumos-ash-session.sh" \
+        "${pkgdir}/usr/bin/chromiumos-ash-session"
+    install -Dm755 "${srcdir}/chromiumos-ash-session-child.sh" \
+        "${pkgdir}/usr/bin/chromiumos-ash-session-child"
+    install -Dm755 "${srcdir}/kibaos-session-error" \
+        "${pkgdir}/usr/bin/kibaos-session-error"
+    install -Dm755 "${srcdir}/kibaos-shell.so" \
+        "${pkgdir}/usr/lib/chromiumos-ash/kibaos-shell.so"
+    install -Dm755 "${srcdir}/kibaos-unlock-check" \
+        "${pkgdir}/usr/lib/chromiumos-ash/kibaos-unlock-check"
+    install -Dm644 "${srcdir}/kibaos-lock.pam" \
+        "${pkgdir}/etc/pam.d/kibaos-lock"
+
+    # Install X11 session entry for display managers.
+    install -Dm644 "${srcdir}/chromiumos-ash.desktop" \
+        "${pkgdir}/usr/share/xsessions/chromiumos-ash.desktop"
+    install -Dm644 "${srcdir}/chromiumos-ash-wayland.desktop" \
+        "${pkgdir}/usr/share/wayland-sessions/chromiumos-ash.desktop"
+
+    # Install feature defaults.
+    install -Dm644 "${srcdir}/kibaos.features.conf" \
+        "${pkgdir}/etc/kibaos/features.conf"
+    local google_api_runtime_config="${KIBAOS_GOOGLE_API_CONFIG:-${srcdir}/google-api.conf.example}"
+    install -Dm644 "${google_api_runtime_config}" \
+        "${pkgdir}/etc/kibaos/google-api.conf"
+    install -Dm644 "${srcdir}/google-api.conf.example" \
+        "${pkgdir}/usr/share/doc/${pkgname}/google-api.conf.example"
+
+    # Install optional SessionManager shim components. D-Bus activation can
+    # start this on demand once the KibaOS session lifecycle switches from the
+    # in-process fake client to a host service.
+    install -Dm755 "${srcdir}/kibaos-session-manager-shim.py" \
+        "${pkgdir}/usr/lib/chromiumos-ash/kibaos-session-manager-shim.py"
+    install -Dm644 "${srcdir}/kibaos-session-manager.service" \
+        "${pkgdir}/usr/lib/systemd/system/kibaos-session-manager.service"
+    install -Dm644 "${srcdir}/org.chromium.SessionManager.conf" \
+        "${pkgdir}/usr/share/dbus-1/system.d/org.chromium.SessionManager.conf"
+    install -Dm644 "${srcdir}/org.chromium.SessionManager.service" \
+        "${pkgdir}/usr/share/dbus-1/system-services/org.chromium.SessionManager.service"
+
+    # KibaOS compatibility: generic Linux installs need the Wayland group for
+    # exo's Wayland server and writable ChromeOS metrics state directories.
+    install -Dm644 "${srcdir}/chromiumos-ash.sysusers.conf" \
+        "${pkgdir}/usr/lib/sysusers.d/chromiumos-ash.conf"
+    install -Dm644 "${srcdir}/chromiumos-ash.tmpfiles.conf" \
+        "${pkgdir}/usr/lib/tmpfiles.d/chromiumos-ash.conf"
+
+    # GTK title bars with the desktop's buttons; see the files themselves.
+    install -Dm644 "${srcdir}/kibaos-gtk-settings.ini" \
+        "${pkgdir}/etc/xdg/gtk-3.0/settings.ini"
+    install -Dm644 "${srcdir}/kibaos-gtk-settings.ini" \
+        "${pkgdir}/etc/xdg/gtk-4.0/settings.ini"
+    install -Dm644 "${srcdir}/90_kibaos.gschema.override" \
+        "${pkgdir}/usr/share/glib-2.0/schemas/90_kibaos.gschema.override"
+    # X11 applications' defaults, loaded by the session when the X11 bridge
+    # comes up; ~/.Xresources still wins.
+    install -Dm644 "${srcdir}/kibaos-Xresources" \
+        "${pkgdir}/usr/share/kibaos/Xresources"
+    # GTK 4 window controls drawn as Ash draws its own; the session points the
+    # user's gtk.css at it.
+    install -Dm644 "${srcdir}/kibaos-gtk4.css" \
+        "${pkgdir}/usr/share/kibaos/gtk-4.0/gtk.css"
+    # Ash answers xdg-desktop-portal's appearance settings (light or dark,
+    # accent colour); GTK's backend answers everything else.
+    install -Dm644 "${srcdir}/kibaos.portal" \
+        "${pkgdir}/usr/share/xdg-desktop-portal/portals/kibaos.portal"
+    install -Dm644 "${srcdir}/kibaos-portals.conf" \
+        "${pkgdir}/usr/share/xdg-desktop-portal/kibaos-portals.conf"
+    # Qt and KDE applications: the Breeze style's settings and a starting
+    # kdeglobals, under the configuration path Ash gives them, behind the
+    # live colour scheme Ash writes into the runtime directory.
+    install -Dm644 "${srcdir}/kibaos-breezerc" \
+        "${pkgdir}/usr/share/kibaos/xdg/breezerc"
+    install -Dm644 "${srcdir}/kibaos-kdeglobals" \
+        "${pkgdir}/usr/share/kibaos/xdg/kdeglobals"
+    # Folders open in KibaOS Files, through Ash's FileManager1, whatever
+    # other file manager is installed.
+    install -Dm755 "${srcdir}/kibaos-open-folder" \
+        "${pkgdir}/usr/bin/kibaos-open-folder"
+    install -Dm644 "${srcdir}/kibaos-files.desktop" \
+        "${pkgdir}/usr/share/applications/kibaos-files.desktop"
+    # Links open in the KibaOS browser, through Ash's org.kibaos.Browser on
+    # the desktop's session bus, whatever other browser is installed.
+    install -Dm755 "${srcdir}/kibaos-open-url" \
+        "${pkgdir}/usr/bin/kibaos-open-url"
+    install -Dm644 "${srcdir}/kibaos-browser.desktop" \
+        "${pkgdir}/usr/share/applications/kibaos-browser.desktop"
+    # Settings changes the system's time zone, not only the desktop's.
+    install -Dm644 "${srcdir}/kibaos-timezone.rules" \
+        "${pkgdir}/usr/share/polkit-1/rules.d/50-kibaos-timezone.rules"
+    install -Dm644 "${srcdir}/kibaos-mimeapps.list" \
+        "${pkgdir}/usr/share/applications/kibaos-mimeapps.list"
+    install -Dm644 "${srcdir}/LICENSE" \
+        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

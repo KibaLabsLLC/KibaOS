@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Get kibaos-vm on Linux or a Mac and start it.
+#
+#   curl -fsSL https://raw.githubusercontent.com/KibaLabsLLC/KibaDE/main/vm/kibaos-vm/get.sh | bash
+#
+# It downloads the kibaos-vm program for this computer, checks it against the
+# SHA-256 written into this script for that version (and the release key's
+# signature too, when gpg is installed), and runs it. curl does not mark the
+# file as quarantined the way a browser download is on a Mac, so nothing stops
+# to ask about it; the checks are what make that safe. A file that does not
+# match is deleted and never run.
+#
+# Options after `bash -s --` go to kibaos-vm:
+#   curl -fsSL .../get.sh | bash -s -- --release v1.1.2
+#
+# Settings, all optional, as environment variables:
+#   KIBAOS_VM_BIN_DIR   where the program is kept (default ~/.local/share/kibaos/bin)
+#   KIBAOS_VM_BASE_URL  where to download from (for testing a build)
+set -euo pipefail
+
+# >>> pins (written by build.sh; do not edit by hand)
+VERSION=1.0.0
+PIN_linux_amd64=f9885629f9c4cf4e12a9fa3448424ba61109a01e236f31f1ca3ed1ef3b042b7f
+PIN_linux_arm64=0f66111e887dcb699740e4cf8bbfb06f82e6878e65e6cbb942f69431fadd3b1a
+PIN_darwin_amd64=a6cbd156c00318d9d2c9fa19034b0580d80221df40f82a9603e3c67a6b4e97af
+PIN_darwin_arm64=a44643bfd2eef784de4b3049b95f7d84bab7522223671f9dcf56518832c2d704
+# <<< pins
+
+FINGERPRINT=BC390DCF360B2184DBBF008B8B2AB2EFE667CB69
+say() { printf '\033[1mkibaos-vm:\033[0m %s\n' "$*"; }
+die() { printf '\033[1mkibaos-vm:\033[0m %s\n' "$*" >&2; exit 1; }
+have() { command -v "$1" >/dev/null 2>&1; }
+
+case $(uname -s) in
+  Linux) os=linux ;;
+  Darwin) os=darwin ;;
+  *) die "this is $(uname -s); on Windows use the PowerShell line instead" ;;
+esac
+case $(uname -m) in
+  x86_64|amd64) arch=amd64 ;;
+  arm64|aarch64) arch=arm64 ;;
+  *) die "kibaos-vm is not built for $(uname -m)" ;;
+esac
+pin_var=PIN_${os}_${arch}
+want=${!pin_var}
+[[ -n $want ]] || die "no kibaos-vm build is published for ${os}-${arch} yet"
+
+sha256_of() {
+  if have sha256sum; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+bin_dir=${KIBAOS_VM_BIN_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/kibaos/bin}
+exe=$bin_dir/kibaos-vm
+name=kibaos-vm-$VERSION-$os-$arch
+base=${KIBAOS_VM_BASE_URL:-https://github.com/KibaLabsLLC/KibaDE/releases/download/kibaos-vm-v$VERSION}
+base=${base%/}
+
+if [[ -x $exe && $(sha256_of "$exe") == "$want" ]]; then
+  say "kibaos-vm $VERSION is already here"
+else
+  have curl || die 'curl is needed to download kibaos-vm'
+  mkdir -p "$bin_dir"
+  rm -f "$exe"
+  say "downloading kibaos-vm $VERSION"
+  curl -fL --progress-bar --retry 3 -o "$exe.part" "$base/$name"
+  got=$(sha256_of "$exe.part")
+  if [[ $got != "$want" ]]; then
+    rm -f "$exe.part"
+    die "the download does not match the SHA-256 this script expects, so it was deleted (expected $want, got $got)"
+  fi
+  if have gpg; then
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    if curl -fsL -o "$tmp/SHA256SUMS" "$base/SHA256SUMS" &&
+      curl -fsL -o "$tmp/SHA256SUMS.sig" "$base/SHA256SUMS.sig" &&
+      curl -fsL -o "$tmp/key.asc" "https://github.com/KibaLabsLLC/KibaDE/raw/main/pins/kibaos-release.gpg"; then
+      GNUPGHOME=$tmp gpg --batch --quiet --import "$tmp/key.asc" 2>/dev/null || true
+      status=$(GNUPGHOME=$tmp gpg --batch --status-fd 1 --verify "$tmp/SHA256SUMS.sig" "$tmp/SHA256SUMS" 2>/dev/null || true)
+      if ! grep -q "VALIDSIG ${FINGERPRINT} " <<<"$status" || ! grep -q "^$want  $name\$" "$tmp/SHA256SUMS"; then
+        rm -f "$exe.part"
+        die "the release's checksums are not signed by the KibaOS release key ${FINGERPRINT}, so the download was deleted"
+      fi
+      say "checked: SHA-256 and the release key's signature"
+    else
+      say "checked: SHA-256 (the signed checksums could not be fetched)"
+    fi
+  else
+    say "checked: SHA-256 (install gpg to check the signature as well)"
+  fi
+  chmod 755 "$exe.part"
+  mv -f "$exe.part" "$exe"
+  if [[ $os == darwin ]] && have xattr; then
+    xattr -d com.apple.quarantine "$exe" 2>/dev/null || true
+  fi
+fi
+
+# Piped into bash, standard input is this script; the screens need the
+# keyboard, which is the terminal. Opening it is the test: with no terminal at
+# all the device exists and still cannot be opened.
+if [[ ! -t 0 ]] && { : </dev/tty; } 2>/dev/null; then
+  exec "$exe" "$@" </dev/tty
+fi
+exec "$exe" "$@"

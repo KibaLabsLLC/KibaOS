@@ -1,0 +1,1031 @@
+diff --git a/chrome/browser/ash/dbus/BUILD.gn b/chrome/browser/ash/dbus/BUILD.gn
+index 69c99a5..bfe050a 100644
+--- a/chrome/browser/ash/dbus/BUILD.gn
++++ b/chrome/browser/ash/dbus/BUILD.gn
+@@ -16,6 +16,10 @@ static_library("dbus") {
+     "arc_tracing_service_provider.h",
+     "ash_dbus_helper.cc",
+     "ash_dbus_helper.h",
++    "kiba_assistant.cc",
++    "kiba_assistant.h",
++    "kiba_bubble.cc",
++    "kiba_bubble.h",
+     "kibaos_bluetooth_service.cc",
+     "kibaos_bluetooth_service.h",
+     "kibaos_browser_service.cc",
+diff --git a/chrome/browser/ash/dbus/kiba_assistant.cc b/chrome/browser/ash/dbus/kiba_assistant.cc
+new file mode 100644
+index 0000000..273b744
+--- /dev/null
++++ b/chrome/browser/ash/dbus/kiba_assistant.cc
+@@ -0,0 +1,419 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "chrome/browser/ash/dbus/kiba_assistant.h"
++
++#include <utility>
++
++#include "ash/shell.h"
++#include "base/functional/bind.h"
++#include "base/functional/callback_helpers.h"
++#include "base/logging.h"
++#include "base/message_loop/message_pump_type.h"
++#include "base/strings/utf_string_conversions.h"
++#include "base/threading/thread.h"
++#include "base/time/time.h"
++#include "cc/paint/paint_flags.h"
++#include "dbus/bus.h"
++#include "dbus/message.h"
++#include "dbus/object_path.h"
++#include "dbus/object_proxy.h"
++#include "ui/aura/window.h"
++#include "ui/display/screen.h"
++#include "ui/gfx/canvas.h"
++#include "ui/gfx/geometry/rect.h"
++#include "ui/gfx/image/canvas_image_source.h"
++#include "ui/gfx/image/image_skia.h"
++#include "ui/gfx/skia_paint_util.h"
++
++namespace ash {
++
++namespace {
++
++constexpr char kService[] = "org.kibaos.Kiba";
++constexpr char kPath[] = "/org/kibaos/Kiba";
++constexpr char kInterface[] = "org.kibaos.Kiba1";
++constexpr char kPropertiesInterface[] = "org.freedesktop.DBus.Properties";
++
++// Clear of the IDs Chrome's own status icons count up from 2 and of the ones
++// the Linux applications' icons take from 1 << 24, and small enough to become
++// a view's ID.
++constexpr int64_t kIconId = int64_t{1} << 23;
++
++constexpr int kIconSizeDip = 20;
++// How long a card that opened by itself stays after Kiba is idle again.
++constexpr base::TimeDelta kAutoHideDelay = base::Seconds(4);
++// What the daemon is asked to wait for; a missing daemon must not hang us.
++constexpr int kCallTimeoutMs = 5000;
++
++constexpr SkColor kCyan = SkColorSetRGB(0x6A, 0xD8, 0xFD);
++constexpr SkColor kBlue = SkColorSetRGB(0x3E, 0x64, 0xEB);
++constexpr SkColor kViolet = SkColorSetRGB(0x7E, 0x63, 0xFA);
++constexpr SkColor kPink = SkColorSetRGB(0xF2, 0x9E, 0xF5);
++constexpr SkColor kMutedGray = SkColorSetRGB(0x9A, 0x9F, 0xB5);
++
++// The tray icon, a small version of the orb: dimmed when muted or when Kiba
++// cannot listen, in the busy colors while it works.
++class OrbIconSource : public gfx::CanvasImageSource {
++ public:
++  OrbIconSource(bool dim, bool busy)
++      : gfx::CanvasImageSource(gfx::Size(kIconSizeDip, kIconSizeDip)),
++        dim_(dim),
++        busy_(busy) {}
++
++  void Draw(gfx::Canvas* canvas) override {
++    const gfx::PointF center(kIconSizeDip / 2.f, kIconSizeDip / 2.f);
++    const float radius = kIconSizeDip * 0.40f;
++    cc::PaintFlags body;
++    body.setAntiAlias(true);
++    if (dim_) {
++      body.setColor(kMutedGray);
++    } else {
++      body.setShader(gfx::CreateGradientShader(
++          gfx::Point(0, 2), gfx::Point(0, kIconSizeDip - 2),
++          busy_ ? kPink : kCyan, kBlue));
++    }
++    canvas->DrawCircle(center, radius, body);
++    cc::PaintFlags rim;
++    rim.setAntiAlias(true);
++    rim.setStyle(cc::PaintFlags::kStroke_Style);
++    rim.setStrokeWidth(1.5f);
++    rim.setColor(dim_ ? kMutedGray : kViolet);
++    canvas->DrawCircle(center, radius, rim);
++  }
++
++ private:
++  const bool dim_;
++  const bool busy_;
++};
++
++// Reads one {string: variant} entry of a GetAll answer.
++void ReadProperty(dbus::MessageReader* entry,
++                  std::string* state,
++                  std::string* status,
++                  bool* muted) {
++  std::string name;
++  dbus::MessageReader variant(nullptr);
++  if (!entry->PopString(&name) || !entry->PopVariant(&variant)) {
++    return;
++  }
++  if (name == "State") {
++    variant.PopString(state);
++  } else if (name == "Status") {
++    variant.PopString(status);
++  } else if (name == "Muted") {
++    variant.PopBool(muted);
++  }
++}
++
++}  // namespace
++
++KibaAssistant::KibaAssistant() = default;
++
++KibaAssistant::~KibaAssistant() {
++  weak_ptr_factory_.InvalidateWeakPtrs();
++  hide_timer_.Stop();
++  bubble_.reset();
++  if (Shell::HasInstance()) {
++    present_ = false;
++    UpdateIcons();
++  }
++  proxy_ = nullptr;
++  if (bus_) {
++    bus_->ShutdownOnDBusThreadAndBlock();
++    bus_.reset();
++  }
++  if (dbus_thread_) {
++    dbus_thread_->Stop();
++  }
++}
++
++// static
++std::unique_ptr<KibaAssistant> KibaAssistant::Create() {
++  auto assistant = std::unique_ptr<KibaAssistant>(new KibaAssistant());
++  if (!assistant->Start()) {
++    return nullptr;
++  }
++  return assistant;
++}
++
++bool KibaAssistant::Start() {
++  if (!Shell::HasInstance()) {
++    return false;
++  }
++  dbus_thread_ = std::make_unique<base::Thread>("KibaOS assistant D-Bus thread");
++  base::Thread::Options thread_options;
++  thread_options.message_pump_type = base::MessagePumpType::IO;
++  if (!dbus_thread_->StartWithOptions(std::move(thread_options))) {
++    LOG(ERROR) << "KibaOS assistant could not start its D-Bus thread";
++    return false;
++  }
++
++  dbus::Bus::Options bus_options;
++  bus_options.bus_type = dbus::Bus::SESSION;
++  bus_options.connection_type = dbus::Bus::PRIVATE;
++  bus_options.dbus_task_runner = dbus_thread_->task_runner();
++  bus_ = new dbus::Bus(std::move(bus_options));
++
++  proxy_ = bus_->GetObjectProxyWithOptions(
++      kService, dbus::ObjectPath(kPath),
++      dbus::ObjectProxy::IGNORE_SERVICE_UNKNOWN_ERRORS);
++  proxy_->SetNameOwnerChangedCallback(base::BindRepeating(
++      &KibaAssistant::OnNameOwnerChanged, weak_ptr_factory_.GetWeakPtr()));
++
++  const auto connect = [this](const char* signal, auto handler) {
++    proxy_->ConnectToSignal(
++        kInterface, signal,
++        base::BindRepeating(handler, weak_ptr_factory_.GetWeakPtr()),
++        base::DoNothing());
++  };
++  connect("StateChanged", &KibaAssistant::OnStateChanged);
++  connect("WakeHeard", &KibaAssistant::OnWakeHeard);
++  connect("Level", &KibaAssistant::OnLevel);
++
++  shell_observation_.Observe(Shell::Get());
++  // The first question is also what makes the bus start the daemon.
++  RefreshProperties();
++  return true;
++}
++
++void KibaAssistant::OnNameOwnerChanged(const std::string& old_owner,
++                                       const std::string& new_owner) {
++  if (new_owner.empty()) {
++    SetPresent(false);
++  } else {
++    RefreshProperties();
++  }
++}
++
++void KibaAssistant::RefreshProperties() {
++  dbus::MethodCall method_call(kPropertiesInterface, "GetAll");
++  dbus::MessageWriter writer(&method_call);
++  writer.AppendString(kInterface);
++  proxy_->CallMethod(&method_call, kCallTimeoutMs,
++                     base::BindOnce(&KibaAssistant::OnProperties,
++                                    weak_ptr_factory_.GetWeakPtr()));
++}
++
++void KibaAssistant::OnProperties(dbus::Response* response) {
++  if (!response) {
++    // No daemon, or it is not answering: no icon.
++    SetPresent(false);
++    return;
++  }
++  dbus::MessageReader reader(response);
++  dbus::MessageReader array(nullptr);
++  if (!reader.PopArray(&array)) {
++    return;
++  }
++  std::string state = state_;
++  std::string status;
++  bool muted = muted_;
++  while (array.HasMoreData()) {
++    dbus::MessageReader entry(nullptr);
++    if (array.PopDictEntry(&entry)) {
++      ReadProperty(&entry, &state, &status, &muted);
++    }
++  }
++  state_ = std::move(state);
++  status_ = base::UTF8ToUTF16(status);
++  muted_ = muted;
++  SetPresent(true);
++  UpdateIcons();
++  if (bubble_) {
++    bubble_->SetState(BubbleState());
++  }
++}
++
++void KibaAssistant::OnStateChanged(dbus::Signal* signal) {
++  dbus::MessageReader reader(signal);
++  std::string state;
++  std::string status;
++  if (!reader.PopString(&state) || !reader.PopString(&status)) {
++    return;
++  }
++  state_ = std::move(state);
++  status_ = base::UTF8ToUTF16(status);
++  // The mute switch is a property; a state change is also when it is read.
++  RefreshProperties();
++  UpdateIcons();
++  if (bubble_) {
++    bubble_->SetState(BubbleState());
++    // A card that opened by itself goes a moment after the answer; a clicked
++    // one stays until it is dismissed.
++    if (state_ == "idle" && !bubble_->pinned()) {
++      hide_timer_.Start(FROM_HERE, kAutoHideDelay,
++                        base::BindOnce(&KibaAssistant::HideTimerFired,
++                                       base::Unretained(this)));
++    } else {
++      hide_timer_.Stop();
++    }
++  }
++}
++
++void KibaAssistant::OnWakeHeard(dbus::Signal* signal) {
++  if (bubble_ || !present_) {
++    return;
++  }
++  // No click to anchor to: the bottom right of the primary display, where
++  // the status area is.
++  const gfx::Rect work_area =
++      display::Screen::Get()->GetPrimaryDisplay().work_area();
++  OpenBubble(gfx::Point(work_area.right() - 8, work_area.bottom() - 8),
++             /*pinned=*/false);
++}
++
++void KibaAssistant::OnLevel(dbus::Signal* signal) {
++  if (!bubble_) {
++    return;
++  }
++  dbus::MessageReader reader(signal);
++  double rms = 0;
++  double low = 0;
++  double mid = 0;
++  double high = 0;
++  if (reader.PopDouble(&rms) && reader.PopDouble(&low) &&
++      reader.PopDouble(&mid) && reader.PopDouble(&high)) {
++    bubble_->SetLevel(rms, low, mid, high);
++  }
++}
++
++void KibaAssistant::Call(const char* method) {
++  dbus::MethodCall method_call(kInterface, method);
++  proxy_->CallMethod(&method_call, kCallTimeoutMs, base::DoNothing());
++}
++
++void KibaAssistant::CallBool(const char* method, bool value) {
++  dbus::MethodCall method_call(kInterface, method);
++  dbus::MessageWriter writer(&method_call);
++  writer.AppendBool(value);
++  proxy_->CallMethod(&method_call, kCallTimeoutMs, base::DoNothing());
++}
++
++void KibaAssistant::SetPresent(bool present) {
++  if (present_ == present) {
++    return;
++  }
++  present_ = present;
++  if (!present_) {
++    hide_timer_.Stop();
++    bubble_.reset();
++    level_stream_ = false;
++  }
++  UpdateIcons();
++}
++
++KibaBubbleState KibaAssistant::BubbleState() const {
++  KibaBubbleState state;
++  state.state = state_;
++  state.status = status_;
++  state.muted = muted_;
++  return state;
++}
++
++void KibaAssistant::UpdateIcons() {
++  if (!Shell::HasInstance()) {
++    return;
++  }
++  TrayIconConfiguration configuration;
++  configuration.id = kIconId;
++  if (present_) {
++    const bool dim = muted_ || state_ == "unavailable";
++    const bool busy = state_ != "idle" && state_ != "unavailable";
++    configuration.image = gfx::CanvasImageSource::MakeImageSkia<OrbIconSource>(
++        dim, busy);
++    configuration.tool_tip =
++        u"Kiba: " + (status_.empty() ? std::u16string(u"ready") : status_);
++  }
++  // Each monitor's status area is asked rather than remembered: a monitor
++  // plugged in again comes back with the same display ID and an empty one.
++  for (aura::Window* root_window : Shell::GetAllRootWindows()) {
++    const int64_t display_id =
++        display::Screen::Get()->GetDisplayNearestWindow(root_window).id();
++    if (!present_) {
++      Shell::Get()->RemoveStatusTrayIcon(configuration, display_id);
++    } else if (!Shell::Get()->UpdateStatusTrayIcon(configuration,
++                                                   display_id)) {
++      TrayIconHandlers handlers;
++      handlers.activate = base::BindRepeating(
++          &KibaAssistant::OnIconActivated, weak_ptr_factory_.GetWeakPtr());
++      Shell::Get()->AddStatusTrayIcon(configuration, display_id,
++                                      std::move(handlers));
++    }
++  }
++}
++
++void KibaAssistant::OnRootWindowAdded(aura::Window* root_window) {
++  UpdateIcons();
++}
++
++void KibaAssistant::OnIconActivated(const gfx::Point& screen_point) {
++  if (bubble_ && bubble_->pinned()) {
++    bubble_.reset();   // the second click closes it
++    hide_timer_.Stop();
++    if (level_stream_) {
++      level_stream_ = false;
++      CallBool("SetLevelStream", false);
++    }
++    return;
++  }
++  bubble_.reset();
++  OpenBubble(screen_point, /*pinned=*/true);
++}
++
++void KibaAssistant::OpenBubble(const gfx::Point& anchor, bool pinned) {
++  KibaBubble::Callbacks callbacks;
++  callbacks.orb_pressed = base::BindRepeating(&KibaAssistant::OnOrbPressed,
++                                              weak_ptr_factory_.GetWeakPtr());
++  callbacks.set_muted = base::BindRepeating(
++      [](base::WeakPtr<KibaAssistant> self, bool muted) {
++        if (self) {
++          self->CallBool("SetMuted", muted);
++        }
++      },
++      weak_ptr_factory_.GetWeakPtr());
++  const int generation = ++bubble_generation_;
++  callbacks.closed = base::BindOnce(&KibaAssistant::OnBubbleClosed,
++                                    weak_ptr_factory_.GetWeakPtr(), generation);
++  bubble_ = KibaBubble::Create(BubbleState(), anchor, pinned,
++                               std::move(callbacks));
++  if (!bubble_) {
++    return;
++  }
++  // The wave is only streamed while somebody can see it.
++  level_stream_ = true;
++  CallBool("SetLevelStream", true);
++}
++
++void KibaAssistant::OnOrbPressed() {
++  if (state_ == "speaking") {
++    Call("Stop");
++  } else if (state_ == "idle") {
++    Call("Talk");
++  }
++}
++
++void KibaAssistant::OnBubbleClosed(int generation) {
++  if (generation != bubble_generation_) {
++    return;   // an older card, already replaced
++  }
++  bubble_.reset();
++  hide_timer_.Stop();
++  if (level_stream_ && present_) {
++    CallBool("SetLevelStream", false);
++  }
++  level_stream_ = false;
++}
++
++void KibaAssistant::HideTimerFired() {
++  if (bubble_ && !bubble_->pinned() && state_ == "idle") {
++    bubble_.reset();
++    if (level_stream_) {
++      level_stream_ = false;
++      CallBool("SetLevelStream", false);
++    }
++  }
++}
++
++}  // namespace ash
+diff --git a/chrome/browser/ash/dbus/kiba_assistant.h b/chrome/browser/ash/dbus/kiba_assistant.h
+new file mode 100644
+index 0000000..57f058e
+--- /dev/null
++++ b/chrome/browser/ash/dbus/kiba_assistant.h
+@@ -0,0 +1,111 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef CHROME_BROWSER_ASH_DBUS_KIBA_ASSISTANT_H_
++#define CHROME_BROWSER_ASH_DBUS_KIBA_ASSISTANT_H_
++
++#include <cstdint>
++#include <memory>
++#include <string>
++
++#include "ash/shell.h"
++#include "ash/shell_observer.h"
++#include "base/memory/raw_ptr.h"
++#include "base/memory/scoped_refptr.h"
++#include "base/memory/weak_ptr.h"
++#include "base/scoped_observation.h"
++#include "base/timer/timer.h"
++#include "chrome/browser/ash/dbus/kiba_bubble.h"
++#include "ui/gfx/geometry/point.h"
++
++namespace aura {
++class Window;
++}  // namespace aura
++
++namespace base {
++class Thread;
++}  // namespace base
++
++namespace dbus {
++class Bus;
++class MethodCall;
++class ObjectProxy;
++class Response;
++class Signal;
++}  // namespace dbus
++
++namespace ash {
++
++// KibaOS compatibility: the Kiba voice assistant in the shell. The engine is
++// kibavoiced, which owns the microphone, the wake phrase, the model and the
++// voice and answers on org.kibaos.Kiba of the session bus (see
++// kibaos-kai/org.kibaos.Kiba1.xml). Ash draws it: a status icon whose click
++// opens a card with the orb, what Kiba is doing and a wave that follows the
++// microphone, and a card that opens by itself, without taking focus, when
++// "Hey Kiba" is heard and tucks away after the answer.
++//
++// The icon is there while kibavoiced is. Asking for its state is also what
++// starts it, because the bus activates the name.
++class KibaAssistant : public ShellObserver {
++ public:
++  // Returns null when the client cannot start.
++  static std::unique_ptr<KibaAssistant> Create();
++
++  KibaAssistant(const KibaAssistant&) = delete;
++  KibaAssistant& operator=(const KibaAssistant&) = delete;
++  ~KibaAssistant() override;
++
++  // ShellObserver:
++  void OnRootWindowAdded(aura::Window* root_window) override;
++
++ private:
++  KibaAssistant();
++
++  bool Start();
++
++  // The daemon's name gained or lost an owner.
++  void OnNameOwnerChanged(const std::string& old_owner,
++                          const std::string& new_owner);
++  void RefreshProperties();
++  void OnProperties(dbus::Response* response);
++  void OnStateChanged(dbus::Signal* signal);
++  void OnWakeHeard(dbus::Signal* signal);
++  void OnLevel(dbus::Signal* signal);
++
++  // Calls a method of org.kibaos.Kiba1 with at most one argument.
++  void Call(const char* method);
++  void CallBool(const char* method, bool value);
++
++  void SetPresent(bool present);
++  void UpdateIcons();
++  void OnIconActivated(const gfx::Point& screen_point);
++  void OpenBubble(const gfx::Point& anchor, bool pinned);
++  void OnOrbPressed();
++  void OnBubbleClosed(int generation);
++  void HideTimerFired();
++  KibaBubbleState BubbleState() const;
++
++  std::unique_ptr<base::Thread> dbus_thread_;
++  scoped_refptr<dbus::Bus> bus_;
++  raw_ptr<dbus::ObjectProxy> proxy_ = nullptr;
++
++  bool present_ = false;
++  std::string state_ = "idle";
++  std::u16string status_;
++  bool muted_ = false;
++
++  std::unique_ptr<KibaBubble> bubble_;
++  // Which bubble a closed notice is about: a late one for a bubble already
++  // replaced must not take the new one away.
++  int bubble_generation_ = 0;
++  bool level_stream_ = false;
++  base::OneShotTimer hide_timer_;
++
++  base::ScopedObservation<Shell, ShellObserver> shell_observation_{this};
++  base::WeakPtrFactory<KibaAssistant> weak_ptr_factory_{this};
++};
++
++}  // namespace ash
++
++#endif  // CHROME_BROWSER_ASH_DBUS_KIBA_ASSISTANT_H_
+diff --git a/chrome/browser/ash/dbus/kiba_bubble.cc b/chrome/browser/ash/dbus/kiba_bubble.cc
+new file mode 100644
+index 0000000..b3f2955
+--- /dev/null
++++ b/chrome/browser/ash/dbus/kiba_bubble.cc
+@@ -0,0 +1,338 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#include "chrome/browser/ash/dbus/kiba_bubble.h"
++
++#include <algorithm>
++#include <cmath>
++#include <memory>
++#include <utility>
++
++#include "ash/public/cpp/shell_window_ids.h"
++#include "ash/shell.h"
++#include "base/functional/bind.h"
++#include "base/memory/ptr_util.h"
++#include "base/strings/utf_string_conversions.h"
++#include "cc/paint/paint_flags.h"
++#include "ui/base/metadata/metadata_header_macros.h"
++#include "ui/base/mojom/dialog_button.mojom.h"
++#include "ui/base/metadata/metadata_impl_macros.h"
++#include "ui/display/screen.h"
++#include "ui/events/event.h"
++#include "ui/gfx/canvas.h"
++#include "ui/gfx/font_list.h"
++#include "ui/gfx/geometry/insets.h"
++#include "ui/gfx/geometry/rect.h"
++#include "ui/gfx/geometry/size.h"
++#include "ui/gfx/skia_paint_util.h"
++#include "ui/views/background.h"
++#include "ui/views/bubble/bubble_border.h"
++#include "ui/views/bubble/bubble_dialog_delegate_view.h"
++#include "ui/views/controls/button/label_button.h"
++#include "ui/views/controls/label.h"
++#include "ui/views/layout/box_layout.h"
++#include "ui/views/view.h"
++#include "ui/views/widget/widget.h"
++
++namespace ash {
++
++namespace {
++
++// Colors sampled from the Kiba mascot. The card is always light.
++constexpr SkColor kCyan = SkColorSetRGB(0x6A, 0xD8, 0xFD);
++constexpr SkColor kBlue = SkColorSetRGB(0x3E, 0x64, 0xEB);
++constexpr SkColor kViolet = SkColorSetRGB(0x7E, 0x63, 0xFA);
++constexpr SkColor kPink = SkColorSetRGB(0xF2, 0x9E, 0xF5);
++constexpr SkColor kNavy = SkColorSetRGB(0x14, 0x1E, 0x4F);
++constexpr SkColor kMist = SkColorSetRGB(0xF4, 0xF5, 0xFE);
++constexpr SkColor kMuted = SkColorSetRGB(0x7B, 0x82, 0xB8);
++constexpr SkColor kError = SkColorSetRGB(0xD6, 0x56, 0x8F);
++
++constexpr int kCardWidth = 280;
++constexpr int kOrbSize = 132;
++constexpr int kWaveHeight = 56;
++
++// The orb, drawn rather than shipped: a gradient disc with a rim that glows
++// while Kiba is busy and swells with the voice.
++class OrbView : public views::View {
++  METADATA_HEADER(OrbView, views::View)
++
++ public:
++  explicit OrbView(base::RepeatingClosure pressed)
++      : pressed_(std::move(pressed)) {}
++
++  void SetActive(bool active) {
++    active_ = active;
++    SchedulePaint();
++  }
++  void SetLevel(double rms) {
++    level_ = std::clamp(rms, 0.0, 1.0);
++    SchedulePaint();
++  }
++
++  // views::View:
++  gfx::Size CalculatePreferredSize(
++      const views::SizeBounds& available_size) const override {
++    return gfx::Size(kCardWidth, kOrbSize);
++  }
++  bool OnMousePressed(const ui::MouseEvent& event) override {
++    return event.IsOnlyLeftMouseButton();
++  }
++  void OnMouseReleased(const ui::MouseEvent& event) override {
++    if (event.IsLeftMouseButton() && HitTestPoint(event.location())) {
++      pressed_.Run();
++    }
++  }
++  void OnPaint(gfx::Canvas* canvas) override {
++    const gfx::PointF center(width() / 2.f, height() / 2.f);
++    const float base_radius = kOrbSize * 0.36f;
++    const float radius = base_radius * (1.f + 0.12f * level_);
++
++    if (active_) {
++      cc::PaintFlags glow;
++      glow.setAntiAlias(true);
++      glow.setColor(SkColorSetA(kViolet, 0x38));
++      canvas->DrawCircle(center, radius + 12.f, glow);
++    }
++    cc::PaintFlags body;
++    body.setAntiAlias(true);
++    body.setShader(gfx::CreateGradientShader(
++        gfx::Point(0, static_cast<int>(center.y() - radius)),
++        gfx::Point(0, static_cast<int>(center.y() + radius)),
++        active_ ? kPink : kCyan, kBlue));
++    canvas->DrawCircle(center, radius, body);
++
++    cc::PaintFlags rim;
++    rim.setAntiAlias(true);
++    rim.setStyle(cc::PaintFlags::kStroke_Style);
++    rim.setStrokeWidth(3.f);
++    rim.setColor(kViolet);
++    canvas->DrawCircle(center, radius, rim);
++
++    // A small highlight, so the disc reads as a bubble.
++    cc::PaintFlags shine;
++    shine.setAntiAlias(true);
++    shine.setColor(SkColorSetA(SK_ColorWHITE, 0x99));
++    canvas->DrawCircle(gfx::PointF(center.x() - radius * 0.38f,
++                                   center.y() - radius * 0.42f),
++                       radius * 0.16f, shine);
++  }
++
++ private:
++  base::RepeatingClosure pressed_;
++  bool active_ = false;
++  double level_ = 0;
++};
++
++BEGIN_METADATA(OrbView)
++END_METADATA
++
++// A gradient wave along the bottom that follows the microphone.
++class WaveView : public views::View {
++  METADATA_HEADER(WaveView, views::View)
++
++ public:
++  void SetLevel(double rms, double low, double mid, double high) {
++    rms_ = std::clamp(rms, 0.0, 1.0);
++    low_ = low;
++    mid_ = mid;
++    high_ = high;
++    SchedulePaint();
++  }
++
++  // views::View:
++  gfx::Size CalculatePreferredSize(
++      const views::SizeBounds& available_size) const override {
++    return gfx::Size(kCardWidth, kWaveHeight);
++  }
++  void OnPaint(gfx::Canvas* canvas) override {
++    // Three bands of bars, one per spectral weight, drawn from the middle.
++    const int bars = 28;
++    const float step = static_cast<float>(width()) / bars;
++    const float mid_y = height() / 2.f;
++    for (int i = 0; i < bars; ++i) {
++      const float t = static_cast<float>(i) / (bars - 1);
++      const double weight = t < 0.34f ? low_ : t < 0.67f ? mid_ : high_;
++      // A bump in the middle of the card, so quiet looks like a calm line.
++      const float envelope = 1.f - std::abs(t - 0.5f) * 1.2f;
++      const float h = 2.f + (height() / 2.f - 4.f) *
++                                static_cast<float>(rms_ * weight * 3.0) *
++                                envelope;
++      cc::PaintFlags flags;
++      flags.setAntiAlias(true);
++      flags.setColor(t < 0.5f ? kCyan : kPink);
++      const float x = i * step + step * 0.2f;
++      canvas->DrawRoundRect(
++          gfx::RectF(x, mid_y - std::min(h, mid_y), step * 0.6f,
++                     2 * std::min(h, mid_y)),
++          step * 0.3f, flags);
++    }
++  }
++
++ private:
++  double rms_ = 0, low_ = 0.34, mid_ = 0.33, high_ = 0.33;
++};
++
++BEGIN_METADATA(WaveView)
++END_METADATA
++
++}  // namespace
++
++// The card's contents.
++class KibaBubbleContents : public views::View {
++  METADATA_HEADER(KibaBubbleContents, views::View)
++
++ public:
++  explicit KibaBubbleContents(KibaBubble::Callbacks* callbacks)
++      : callbacks_(callbacks) {
++    SetBackground(views::CreateSolidBackground(SK_ColorWHITE));
++    SetLayoutManager(std::make_unique<views::BoxLayout>(
++        views::BoxLayout::Orientation::kVertical, gfx::Insets::VH(8, 0), 4));
++    orb_ = AddChildView(std::make_unique<OrbView>(
++        base::BindRepeating(&KibaBubbleContents::OnOrbPressed, base::Unretained(this))));
++    status_ = AddChildView(std::make_unique<views::Label>());
++    status_->SetHorizontalAlignment(gfx::ALIGN_CENTER);
++    status_->SetFontList(
++        gfx::FontList().DeriveWithSizeDelta(1).DeriveWithWeight(
++            gfx::Font::Weight::MEDIUM));
++    wave_ = AddChildView(std::make_unique<WaveView>());
++    mute_ = AddChildView(std::make_unique<views::LabelButton>(
++        base::BindRepeating(&KibaBubbleContents::OnMutePressed, base::Unretained(this)),
++        std::u16string()));
++    mute_->SetEnabledTextColors(kNavy);
++  }
++
++  void SetState(const KibaBubbleState& state) {
++    muted_ = state.muted;
++    const bool error = state.state == "unavailable";
++    status_->SetText(state.status);
++    status_->SetEnabledColor(error ? kError : kMuted);
++    orb_->SetActive(state.state != "idle" && state.state != "unavailable");
++    mute_->SetText(muted_ ? u"Unmute Kiba" : u"Mute Kiba");
++    if (state.state != "listening") {
++      wave_->SetLevel(0, 0.34, 0.33, 0.33);
++      orb_->SetLevel(0);
++    }
++    state_ = state.state;
++  }
++  void SetLevel(double rms, double low, double mid, double high) {
++    if (state_ != "listening") {
++      return;
++    }
++    wave_->SetLevel(rms, low, mid, high);
++    orb_->SetLevel(rms);
++  }
++
++ private:
++  void OnOrbPressed() { callbacks_->orb_pressed.Run(); }
++  void OnMutePressed() { callbacks_->set_muted.Run(!muted_); }
++
++  raw_ptr<KibaBubble::Callbacks> callbacks_;
++  raw_ptr<OrbView> orb_ = nullptr;
++  raw_ptr<views::Label> status_ = nullptr;
++  raw_ptr<WaveView> wave_ = nullptr;
++  raw_ptr<views::LabelButton> mute_ = nullptr;
++  bool muted_ = false;
++  std::string state_;
++};
++
++BEGIN_METADATA(KibaBubbleContents)
++END_METADATA
++
++namespace {
++
++// Keeps the callbacks the card's views call alive as long as the card is,
++// and tells the owner when the card is gone, whoever closed it.
++class Delegate : public views::BubbleDialogDelegate {
++ public:
++  Delegate(const gfx::Rect& anchor, KibaBubble::Callbacks callbacks)
++      : views::BubbleDialogDelegate(static_cast<views::View*>(nullptr),
++                                    views::BubbleBorder::BOTTOM_RIGHT,
++                                    views::BubbleBorder::STANDARD_SHADOW),
++        callbacks_(std::move(callbacks)) {
++    SetAnchorRect(anchor);
++    SetButtons(static_cast<int>(ui::mojom::DialogButton::kNone));
++    set_margins(gfx::Insets());
++    set_corner_radius(24);
++    SetShowCloseButton(false);
++  }
++  ~Delegate() override {
++    if (callbacks_.closed) {
++      std::move(callbacks_.closed).Run();
++    }
++  }
++  KibaBubble::Callbacks* callbacks() { return &callbacks_; }
++
++ private:
++  KibaBubble::Callbacks callbacks_;
++};
++
++}  // namespace
++
++KibaBubble::KibaBubble() = default;
++
++KibaBubble::~KibaBubble() {
++  Close();
++}
++
++// static
++std::unique_ptr<KibaBubble> KibaBubble::Create(const KibaBubbleState& state,
++                                               const gfx::Point& anchor,
++                                               bool pinned,
++                                               Callbacks callbacks) {
++  if (!Shell::HasInstance()) {
++    return nullptr;
++  }
++  const display::Display display =
++      display::Screen::Get()->GetDisplayNearestPoint(anchor);
++  aura::Window* root = Shell::GetRootWindowForDisplayId(display.id());
++  if (!root) {
++    return nullptr;
++  }
++  auto bubble = base::WrapUnique(new KibaBubble());
++  bubble->pinned_ = pinned;
++
++  gfx::Rect anchor_rect(anchor, gfx::Size(1, 1));
++  auto delegate = std::make_unique<Delegate>(anchor_rect, std::move(callbacks));
++  delegate->set_parent_window(
++      Shell::GetContainer(root, kShellWindowId_SettingBubbleContainer));
++  delegate->set_close_on_deactivate(pinned);
++  delegate->SetCanActivate(pinned);
++  auto contents = std::make_unique<KibaBubbleContents>(delegate->callbacks());
++  contents->SetState(state);
++  bubble->contents_ = delegate->SetContentsView(std::move(contents));
++
++  // The widget owns the delegate and goes away on its own when the bubble
++  // is dismissed; `widget_` follows it without owning it.
++  views::Widget* widget = views::BubbleDialogDelegate::CreateBubbleDeprecated(
++      std::move(delegate), views::Widget::InitParams::NATIVE_WIDGET_OWNS_WIDGET);
++  bubble->widget_ = widget->GetWeakPtr();
++  if (pinned) {
++    widget->Show();
++  } else {
++    widget->ShowInactive();
++  }
++  return bubble;
++}
++
++void KibaBubble::SetState(const KibaBubbleState& state) {
++  if (contents_ && widget_) {
++    contents_->SetState(state);
++  }
++}
++
++void KibaBubble::SetLevel(double rms, double low, double mid, double high) {
++  if (contents_ && widget_) {
++    contents_->SetLevel(rms, low, mid, high);
++  }
++}
++
++void KibaBubble::Close() {
++  if (widget_) {
++    contents_ = nullptr;
++    widget_->Close();
++  }
++}
++
++}  // namespace ash
+diff --git a/chrome/browser/ash/dbus/kiba_bubble.h b/chrome/browser/ash/dbus/kiba_bubble.h
+new file mode 100644
+index 0000000..e1a2cf2
+--- /dev/null
++++ b/chrome/browser/ash/dbus/kiba_bubble.h
+@@ -0,0 +1,72 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++#ifndef CHROME_BROWSER_ASH_DBUS_KIBA_BUBBLE_H_
++#define CHROME_BROWSER_ASH_DBUS_KIBA_BUBBLE_H_
++
++#include <memory>
++#include <string>
++
++#include "base/functional/callback.h"
++#include "base/memory/raw_ptr.h"
++#include "base/memory/weak_ptr.h"
++#include "ui/gfx/geometry/point.h"
++
++namespace views {
++class Widget;
++}  // namespace views
++
++namespace ash {
++
++class KibaBubbleContents;
++
++// KibaOS compatibility: what the Kiba assistant's bubble shows, a card drawn
++// with Views from the state kibavoiced reports. It owns no state of its own.
++struct KibaBubbleState {
++  std::string state = "idle";
++  std::u16string status;
++  bool muted = false;
++};
++
++class KibaBubble {
++ public:
++  struct Callbacks {
++    // The orb was pressed: talk when idle, stop when speaking.
++    base::RepeatingClosure orb_pressed;
++    base::RepeatingCallback<void(bool muted)> set_muted;
++    // The bubble went away, however it did.
++    base::OnceClosure closed;
++  };
++
++  // `pinned` bubbles come from a click and take focus; the others come from
++  // the wake phrase and neither take it nor stay. `anchor` is a point on the
++  // screen the bubble opens beside.
++  static std::unique_ptr<KibaBubble> Create(const KibaBubbleState& state,
++                                            const gfx::Point& anchor,
++                                            bool pinned,
++                                            Callbacks callbacks);
++
++  KibaBubble(const KibaBubble&) = delete;
++  KibaBubble& operator=(const KibaBubble&) = delete;
++  ~KibaBubble();
++
++  void SetState(const KibaBubbleState& state);
++  // rms 0..1; low, mid and high are spectral weights.
++  void SetLevel(double rms, double low, double mid, double high);
++  bool pinned() const { return pinned_; }
++  void Close();
++
++ private:
++  KibaBubble();
++
++  bool pinned_ = false;
++  base::WeakPtr<views::Widget> widget_;
++  // Goes with the widget, which is why every use checks `widget_` first.
++  raw_ptr<KibaBubbleContents, DisableDanglingPtrDetection> contents_ = nullptr;
++  base::WeakPtrFactory<KibaBubble> weak_ptr_factory_{this};
++};
++
++}  // namespace ash
++
++#endif  // CHROME_BROWSER_ASH_DBUS_KIBA_BUBBLE_H_
+diff --git a/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.cc b/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.cc
+index 3e3e290..ed43e18 100644
+--- a/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.cc
++++ b/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.cc
+@@ -111,6 +111,7 @@
+ #include "chrome/browser/ash/dbus/proxy_resolution_service_provider.h"
+ #include "chrome/browser/ash/dbus/screen_lock_service_provider.h"
+ #include "chrome/browser/ash/dbus/smb_fs_service_provider.h"
++#include "chrome/browser/ash/dbus/kiba_assistant.h"
+ #include "chrome/browser/ash/dbus/status_notifier_host.h"
+ #include "chrome/browser/ash/dbus/virtual_file_request_service_provider.h"
+ #include "chrome/browser/ash/dbus/vm/vm_applications_service_provider.h"
+@@ -1744,6 +1745,9 @@ void ChromeBrowserMainPartsAsh::PostBrowserStart() {
+         g_browser_process->shared_url_loader_factory());
+     // KibaOS compatibility: their tray icons show in the status area.
+     status_notifier_host_ = StatusNotifierHost::Create();
++    // KibaOS compatibility: the Kiba voice assistant, an icon and a card in
++    // the status area while kibavoiced runs.
++    kiba_assistant_ = KibaAssistant::Create();
+     // KibaOS compatibility: "loginctl lock-session" and the lockers that use
+     // it show the lock screen, and logind hears when it is up.
+     logind_lock_bridge_ = LogindLockBridge::Create();
+@@ -1759,6 +1763,7 @@ void ChromeBrowserMainPartsAsh::PostBrowserStart() {
+ // crbug.com/40511182 for details.
+ void ChromeBrowserMainPartsAsh::PostMainMessageLoopRun() {
+   logind_lock_bridge_.reset();
++  kiba_assistant_.reset();
+   status_notifier_host_.reset();
+   mpris_media_bridge_.reset();
+   video_conference_manager_client_.reset();
+diff --git a/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.h b/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.h
+index 72e12e9..6179500 100644
+--- a/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.h
++++ b/chrome/browser/ash/main_parts/chrome_browser_main_parts_ash.h
+@@ -111,6 +111,7 @@ class SessionTerminationManager;
+ class ShortcutMappingPrefService;
+ class ShutdownPolicyForwarder;
+ class SigninProfileHandler;
++class KibaAssistant;
+ class StatusNotifierHost;
+ class SuspendPerfReporter;
+ class SystemTokenCertDBInitializer;
+@@ -315,6 +316,9 @@ class ChromeBrowserMainPartsAsh : public ChromeBrowserMainPartsLinux {
+   // KibaOS compatibility: Linux applications' icons in the system tray.
+   std::unique_ptr<StatusNotifierHost> status_notifier_host_;
+ 
++  // KibaOS compatibility: the Kiba voice assistant in the status area.
++  std::unique_ptr<KibaAssistant> kiba_assistant_;
++
+   // Set when PreProfileInit() is called. If PreMainMessageLoopRun() exits
+   // early, this will be false during PostMainMessageLoopRun(), etc.
+   // Used to prevent shutting down classes that were not initialized.

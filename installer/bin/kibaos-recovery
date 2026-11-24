@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+# Non-destructive Btrfs/systemd-boot recovery controls for an installed KibaOS system.
+set -Eeuo pipefail
+
+ROOT=/
+COMMAND=${1:-help}
+shift || true
+CONFIRM=
+LABEL=
+SET_ROLLBACK=0
+RETENTION=${KIBAOS_ROLLBACK_RETENTION:-3}
+
+usage() {
+  cat <<'EOF'
+Usage: kibaos-recovery COMMAND [options]
+
+Commands:
+  status                    Show install manifest, boot state, and snapshots
+  snapshot --label NAME     Create a read-only recovery snapshot
+           [--set-rollback] Also point the rollback boot entry at the snapshot
+  boot-normal               Select the normal entry for the next boot
+  boot-rollback             Select the configured rollback entry for next boot
+  default-normal --confirm SET-DEFAULT:kibaos.conf
+  default-rollback --confirm SET-DEFAULT:kibaos-rollback.conf
+  refresh-bootloader        Reinstall systemd-boot files without EFI variable writes
+  collect [collector args]  Run kibaos-hardware-qualify
+
+Options:
+  --root PATH               Mounted installed root (default /)
+  --label NAME              Snapshot label (letters, digits, dot, underscore, dash)
+  --set-rollback            Update kibaos-rollback.conf after creating a snapshot
+  --confirm TOKEN           Required only for persistent default changes
+
+Environment:
+  KIBAOS_ROLLBACK_RETENTION Number of manual snapshots to retain (default: 3)
+
+No command deletes a snapshot or modifies a filesystem layout.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --root) ROOT=${2:?}; shift 2 ;;
+    --label) LABEL=${2:?}; shift 2 ;;
+    --set-rollback) SET_ROLLBACK=1; shift ;;
+    --confirm) CONFIRM=${2:?}; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) break ;;
+  esac
+done
+
+[[ $RETENTION =~ ^[1-9][0-9]*$ ]] || {
+  echo 'kibaos-recovery: KIBAOS_ROLLBACK_RETENTION must be a positive integer' >&2
+  exit 2
+}
+
+ROOT=$(readlink -f -- "$ROOT")
+ENTRY_DIR=$ROOT/boot/loader/entries
+SNAPSHOT_DIR=$ROOT/.snapshots
+
+require_root() {
+  (( EUID == 0 )) || { echo 'kibaos-recovery: this operation requires root' >&2; exit 1; }
+}
+
+case "$COMMAND" in
+  help|-h|--help)
+    usage
+    ;;
+  status)
+    [[ ! -r $ROOT/etc/kibaos-install/manifest ]] || cat "$ROOT/etc/kibaos-install/manifest"
+    printf '%s\n' '--- boot entries ---'
+    bootctl --root="$ROOT" --esp-path=/boot status 2>&1 || true
+    printf '%s\n' '--- snapshots ---'
+    btrfs subvolume list -s "$ROOT" 2>&1 || true
+    ;;
+  snapshot)
+    require_root
+    [[ $LABEL =~ ^[A-Za-z0-9._-]{1,48}$ ]] || { echo 'kibaos-recovery: --label must be 1 to 48 letters, digits, dots, underscores or hyphens' >&2; exit 2; }
+    stamp=$(date -u +%Y%m%dT%H%M%SZ)
+    destination=$SNAPSHOT_DIR/manual-${stamp}-${LABEL}/snapshot
+    [[ ! -e $destination ]] || { echo "kibaos-recovery: snapshot exists: $destination" >&2; exit 1; }
+    normal_entry=$ENTRY_DIR/kibaos.conf
+    rollback_entry=$ENTRY_DIR/kibaos-rollback.conf
+    artifact_paths=()
+    if (( SET_ROLLBACK )); then
+      [[ -r $normal_entry ]] || { echo "kibaos-recovery: missing entry: $normal_entry" >&2; exit 1; }
+      while read -r artifact; do
+        [[ $artifact == /* && $artifact != *..* ]] || {
+          echo "kibaos-recovery: unsafe boot artifact path: $artifact" >&2
+          exit 1
+        }
+        [[ -r $ROOT/boot$artifact ]] || {
+          echo "kibaos-recovery: missing boot artifact: $ROOT/boot$artifact" >&2
+          exit 1
+        }
+        artifact_paths+=("$artifact")
+      done < <(awk '$1 == "linux" || $1 == "initrd" { print $2 }' "$normal_entry")
+      ((${#artifact_paths[@]} > 0)) || { echo 'kibaos-recovery: normal boot entry has no artifacts' >&2; exit 1; }
+      required_bytes=0
+      for artifact in "${artifact_paths[@]}"; do
+        artifact_bytes=$(stat -c '%s' "$ROOT/boot$artifact")
+        required_bytes=$((required_bytes + artifact_bytes))
+      done
+      available_bytes=$(df -B1 --output=avail "$ROOT/boot" | awk 'NR == 2 {print $1}')
+      reserve_bytes=${KIBAOS_ROLLBACK_RESERVE_BYTES:-33554432}
+      [[ $available_bytes =~ ^[0-9]+$ ]] || { echo 'kibaos-recovery: could not measure ESP free space' >&2; exit 1; }
+      (( available_bytes >= required_bytes + reserve_bytes )) || {
+        echo "kibaos-recovery: not enough ESP space for rollback artifacts (need $((required_bytes + reserve_bytes)) bytes, have $available_bytes)" >&2
+        exit 1
+      }
+    fi
+    install -d -m 0750 "$(dirname "$destination")"
+    btrfs subvolume snapshot -r "$ROOT" "$destination"
+    snapshot_created=1
+    rollback_boot_dir=
+    rollback_tmp=
+    cleanup_partial_snapshot() {
+      local status=$?
+      set +e
+      if (( status != 0 && snapshot_created )); then
+        if ! btrfs subvolume delete -- "$destination" >/dev/null 2>&1; then
+          printf '%s\n' "kibaos-recovery: failed to remove partial snapshot after an error: $destination" >&2
+        else
+          rmdir -- "$(dirname "$destination")" 2>/dev/null || true
+        fi
+        if [[ -n ${rollback_boot_dir:-} && -d $rollback_boot_dir ]]; then
+          find "$rollback_boot_dir" -depth -type f -delete 2>/dev/null || true
+          find "$rollback_boot_dir" -depth -type l -delete 2>/dev/null || true
+          find "$rollback_boot_dir" -depth -type d -empty -delete 2>/dev/null || true
+        fi
+        if [[ -n ${rollback_tmp:-} ]]; then
+          rm -f -- "$rollback_tmp" 2>/dev/null || true
+        fi
+      fi
+      exit "$status"
+    }
+    trap cleanup_partial_snapshot EXIT
+    if (( SET_ROLLBACK )); then
+      snapshot_name=$(basename "$(dirname "$destination")")
+      snapshot_subvolume=@snapshots/$snapshot_name/snapshot
+      rollback_boot_dir=$ROOT/boot/kibaos-rollback/$snapshot_name
+      install -d -m 0755 "$rollback_boot_dir"
+      for artifact in "${artifact_paths[@]}"; do
+        install -m 0644 "$ROOT/boot$artifact" "$rollback_boot_dir/$(basename "$artifact")"
+      done
+      rollback_tmp=$(mktemp "${rollback_entry}.tmp.XXXXXX")
+      if ! awk -v subvolume="$snapshot_subvolume" -v label="$LABEL" -v boot_id="$snapshot_name" '
+        /^title[[:space:]]/ {
+          print "title KibaOS rollback (" label ")"
+          next
+        }
+        /^(linux|initrd)[[:space:]]/ {
+          artifact = $2
+          sub(/^.*\//, "", artifact)
+          print $1 " /kibaos-rollback/" boot_id "/" artifact
+          next
+        }
+        /^options[[:space:]]/ {
+          line = $0
+          # A rollback boot shows its messages: no quiet, and no unlock screen
+          # over them. Repeated, because one pass consumes the space between
+          # two neighbours and leaves the second standing.
+          while (gsub(/[[:space:]](quiet|splash)([[:space:]]|$)/, " ", line) > 0) {}
+          sub(/[[:space:]]+$/, "", line)
+          if (!sub(/rootflags=subvol=[^[:space:]]+/, "rootflags=subvol=" subvolume, line))
+            exit 42
+          print line
+          next
+        }
+        { print }
+      ' "$normal_entry" >"$rollback_tmp"; then
+        rm -f -- "$rollback_tmp"
+        echo 'kibaos-recovery: normal boot entry has no Btrfs root subvolume' >&2
+        exit 1
+      fi
+      chmod 0644 "$rollback_tmp"
+      mv -f "$rollback_tmp" "$rollback_entry"
+      find "$ROOT/boot/kibaos-rollback" -mindepth 1 -maxdepth 1 -type d \
+        ! -name "$snapshot_name" ! -name factory -exec sh -c '
+          find "$1" -depth -type f -delete
+          find "$1" -depth -type l -delete
+          find "$1" -depth -type d -empty -delete
+        ' _ {} \;
+    fi
+    snapshot_created=0
+    trap - EXIT
+    # Keep the factory snapshot plus a bounded number of manual snapshots.
+    # Deleting a Btrfs subvolume must go through btrfs(8); a failed delete is
+    # reported but never replaced with a dangerous recursive removal.
+    mapfile -t manual_snapshots < <(
+      find "$SNAPSHOT_DIR" -mindepth 2 -maxdepth 2 -type d -name snapshot \
+        -path "$SNAPSHOT_DIR/manual-*/snapshot" -printf '%h\n' | LC_ALL=C sort
+    )
+    while ((${#manual_snapshots[@]} > RETENTION)); do
+      oldest=${manual_snapshots[0]}
+      if btrfs subvolume delete -- "$oldest/snapshot" >/dev/null 2>&1; then
+        rmdir -- "$oldest" 2>/dev/null || true
+      else
+        printf '%s\n' "kibaos-recovery: could not prune old snapshot: $oldest" >&2
+        break
+      fi
+      manual_snapshots=("${manual_snapshots[@]:1}")
+    done
+    printf '%s\n' "$destination"
+    ;;
+  boot-normal|boot-rollback)
+    require_root
+    entry=kibaos.conf
+    [[ $COMMAND != boot-rollback ]] || entry=kibaos-rollback.conf
+    [[ -r $ENTRY_DIR/$entry ]] || { echo "kibaos-recovery: missing entry: $ENTRY_DIR/$entry" >&2; exit 1; }
+    bootctl --root="$ROOT" --esp-path=/boot set-oneshot "$entry"
+    ;;
+  default-normal|default-rollback)
+    require_root
+    entry=kibaos.conf
+    [[ $COMMAND != default-rollback ]] || entry=kibaos-rollback.conf
+    [[ $CONFIRM == SET-DEFAULT:$entry ]] || { echo "kibaos-recovery: use --confirm SET-DEFAULT:$entry" >&2; exit 1; }
+    [[ -r $ENTRY_DIR/$entry ]] || { echo "kibaos-recovery: missing entry: $ENTRY_DIR/$entry" >&2; exit 1; }
+    bootctl --root="$ROOT" --esp-path=/boot set-default "$entry"
+    ;;
+  refresh-bootloader)
+    require_root
+    bootctl --root="$ROOT" --esp-path=/boot --no-variables install
+    ;;
+  collect)
+    exec kibaos-hardware-qualify "$@"
+    ;;
+  *)
+    echo "kibaos-recovery: unknown command: $COMMAND" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

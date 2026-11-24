@@ -1,0 +1,17 @@
+# Maintainer: KibaOS Contributors
+
+pkgname=kibaos-account-helper
+pkgver=0.1.0
+pkgrel=2
+pkgdesc="PAM-backed local account helper for KibaOS"
+arch=('x86_64')
+url="https://github.com/KibaLabsLLC/KibaDE"
+license=('BSD-3-Clause')
+depends=('gcc-libs' 'glibc' 'pam')
+makedepends=('gcc')
+source=(
+  'kibaos-account-helper.cc'
+  'kibaos.pam'
+  'LICENSE'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP')

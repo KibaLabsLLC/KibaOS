@@ -1,0 +1,266 @@
+diff --git a/ui/file_manager/file_manager/foreground/css/file_manager.css b/ui/file_manager/file_manager/foreground/css/file_manager.css
+index aae03f62df81..fbf90177f48b 100644
+--- a/ui/file_manager/file_manager/foreground/css/file_manager.css
++++ b/ui/file_manager/file_manager/foreground/css/file_manager.css
+@@ -47,16 +47,25 @@ body {
+ }
+ 
+ /* Drop opacity of selected rows to give a visual feedback on copy/cut
+  * operation. */
+ .blink {
+   opacity: 0.8;
+ }
+ 
++/* KibaOS: a file that has been cut and is waiting to be pasted.
++ *
++ * Half opacity, not the 0.8 above. That one is a hundred millisecond flash
++ * acknowledging the keystroke; this one has to still read as "not settled yet"
++ * when you come back to the window a minute later, and 0.8 does not. */
++.kibaos-cut {
++  opacity: 0.5;
++}
++
+ /* Main part of the dialog between header and footer. */
+ .dialog-container {
+   align-items: stretch;
+   background-color: var(--cros-sys-app_base_shaded);
+   display: flex;
+   flex: auto;
+   flex-direction: row;
+   overflow: hidden;
+diff --git a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+new file mode 100644
+index 000000000000..ab57790a9fd7
+--- /dev/null
++++ b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+@@ -0,0 +1,58 @@
++// Copyright 2026 The Chromium Authors
++// Use of this source code is governed by a BSD-style license that can be
++// found in the LICENSE file.
++
++import type {FilesAppEntry} from '../../common/js/files_app_entry_types.js';
++
++/**
++ * KibaOS: which files are waiting to be moved.
++ *
++ * Cutting a file gave a hundred millisecond flicker at opacity 0.8 and then
++ * nothing. Twenty percent of a fade for a tenth of a second is not an
++ * acknowledgement; it is indistinguishable from a rendering hiccup. So after
++ * cutting three files out of four hundred there was no way to see which three,
++ * and the only way to find out was to paste somewhere and look.
++ *
++ * Every other file manager dims a cut file until it is pasted. This is the set
++ * that makes that possible.
++ *
++ * Keyed by URL rather than by entry, because the list rebuilds its entry
++ * objects as rows are recycled, so the object that was cut is not the object
++ * the row is later rendered from. The URL survives that.
++ */
++const cutUrls = new Set<string>();
++
++/**
++ * Marks entries as cut, replacing anything marked before.
++ *
++ * There is only ever one clipboard, so a second cut replaces the first rather
++ * than adding to it.
++ */
++export function kibaOsMarkCut(entries: Array<Entry|FilesAppEntry>) {
++  cutUrls.clear();
++  for (const entry of entries) {
++    cutUrls.add(entry.toURL());
++  }
++}
++
++/**
++ * Forgets what was cut. Returns whether anything was actually forgotten, so a
++ * caller can skip a redraw it does not need.
++ */
++export function kibaOsClearCut(): boolean {
++  if (cutUrls.size === 0) {
++    return false;
++  }
++  cutUrls.clear();
++  return true;
++}
++
++/**
++ * Whether this entry is waiting to be moved.
++ */
++export function kibaOsIsCut(entry: Entry|FilesAppEntry): boolean {
++  if (cutUrls.size === 0) {
++    return false;
++  }
++  return cutUrls.has(entry.toURL());
++}
+diff --git a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
+index e8ec0e766081..841d4dbe5101 100644
+--- a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
++++ b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
+@@ -23,16 +23,17 @@ import {FileErrorToDomError, visitURL} from '../../common/js/util.js';
+ import {RootType, VolumeType} from '../../common/js/volume_manager_types.js';
+ import type {FileKey} from '../../state/state.js';
+ import {getFileData, getStore} from '../../state/store.js';
+ import type {XfTree} from '../../widgets/xf_tree.js';
+ import type {XfTreeItem} from '../../widgets/xf_tree_item.js';
+ import {isTreeItem, isXfTree} from '../../widgets/xf_tree_util.js';
+ import type {FilesToast} from '../elements/files_toast.js';
+ 
++import {kibaOsClearCut, kibaOsIsCut, kibaOsMarkCut} from './kibaos_cut_marks.js';
+ import type {DirectoryModel} from './directory_model.js';
+ import type {FileSelectionHandler} from './file_selection.js';
+ import {EventType} from './file_selection.js';
+ import type {MetadataModel} from './metadata/metadata_model.js';
+ import type {Command} from './ui/command.js';
+ import {DragSelector} from './ui/drag_selector.js';
+ import type {FileGrid} from './ui/file_grid.js';
+ import type {FileTableList} from './ui/file_table_list.js';
+@@ -1174,16 +1175,59 @@ export class FileTransferController {
+           document.activeElement, clipboardData, effectAllowed);
+       return;
+     }
+ 
+     // If current focus is not on DirectoryTree, write the current selection in
+     // the list to system clipboard.
+     this.cutOrCopy_(clipboardData, effectAllowed);
+     this.blinkSelection_();
++
++    // KibaOS: remember what is waiting to move, and forget any earlier lot.
++    // A copy clears the marks too: there is one clipboard, so copying means
++    // the previous cut is no longer what paste will do.
++    if (isMove) {
++      kibaOsMarkCut(this.selectionHandler_.selection.entries);
++      this.kibaOsRedrawForCutMarks_();
++    } else if (kibaOsClearCut()) {
++      this.kibaOsRedrawForCutMarks_();
++    }
++  }
++
++  /**
++   * KibaOS: bring the rows already on screen into line with what is cut.
++   *
++   * Deliberately not list.redraw(). Redraw reuses the rows it already has:
++   * mergeItems takes cachedItems_[index] when one exists and only calls
++   * createItem when it does not, so the render path that applies the class
++   * never runs again for a row that is already on screen. Calling redraw here
++   * dimmed nothing at all, and would have dimmed only the rows scrolled into
++   * view afterwards, which is worse than dimming none of them.
++   *
++   * So the rows on screen are toggled directly and the render path keeps
++   * handling the ones that arrive later. Both are needed: this one cannot see
++   * rows that do not exist yet, and that one does not run for rows that
++   * already do.
++   */
++  private kibaOsRedrawForCutMarks_() {
++    const list = this.listContainer_.currentList;
++    const model = list.dataModel;
++    if (!model) {
++      return;
++    }
++    for (const element of list.querySelectorAll<ListItem>('li')) {
++      const index = element.listIndex;
++      if (index < 0) {
++        continue;
++      }
++      const entry = model.item(index);
++      if (entry) {
++        element.classList.toggle('kibaos-cut', kibaOsIsCut(entry));
++      }
++    }
+   }
+ 
+   /**
+    * Performs cut or copy operation dispatched from directory tree.
+    */
+   cutOrCopyFromDirectoryTree(
+       focusedItem: XfTreeItem|null, clipboardData: DataTransfer|null,
+       effectAllowed: DataTransfer['effectAllowed']) {
+@@ -1303,16 +1347,20 @@ export class FileTransferController {
+         !this.canPasteOrDrop_(getClipboardData(event), destination)) {
+       return;
+     }
+     event.preventDefault();
+     this.paste(getClipboardData(event), destination).then(effect => {
+       // On cut, we clear the clipboard after the file is pasted/moved so we
+       // don't try to move/delete the original file again.
+       if (effect === 'move') {
++        // KibaOS: the cut has been consumed, so the marks go with it.
++        if (kibaOsClearCut()) {
++          this.kibaOsRedrawForCutMarks_();
++        }
+         this.simulateCommand_('cut', (event: Event) => {
+           event.preventDefault();
+           const clipboardData = getClipboardData(event);
+           if (clipboardData) {
+             clipboardData.setData('fs/clear', '');
+           }
+         });
+       }
+diff --git a/ui/file_manager/file_manager/foreground/js/ui/file_table_list.ts b/ui/file_manager/file_manager/foreground/js/ui/file_table_list.ts
+index dc1235fdcd2e..6ef2d53db896 100644
+--- a/ui/file_manager/file_manager/foreground/js/ui/file_table_list.ts
++++ b/ui/file_manager/file_manager/foreground/js/ui/file_table_list.ts
+@@ -8,16 +8,17 @@ import type {EntryLocation} from '../../../background/js/entry_location_impl.js'
+ import type {VolumeManager} from '../../../background/js/volume_manager.js';
+ import type {ArrayDataModel} from '../../../common/js/array_data_model.js';
+ import {isTeamDriveRoot} from '../../../common/js/entry_utils.js';
+ import {getIcon, isEncrypted} from '../../../common/js/file_type.js';
+ import type {FilesAppEntry} from '../../../common/js/files_app_entry_types.js';
+ import {isDlpEnabled, isDriveFsBulkPinningEnabled} from '../../../common/js/flags.js';
+ import {getEntryLabel, str, strf} from '../../../common/js/translations.js';
+ import type {FileListModel} from '../file_list_model.js';
++import {kibaOsIsCut} from '../kibaos_cut_marks.js';
+ import type {MetadataItem} from '../metadata/metadata_item.js';
+ import type {MetadataModel} from '../metadata/metadata_model.js';
+ 
+ import type {A11yAnnounce} from './a11y_announce.js';
+ import {DragSelector} from './drag_selector.js';
+ import type {FileGridSelectionController} from './file_grid.js';
+ import type {FileListSelectionModel} from './file_list_selection_model.js';
+ import type {FileTable} from './file_table.js';
+@@ -471,16 +472,24 @@ export function updateListItemExternalProps(
+     }
+     const dlpIcon = li.querySelector('.dlp-managed-icon');
+     if (dlpIcon) {
+       dlpIcon.classList.toggle(
+           'is-dlp-restricted', externalProps.isDlpRestricted);
+     }
+   }
+ 
++  // KibaOS: a file waiting to be moved stays dimmed until it is pasted.
++  //
++  // Here rather than at the moment of cutting, because this runs from
++  // decorateListItem on every row render. The list recycles its rows as it
++  // scrolls, so a class set once on the visible rows would be wiped off any row
++  // that scrolls away and come back missing.
++  li.classList.toggle('kibaos-cut', kibaOsIsCut(entry));
++
+   li.classList.toggle('shortcut', !!externalProps.shortcut);
+ 
+   const iconDiv = li.querySelector<HTMLElement>('.detail-icon');
+   if (!iconDiv) {
+     return;
+   }
+   iconDiv.style.backgroundImage = '';
+ 
+diff --git a/ui/file_manager/file_names.gni b/ui/file_manager/file_names.gni
+index 032a8cb6e90d..33103db76c02 100644
+--- a/ui/file_manager/file_names.gni
++++ b/ui/file_manager/file_names.gni
+@@ -214,16 +214,17 @@ ts_files = [
+   "file_manager/background/js/volume_manager_factory.ts",
+ 
+   # Foreground:
+   "file_manager/foreground/js/actions_controller.ts",
+   "file_manager/foreground/js/actions_model.ts",
+   "file_manager/foreground/js/android_app_list_model.ts",
+   "file_manager/foreground/js/app_state_controller.ts",
+   "file_manager/foreground/js/kibaos_devices_controller.ts",
++  "file_manager/foreground/js/kibaos_cut_marks.ts",
+   "file_manager/foreground/js/kibaos_folder_size.ts",
+   "file_manager/foreground/js/banner_controller.ts",
+   "file_manager/foreground/js/command_handler.ts",
+   "file_manager/foreground/js/constants.ts",
+   "file_manager/foreground/js/crossover_search_utils.ts",
+   "file_manager/foreground/js/crostini_controller.ts",
+   "file_manager/foreground/js/one_drive_controller.ts",
+   "file_manager/foreground/js/deferred_elements.ts",

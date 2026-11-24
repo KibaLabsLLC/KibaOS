@@ -1,0 +1,23 @@
+[Unit]
+Description=KibaOS Linux host integration bridge
+After=dbus.service
+Wants=dbus.service
+
+[Service]
+Type=dbus
+BusName=org.kibaos.HostBridge
+ExecStart=/usr/bin/kibaos-host-bridge
+Restart=on-failure
+RestartSec=2
+User=root
+PrivateTmp=true
+ProtectHome=read-only
+ProtectKernelLogs=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+LockPersonality=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

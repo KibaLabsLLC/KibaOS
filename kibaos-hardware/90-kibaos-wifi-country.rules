@@ -1,0 +1,2 @@
+# A Wi-Fi card appearing sets the Wi-Fi country, see kibaos-wifi-country.
+ACTION=="add", SUBSYSTEM=="ieee80211", TAG+="systemd", ENV{SYSTEMD_WANTS}+="kibaos-wifi-country.service"

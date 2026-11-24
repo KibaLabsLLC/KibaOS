@@ -1,0 +1,213 @@
+#!/bin/bash
+# Supervise the complete Weston/KibaOS session so it can restart as a unit.
+set -u
+
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+state_root="${runtime_dir}/kibaos"
+session_id="${XDG_SESSION_ID:-}"
+if [[ -n "${session_id}" &&
+      ( "${session_id}" == "." || "${session_id}" == ".." ||
+        ! "${session_id}" =~ ^[A-Za-z0-9_.-]+$ ) ]]; then
+  echo "kibaos-session-supervisor: invalid XDG_SESSION_ID" >&2
+  exit 2
+fi
+
+# PAM/logind normally provides XDG_SESSION_ID, allowing one UID to own several
+# independent KibaOS sessions. Without it, use one fail-closed fallback slot
+# rather than guessing a scope and risking control of another session.
+if [[ -n "${session_id}" ]]; then
+  state_dir="${state_root}/sessions/${session_id}"
+  supervisor_scope="session ${session_id}"
+else
+  state_dir="${state_root}"
+  supervisor_scope="unscoped fallback"
+fi
+pid_file="${state_dir}/session-supervisor.pid"
+pid_lock_file="${pid_file}.lock"
+# tuigreet's --session-wrapper passes the selected desktop entry as argv.
+session_command=(/usr/bin/chromiumos-ash-session)
+if [[ "$#" -gt 0 ]]; then
+  # tuigreet 0.9.1 can remember pkgrel 1's supervisor-valued --cmd in its
+  # per-user cache. When the new session wrapper prefixes that exact cached
+  # command, starting it recursively would collide with this supervisor's lock.
+  if [[ "$#" -eq 1 && "$1" == /usr/bin/kibaos-session-supervisor ]]; then
+    echo "kibaos-session-supervisor: replacing obsolete cached supervisor command" >&2
+  else
+    session_command=("$@")
+  fi
+fi
+[[ -n "${session_command[0]}" ]] || {
+  echo "kibaos-session-supervisor: session command cannot be empty" >&2
+  exit 2
+}
+stop_grace_seconds="${KIBAOS_SUPERVISOR_STOP_GRACE_SECONDS:-15}"
+stop_kill_seconds="${KIBAOS_SUPERVISOR_STOP_KILL_SECONDS:-5}"
+max_session_failures="${KIBAOS_SUPERVISOR_MAX_SESSION_FAILURES:-3}"
+retry_delay_seconds="${KIBAOS_SUPERVISOR_RETRY_DELAY_SECONDS:-2}"
+session_error_command="${KIBAOS_SESSION_ERROR_COMMAND:-/usr/bin/kibaos-session-error}"
+for duration in "${stop_grace_seconds}" "${stop_kill_seconds}"; do
+  if [[ ! "${duration}" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo "kibaos-session-supervisor: invalid stop timeout" >&2
+    exit 2
+  fi
+done
+if [[ ! "${max_session_failures}" =~ ^[1-9][0-9]*$ ||
+      ! "${retry_delay_seconds}" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  echo "kibaos-session-supervisor: invalid session retry policy" >&2
+  exit 2
+fi
+restart_requested=0
+stopping=0
+child_pid=""
+session_failures=0
+pid_tmp="${pid_file}.$$"
+
+fail_state() {
+  echo "kibaos-session-supervisor: $*" >&2
+  exit 1
+}
+
+prepare_private_dir() {
+  local path="$1"
+  [[ ! -L "${path}" ]] || fail_state "refusing symlink state directory ${path}"
+  [[ ! -e "${path}" || -d "${path}" ]] || \
+    fail_state "state path is not a directory: ${path}"
+  mkdir "${path}" 2>/dev/null || [[ -d "${path}" ]] || \
+    fail_state "cannot create ${path}"
+  [[ -O "${path}" ]] || fail_state "state directory is not owned by this user: ${path}"
+  chmod 700 "${path}" || fail_state "cannot protect ${path}"
+}
+
+umask 077
+[[ -d "${runtime_dir}" && ! -L "${runtime_dir}" && -O "${runtime_dir}" ]] || \
+  fail_state "invalid XDG_RUNTIME_DIR: ${runtime_dir}"
+prepare_private_dir "${state_root}"
+if [[ "${state_dir}" != "${state_root}" ]]; then
+  prepare_private_dir "${state_root}/sessions"
+  prepare_private_dir "${state_dir}"
+fi
+
+cleanup() {
+  local owner=""
+  rm -f -- "${pid_tmp}"
+  if [[ -f "${pid_file}" && ! -L "${pid_file}" ]]; then
+    read -r owner <"${pid_file}" || true
+  fi
+  if [[ "${owner}" == "$$" ]]; then
+    rm -f -- "${pid_file}"
+  fi
+}
+trap cleanup EXIT
+
+# Keep this lock in both the supervisor and the session process tree. If the
+# supervisor dies unexpectedly, the live session retains fd 9 and prevents a
+# replacement from launching a second session in the same scope.
+[[ ! -L "${pid_lock_file}" && ( ! -e "${pid_lock_file}" || -f "${pid_lock_file}" ) ]] || \
+  fail_state "invalid supervisor lock ${pid_lock_file}"
+exec 9>"${pid_lock_file}" || {
+  echo "kibaos-session-supervisor: cannot open ${pid_lock_file}" >&2
+  exit 1
+}
+[[ -O "${pid_lock_file}" ]] || fail_state "supervisor lock is not owned by this user"
+chmod 600 "${pid_lock_file}" || fail_state "cannot protect ${pid_lock_file}"
+if ! flock -n 9; then
+  echo "kibaos-session-supervisor: ${supervisor_scope} already has an active supervisor" >&2
+  exit 1
+fi
+rm -f -- "${pid_tmp}"
+if ! ( set -o noclobber; printf '%s\n' "$$" >"${pid_tmp}" ); then
+  fail_state "cannot write ${pid_tmp}"
+fi
+chmod 600 "${pid_tmp}" || fail_state "cannot protect ${pid_tmp}"
+mv -fT "${pid_tmp}" "${pid_file}" || fail_state "cannot publish ${pid_file}"
+
+stop_child() {
+  if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+    kill -TERM -- "-${child_pid}" 2>/dev/null || true
+  fi
+}
+
+wait_for_stopped_child() {
+  local pid="$1" status watchdog
+  (
+    # The session child intentionally retains fd 9; the watchdog must not.
+    exec 9>&-
+    sleep "${stop_grace_seconds}"
+    kill -TERM -- "-${pid}" 2>/dev/null || exit 0
+    sleep "${stop_kill_seconds}"
+    kill -KILL -- "-${pid}" 2>/dev/null || true
+  ) &
+  watchdog=$!
+  while kill -0 "${pid}" 2>/dev/null; do
+    wait "${pid}"
+    status=$?
+  done
+  kill "${watchdog}" 2>/dev/null || true
+  wait "${watchdog}" 2>/dev/null || true
+  return "${status:-0}"
+}
+
+request_restart() {
+  restart_requested=1
+  stop_child
+}
+
+request_stop() {
+  stopping=1
+  stop_child
+}
+
+report_session_error() {
+  [[ -x "${session_error_command}" ]] || return 0
+  "${session_error_command}" "$@" || true
+}
+
+trap request_restart USR1
+trap request_stop HUP INT TERM
+
+while [[ "${stopping}" == 0 ]]; do
+  restart_requested=0
+  setsid -- "${session_command[@]}" &
+  child_pid=$!
+
+  wait "${child_pid}"
+  status=$?
+  if kill -0 "${child_pid}" 2>/dev/null; then
+    wait_for_stopped_child "${child_pid}"
+    status=$?
+  fi
+  child_pid=""
+
+  if [[ "${stopping}" == 1 ]]; then
+    exit 0
+  fi
+  if [[ "${restart_requested}" == 1 ]]; then
+    sleep 1
+    continue
+  fi
+
+  # Status 78 is reserved for actionable preflight failures. Do not retry a
+  # missing render device or broken runtime directory and make the reason
+  # available to the greeter/log instead of presenting a password kickout.
+  if [[ "${status}" == 78 ]]; then
+    echo "kibaos-session-supervisor: session preflight failed; see the KibaOS session report" >&2
+    exit "${status}"
+  fi
+
+  # A compositor can fail transiently while logind/seatd is still assigning
+  # the DRM device. Keep the authenticated session alive for a bounded retry
+  # window instead of immediately returning to tuigreet and making a correct
+  # password look like a login failure. A clean exit remains a real sign-out.
+  if [[ "${status}" != 0 ]]; then
+    session_failures=$((session_failures + 1))
+    if (( session_failures < max_session_failures )); then
+      echo "kibaos-session-supervisor: session exited with status ${status}; retry ${session_failures}/${max_session_failures}" >&2
+      sleep "${retry_delay_seconds}"
+      continue
+    fi
+    echo "kibaos-session-supervisor: session failed ${session_failures} times; returning to greeter" >&2
+    report_session_error session-failed "exit_status=${status}"
+  fi
+
+  exit "${status}"
+done

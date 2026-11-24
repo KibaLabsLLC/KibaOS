@@ -1,0 +1,197 @@
+# shellcheck shell=bash
+# Shared input validation for the KibaOS installer front ends.
+#
+# These rules live in their own sourceable file for one reason: they depend on
+# data that only exists on a live installation image (zoneinfo, i18n locales,
+# console keymaps). Keeping them here lets the test suite point the lookup
+# roots at fixtures and assert real accept/reject behaviour on any machine,
+# instead of grepping the front end for source text that may not even run.
+#
+# Every function is side-effect free and returns 0 for accept, 1 for reject.
+
+KIBAOS_ZONEINFO_DIR=${KIBAOS_ZONEINFO_DIR:-/usr/share/zoneinfo}
+KIBAOS_LOCALE_DIR=${KIBAOS_LOCALE_DIR:-/usr/share/i18n/locales}
+KIBAOS_KEYMAP_DIR=${KIBAOS_KEYMAP_DIR:-/usr/share/kbd/keymaps}
+
+# Terminal transitions can leave CR/LF delimiters in a line read after a
+# long package-acquisition phase. Normalize only those line delimiters; the
+# destructive confirmation caller still performs an exact token comparison,
+# so other control bytes remain a refusal.
+kibaos_normalize_confirmation() {
+  local value=$1
+  value=${value//$'\r'/}
+  value=${value//$'\n'/}
+  printf '%s' "$value"
+}
+
+# A timezone must name an installed zone file. The excluded names are the
+# metadata files tzdata ships alongside the zones; they are readable but are
+# not valid values for timedatectl/localtime.
+kibaos_valid_timezone() {
+  local timezone=$1
+  [[ -n $timezone ]] || return 1
+  [[ $timezone =~ ^[A-Za-z0-9_+.-]+(/[A-Za-z0-9_+.-]+)*$ ]] || return 1
+  [[ $timezone != *..* ]] || return 1
+  [[ $timezone != *.tab ]] || return 1
+  case $timezone in
+    iso3166.tab|zone.tab|zone1970.tab|leapseconds|leap-seconds.list|tzdata.zi)
+      return 1
+      ;;
+  esac
+  [[ -f "$KIBAOS_ZONEINFO_DIR/$timezone" ]] || return 1
+  return 0
+}
+
+# C, POSIX and C.UTF-8 are always available from glibc itself and have no
+# entry under the i18n locale source directory.
+kibaos_valid_locale() {
+  local locale=$1 locale_name
+  [[ -n $locale ]] || return 1
+  [[ $locale =~ ^[A-Za-z0-9_.@-]+$ ]] || return 1
+  case $locale in
+    C|POSIX|C.UTF-8) return 0 ;;
+  esac
+  locale_name=${locale%%[@.]*}
+  [[ -n $locale_name ]] || return 1
+  [[ -f "$KIBAOS_LOCALE_DIR/$locale_name" ]] || return 1
+  return 0
+}
+
+# Console keymaps are stored in per-layout subdirectories with several
+# possible extensions, so this is a search rather than a direct stat.
+kibaos_valid_keymap() {
+  local keymap=$1
+  [[ -n $keymap ]] || return 1
+  [[ $keymap =~ ^[A-Za-z0-9_.@+-]+$ ]] || return 1
+  [[ -d $KIBAOS_KEYMAP_DIR ]] || return 1
+  find "$KIBAOS_KEYMAP_DIR" -type f \
+    \( -name "$keymap.map.gz" -o -name "$keymap.map" -o -name "$keymap.kmap.gz" \) \
+    -print -quit 2>/dev/null | grep -q .
+}
+
+kibaos_valid_username() {
+  local username=$1
+  [[ $username =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || return 1
+  # Names the installed base system already owns; useradd would fail late,
+  # after the disk has been erased.
+  case $username in
+    root|bin|daemon|mail|ftp|http|nobody|dbus|systemd-*|polkitd|greeter) return 1 ;;
+  esac
+  return 0
+}
+
+# RFC 1123 host label rules: letters, digits and inner hyphens only.
+#
+# And not `localhost`, which passes every one of those rules and is the one
+# name that must not be used. `/etc/hosts` maps it to 127.0.0.1 on every
+# machine ever made, so a computer called `localhost` is a computer that
+# resolves its own name to itself and then cannot be reached by it: file
+# sharing, printing and anything that looks the machine up by name all fail
+# later, in ways nobody traces back to a question asked before the disk was
+# erased. Refusing it here costs one line.
+kibaos_valid_hostname() {
+  local hostname=$1
+  [[ -n $hostname ]] || return 1
+  (( ${#hostname} <= 63 )) || return 1
+  [[ $hostname =~ ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$ ]] || return 1
+  # Case folded, because `LocalHost` resolves exactly the same way.
+  [[ ${hostname,,} != localhost ]] || return 1
+  return 0
+}
+
+# The storage shape. Each of these is a closed set, and each set is the same
+# one kibaos-install accepts - the engine re-checks every value, and these
+# exist so a front end can refuse a bad answer at the prompt rather than after
+# every other question has been asked.
+kibaos_valid_filesystem() {
+  case $1 in btrfs|ext4|xfs) return 0 ;; *) return 1 ;; esac
+}
+
+kibaos_valid_swap() {
+  case $1 in none|file|zram) return 0 ;; *) return 1 ;; esac
+}
+
+kibaos_valid_swap_size() {
+  case $1 in
+    auto|hibernate) return 0 ;;
+    *) [[ $1 =~ ^[0-9]+[GM]$ ]] ;;
+  esac
+}
+
+kibaos_valid_layout() {
+  case $1 in wipe|alongside) return 0 ;; *) return 1 ;; esac
+}
+
+# The desktop. Closed sets again, the same ones kibaos-install accepts.
+kibaos_valid_feature_profile() {
+  case $1 in auto|standard|plus|advanced_plus|advanced_plus_ai) return 0 ;; *) return 1 ;; esac
+}
+
+kibaos_valid_display_scale() {
+  case $1 in auto|100|125|150|175|200) return 0 ;; *) return 1 ;; esac
+}
+
+# `none`, or a comma list of the apps kibaos-install knows by name, each once
+# or more. Never a package name: the list is the engine's, and this is a copy
+# of its keys so a typed answer is refused here instead of at the engine.
+kibaos_valid_apps() {
+  local list=$1 app
+  local -a apps
+  [[ $list != none ]] || return 0
+  [[ -n $list && $list != *, && $list != ,* && $list != *,,* ]] || return 1
+  IFS=, read -r -a apps <<<"$list"
+  for app in "${apps[@]}"; do
+    case $app in firefox|vscode|flatpak|waydroid|devtools) ;; *) return 1 ;; esac
+  done
+}
+
+# The photographs an installed desktop has, which are the ones the
+# kibaos-wallpapers package ships, by file name without .png. The live image
+# carries more for the installer's own screens, so this is a list rather than
+# a look at a folder. test-questions.sh holds it to the package.
+KIBAOS_DESKTOP_WALLPAPERS=(
+  place-antelope place-bagan place-deadvlei place-fuji place-lofoten
+  place-milford place-moraine place-plitvice place-skye place-torres
+  place-trecime place-vestrahorn place-zhangjiajie quiet-beach
+  quiet-forestpath quiet-frost quiet-lonetree quiet-meadow quiet-rainleaves
+  quiet-reeds quiet-river quiet-snowpine quiet-stream wild-bioluminescence
+  wild-duststorm wild-icecave wild-lava wild-storm
+)
+
+kibaos_valid_wallpaper() {
+  local name
+  [[ $1 != auto ]] || return 0
+  for name in "${KIBAOS_DESKTOP_WALLPAPERS[@]}"; do
+    [[ $1 != "$name" ]] || return 0
+  done
+  return 1
+}
+
+kibaos_valid_yes_no() {
+  case $1 in yes|no) return 0 ;; *) return 1 ;; esac
+}
+
+kibaos_valid_arch_snapshot() {
+  local snapshot=$1 normalized
+  [[ $snapshot =~ ^20[0-9]{2}/(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])$ ]] || return 1
+  normalized=$(date -u -d "${snapshot//\//-}" +%Y/%m/%d 2>/dev/null || true)
+  [[ $normalized == "$snapshot" ]]
+}
+
+# Compare the disk selected before the prompts with the disk still present at
+# the destructive confirmation gate. Model/transport/size are always required;
+# a serial or WWN, when the device exposes one, is an additional stable match.
+# This keeps ordinary virtual disks usable while refusing a changed identity
+# between the dry run and erase confirmation.
+kibaos_target_identity_matches() {
+  local expected_path=$1 expected_size=$2 expected_model=$3 expected_transport=$4
+  local expected_serial=$5 expected_wwn=$6 current_path=$7 current_size=$8
+  local current_model=$9 current_transport=${10} current_serial=${11} current_wwn=${12}
+  [[ $expected_path == "$current_path" &&
+     $expected_size == "$current_size" &&
+     $expected_model == "$current_model" &&
+     $expected_transport == "$current_transport" ]] || return 1
+  [[ -z $expected_serial || $expected_serial == "$current_serial" ]] || return 1
+  [[ -z $expected_wwn || $expected_wwn == "$current_wwn" ]] || return 1
+  return 0
+}

@@ -1,0 +1,19 @@
+[package]
+name = "kibaosfs-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "kibaosfs"
+path = "src/main.rs"
+
+[dependencies]
+kibaosfs-core = { path = "../kibaosfs-core" }
+serde_json.workspace = true
+serde.workspace = true
+rustix.workspace = true
+
+[dev-dependencies]
+# The route tests draw their own fixtures rather than carry binary files.
+image.workspace = true

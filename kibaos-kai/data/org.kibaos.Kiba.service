@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.kibaos.Kiba
+Exec=/usr/bin/kibavoiced
+SystemdService=kibavoiced.service

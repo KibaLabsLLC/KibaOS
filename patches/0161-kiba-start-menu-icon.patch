@@ -1,0 +1,182 @@
+diff --git a/ash/shelf/home_button.cc b/ash/shelf/home_button.cc
+index 5293c08..33b6a2f 100644
+--- a/ash/shelf/home_button.cc
++++ b/ash/shelf/home_button.cc
+@@ -7,6 +7,8 @@
+ #include <math.h>  // std::ceil
+ 
+ #include <memory>
++#include <optional>
++#include <vector>
+ 
+ #include "ash/app_list/app_list_controller_impl.h"
+ #include "ash/app_list/app_list_model_provider.h"
+@@ -29,6 +31,7 @@
+ #include "ash/style/style_util.h"
+ #include "ash/style/typography.h"
+ #include "ash/user_education/user_education_class_properties.h"
++#include "base/base64.h"
+ #include "base/check_op.h"
+ #include "base/i18n/rtl.h"
+ #include "base/memory/raw_ptr.h"
+@@ -48,8 +51,12 @@
+ #include "ui/display/screen.h"
+ #include "ui/events/ash/keyboard_capability.h"
+ #include "ui/events/devices/device_data_manager.h"
++#include "skia/ext/image_operations.h"
+ #include "ui/gfx/canvas.h"
+ #include "ui/gfx/geometry/transform_util.h"
++#include "ui/gfx/image/image.h"
++#include "ui/gfx/image/image_skia.h"
++#include "ui/gfx/image/image_skia_operations.h"
+ #include "ui/gfx/scoped_canvas.h"
+ #include "ui/views/animation/animation_builder.h"
+ #include "ui/views/animation/flood_fill_ink_drop_ripple.h"
+@@ -121,6 +128,112 @@ constexpr base::TimeDelta kQuickAppContainerFadeInDuration =
+ constexpr base::TimeDelta kQuickAppSlideOutDuration = base::Milliseconds(200);
+ constexpr base::TimeDelta kQuickAppFadeOutDuration = base::Milliseconds(100);
+ 
++// KibaOS: the start menu (launcher) button icon, a 128x128 PNG with a
++// transparent background, embedded as base64 so the shelf needs no resource
++// bundle entry to draw it.
++constexpr char kKibaStartIconBase64[] =
++    "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";
++
++// Edge length, in dip, that the KibaOS start icon is drawn at.
++constexpr int kKibaStartIconSizeDip = 24;
++
++// Decodes the embedded icon once. Returns a null image if it cannot be
++// decoded, in which case the stock launcher icon is used.
++gfx::ImageSkia LoadKibaStartIcon() {
++  std::optional<std::vector<uint8_t>> png =
++      base::Base64Decode(kKibaStartIconBase64);
++  if (!png || png->empty()) {
++    return gfx::ImageSkia();
++  }
++  gfx::Image decoded = gfx::Image::CreateFrom1xPNGBytes(*png);
++  if (decoded.IsEmpty()) {
++    return gfx::ImageSkia();
++  }
++  return gfx::ImageSkiaOperations::CreateResizedImage(
++      decoded.AsImageSkia(), skia::ImageOperations::RESIZE_BEST,
++      gfx::Size(kKibaStartIconSizeDip, kKibaStartIconSizeDip));
++}
++
+ }  // namespace
+ 
+ class HomeButton::ButtonImageView : public views::View {
+@@ -259,20 +372,21 @@ class HomeButton::ButtonImageView : public views::View {
+   }
+ 
+   void UpdateIconImageModel() {
+-    if (Shell::Get()->keyboard_capability()->GetMetaKeyToDisplay() ==
+-        ui::mojom::MetaKey::kLauncherRefresh) {
+-      image_model_ =
+-          ui::ImageModel::FromVectorIcon(kCampbellHeroIcon, GetIconColorId());
+-    } else {
+-      image_model_ = std::nullopt;
+-      image_ = gfx::ImageSkia();
+-      return;
++    // KibaOS: always show the Kiba start icon, whatever the meta key is.
++    image_model_ = std::nullopt;
++    if (image_.isNull()) {
++      image_ = LoadKibaStartIcon();
+     }
+-
+-    if (image_model_ && GetColorProvider()) {
+-      image_ = image_model_->Rasterize(GetColorProvider());
+-    } else {
+-      image_ = gfx::ImageSkia();
++    if (image_.isNull()) {
++      // The embedded icon could not be decoded: fall back to the stock look.
++      if (Shell::Get()->keyboard_capability()->GetMetaKeyToDisplay() ==
++          ui::mojom::MetaKey::kLauncherRefresh) {
++        image_model_ =
++            ui::ImageModel::FromVectorIcon(kCampbellHeroIcon, GetIconColorId());
++        if (GetColorProvider()) {
++          image_ = image_model_->Rasterize(GetColorProvider());
++        }
++      }
+     }
+   }
+ 
