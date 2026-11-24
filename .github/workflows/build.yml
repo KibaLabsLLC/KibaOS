@@ -20,7 +20,7 @@ on:
 jobs:
   build_x86_64:
     if: ${{ !inputs.skip_build }}
-    runs-on: avrea-ubuntu-26.04-32-vcpu
+    runs-on: avrea-ubuntu-26.04-16-vcpu
     timeout-minutes: 740
     steps:
       - name: Checkout repository
