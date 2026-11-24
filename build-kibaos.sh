@@ -218,7 +218,8 @@ install_host_dependencies() {
         grub \
         mtools \
         dosfstools \
-        gnupg
+        gnupg \
+        weston
 }
 
 bootstrap_chromium() {
