@@ -18,19 +18,15 @@ parameters:
   dispatch:
     description: 'Set true on a manual/API trigger. Replaces workflow_dispatch; pushes do nothing.'
     type: boolean
-    default: false
+    default: true
   skip_build:
     description: 'Skip building; publish + OTA the newest CircleCI build artifact if SourceForge is older'
-    type: boolean
-    default: false
-  skip_ota:
-    description: 'Skip OTA generation and publishing'
     type: boolean
     default: false
   run_vmtest:
     description: 'Run UEFI VM test using the newest available build artifact'
     type: boolean
-    default: false
+    default: true
   build_offset:
     description: >-
       Added to the CircleCI pipeline number to make the build/patch number.
@@ -41,7 +37,7 @@ parameters:
   vmtest_wait:
     description: 'Seconds to wait at each VM stage. CircleCI cloud has no KVM (software emulation), so raise this (e.g. 600).'
     type: integer
-    default: 120
+    default: 600
 
 executors:
   light:
