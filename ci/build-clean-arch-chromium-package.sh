@@ -117,6 +117,8 @@ arch-chroot "${ARCHROOT}" /usr/bin/runuser -u aurabuild -- \
         is_chrome_branded = false
         is_chromeos_device = false
         symbol_level = 0
+        blink_symbol_level = 0
+        v8_symbol_level = 0
         use_goma = false
         use_sysroot = true
         use_ozone = true
@@ -124,6 +126,9 @@ arch-chroot "${ARCHROOT}" /usr/bin/runuser -u aurabuild -- \
         use_system_minigbm = true
         enable_rust = true
         use_official_google_api_keys = false
+        enable_nacl = false
+        enable_print_preview = false
+        enable_remoting = false
       "
     fi
     if grep -Eq "^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"" /build/chromium-clean-out/Ash/args.gn; then

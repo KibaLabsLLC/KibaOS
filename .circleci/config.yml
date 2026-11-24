@@ -18,7 +18,7 @@ parameters:
   dispatch:
     description: 'Set true on a manual/API trigger. Replaces workflow_dispatch; pushes do nothing.'
     type: boolean
-    default: true
+    default: false
   skip_build:
     description: 'Skip building; publish + OTA the newest CircleCI build artifact if SourceForge is older'
     type: boolean
@@ -55,7 +55,7 @@ executors:
   vm-build:
     machine:
       image: ubuntu-2404:current
-    resource_class: large
+    resource_class: 2xlarge
 
 commands:
   load_state:
@@ -119,6 +119,9 @@ jobs:
     executor: vm-build
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - chromium-src-v1-{{ checksum "pins/chromium.sha" }}
       - run:
           name: Run build in Docker
           no_output_timeout: 300m
@@ -129,6 +132,11 @@ jobs:
               -e KIBA_ARCH="x86_64" \
               "archlinux:latest" \
               /bin/bash -c 'useradd -m kibaos-builder && export KIBAOS_BUILD_USER=kibaos-builder && exec bash /w/build-kibaos.sh'
+      - save_cache:
+          key: chromium-src-v1-{{ checksum "pins/chromium.sha" }}
+          paths:
+            - .build/chromium-bootstrap
+            - .build/depot_tools
       - run:
           name: Collect ISO
           command: |
