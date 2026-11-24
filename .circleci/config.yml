@@ -60,7 +60,7 @@ executors:
   vm-build:
     machine:
       image: ubuntu-2404:current
-    resource_class: xlarge
+    resource_class: large
 
 commands:
   load_state:
