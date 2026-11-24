@@ -337,7 +337,7 @@ chmod 0440 "$AIROOTFS/etc/sudoers.d/liveuser"
 WANTS="$AIROOTFS/etc/systemd/system"
 mkdir -p "$WANTS/default.target.wants" "$WANTS/multi-user.target.wants"
 ln -sf /usr/lib/systemd/system/graphical.target "$WANTS/default.target"
-ln -sf /usr/lib/systemd/system/aurade-greetd.service "$WANTS/display-manager.service"
+ln -sf /usr/lib/systemd/system/kibaos-greetd.service "$WANTS/display-manager.service"
 ln -sf /usr/lib/systemd/system/pacman-init.service "$WANTS/multi-user.target.wants/pacman-init.service"
 ln -sf /usr/lib/systemd/system/bluetooth.service "$WANTS/multi-user.target.wants/bluetooth.service"
 mkdir -p "$AIROOTFS/root"
@@ -535,26 +535,87 @@ if pacman -Q jack2 >/dev/null 2>&1;then
 pacman -Rdd --noconfirm jack2
 fi
 pacman -S --noconfirm --needed pipewire-jack qt6-multimedia-ffmpeg
-AURADE_KEY_FPR="BC390DCF360B2184DBBF008B8B2AB2EFE667CB69"
-AURADE_KEY_URL="https://raw.githubusercontent.com/Cam396/aurade/main/pins/aurade-release.gpg"
-AURADE_REPO_URL="https://github.com/Cam396/aurade/releases/download/repo-x86_64"
-AURADE_OK=0
-if curl -fsSL --retry 5 --retry-delay 3 -o /tmp/aurade-release.gpg "$AURADE_KEY_URL"&&[ "$(gpg --show-keys --with-colons /tmp/aurade-release.gpg|awk -F: '$1=="fpr"{print $10;exit}')" = "$AURADE_KEY_FPR" ]&&pacman-key --add /tmp/aurade-release.gpg&&pacman-key --lsign-key "$AURADE_KEY_FPR";then
-grep -q '^\[aurade\]' /etc/pacman.conf||printf '\n[aurade]\nServer = %s\n' "$AURADE_REPO_URL" >>/etc/pacman.conf
-if pacman -Syu --noconfirm --needed aurade&&[ -x /usr/bin/aurade-session-supervisor ]&&[ -f /usr/share/wayland-sessions/aurade.desktop ];then
-AURADE_OK=1
-fi
+# ---- KibaDE (https://github.com/KibaLabsLLC/KibaDE) replaces AuraDE ----------------------------------------
+# build-chromeos-ash.sh builds chrome + chrome_sandbox from the pinned Chromium checkout; the PKGBUILD then
+# packages that exact output (KIBAOS_SKIP_CHROMIUM_BUILD=1) together with the session/launcher files, and the
+# support packages (shill-nm-adapter, system/account helpers, login, greeter) are built from the same repo.
+# Everything runs as the unprivileged kibabuild user because makepkg and depot_tools refuse root.
+KIBADE_REPO_URL="https://github.com/KibaLabsLLC/KibaDE"
+KIBADE_HOME="/home/kibabuild"
+KIBADE_BUILD="$KIBADE_HOME/kibade-build"
+echo "=== Building KibaDE from $KIBADE_REPO_URL ==="
+_pre_pkgs="$(pacman -Qq)"
+pacman -Syu --noconfirm --needed \
+base-devel git python python-pip nodejs ninja gn pkgconf clang lld bison flex gperf patch \
+rust cargo rsync libarchive file weston pam wayland wayland-protocols greetd greetd-tuigreet
+id kibabuild >/dev/null 2>&1||useradd -m kibabuild
+echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
+chmod 440 /etc/sudoers.d/kibabuild
+install -d -o kibabuild -g kibabuild "$KIBADE_BUILD" "$KIBADE_BUILD/pkgdest"
+cat >"$KIBADE_HOME/kibade-build.sh" <<'KIBADEBUILD'
+#!/bin/bash
+set -euo pipefail
+B="$HOME/kibade-build"
+KIBADE="$B/KibaDE"
+export PKGDEST="$B/pkgdest"
+rm -rf "$KIBADE"
+_ok=0
+for _try in 1 2 3 4 5;do
+if git clone --depth 1 https://github.com/KibaLabsLLC/KibaDE "$KIBADE";then _ok=1;break;fi
+echo "!! KibaDE clone attempt $_try/5 failed -- retrying in 10s" >&2
+rm -rf "$KIBADE"
+sleep 10
+done
+[ "$_ok" -eq 1 ]||{ echo "ERROR: could not clone KibaLabsLLC/KibaDE" >&2;exit 1; }
+[ -x "$KIBADE/build-chromeos-ash.sh" ]||chmod +x "$KIBADE/build-chromeos-ash.sh"
+# depot_tools + the pinned Chromium checkout, with the KibaDE patch series verified
+[ -d "$B/depot_tools/.git" ]||git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git "$B/depot_tools"
+export PATH="$B/depot_tools:$PATH"
+REV="$(tr -d '[:space:]' <"$KIBADE/pins/chromium.sha")"
+[[ "$REV" =~ ^[0-9a-fA-F]{40}$ ]]||{ echo "ERROR: bad pins/chromium.sha: $REV" >&2;exit 1; }
+export KIBAOS_WORKDIR="$B" KIBAOS_DEPOT_TOOLS="$B/depot_tools" KIBAOS_BOOTSTRAP_JOBS="$(nproc)"
+bash "$KIBADE/ci/bootstrap-chromium-src.sh" --revision "$REV" --target "$B/chromium-bootstrap" --run --verify-series
+export CHROME_SRC="$B/chromium-bootstrap/src"
+[ -d "$CHROME_SRC/.git" ]||{ echo "ERROR: Chromium checkout missing at $CHROME_SRC" >&2;exit 1; }
+# build-chromeos-ash.sh: 'build' = gn gen + ninja (chrome chrome_sandbox) + verify + stage.
+# 'prepare' (repo sync of the ChromiumOS minilayout) is skipped: the source is the bootstrapped CHROME_SRC above.
+export CHROMIUMOS_DIR="$B/chromium-bootstrap" DEPOT_TOOLS_DIR="$B/depot_tools" OUTPUT_DIR="$CHROME_SRC/out/Ash" JOBS="$(nproc)"
+cd "$KIBADE"
+bash ./build-chromeos-ash.sh build||echo "!! build-chromeos-ash.sh exited non-zero (checking the build output anyway)" >&2
+[ -x "$OUTPUT_DIR/chrome" ]&&[ -x "$OUTPUT_DIR/chrome_sandbox" ]||{ echo "ERROR: build-chromeos-ash.sh did not produce chrome + chrome_sandbox in $OUTPUT_DIR" >&2;exit 1; }
+# Package that build output (complete runtime tree, session scripts, setuid sandbox) with the repo's PKGBUILD.
+cd "$KIBADE/chromiumos-ash"
+rm -rf pkg src
+KIBAOS_SKIP_CHROMIUM_BUILD=1 KIBAOS_OUT_DIR="$OUTPUT_DIR" makepkg -f -d --noconfirm --nocheck
+for _p in shill-nm-adapter kibaos-system-helper kibaos-account-helper kibaos-login kibaos-greeter;do
+echo "=== makepkg $_p ==="
+(cd "$KIBADE/$_p"&&rm -rf pkg src&&makepkg -f -d --noconfirm --nocheck)
+done
+ls -l "$PKGDEST"
+KIBADEBUILD
+chmod 755 "$KIBADE_HOME/kibade-build.sh"
+chown kibabuild:kibabuild "$KIBADE_HOME/kibade-build.sh"
+su - kibabuild -c "$KIBADE_HOME/kibade-build.sh"||{ echo "ERROR: KibaDE build failed" >&2;exit 1; }
+for _n in chromiumos-ash shill-nm-adapter kibaos-system-helper kibaos-account-helper kibaos-login kibaos-greeter;do
+ls "$KIBADE_BUILD"/pkgdest/"$_n"-[0-9]*.pkg.tar.* >/dev/null 2>&1||{ echo "ERROR: no built package for $_n" >&2;exit 1; }
+done
+pacman -U --noconfirm "$KIBADE_BUILD"/pkgdest/*.pkg.tar.*||{ echo "ERROR: could not install the KibaDE packages" >&2;exit 1; }
+if [ -x /usr/bin/kibaos-session-supervisor ]&&[ -f /usr/share/wayland-sessions/chromiumos-ash.desktop ]&&[ -x /usr/lib/chromiumos-ash/chrome ];then
+echo "=== KibaDE installed ==="
 else
-echo "ERROR: could not fetch/verify the AuraDE release key (expected $AURADE_KEY_FPR)" >&2
-fi
-rm -f /tmp/aurade-release.gpg
-if [ "$AURADE_OK" -eq 1 ];then
-pacman -S --noconfirm --needed aurade-greeter weston||{ echo "ERROR: could not install aurade-greeter" >&2;exit 1; }
-echo "=== AuraDE installed ==="
-else
-echo "ERROR: AuraDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
+echo "ERROR: KibaDE install failed -- Budgie is gone, so there is no desktop to fall back to" >&2
 exit 1
 fi
+# The build tree (Chromium checkout + out/) must never reach the squashfs; drop build-only toolchain packages too.
+rm -rf "$KIBADE_BUILD" "$KIBADE_HOME/kibade-build.sh"
+rm -f /etc/sudoers.d/kibabuild
+userdel -r kibabuild 2>/dev/null||true
+_drop=""
+for _t in clang lld gn bison flex gperf nodejs patch python-pip;do
+if ! printf '%s\n' "$_pre_pkgs"|grep -qx "$_t"&&pacman -Q "$_t" >/dev/null 2>&1;then _drop="$_drop $_t";fi
+done
+[ -n "$_drop" ]&&{ pacman -Rns --noconfirm $_drop||echo "!! could not remove build-only packages:$_drop" >&2; }
+unset _pre_pkgs _drop
 # Find every file containing the string (raw bytes), then same-length replace, binary-safe, display-case only
 # Rebrand AuraDE -> KibaOS and set the tagline. The old raw grep|sed could not see
 # names inside gzip/brotli-compressed .pak entries or UTF-16 strings, which is where
@@ -597,7 +658,7 @@ stats = {"paks": 0, "entries": 0, "files": 0, "skipped": [], "elf_patched": 0, "
 # Terms rewritten to KibaOS inside the AuraDE trees only. ORDER MATTERS: "Arch Linux"
 # must go before "Linux" or it would come out as "Arch KibaOS".
 EXTRA = [("Arch Linux", "KibaOS"), ("Chromium OS", "KibaOS"), ("ChromiumOS", "KibaOS"), ("Linux", "KibaOS")]
-AURA_ROOTS = ("/usr/lib/chromiumos-ash/", "/usr/lib/aurade-greeter/")
+AURA_ROOTS = ("/usr/lib/chromiumos-ash/", "/usr/lib/kibaos-greeter/")
 
 def _extra_rx(old, enc, binary):
     o = re.escape(old.encode(enc))
@@ -865,12 +926,12 @@ def main(roots):
         sys.exit(2)
 
 if __name__ == "__main__":
-    main(sys.argv[1:] or ["/usr/lib/chromiumos-ash", "/usr/lib/aurade-greeter", "/usr/share"])
+    main(sys.argv[1:] or ["/usr/lib/chromiumos-ash", "/usr/lib/kibaos-greeter", "/usr/share"])
 KIBAREBRAND
 chmod +x /usr/local/bin/kiba-rebrand
-python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt||{ echo "ERROR: kiba-rebrand failed" >&2;exit 1; }
+python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/kibaos-greeter /usr/share /opt||{ echo "ERROR: kiba-rebrand failed" >&2;exit 1; }
 # Verify: no display-case name left in ASCII or UTF-16, anywhere that ships
-_left="$(grep -rlaE 'AuraDE|A.u.r.a.D.E|Fast\. Secure\. Effortless' /usr/lib/chromiumos-ash /usr/lib/aurade-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
+_left="$(grep -rlaE 'AuraDE|A.u.r.a.D.E|Fast\. Secure\. Effortless' /usr/lib/chromiumos-ash /usr/lib/kibaos-greeter /usr/share /opt 2>/dev/null|grep -v '\.pak$'||true)"
 [ -n "$_left" ]&&echo "!! rebrand: display-name strings still present in: $_left" >&2
 # Keep the tool and re-run it whenever pacman reinstalls/updates the AuraDE packages --
 # otherwise an update (or the installer pulling the package again) restores "AuraDE".
@@ -881,28 +942,27 @@ Operation = Install
 Operation = Upgrade
 Type = Package
 Target = chromiumos-ash
-Target = aurade
-Target = aurade-greeter
+Target = kibaos-greeter
 
 [Action]
 Description = Rebranding AuraDE -> KibaOS...
 When = PostTransaction
-Exec = /usr/bin/python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/aurade-greeter
+Exec = /usr/bin/python3 /usr/local/bin/kiba-rebrand /usr/lib/chromiumos-ash /usr/lib/kibaos-greeter
 KIBAHOOK
-# Ash's default wallpaper. The supported knob is AURADE_DEFAULT_WALLPAPER in /etc/aurade/features.conf:
+# Ash's default wallpaper. The supported knob is KIBAOS_DEFAULT_WALLPAPER in /etc/kibaos/features.conf:
 # chromiumos-ash (the launcher) turns it into --default-wallpaper-large/-small and, because the ChromeOS
 # time-of-day wallpaper would otherwise replace it at first sign-in, disables that feature (and its screen saver).
 # (The old `sed` on chromiumos-ash-session was a no-op: that script has no CHROME= line, and the launcher that
 # builds the flags is /usr/bin/chromiumos-ash and never read CHROME_FLAGS.)
-mkdir -p /etc/aurade
-[ -f /etc/aurade/features.conf ]||: >/etc/aurade/features.conf
-if grep -q '^AURADE_DEFAULT_WALLPAPER=' /etc/aurade/features.conf;then
-sed -i 's|^AURADE_DEFAULT_WALLPAPER=.*|AURADE_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg|' /etc/aurade/features.conf
+mkdir -p /etc/kibaos
+[ -f /etc/kibaos/features.conf ]||: >/etc/kibaos/features.conf
+if grep -q '^KIBAOS_DEFAULT_WALLPAPER=' /etc/kibaos/features.conf;then
+sed -i 's|^KIBAOS_DEFAULT_WALLPAPER=.*|KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg|' /etc/kibaos/features.conf
 else
-printf '\nAURADE_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg\n' >>/etc/aurade/features.conf
+printf '\nKIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg\n' >>/etc/kibaos/features.conf
 fi
 chmod 644 /usr/share/kibaos/wallpaper.jpg
-grep -q '^AURADE_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg$' /etc/aurade/features.conf||{ echo "ERROR: could not set the Ash default wallpaper" >&2;exit 1; }
+grep -q '^KIBAOS_DEFAULT_WALLPAPER=/usr/share/kibaos/wallpaper.jpg$' /etc/kibaos/features.conf||{ echo "ERROR: could not set the Ash default wallpaper" >&2;exit 1; }
 id kibabuild >/dev/null 2>&1||useradd -m kibabuild
 echo 'kibabuild ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/kibabuild
 chmod 440 /etc/sudoers.d/kibabuild
@@ -1712,27 +1772,27 @@ cat >/usr/local/bin/kibaos-greetd-config <<'GREETDCFGSCRIPT'
 set -e
 _user="${1:-}"
 mkdir -p /etc/greetd
-_tmp="$(mktemp /etc/greetd/.aurade.toml.XXXXXX)"
+_tmp="$(mktemp /etc/greetd/.kibaos.toml.XXXXXX)"
 {
 printf '[terminal]\nvt = 1\n\n'
 printf '[default_session]\n'
-printf 'command = "/usr/lib/aurade-greeter/aurade-greeter-session"\n'
+printf 'command = "/usr/lib/kibaos-greeter/kibaos-greeter-session"\n'
 printf 'user = "greeter"\n'
 if [ -n "$_user" ];then
-_cmd=/usr/bin/aurade-session-supervisor
+_cmd="/usr/bin/kibaos-session-supervisor /usr/bin/chromiumos-ash-session"
 printf '\n[initial_session]\ncommand = "%s"\nuser = "%s"\n' "$_cmd" "$_user"
 fi
 } >"$_tmp"
 chmod 644 "$_tmp"
-mv -f "$_tmp" /etc/greetd/aurade.toml
+mv -f "$_tmp" /etc/greetd/kibaos.toml
 GREETDCFGSCRIPT
 chmod 755 /usr/local/bin/kibaos-greetd-config
 /usr/local/bin/kibaos-greetd-config
 mkdir -p /var/lib/AccountsService/users
 cat >/var/lib/AccountsService/users/liveuser <<'LIVEUSERACCOUNTS'
 [User]
-Session=aurade
-XSession=aurade
+Session=chromiumos-ash
+XSession=chromiumos-ash
 SystemAccount=false
 LIVEUSERACCOUNTS
 chmod 600 /var/lib/AccountsService/users/liveuser
@@ -1748,14 +1808,14 @@ cat >/usr/local/bin/kibaos-live-autologin <<'LIVEAUTOLOGIN'
 #!/bin/bash
 [ -d /run/archiso ]||exit 0
 id liveuser >/dev/null 2>&1||exit 0
-if ! grep -qs '^user = "liveuser"' /etc/greetd/aurade.toml;then
+if ! grep -qs '^user = "liveuser"' /etc/greetd/kibaos.toml;then
 /usr/local/bin/kibaos-greetd-config liveuser
 logger -t kibaos-live-autologin "greetd config was missing autologin; rewrote it"
 fi
 rm -f /run/greetd.run
 mkdir -p /var/lib/AccountsService/users
-if ! grep -qs '^Session=aurade' /var/lib/AccountsService/users/liveuser;then
-printf '[User]\nSession=aurade\nXSession=aurade\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
+if ! grep -qs '^Session=chromiumos-ash' /var/lib/AccountsService/users/liveuser;then
+printf '[User]\nSession=chromiumos-ash\nXSession=chromiumos-ash\nSystemAccount=false\n' >/var/lib/AccountsService/users/liveuser
 chmod 600 /var/lib/AccountsService/users/liveuser
 fi
 passwd -u liveuser >/dev/null 2>&1||true
@@ -1765,7 +1825,7 @@ chmod +x /usr/local/bin/kibaos-live-autologin
 cat >/etc/systemd/system/kibaos-live-autologin.service <<'LIVEAUTOLOGINSVC'
 [Unit]
 Description=Ensure greetd autologin for the KibaOS live user
-Before=aurade-greetd.service display-manager.service
+Before=kibaos-greetd.service display-manager.service
 After=local-fs.target systemd-sysusers.service
 
 [Service]
@@ -1793,8 +1853,8 @@ logger -t kibaos-wait-drm "no non-simpledrm GPU driver after 20s, starting greet
 exit 0
 WAITDRM
 chmod +x /usr/local/bin/kibaos-wait-drm
-mkdir -p /etc/systemd/system/aurade-greetd.service.d
-cat >/etc/systemd/system/aurade-greetd.service.d/10-kibaos-wait-drm.conf <<'GDMWAITDRM'
+mkdir -p /etc/systemd/system/kibaos-greetd.service.d
+cat >/etc/systemd/system/kibaos-greetd.service.d/10-kibaos-wait-drm.conf <<'GDMWAITDRM'
 [Service]
 ExecStartPre=/usr/local/bin/kibaos-wait-drm
 TimeoutStartSec=90
@@ -1818,7 +1878,7 @@ cat >/etc/systemd/system/kibaos-gpu-select.service <<'GPUSELECTSVC'
 [Unit]
 Description=Use nouveau for NVIDIA GPUs the open kernel modules do not support
 After=systemd-udev-trigger.service
-Before=aurade-greetd.service display-manager.service
+Before=kibaos-greetd.service display-manager.service
 
 [Service]
 Type=oneshot
@@ -1828,7 +1888,7 @@ ExecStart=/usr/local/bin/kibaos-gpu-select
 WantedBy=graphical.target
 GPUSELECTSVC
 systemctl enable kibaos-gpu-select.service
-for _f in /usr/share/wayland-sessions/aurade.desktop /usr/bin/aurade-session-supervisor /usr/lib/systemd/system/aurade-greetd.service /usr/lib/aurade-greeter/aurade-greeter-session /usr/bin/aurade-greeter /usr/bin/weston;do
+for _f in /usr/share/wayland-sessions/chromiumos-ash.desktop /usr/bin/kibaos-session-supervisor /usr/lib/systemd/system/kibaos-greetd.service /usr/lib/kibaos-greeter/kibaos-greeter-session /usr/bin/weston;do
 [ -e "$_f" ]||{
 echo "ERROR: autologin prerequisite missing: $_f" >&2
 exit 1
@@ -1838,8 +1898,8 @@ id greeter >/dev/null 2>&1||echo "WARNING: greeter user missing at build time (c
 if [ ! -f /etc/pam.d/greetd ];then
 printf '#%PAM-1.0\nauth       required     pam_securetty.so\nauth       requisite    pam_nologin.so\nauth       include      system-local-login\naccount    include      system-local-login\nsession    include      system-local-login\n' >/etc/pam.d/greetd
 fi
-mkdir -p /var/lib/aurade-greeter /var/cache/aurade-greeter
-chown greeter:greeter /var/lib/aurade-greeter /var/cache/aurade-greeter 2>/dev/null||true
+mkdir -p /var/lib/kibaos-greeter /var/cache/kibaos-greeter
+chown greeter:greeter /var/lib/kibaos-greeter /var/cache/kibaos-greeter 2>/dev/null||true
 cat >/usr/local/bin/kibaos-screenshot <<'SCREENSHOT'
 #!/bin/bash
 set -euo pipefail
@@ -2044,7 +2104,7 @@ restart_compositor(){
 log "Restarting session..."
 {
 [ -d /run/archiso ]&&rm -f /run/greetd.run
-systemctl restart aurade-greetd 2>/dev/null
+systemctl restart kibaos-greetd 2>/dev/null
 }||pkill -TERM weston 2>/dev/null||true
 sleep 1
 log "Session restarted."
@@ -2052,7 +2112,7 @@ log "Session restarted."
 restart_display_manager(){
 log "Restarting greetd..."
 [ -d /run/archiso ]&&rm -f /run/greetd.run
-systemctl restart aurade-greetd
+systemctl restart kibaos-greetd
 for i in $(seq 1 20);do
 [ -S "/run/user/1000/${WAYLAND_DISPLAY:-wayland-0}" ]&&break
 sleep 0.5
@@ -2161,7 +2221,7 @@ NEEDS_COMPOSITOR_RESTART=false
 while IFS= read -r line;do
 FILEPATH=$(echo "$line"|awk '{print $2}'|sed 's|^\./||')
 case "$FILEPATH" in
-etc/greetd*|usr/bin/greetd*|usr/bin/aurade-greeter*|usr/lib/aurade-greeter*)NEEDS_DISPLAY_RESTART=true
+etc/greetd*|usr/bin/greetd*|usr/bin/kibaos-greeter*|usr/lib/kibaos-greeter*)NEEDS_DISPLAY_RESTART=true
 ;;
 usr/bin/weston*)NEEDS_COMPOSITOR_RESTART=true
 esac
@@ -2533,7 +2593,7 @@ PollIntervalMaxSec=1024
 TIMESYNCD
 timedatectl set-local-rtc 0 2>/dev/null||true
 systemctl enable systemd-timesyncd
-systemctl enable aurade-greetd
+systemctl enable kibaos-greetd
 systemctl enable NetworkManager
 mkdir -p /etc/NetworkManager/conf.d
 cat >/etc/NetworkManager/conf.d/dns.conf <<'NMDNS'
