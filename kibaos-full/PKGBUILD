@@ -9,13 +9,6 @@ url="https://kibaos.com"
 license=('BSD-3-Clause')
 depends=(
     "kibaos>=${pkgver}"
-    "kibaos-kai>=${pkgver}"
+    "kibaos-kai"
     'bluez'
 )
-source=('LICENSE')
-sha256sums=('SKIP')
-
-package() {
-    install -Dm644 "${srcdir}/LICENSE" \
-        "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-}
