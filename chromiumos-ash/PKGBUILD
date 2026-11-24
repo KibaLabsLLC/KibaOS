@@ -103,6 +103,7 @@ makedepends=(
     'lld'
     'gn'
     'python-pip'
+    'weston'
 )
 # The source is Chromium's monolithic depot_tools+gclient checkout.
 # This is NOT a tarball. See the CI/CD build script for how to
