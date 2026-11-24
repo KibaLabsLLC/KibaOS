@@ -128,7 +128,7 @@ jobs:
               -e RUN_NUM="$(( << pipeline.number >> + << pipeline.parameters.build_offset >> ))" \
               -e KIBA_ARCH="x86_64" \
               "archlinux:latest" \
-              /bin/bash /w/build-kibaos.sh
+              /bin/bash -c 'useradd -m kibaos-builder && export KIBAOS_BUILD_USER=kibaos-builder && exec bash /w/build-kibaos.sh'
       - run:
           name: Collect ISO
           command: |
