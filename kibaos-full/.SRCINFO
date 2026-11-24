@@ -4,7 +4,7 @@ pkgbase = kibaos-full
 	pkgrel = 1
 	url = https://kibaos.com
 	arch = any
-	license = BSD-3-Clause
+	license = GPL
 	depends = kibaos>=158.0.8115.0
 	depends = kibaos-kai
 	depends = bluez
