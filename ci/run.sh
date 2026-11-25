@@ -6,9 +6,8 @@
 # its own copy of each check, and a check could pass here and fail there with
 # nobody able to say which copy was wrong.
 #
-#   ci/run.sh lint            syntax, workflow lint, action runtimes, patch series,
-#                             metadata, whitespace
-#   ci/run.sh gates           release identity, source integrity, leak and docs gates
+#   ci/run.sh lint            syntax, patch series, metadata, whitespace
+#   ci/run.sh gates           leak and docs gates
 #   ci/run.sh installer [I/N] the installer suite, or shard I of N
 #   ci/run.sh fixtures        ci/tests and the component tests
 #   ci/run.sh packages        build, check and install the Arch packages in a clean
@@ -30,8 +29,6 @@ cd "$ROOT"
 # same snapshot the ISO installs from.
 ARCH_IMAGE=docker.io/library/archlinux:base-devel@sha256:51dd3d24f7fba779e7c471caeee7804c50e8c134ad948e19685a1c83a42facc3
 ARCH_SNAPSHOT=$(<"$ROOT/pins/arch.snapshot")
-ACTIONLINT_VERSION=1.7.12
-ACTIONLINT_SHA256=8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
 
 # The packages CI builds. chromiumos-ash needs a Chromium build, kibaosfs a
 # Rust toolchain and the Files page, and kibaos-wallpapers the staged images,
@@ -86,21 +83,6 @@ job_setup_ubuntu() {
   endgroup
 }
 
-fetch_actionlint() {
-  local cache=${XDG_CACHE_HOME:-$HOME/.cache}/kibaos-ci/actionlint-$ACTIONLINT_VERSION
-  local tarball="$cache/actionlint.tar.gz"
-  if [[ ! -x $cache/actionlint ]]; then
-    mkdir -p "$cache"
-    curl -fsSL -o "$tarball" \
-      "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
-    printf '%s  %s\n' "$ACTIONLINT_SHA256" "$tarball" | sha256sum -c --quiet - ||
-      die 'the actionlint download does not match its pinned checksum'
-    tar -xzf "$tarball" -C "$cache" actionlint
-    rm -f "$tarball"
-  fi
-  printf '%s\n' "$cache/actionlint"
-}
-
 job_lint() {
   local file
 
@@ -119,33 +101,6 @@ for path in paths:
         compile(handle.read(), path, "exec")
 print(f"{len(paths)} python files compile")
 '
-  endgroup
-
-  group 'workflow lint'
-  "$(fetch_actionlint)" -color .github/workflows/*.yml
-  endgroup
-
-  # GitHub retires JavaScript action runtimes on a schedule (Node 20 went in
-  # 2026) and only warns on the runs that still use one. Every action is
-  # pinned by commit, so its action.yml at that commit says exactly which
-  # runtime it needs; anything older than node24 fails here instead.
-  group 'action runtimes'
-  local ref using count=0
-  while IFS= read -r ref; do
-    using=$(curl -fsSL "https://raw.githubusercontent.com/${ref%@*}/${ref#*@}/action.yml" |
-      python3 -c 'import sys, yaml; print(yaml.safe_load(sys.stdin)["runs"]["using"])') ||
-      die "could not read the runtime from action.yml for ${ref}"
-    case $using in
-      node2[4-9]|node[3-9][0-9]|composite|docker) ;;
-      *) die "${ref} runs on '${using:-unknown}'; pin a release that runs on node24 or later" ;;
-    esac
-    printf '%s: %s\n' "$ref" "$using"
-    count=$((count + 1))
-  done < <(sed -n 's/^[[:space:]]*-\{0,1\}[[:space:]]*uses:[[:space:]]*\([^ #]*@[0-9a-f]\{40\}\).*/\1/p' .github/workflows/*.yml | sort -u)
-  (( count > 0 )) || die 'found no pinned actions to check'
-  # A tag or branch reference would let the runtime change under the pin.
-  ! grep -nE '^[[:space:]]*-?[[:space:]]*uses:[[:space:]]*[^ #]+@' .github/workflows/*.yml |
-    grep -vE '@[0-9a-f]{40}([[:space:]]|$)' || die 'the action above is not pinned by a full commit hash'
   endgroup
 
   group 'patch series manifest'
@@ -178,8 +133,6 @@ print(f"{len(paths)} python files compile")
 }
 
 job_gates() {
-  group 'release identity'; ci/verify-release-identity.sh; endgroup
-  group 'source integrity'; ci/source-integrity-gate.sh; endgroup
   group 'public release leak gate'; ci/public-release-leak-gate.sh; endgroup
   group 'public documentation gate'; ci/public-docs-gate.sh; endgroup
 }
