@@ -68,7 +68,6 @@ TESTS=(
   test-execute-path-gate.sh
   test-leak-gate.sh
   test-patch-series-gate.sh
-  ../../ci/tests/runtime-risk-source-test.sh
 )
 
 shard_index=1

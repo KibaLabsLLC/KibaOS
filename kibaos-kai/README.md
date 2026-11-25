@@ -11,7 +11,6 @@ daemon runs it.
 | `kibavoiced` | Headless daemon (Qt Core + DBus). Owns the microphone, the wake phrase, the model and the voice. Owns `org.kibaos.Kiba` on the session bus. |
 | `org.kibaos.Kiba1.xml` | The D-Bus contract between the daemon and the shell. |
 | `kibavoice` | kAI's engine CLI, run by the daemon as a child process (`src/kibavoice.cpp`). |
-| `patches/0162-kiba-assistant-in-the-shell.patch` | Ash side: a status-area icon and a Views card (orb, status line, microphone wave, mute). |
 
 ## How it fits
 

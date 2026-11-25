@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # What keeps the desktop drawing on a machine whose GPU cannot draw it.
 #
-# Three patches, and each one going missing in a rebase is a crash on some
-# machine. 0090 lets the transport factory switch to software compositing and
-# keeps exo from starting without GPU compositing. 0091 gives the GPU process
-# the display compositor mode a Chromebook is built without, so a GPU that
-# fails every time ends in software instead of in "GPU process isn't usable.
-# Goodbye." 0092 has exo refuse a window it has no way to draw, because
-# building one without a GPU context crashed the whole desktop.
+# Two patches in the series, and each one going missing in a rebase is a crash
+# on some machine. 0091 gives the GPU process the display compositor mode a
+# Chromebook is built without, so a GPU that fails every time ends in software
+# instead of in "GPU process isn't usable. Goodbye." 0092 has exo refuse a
+# window it has no way to draw, because building one without a GPU context
+# crashed the whole desktop. The third patch in the old trio, 0090, patched the
+# transport factory in chrome/, which the current Lumen build does not carry,
+# so it is gone from the series.
 #
 # All of it is gated on one environment variable, which the launcher exports.
 # A rename on either side would switch the fallback off without a word, so the
@@ -32,36 +33,17 @@ code_in() {
 }
 
 declare -A NAME=(
-  [0090]=0090-the-desktop-draws-without-a-gpu.patch
   [0091]=0091-a-gpu-that-keeps-failing-ends-in-software.patch
   [0092]=0092-exo-refuses-windows-it-cannot-draw.patch
 )
 previous=0
-for id in 0090 0091 0092; do
+for id in 0091 0092; do
   [[ -r $PATCHES/${NAME[$id]} ]] || fail "patch $id is missing"
   line=$(grep -Fnx "${NAME[$id]}" "$PATCHES/SERIES" | cut -d: -f1 || true)
   [[ -n $line ]] || fail "patch $id is not listed in SERIES"
   (( line > previous )) || fail "patch $id is listed before the patch it builds on"
   previous=$line
 done
-
-# 0090. The transport factory switches under the variable and still refuses
-# without it; the GPU process's own request is passed on under it; and exo
-# stays off without a GPU context.
-factory=$(code_in "$PATCHES/${NAME[0090]}" content/browser/compositor/viz_process_transport_factory.cc)
-grep -Fq "\"$VARIABLE\"" <<<"$factory" || \
-  fail '0090 no longer reads the fallback variable in the transport factory'
-grep -Fq 'Switching to software compositing' <<<"$factory" || \
-  fail '0090 no longer switches the transport factory to software'
-grep -Fq 'LOG(FATAL)' <<<"$factory" || \
-  fail '0090 no longer refuses when the fallback is not allowed'
-host=$(code_in "$PATCHES/${NAME[0090]}" content/browser/gpu/gpu_process_host.cc)
-grep -Fq "\"$VARIABLE\"" <<<"$host" || \
-  fail "0090 no longer passes the GPU process's request on under the fallback variable"
-parts=$(code_in "$PATCHES/${NAME[0090]}" chrome/browser/exo_parts.cc)
-grep -Fq 'SharedMainThreadRasterContextProvider()' <<<"$parts" && \
-  grep -Fq 'return nullptr;' <<<"$parts" || \
-  fail '0090 no longer keeps exo off without GPU compositing'
 
 # 0091. The display compositor mode, on ChromeOS only, and only when the
 # variable allows it.
