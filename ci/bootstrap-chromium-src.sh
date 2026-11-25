@@ -179,6 +179,7 @@ LEAN_SKIP_DEP_PATHS=(
 # Hooks to skip unconditionally (not targeting ChromeOS; chromite not present).
 SKIP_HOOK_NAMES=(
   "cros_simplechrome_artifacts_with_vm"
+  "cros_simplechrome_artifacts_with_no_vm"
 )
 
 resolver_args=()
