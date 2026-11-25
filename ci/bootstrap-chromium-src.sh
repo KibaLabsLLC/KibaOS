@@ -1,11 +1,14 @@
 
 #!/bin/bash
-# Bootstrap a pinned Project Lumen checkout for KibaOS Arch CI.
+# Bootstrap the latest Project Lumen source for KibaOS Arch CI.
 #
-# Git manages the Lumen source.
-# depot_tools/gclient manages DEPS dependencies and build hooks.
+# Git:
+#   Fetches and updates Project Lumen.
 #
-# The resulting source is available at:
+# depot_tools / gclient:
+#   Resolves DEPS dependencies and executes Chromium build hooks.
+#
+# Source:
 #   ${TARGET}/src
 #
 # Compatible with:
@@ -19,35 +22,30 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 DEPOT_TOOLS="${KIBAOS_DEPOT_TOOLS:-${REPO_ROOT}/depot_tools_fresh}"
+
 LUMEN_REPO="${KIBAOS_LUMEN_REPOSITORY:-https://github.com/KibaLabsLLC/Lumen.git}"
 LUMEN_BRANCH="${KIBAOS_LUMEN_BRANCH:-lumen/source}"
 
 TARGET="${KIBAOS_BOOTSTRAP_TARGET:-/mnt/build/kibaos-work/lumen-bootstrap}"
-REVISION="${KIBAOS_LUMEN_REVISION:-}"
-JOBS="${KIBAOS_BOOTSTRAP_JOBS:-8}"
+SRC_DIR="${TARGET}/src"
 
-# Skip optional dependency downloads when supported by the Lumen DEPS file.
-# Set to 0 to sync everything.
+JOBS="${KIBAOS_BOOTSTRAP_JOBS:-8}"
 LEAN_SYNC="${KIBAOS_LEAN_SYNC:-1}"
 
 mode="plan"
 verify_series=0
 apply_series=0
 
-SRC_DIR="${TARGET}/src"
-
 usage() {
   cat <<'EOF'
 Usage: ci/bootstrap-chromium-src.sh [options]
 
-Creates a pinned Project Lumen checkout for KibaOS CI.
+Bootstraps the latest Project Lumen source for KibaOS CI.
 
-Git fetches the Lumen source. depot_tools/gclient then resolves
-its DEPS dependencies and executes the declared build hooks.
+Git fetches the latest commit from the configured Lumen branch.
+gclient processes Lumen's DEPS file and executes build hooks.
 
 Options:
-  --revision SHA   Lumen commit SHA to pin.
-                   Default: pins/lumen.sha, otherwise remote branch HEAD.
   --target DIR     Checkout parent directory (holds .gclient and src/).
   --run            Actually perform the bootstrap.
   --verify-series  Verify patches/SERIES against the fresh checkout.
@@ -58,13 +56,15 @@ Environment:
   KIBAOS_DEPOT_TOOLS=/path/to/depot_tools
   KIBAOS_LUMEN_REPOSITORY=https://github.com/KibaLabsLLC/Lumen.git
   KIBAOS_LUMEN_BRANCH=lumen/source
-  KIBAOS_LUMEN_REVISION=<commit SHA>
   KIBAOS_BOOTSTRAP_TARGET=/mnt/build/kibaos-work/lumen-bootstrap
   KIBAOS_BOOTSTRAP_JOBS=8
   KIBAOS_LEAN_SYNC=1
 
-The Lumen source is pinned independently from its dependencies.
-gclient processes the checked-out Lumen DEPS file and runs its hooks.
+KIBAOS_LEAN_SYNC:
+  1 = Skip optional dependencies when supported by DEPS.
+  0 = Perform a full dependency sync.
+
+No revision is pinned. Every run fetches the latest branch HEAD.
 
 Pruning must happen after the patch series is applied, as required
 by the KibaOS package build.
@@ -81,11 +81,6 @@ need_value() {
 
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
-    --revision)
-      need_value "$@"
-      REVISION="$2"
-      shift 2
-      ;;
     --target)
       need_value "$@"
       TARGET="$2"
@@ -138,27 +133,24 @@ if [[ ! -x "${DEPOT_TOOLS}/gclient" ]]; then
   exit 2
 fi
 
-# Resolve the Lumen revision.
-if [[ -z "${REVISION}" ]]; then
-  if [[ -r "${REPO_ROOT}/pins/lumen.sha" ]]; then
-    REVISION="$(tr -d '[:space:]' < "${REPO_ROOT}/pins/lumen.sha")"
-  else
-    echo "Resolving ${LUMEN_BRANCH} from Project Lumen..."
+# Resolve the latest commit on the Lumen branch.
+resolve_lumen_revision() {
+  local revision
 
-    REVISION="$(
-      git ls-remote "${LUMEN_REPO}" \
-        "refs/heads/${LUMEN_BRANCH}" |
-        awk 'NR == 1 { print $1 }'
-    )"
-  fi
-fi
+  revision="$(
+    git ls-remote "${LUMEN_REPO}" "refs/heads/${LUMEN_BRANCH}" |
+      awk 'NR == 1 { print $1 }'
+  )"
 
-[[ "${REVISION}" =~ ^[0-9a-fA-F]{40}$ ]] || {
-  echo "Lumen revision must be a 40-character commit SHA: ${REVISION}" >&2
-  exit 2
+  [[ "${revision}" =~ ^[0-9a-fA-F]{40}$ ]] || {
+    echo "Could not resolve Lumen branch: ${LUMEN_BRANCH}" >&2
+    return 1
+  }
+
+  printf '%s\n' "${revision}"
 }
 
-# Keep the original optional DEPS variables.
+# Optional Chromium DEPS variables.
 LEAN_VARS=(
   checkout_telemetry_dependencies
   checkout_pgo_profiles
@@ -177,22 +169,23 @@ else
 fi
 
 echo "Project Lumen bootstrap plan:"
-echo "  repository:   ${LUMEN_REPO}"
-echo "  branch:       ${LUMEN_BRANCH}"
-echo "  revision:     ${REVISION}"
-echo "  depot_tools:  ${DEPOT_TOOLS}"
-echo "  target:       ${TARGET}"
-echo "  source:       ${SRC_DIR}"
-echo "  jobs:         ${JOBS}"
-echo "  lean sync:    ${lean_note}"
+echo "  repository:  ${LUMEN_REPO}"
+echo "  branch:      ${LUMEN_BRANCH}"
+echo "  depot_tools: ${DEPOT_TOOLS}"
+echo "  target:      ${TARGET}"
+echo "  source:      ${SRC_DIR}"
+echo "  jobs:        ${JOBS}"
+echo "  lean sync:   ${lean_note}"
+echo "  revision:    latest branch HEAD"
 echo
 echo "  steps:"
-echo "    1. Fetch and pin Lumen using Git"
-echo "    2. Configure gclient for the local Lumen checkout"
-echo "    3. gclient sync --nohooks --no-history --shallow -j${JOBS}"
-echo "    4. gclient runhooks"
+echo "    1. Resolve latest Lumen commit using Git"
+echo "    2. Fetch and check out Lumen"
+echo "    3. Configure gclient for the Lumen source"
+echo "    4. gclient sync --nohooks --no-history --shallow -j${JOBS}"
+echo "    5. gclient runhooks"
 
-step=5
+step=6
 
 if [[ "${verify_series}" == "1" ]]; then
   echo "    ${step}. Verify patches/SERIES"
@@ -216,19 +209,24 @@ export GIT_LFS_SKIP_SMUDGE=1
 
 mkdir -p "${TARGET}"
 
-# Fetch Lumen directly with Git.
+# Resolve the branch HEAD immediately before fetching.
+echo "==> Resolving latest Project Lumen commit"
+
+REVISION="$(resolve_lumen_revision)"
+
+echo "==> Latest Lumen commit: ${REVISION}"
+
+# Fetch Lumen using Git.
 if [[ -d "${SRC_DIR}/.git" ]]; then
-  echo "==> Existing Lumen checkout found"
+  echo "==> Updating existing Lumen checkout"
 
   git -C "${SRC_DIR}" remote set-url origin "${LUMEN_REPO}"
-
-  echo "==> Fetching pinned Lumen revision"
   git -C "${SRC_DIR}" fetch --depth=1 origin "${REVISION}"
 else
   if [[ -d "${SRC_DIR}" ]] &&
      [[ -n "$(find "${SRC_DIR}" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
     echo "Error: ${SRC_DIR} exists but is not a Git checkout." >&2
-    echo "Move or remove that directory before bootstrapping." >&2
+    echo "Move or remove it before bootstrapping." >&2
     exit 2
   fi
 
@@ -237,35 +235,33 @@ else
   mkdir -p "${SRC_DIR}"
   git -C "${SRC_DIR}" init
   git -C "${SRC_DIR}" remote add origin "${LUMEN_REPO}"
-
-  echo "==> Fetching pinned Lumen revision"
   git -C "${SRC_DIR}" fetch --depth=1 origin "${REVISION}"
 fi
 
-echo "==> Checking out Lumen"
+echo "==> Checking out latest Lumen source"
+
 git -C "${SRC_DIR}" checkout --detach --force FETCH_HEAD
 
 ACTUAL_REVISION="$(git -C "${SRC_DIR}" rev-parse HEAD)"
 
 if [[ "${ACTUAL_REVISION}" != "${REVISION}" ]]; then
-  echo "Lumen revision mismatch!" >&2
-  echo "Expected: ${REVISION}" >&2
-  echo "Actual:   ${ACTUAL_REVISION}" >&2
+  echo "Error: Lumen checkout does not match fetched revision." >&2
   exit 1
 fi
 
 if [[ ! -f "${SRC_DIR}/DEPS" ]]; then
-  echo "Error: Lumen checkout has no DEPS file." >&2
-  echo "gclient cannot resolve dependencies or execute DEPS hooks." >&2
+  echo "Error: Lumen has no DEPS file." >&2
+  echo "Cannot run gclient dependency synchronization." >&2
   exit 1
 fi
 
-echo "==> Lumen source pinned at ${ACTUAL_REVISION}"
+echo "==> Lumen checked out at ${ACTUAL_REVISION}"
 
-# Configure gclient to process the local source tree.
-# managed=False is important: Git, not gclient, owns the Lumen checkout.
-# gclient still processes its DEPS file and its dependencies.
-echo "==> Writing ${TARGET}/.gclient"
+# Write gclient configuration.
+#
+# managed=False leaves ownership of the main source checkout to Git.
+# gclient still processes DEPS and manages dependency checkouts.
+echo "==> Configuring gclient"
 
 {
   cat <<EOF
@@ -292,7 +288,7 @@ EOF
 
 cd "${TARGET}"
 
-# Validate optional custom variables against the checked-out DEPS.
+# Check whether optional variables exist in this DEPS revision.
 check_lean_vars() {
   local deps="${SRC_DIR}/DEPS"
   local var
@@ -306,8 +302,8 @@ check_lean_vars() {
   done
 }
 
-# Fetch external dependencies without allowing gclient to replace Lumen.
-echo "==> Syncing Lumen DEPS dependencies"
+# Synchronize external dependencies.
+echo "==> Syncing Lumen dependencies"
 
 gclient sync \
   --nohooks \
@@ -317,16 +313,16 @@ gclient sync \
 
 check_lean_vars
 
-# Run the hooks declared by Lumen's DEPS and its dependencies.
-echo "==> Running Chromium build hooks"
+# Run Chromium's dependency hooks.
+echo "==> Running build hooks"
 
 gclient runhooks
 
-# Verify that gclient did not move the pinned Lumen checkout.
+# Ensure the Lumen source was not changed by dependency synchronization.
 FINAL_REVISION="$(git -C "${SRC_DIR}" rev-parse HEAD)"
 
 if [[ "${FINAL_REVISION}" != "${REVISION}" ]]; then
-  echo "Error: gclient changed the Lumen source revision." >&2
+  echo "Error: Lumen source revision changed during gclient sync." >&2
   echo "Expected: ${REVISION}" >&2
   echo "Actual:   ${FINAL_REVISION}" >&2
   exit 1
@@ -334,16 +330,15 @@ fi
 
 echo "==> Dependencies and hooks completed"
 
-# Verify patch series against the pristine source.
+# Verify patches against the fetched source.
 if [[ "${verify_series}" == "1" ]]; then
-  echo "==> Verifying patch series against Lumen"
+  echo "==> Verifying patch series"
 
   CHROME_SRC="${SRC_DIR}" \
-    "${SCRIPT_DIR}/verify-patch-series.sh" \
-    --base-ref "${REVISION}"
+    "${SCRIPT_DIR}/verify-patch-series.sh"
 fi
 
-# Optionally apply patches directly to the checkout.
+# Apply patches directly to the source.
 if [[ "${apply_series}" == "1" ]]; then
   echo "==> Applying patch series"
 
