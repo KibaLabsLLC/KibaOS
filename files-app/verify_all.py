@@ -32,7 +32,7 @@ import sources
 ROOT = os.path.dirname(os.path.abspath(__file__))
 HTTP_PORT = 8901
 CDP_PORT = 19333
-CHROME = "/opt/google/chrome/chrome"
+CHROME = "/usr/lib/chromiumos-ash/chrome"
 TIMEOUT = 25
 
 try:

@@ -446,22 +446,6 @@ EOF
         chmod 4755 "${pkgdir}/usr/lib/chromiumos-ash/chrome-sandbox"
     fi
 
-    # KibaOS compatibility: a few ChromiumOS/Chrome paths still probe the
-    # historical Google Chrome install prefix. Keep the real payload in
-    # /usr/lib/chromiumos-ash and expose stable symlinks for those probes.
-    install -dm755 "${pkgdir}/opt/google/chrome"
-    for rel in \
-        chrome \
-        chrome_100_percent.pak \
-        chrome_200_percent.pak \
-        icudtl.dat \
-        resources.pak; do
-        if [ -e "${pkgdir}/usr/lib/chromiumos-ash/${rel}" ]; then
-            ln -s "/usr/lib/chromiumos-ash/${rel}" \
-                "${pkgdir}/opt/google/chrome/${rel}"
-        fi
-    done
-
     # KibaOS compatibility: Arch's ttf-roboto package installs under
     # /usr/share/fonts/TTF, while some ChromeOS readahead paths still probe the
     # ChromeOS-style /usr/share/fonts/roboto directory.
