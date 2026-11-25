@@ -1,6 +1,5 @@
 # Seconds each installer test took on a GitHub runner (ubuntu-24.04), used to
 # balance the CI shards. A test not listed here counts as one second.
-runtime-risk-source-test.sh	0
 test-a11y-announce.sh	0
 test-accessibility.sh	3
 test-answers-fuzz.sh	41

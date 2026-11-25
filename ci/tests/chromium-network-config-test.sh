@@ -5,14 +5,16 @@
 # fake Shill services, because invented interfaces look exactly like real
 # connections in Ash and nothing on screen says otherwise.
 #
-# What provides it has changed. Until 2026-08-31 the mechanism was
-# use_real_dbus_clients=true, and this fixture asserted that flag was set.
-# Patch 0038 replaced it: ash_dbus_helper now routes the Shill clients to their
-# own narrowly scoped real bus on generic Linux, rather than to the global bus,
-# which does not exist there. That routing is what makes networking real, and
-# it does not need the flag.
+# What provides it has changed more than once. Until 2026-08-31 the mechanism
+# was use_real_dbus_clients=true, and this fixture asserted that flag was set.
+# Patch 0038 replaced it with a narrowly scoped real bus for the Shill clients,
+# and that patch lived in the chrome/ half of the series, which the current
+# Lumen build does not carry. What remains here are the facts that must hold
+# regardless of the mechanism: the flag stays out of everything that generates
+# build args, and the PKGBUILD's fail-closed guard on the Shill routing stays
+# in place.
 #
-# The flag is now actively harmful and must stay out:
+# The flag is actively harmful and must stay out:
 #
 #   2026-08-19 23:32  flag added, as the original real-Shill mechanism
 #   2026-08-20 08:56  upstream gives about seventy clients under
@@ -24,15 +26,13 @@
 # built with it aborts in PostEarlyInitialization before any window is created,
 # the session supervisor gives up after five quick exits, and greetd falls back
 # to the greeter, which reads as an ordinary logout rather than a broken build.
-# That is why this fixture now fails closed on the flag being present.
+# That is why this fixture fails closed on the flag being present.
 set -Eeuo pipefail
 
 ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd -P)
 PKGBUILD="$ROOT/chromiumos-ash/PKGBUILD"
 PACKAGER="$ROOT/ci/build-clean-arch-chromium-package.sh"
 GATE="$ROOT/ci/chromium-candidate-gate.sh"
-NETWORK_PATCH="$ROOT/patches/0004-session-lifecycle-generic-linux.patch"
-SHILL_PATCH="$ROOT/patches/0038-shill-network-real-bus-linux.patch"
 
 fail() { echo "Chromium network client configuration test: $*" >&2; exit 1; }
 
@@ -63,23 +63,5 @@ grep -Fq 'shill_clients::InitializeKibaOs' "$PKGBUILD" || \
   fail 'the PKGBUILD no longer fails closed on the real Shill routing being absent'
 grep -Fq 'missing the real Shill routing' "$PKGBUILD" || \
   fail 'the fail closed message for the Shill routing is gone'
-
-# --- and the patch that provides it must still provide it ------------------
-
-[[ -r $SHILL_PATCH ]] || fail 'patch 0038 is missing'
-grep -Fq 'InitializeKibaOs' "$SHILL_PATCH" || \
-  fail 'patch 0038 no longer defines InitializeKibaOs'
-grep -Fq 'GetKibaOsBluezSystemBus' "$SHILL_PATCH" || \
-  fail 'patch 0038 no longer points Shill at the scoped real bus'
-
-# --- the desktop fake clients stay gated the way 0004 gates them -----------
-
-[[ -r $NETWORK_PATCH ]] || fail 'patch 0004 is missing'
-grep -Fq '#if !defined(USE_REAL_DBUS_CLIENTS)' "$NETWORK_PATCH" || \
-  fail 'patch 0004 no longer keeps the desktop fake clients behind the build definition'
-grep -Fq 'FakeSessionManagerClient' "$NETWORK_PATCH" || \
-  fail 'patch 0004 no longer references FakeSessionManagerClient'
-grep -Fq 'FakePowerManagerClient' "$NETWORK_PATCH" || \
-  fail 'patch 0004 no longer references FakePowerManagerClient'
 
 echo 'Chromium network client configuration test: PASS (flag out, Shill routing guarded)'
