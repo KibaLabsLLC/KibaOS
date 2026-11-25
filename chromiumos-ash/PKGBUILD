@@ -251,7 +251,17 @@ build() {
     # Generate GN args without Google credentials. KibaOS uses local accounts
     # for the public release, while the runtime config remains an optional
     # user-owned hook for a future private build.
-    gn gen "${out_dir}" --args="
+    # This tree has no chrome/ source: Lumen's shell delegation in lumen/
+    # replaces the browser UI chrome would provide. Root BUILD.gn still imports
+    # a handful of chrome/*.gni config files unconditionally, carried as
+    # config-only shims by patch 0162, and root targets still reference
+    # //chrome/* targets that no longer exist. Limiting gn gen to the two
+    # targets we actually build keeps only those, plus their transitive
+    # dependencies, defined, so the pruned tree configures cleanly.
+    gn gen "${out_dir}" \
+        --root-pattern="//lumen:chrome" \
+        --root-pattern="//sandbox/linux:chrome_sandbox" \
+        --args="
         target_os = \"linux\"
         target_cpu = \"x64\"
         is_debug = false
@@ -280,13 +290,6 @@ build() {
         # where a development build asserts, so the assert comes off here and
         # the bring up tree keeps it.
         dcheck_always_on = false
-
-        # The browser's built-in AI (the Prompt, Summarizer, Writer, Rewriter
-        # and Proofreader web APIs) on Gemma 4 through KibaOS's llama.cpp
-        # backend, patch 0142, in place of Gemini Nano. It stays idle until
-        # the optional kibaos-ai package and its model are installed.
-        use_on_device_model_service = true
-        kibaos_local_model = true
     "
 
     if grep -Eq '^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"' "${out_dir}/args.gn"; then
@@ -386,7 +389,7 @@ package() {
 
     (
         cd "${chrome_src}"
-        if ! "${gn_bin}" desc "${out_dir}" //chrome:chrome runtime_deps >"${runtime_deps}"; then
+        if ! "${gn_bin}" desc "${out_dir}" //lumen:chrome runtime_deps >"${runtime_deps}"; then
             cat >"${runtime_deps}" <<'EOF'
 ./chrome
 ./chrome_crashpad_handler
@@ -402,7 +405,6 @@ libGLESv2.so
 libvk_swiftshader.so
 libvulkan.so.1
 liboptimization_guide_internal.so
-kibaos_local_model
 vk_swiftshader_icd.json
 IwaKeyDistribution
 MEIPreload
