@@ -1,8 +1,8 @@
 diff --git a/ash/webui/diagnostics_ui/backend/input/input_data_provider.cc b/ash/webui/diagnostics_ui/backend/input/input_data_provider.cc
-index ba9a224fc803..d35d122888e1 100644
+index 013832c93f..50c61f1274 100644
 --- a/ash/webui/diagnostics_ui/backend/input/input_data_provider.cc
 +++ b/ash/webui/diagnostics_ui/backend/input/input_data_provider.cc
-@@ -46,8 +46,9 @@ bool GetEventNodeId(base::FilePath path, int* id) {
+@@ -44,8 +44,9 @@ bool GetEventNodeId(base::FilePath path, int* id) {
    const std::string base_name_prefix = "event";
  
    std::string base_name = path.BaseName().value();
@@ -13,7 +13,7 @@ index ba9a224fc803..d35d122888e1 100644
    base_name.erase(0, base_name_prefix.length());
    return base::StringToInt(base_name, id);
  }
-@@ -108,11 +109,26 @@ InputDataProvider::~InputDataProvider() {
+@@ -106,11 +107,26 @@ InputDataProvider::~InputDataProvider() {
    }
  
    BlockShortcuts(/*should_block=*/false);
@@ -45,7 +45,7 @@ index ba9a224fc803..d35d122888e1 100644
  }
  
  // static
-@@ -135,21 +151,40 @@ void InputDataProvider::Initialize(aura::Window* window) {
+@@ -133,21 +149,40 @@ void InputDataProvider::Initialize(aura::Window* window) {
    DCHECK(event_rewriter_delegate_);
  
    // Window and widget are needed for security enforcement.
@@ -96,7 +96,7 @@ index ba9a224fc803..d35d122888e1 100644
  
    UpdateMaySendEvents();
  }
-@@ -290,14 +325,21 @@ void InputDataProvider::OnPowerStateChanged(
+@@ -288,14 +323,21 @@ void InputDataProvider::OnPowerStateChanged(
  }
  
  void InputDataProvider::MoveAppToTestingScreen(uint32_t evdev_id) {
@@ -119,7 +119,7 @@ index ba9a224fc803..d35d122888e1 100644
  
    // Use device name to find the targeting display id.
    // Since we use evdev_id as the device id in our implementation, which
-@@ -326,7 +368,7 @@ void InputDataProvider::MoveAppToTestingScreen(uint32_t evdev_id) {
+@@ -324,7 +366,7 @@ void InputDataProvider::MoveAppToTestingScreen(uint32_t evdev_id) {
  }
  
  void InputDataProvider::MoveAppBackToPreviousScreen() {
@@ -128,7 +128,7 @@ index ba9a224fc803..d35d122888e1 100644
      window_util::MoveWindowToDisplay(widget_->GetNativeWindow(),
                                       previous_display_id_);
    }
-@@ -337,11 +379,19 @@ void InputDataProvider::MoveAppBackToPreviousScreen() {
+@@ -335,11 +377,19 @@ void InputDataProvider::MoveAppBackToPreviousScreen() {
  }
  
  void InputDataProvider::SetA11yTouchPassthrough(bool enabled) {
@@ -148,7 +148,7 @@ index ba9a224fc803..d35d122888e1 100644
    const bool widget_open = !widget_->IsClosed();
    const bool widget_active = widget_->IsActive();
    const bool widget_visible = widget_->IsVisible();
-@@ -361,10 +411,11 @@ void InputDataProvider::UpdateEventObservers() {
+@@ -359,10 +409,11 @@ void InputDataProvider::UpdateEventObservers() {
        BlockShortcuts(may_send_events_);
      }
  
@@ -162,7 +162,7 @@ index ba9a224fc803..d35d122888e1 100644
    }
  }
  
-@@ -448,8 +499,11 @@ void InputDataProvider::OnObservedKeyboardInputDisconnect(
+@@ -446,8 +497,11 @@ void InputDataProvider::OnObservedKeyboardInputDisconnect(
  void InputDataProvider::ObserveKeyEvents(
      uint32_t id,
      mojo::PendingRemote<mojom::KeyboardObserver> observer) {
@@ -176,7 +176,7 @@ index ba9a224fc803..d35d122888e1 100644
  
    if (!keyboards_.contains(id)) {
      LOG(ERROR) << "Couldn't find keyboard with ID " << id
-@@ -477,12 +531,14 @@ void InputDataProvider::ObserveKeyEvents(
+@@ -475,12 +529,14 @@ void InputDataProvider::ObserveKeyEvents(
    const auto observer_id = observers.Add(std::move(observer));
  
    // Ensure first callback is 'Paused' if we do not currently have focus
@@ -193,7 +193,7 @@ index ba9a224fc803..d35d122888e1 100644
  }
  
  void InputDataProvider::SendPauseEvents() {
-@@ -597,9 +653,9 @@ void InputDataProvider::AddKeyboard(const InputDeviceInformation* device_info) {
+@@ -595,9 +651,9 @@ void InputDataProvider::AddKeyboard(const InputDeviceInformation* device_info) {
    if (is_internal_keyboard &&
        IsSplitModifierKeyboard(device_info->input_device.id) &&
        (keyboard->bottom_left_layout == mojom::BottomLeftLayout::kUnknown ||
@@ -206,7 +206,7 @@ index ba9a224fc803..d35d122888e1 100644
    if (!features::IsExternalKeyboardInDiagnosticsAppEnabled() &&
        !is_internal_keyboard) {
      return;
-@@ -631,8 +687,11 @@ void InputDataProvider::SendInputKeyEvent(uint32_t id,
+@@ -629,8 +685,11 @@ void InputDataProvider::SendInputKeyEvent(uint32_t id,
                                            uint32_t key_code,
                                            uint32_t scan_code,
                                            bool down) {
@@ -221,10 +221,10 @@ index ba9a224fc803..d35d122888e1 100644
    if (!keyboard_observers_.contains(id)) {
      LOG(ERROR) << "Couldn't find keyboard observer with ID " << id
 diff --git a/ash/webui/diagnostics_ui/backend/input/input_data_provider.h b/ash/webui/diagnostics_ui/backend/input/input_data_provider.h
-index bf64c5212e9b..c36d9f23d5b6 100644
+index 8bd36e9509..00b9aed808 100644
 --- a/ash/webui/diagnostics_ui/backend/input/input_data_provider.h
 +++ b/ash/webui/diagnostics_ui/backend/input/input_data_provider.h
-@@ -204,6 +204,11 @@ class InputDataProvider : public mojom::InputDataProvider,
+@@ -202,6 +202,11 @@ class InputDataProvider : public mojom::InputDataProvider,
  
    bool logged_not_dispatching_key_events_ = false;
    raw_ptr<views::Widget> widget_ = nullptr;
@@ -237,7 +237,7 @@ index bf64c5212e9b..c36d9f23d5b6 100644
    mojo::RemoteSet<mojom::ConnectedDevicesObserver> connected_devices_observers_;
  
 diff --git a/ash/webui/diagnostics_ui/backend/system/system_data_provider.cc b/ash/webui/diagnostics_ui/backend/system/system_data_provider.cc
-index 53a448c9a635..b77268ba8c87 100644
+index 60b4883d74..bd8a9e7442 100644
 --- a/ash/webui/diagnostics_ui/backend/system/system_data_provider.cc
 +++ b/ash/webui/diagnostics_ui/backend/system/system_data_provider.cc
 @@ -4,8 +4,20 @@
@@ -273,7 +273,7 @@ index 53a448c9a635..b77268ba8c87 100644
  #include "base/time/time.h"
  #include "base/timer/timer.h"
  #include "chromeos/ash/services/cros_healthd/public/cpp/service_connection.h"
-@@ -36,7 +53,1000 @@ constexpr int kBatteryHealthRefreshIntervalInSeconds = 60;
+@@ -34,7 +51,1000 @@ constexpr int kBatteryHealthRefreshIntervalInSeconds = 60;
  constexpr int kChargeStatusRefreshIntervalInSeconds = 15;
  constexpr int kCpuUsageRefreshIntervalInSeconds = 1;
  constexpr int kMemoryUsageRefreshIntervalInSeconds = 10;
@@ -1274,7 +1274,7 @@ index 53a448c9a635..b77268ba8c87 100644
  
  void PopulateBoardName(const healthd::SystemInfo& system_info,
                         mojom::SystemInfo& out_system_info) {
-@@ -74,7 +1084,8 @@ void PopulateCpuInfo(const healthd::CpuInfo& cpu_info,
+@@ -72,7 +1082,8 @@ void PopulateCpuInfo(const healthd::CpuInfo& cpu_info,
    for (const auto& physical_cpu_ptr : physical_cpus) {
      if (physical_cpu_ptr->logical_cpus.empty()) {
        EmitSystemDataError(metrics::DataError::kExpectationNotMet);
@@ -1284,7 +1284,7 @@ index 53a448c9a635..b77268ba8c87 100644
        return;
      }
    }
-@@ -249,7 +1260,8 @@ void PopulateAverageScaledClockSpeed(const healthd::CpuInfo& cpu_info,
+@@ -247,7 +1258,8 @@ void PopulateAverageScaledClockSpeed(const healthd::CpuInfo& cpu_info,
                                       mojom::CpuUsage& out_cpu_usage) {
    for (const auto& physical_cpu_ptr : cpu_info.physical_cpus) {
      if (physical_cpu_ptr->logical_cpus.empty()) {
@@ -1294,7 +1294,7 @@ index 53a448c9a635..b77268ba8c87 100644
        return;
      }
    }
-@@ -280,6 +1292,8 @@ SystemDataProvider::SystemDataProvider() {
+@@ -278,6 +1290,8 @@ SystemDataProvider::SystemDataProvider() {
    battery_health_timer_ = std::make_unique<base::RepeatingTimer>();
    cpu_usage_timer_ = std::make_unique<base::RepeatingTimer>();
    memory_usage_timer_ = std::make_unique<base::RepeatingTimer>();
@@ -1303,7 +1303,7 @@ index 53a448c9a635..b77268ba8c87 100644
    chromeos::PowerManagerClient::Get()->AddObserver(this);
  }
  
-@@ -306,6 +1320,14 @@ void SystemDataProvider::GetBatteryInfo(GetBatteryInfoCallback callback) {
+@@ -304,6 +1318,14 @@ void SystemDataProvider::GetBatteryInfo(GetBatteryInfoCallback callback) {
                       weak_factory_.GetWeakPtr(), std::move(callback)));
  }
  
@@ -1318,7 +1318,7 @@ index 53a448c9a635..b77268ba8c87 100644
  void SystemDataProvider::ObserveBatteryChargeStatus(
      mojo::PendingRemote<mojom::BatteryChargeStatusObserver> observer) {
    battery_charge_status_observers_.Add(std::move(observer));
-@@ -359,6 +1381,32 @@ void SystemDataProvider::ObserveCpuUsage(
+@@ -357,6 +1379,32 @@ void SystemDataProvider::ObserveCpuUsage(
    UpdateCpuUsage();
  }
  
@@ -1351,7 +1351,7 @@ index 53a448c9a635..b77268ba8c87 100644
  void SystemDataProvider::PowerChanged(
      const power_manager::PowerSupplyProperties& proto) {
    if (battery_charge_status_observers_.empty()) {
-@@ -408,40 +1456,41 @@ void SystemDataProvider::OnSystemInfoProbeResponse(
+@@ -406,40 +1454,41 @@ void SystemDataProvider::OnSystemInfoProbeResponse(
  
    if (info_ptr.is_null()) {
      LOG(ERROR) << "Null response from croshealthd::ProbeTelemetryInfo.";
@@ -1402,7 +1402,7 @@ index 53a448c9a635..b77268ba8c87 100644
  
    if (IsLoggingEnabled()) {
      DiagnosticsLogController::Get()->GetTelemetryLog().UpdateSystemInfo(
-@@ -579,18 +1628,22 @@ void SystemDataProvider::OnMemoryUsageUpdated(
+@@ -577,18 +1626,22 @@ void SystemDataProvider::OnMemoryUsageUpdated(
  
    if (info_ptr.is_null()) {
      LOG(ERROR) << "Null response from croshealthd::ProbeTelemetryInfo.";
@@ -1429,7 +1429,7 @@ index 53a448c9a635..b77268ba8c87 100644
    NotifyMemoryUsageObservers(memory_usage);
  }
  
-@@ -599,15 +1652,17 @@ void SystemDataProvider::OnCpuUsageUpdated(healthd::TelemetryInfoPtr info_ptr) {
+@@ -597,15 +1650,17 @@ void SystemDataProvider::OnCpuUsageUpdated(healthd::TelemetryInfoPtr info_ptr) {
  
    if (info_ptr.is_null()) {
      LOG(ERROR) << "Null response from croshealthd::ProbeTelemetryInfo.";
@@ -1449,7 +1449,7 @@ index 53a448c9a635..b77268ba8c87 100644
      NotifyCpuUsageObservers(cpu_usage);
      return;
    }
-@@ -615,6 +1670,14 @@ void SystemDataProvider::OnCpuUsageUpdated(healthd::TelemetryInfoPtr info_ptr) {
+@@ -613,6 +1668,14 @@ void SystemDataProvider::OnCpuUsageUpdated(healthd::TelemetryInfoPtr info_ptr) {
    ComputeAndPopulateCpuUsage(*cpu_info, *cpu_usage.get());
    PopulateAverageCpuTemperature(*cpu_info, *cpu_usage.get());
    PopulateAverageScaledClockSpeed(*cpu_info, *cpu_usage.get());
@@ -1464,7 +1464,7 @@ index 53a448c9a635..b77268ba8c87 100644
  
    NotifyCpuUsageObservers(cpu_usage);
  }
-@@ -701,6 +1764,48 @@ void SystemDataProvider::NotifyCpuUsageObservers(
+@@ -699,6 +1762,48 @@ void SystemDataProvider::NotifyCpuUsageObservers(
    }
  }
  
@@ -1514,7 +1514,7 @@ index 53a448c9a635..b77268ba8c87 100644
    if (!probe_service_ || !probe_service_.is_connected()) {
      cros_healthd::ServiceConnection::GetInstance()->BindProbeService(
 diff --git a/ash/webui/diagnostics_ui/backend/system/system_data_provider.h b/ash/webui/diagnostics_ui/backend/system/system_data_provider.h
-index 92f78cac6729..f32c8aa56016 100644
+index a5e4758879..4d8cbbcb35 100644
 --- a/ash/webui/diagnostics_ui/backend/system/system_data_provider.h
 +++ b/ash/webui/diagnostics_ui/backend/system/system_data_provider.h
 @@ -7,6 +7,7 @@
@@ -1524,8 +1524,8 @@ index 92f78cac6729..f32c8aa56016 100644
 +#include <vector>
  
  #include "ash/webui/diagnostics_ui/backend/system/cpu_usage_data.h"
- #include "ash/webui/diagnostics_ui/mojom/system_data_provider.mojom.h"
-@@ -39,6 +40,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
+ #include "base/memory/raw_ptr.h"
+@@ -37,6 +38,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
    // mojom::SystemDataProvider:
    void GetSystemInfo(GetSystemInfoCallback callback) override;
    void GetBatteryInfo(GetBatteryInfoCallback callback) override;
@@ -1534,7 +1534,7 @@ index 92f78cac6729..f32c8aa56016 100644
    void ObserveBatteryChargeStatus(
        mojo::PendingRemote<mojom::BatteryChargeStatusObserver> observer)
        override;
-@@ -48,6 +51,10 @@ class SystemDataProvider : public mojom::SystemDataProvider,
+@@ -46,6 +49,10 @@ class SystemDataProvider : public mojom::SystemDataProvider,
        mojo::PendingRemote<mojom::MemoryUsageObserver> observer) override;
    void ObserveCpuUsage(
        mojo::PendingRemote<mojom::CpuUsageObserver> observer) override;
@@ -1545,7 +1545,7 @@ index 92f78cac6729..f32c8aa56016 100644
  
    // PowerManagerClient::Observer:
    void PowerChanged(const power_manager::PowerSupplyProperties& proto) override;
-@@ -86,6 +93,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
+@@ -84,6 +91,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
    void UpdateMemoryUsage();
  
    void UpdateCpuUsage();
@@ -1554,7 +1554,7 @@ index 92f78cac6729..f32c8aa56016 100644
  
    void NotifyBatteryChargeStatusObservers(
        const mojom::BatteryChargeStatusPtr& battery_charge_status);
-@@ -96,6 +105,9 @@ class SystemDataProvider : public mojom::SystemDataProvider,
+@@ -94,6 +103,9 @@ class SystemDataProvider : public mojom::SystemDataProvider,
    void NotifyMemoryUsageObservers(const mojom::MemoryUsagePtr& memory_usage);
  
    void NotifyCpuUsageObservers(const mojom::CpuUsagePtr& cpu_usage);
@@ -1564,7 +1564,7 @@ index 92f78cac6729..f32c8aa56016 100644
  
    void OnBatteryChargeStatusUpdated(
        const std::optional<power_manager::PowerSupplyProperties>&
-@@ -107,6 +119,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
+@@ -105,6 +117,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
    void OnMemoryUsageUpdated(cros_healthd::mojom::TelemetryInfoPtr info_ptr);
  
    void OnCpuUsageUpdated(cros_healthd::mojom::TelemetryInfoPtr info_ptr);
@@ -1573,29 +1573,11 @@ index 92f78cac6729..f32c8aa56016 100644
  
    void ComputeAndPopulateCpuUsage(const cros_healthd::mojom::CpuInfo& cpu_info,
                                    mojom::CpuUsage& out_cpu_usage);
-@@ -119,6 +133,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
-   mojo::RemoteSet<mojom::BatteryHealthObserver> battery_health_observers_;
-   mojo::RemoteSet<mojom::MemoryUsageObserver> memory_usage_observers_;
-   mojo::RemoteSet<mojom::CpuUsageObserver> cpu_usage_observers_;
-+  mojo::RemoteSet<mojom::GpuUsageObserver> gpu_usage_observers_;
-+  mojo::RemoteSet<mojom::SensorInfoObserver> sensor_info_observers_;
- 
-   mojo::Receiver<mojom::SystemDataProvider> receiver_{this};
- 
-@@ -126,6 +142,8 @@ class SystemDataProvider : public mojom::SystemDataProvider,
-   std::unique_ptr<base::RepeatingTimer> battery_health_timer_;
-   std::unique_ptr<base::RepeatingTimer> memory_usage_timer_;
-   std::unique_ptr<base::RepeatingTimer> cpu_usage_timer_;
-+  std::unique_ptr<base::RepeatingTimer> gpu_usage_timer_;
-+  std::unique_ptr<base::RepeatingTimer> sensor_info_timer_;
- 
-   base::WeakPtrFactory<SystemDataProvider> weak_factory_{this};
- };
 diff --git a/ash/webui/diagnostics_ui/diagnostics_ui.cc b/ash/webui/diagnostics_ui/diagnostics_ui.cc
-index 4b378883130d..561605304969 100644
+index 1de53ff58b..3bc14fb3bf 100644
 --- a/ash/webui/diagnostics_ui/diagnostics_ui.cc
 +++ b/ash/webui/diagnostics_ui/diagnostics_ui.cc
-@@ -361,6 +361,7 @@ void AddDiagnosticsStrings(content::WebUIDataSource* html_source) {
+@@ -354,6 +354,7 @@ void AddDiagnosticsStrings(content::WebUIDataSource* html_source) {
        {"wifiLabel", IDS_NETWORK_TYPE_WIFI},
    };
    html_source->AddLocalizedStrings(kLocalizedStrings);
@@ -1604,7 +1586,7 @@ index 4b378883130d..561605304969 100644
    html_source->UseStringsJs();
  }
 diff --git a/ash/webui/diagnostics_ui/mojom/system_data_provider.mojom b/ash/webui/diagnostics_ui/mojom/system_data_provider.mojom
-index cc0471d2b923..81c55cd9087b 100644
+index cc0471d2b9..81c55cd908 100644
 --- a/ash/webui/diagnostics_ui/mojom/system_data_provider.mojom
 +++ b/ash/webui/diagnostics_ui/mojom/system_data_provider.mojom
 @@ -66,6 +66,59 @@ struct BatteryHealth {
@@ -1705,7 +1687,7 @@ index cc0471d2b923..81c55cd9087b 100644
 +  ObserveSensorInfo(pending_remote<SensorInfoObserver> observer);
  };
 diff --git a/ash/webui/diagnostics_ui/resources/BUILD.gn b/ash/webui/diagnostics_ui/resources/BUILD.gn
-index 1ff9d17772c8..626f8742818c 100644
+index 1ff9d17772..626f874281 100644
 --- a/ash/webui/diagnostics_ui/resources/BUILD.gn
 +++ b/ash/webui/diagnostics_ui/resources/BUILD.gn
 @@ -26,6 +26,7 @@ build_webui("build") {
@@ -1725,7 +1707,7 @@ index 1ff9d17772c8..626f8742818c 100644
      "text_badge.ts",
      "touchpad_tester.ts",
 diff --git a/ash/webui/diagnostics_ui/resources/diagnostics_app.ts b/ash/webui/diagnostics_ui/resources/diagnostics_app.ts
-index 481658d29a06..15c8f1ead096 100644
+index 481658d29a..15c8f1ead0 100644
 --- a/ash/webui/diagnostics_ui/resources/diagnostics_app.ts
 +++ b/ash/webui/diagnostics_ui/resources/diagnostics_app.ts
 @@ -10,6 +10,7 @@ import './diagnostics_sticky_banner.js';
@@ -1747,7 +1729,7 @@ index 481658d29a06..15c8f1ead096 100644
  
      pages.push(this.createInputSelector());
 diff --git a/ash/webui/diagnostics_ui/resources/diagnostics_utils.ts b/ash/webui/diagnostics_ui/resources/diagnostics_utils.ts
-index bad97b10af7c..247a46393bba 100644
+index bad97b10af..247a46393b 100644
 --- a/ash/webui/diagnostics_ui/resources/diagnostics_utils.ts
 +++ b/ash/webui/diagnostics_ui/resources/diagnostics_utils.ts
 @@ -49,6 +49,8 @@ export function getNavigationViewForPageId(id: string): NavigationView {
@@ -1760,7 +1742,7 @@ index bad97b10af7c..247a46393bba 100644
        assertNotReached();
    }
 diff --git a/ash/webui/diagnostics_ui/resources/fake_system_data_provider.ts b/ash/webui/diagnostics_ui/resources/fake_system_data_provider.ts
-index 3bbb2986f716..20decfd84d9a 100644
+index 3bbb2986f7..20decfd84d 100644
 --- a/ash/webui/diagnostics_ui/resources/fake_system_data_provider.ts
 +++ b/ash/webui/diagnostics_ui/resources/fake_system_data_provider.ts
 @@ -6,7 +6,7 @@ import {FakeMethodResolver} from 'chrome://resources/ash/common/fake_method_reso
@@ -1896,7 +1878,7 @@ index 3bbb2986f716..20decfd84d9a 100644
    // Disables all observers and resets provider to its initial state.
 diff --git a/ash/webui/diagnostics_ui/resources/gpu_card.html b/ash/webui/diagnostics_ui/resources/gpu_card.html
 new file mode 100644
-index 000000000000..f2320277c9c6
+index 0000000000..f2320277c9
 --- /dev/null
 +++ b/ash/webui/diagnostics_ui/resources/gpu_card.html
 @@ -0,0 +1,86 @@
@@ -1988,7 +1970,7 @@ index 000000000000..f2320277c9c6
 +</diagnostics-card>
 diff --git a/ash/webui/diagnostics_ui/resources/gpu_card.ts b/ash/webui/diagnostics_ui/resources/gpu_card.ts
 new file mode 100644
-index 000000000000..ff36c7ff7aaa
+index 0000000000..ff36c7ff7a
 --- /dev/null
 +++ b/ash/webui/diagnostics_ui/resources/gpu_card.ts
 @@ -0,0 +1,186 @@
@@ -2179,7 +2161,7 @@ index 000000000000..ff36c7ff7aaa
 +
 +customElements.define(GpuCardElement.is, GpuCardElement);
 diff --git a/ash/webui/diagnostics_ui/resources/icons.html b/ash/webui/diagnostics_ui/resources/icons.html
-index fc4702f94273..df8102aec9f2 100644
+index fc4702f942..df8102aec9 100644
 --- a/ash/webui/diagnostics_ui/resources/icons.html
 +++ b/ash/webui/diagnostics_ui/resources/icons.html
 @@ -69,6 +69,14 @@
@@ -2199,7 +2181,7 @@ index fc4702f94273..df8102aec9f2 100644
        <path d="M6 15V13H4V15.375C4 16.2688 4.73125 17 5.625 17H14.375C15.2688 17 16 16.2688 16 15.375V13H14V15H6Z" />
 diff --git a/ash/webui/diagnostics_ui/resources/sensors_page.html b/ash/webui/diagnostics_ui/resources/sensors_page.html
 new file mode 100644
-index 000000000000..406162a7bf77
+index 0000000000..406162a7bf
 --- /dev/null
 +++ b/ash/webui/diagnostics_ui/resources/sensors_page.html
 @@ -0,0 +1,70 @@
@@ -2275,7 +2257,7 @@ index 000000000000..406162a7bf77
 +</div>
 diff --git a/ash/webui/diagnostics_ui/resources/sensors_page.ts b/ash/webui/diagnostics_ui/resources/sensors_page.ts
 new file mode 100644
-index 000000000000..c7260ff4bf83
+index 0000000000..c7260ff4bf
 --- /dev/null
 +++ b/ash/webui/diagnostics_ui/resources/sensors_page.ts
 @@ -0,0 +1,168 @@
@@ -2448,7 +2430,7 @@ index 000000000000..c7260ff4bf83
 +
 +customElements.define(SensorsPageElement.is, SensorsPageElement);
 diff --git a/ash/webui/diagnostics_ui/resources/system_page.html b/ash/webui/diagnostics_ui/resources/system_page.html
-index 9bf06ba6de36..8afe37f56018 100644
+index 9bf06ba6de..8afe37f560 100644
 --- a/ash/webui/diagnostics_ui/resources/system_page.html
 +++ b/ash/webui/diagnostics_ui/resources/system_page.html
 @@ -69,6 +69,9 @@
@@ -2462,7 +2444,7 @@ index 9bf06ba6de36..8afe37f56018 100644
    <cr-toast id="toast" duration="2500">
      <span>[[toastText]]</span>
 diff --git a/ash/webui/diagnostics_ui/resources/system_page.ts b/ash/webui/diagnostics_ui/resources/system_page.ts
-index 0bef92570c72..37600c2f4f31 100644
+index 0bef92570c..37600c2f4f 100644
 --- a/ash/webui/diagnostics_ui/resources/system_page.ts
 +++ b/ash/webui/diagnostics_ui/resources/system_page.ts
 @@ -9,6 +9,7 @@ import 'chrome://resources/polymer/v3_0/iron-icon/iron-icon.js';

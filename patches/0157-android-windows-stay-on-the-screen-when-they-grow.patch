@@ -1,19 +1,20 @@
 diff --git a/chromeos/ash/experiences/arc/compat_mode/arc_resize_lock_manager.cc b/chromeos/ash/experiences/arc/compat_mode/arc_resize_lock_manager.cc
-index 1062e463db19..bda75c6195b4 100644
+index 4774eb6503..e1eabdc400 100644
 --- a/chromeos/ash/experiences/arc/compat_mode/arc_resize_lock_manager.cc
 +++ b/chromeos/ash/experiences/arc/compat_mode/arc_resize_lock_manager.cc
-@@ -33,6 +33,7 @@
+@@ -28,6 +28,7 @@
+ #include "chromeos/ui/base/window_properties.h"
  #include "ui/aura/window_observer.h"
  #include "ui/aura/window_tree_host.h"
- #include "ui/base/mojom/window_show_state.mojom.h"
 +#include "ui/display/screen.h"
- #include "ui/views/widget/widget.h"
  #include "ui/wm/public/activation_client.h"
  
-@@ -267,6 +268,21 @@ void ArcResizeLockManager::OnWindowBoundsChanged(
-     }
+ namespace arc {
+@@ -253,6 +254,21 @@ void ArcResizeLockManager::OnWindowBoundsChanged(
+     const gfx::Rect& new_bounds,
+     ui::PropertyChangeReason reason) {
    compat_mode_button_controller_->Update(window);
- 
++
 +  // KibaOS: an Android window that grew past the work area while keeping the
 +  // origin it opened with is moved back onto the screen.
 +  if (window->IsVisible() && !new_bounds.IsEmpty()) {
@@ -28,7 +29,6 @@ index 1062e463db19..bda75c6195b4 100644
 +      window->SetBoundsInScreen(bounds, display);
 +    }
 +  }
-+
-   // Only a size the user chose after the window opened is worth keeping.
-   if (old_bounds.size() == new_bounds.size() ||
-       !size_restored_windows_.contains(window)) {
+ }
+ 
+ void ArcResizeLockManager::OnWindowDestroying(aura::Window* window) {

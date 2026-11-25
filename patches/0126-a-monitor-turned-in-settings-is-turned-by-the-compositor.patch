@@ -1,5 +1,5 @@
 diff --git a/ash/display/aura_display_source.cc b/ash/display/aura_display_source.cc
-index 615824ea0506..a1dc59953795 100644
+index ebbd355a93..01d099ebf4 100644
 --- a/ash/display/aura_display_source.cc
 +++ b/ash/display/aura_display_source.cc
 @@ -213,6 +213,11 @@ AuraDisplaySource* AuraDisplaySource::Get() {
@@ -59,7 +59,7 @@ index 615824ea0506..a1dc59953795 100644
    if (text.empty() || text == last_layout_) {
      return;
 diff --git a/ash/display/aura_display_source.h b/ash/display/aura_display_source.h
-index 4fcba7684eb9..c89714cc1f1c 100644
+index 0006034031..63d54ab22f 100644
 --- a/ash/display/aura_display_source.h
 +++ b/ash/display/aura_display_source.h
 @@ -46,7 +46,9 @@ namespace ash {
@@ -97,7 +97,7 @@ index 4fcba7684eb9..c89714cc1f1c 100644
    void SaveScales(std::map<std::string, float> scales);
  
 diff --git a/ash/display/display_configuration_controller.cc b/ash/display/display_configuration_controller.cc
-index d6f0fa28c91c..0916fe18a500 100644
+index 2bad25f520..07f79bb8f8 100644
 --- a/ash/display/display_configuration_controller.cc
 +++ b/ash/display/display_configuration_controller.cc
 @@ -6,6 +6,7 @@
@@ -108,7 +108,7 @@ index d6f0fa28c91c..0916fe18a500 100644
  #include "ash/display/display_animator.h"
  #include "ash/display/display_util.h"
  #include "ash/public/cpp/shelf_types.h"
-@@ -147,8 +148,11 @@ void DisplayConfigurationController::SetDisplayRotation(
+@@ -143,8 +144,11 @@ void DisplayConfigurationController::SetDisplayRotation(
      display::Display::RotationSource source,
      DisplayConfigurationController::RotationAnimation mode) {
    // No need to apply animation if the wallpaper isn't set yet during startup.
@@ -122,10 +122,18 @@ index d6f0fa28c91c..0916fe18a500 100644
        return;
      if (display_animator_) {
 diff --git a/ash/display/root_window_transformers.cc b/ash/display/root_window_transformers.cc
-index ebacff2efbbe..6d4ebeff6bb1 100644
+index 050fea7d42..c04eca9837 100644
 --- a/ash/display/root_window_transformers.cc
 +++ b/ash/display/root_window_transformers.cc
-@@ -34,6 +34,12 @@ namespace {
+@@ -7,6 +7,7 @@
+ #include <cmath>
+ 
+ #include "ash/accessibility/magnifier/fullscreen_magnifier_controller.h"
++#include "ash/display/aura_display_source.h"
+ #include "ash/display/display_util.h"
+ #include "ash/host/root_window_transformer.h"
+ #include "ash/shell.h"
+@@ -33,6 +34,12 @@ namespace {
  // |display::Display::ROTATE_0|.
  gfx::Transform CreateRootWindowRotationTransform(
      const display::Display& display) {
@@ -138,7 +146,7 @@ index ebacff2efbbe..6d4ebeff6bb1 100644
    gfx::SizeF size(display.GetSizeInPixel());
  
    // Use SizeF so that the origin of translated layer will be
-@@ -97,6 +103,12 @@ class AshRootWindowTransformer : public RootWindowTransformer {
+@@ -96,6 +103,12 @@ class AshRootWindowTransformer : public RootWindowTransformer {
   public:
    AshRootWindowTransformer(const display::Display& display) {
      initial_root_bounds_ = gfx::Rect(display.size());
@@ -151,16 +159,16 @@ index ebacff2efbbe..6d4ebeff6bb1 100644
      display::DisplayManager* display_manager = Shell::Get()->display_manager();
      display::ManagedDisplayInfo info =
          display_manager->GetDisplayInfo(display.id());
-@@ -148,7 +160,7 @@ class AshRootWindowTransformer : public RootWindowTransformer {
+@@ -133,7 +146,7 @@ class AshRootWindowTransformer : public RootWindowTransformer {
      return invert_transform_;
    }
    gfx::Rect GetRootWindowBounds(const gfx::Size& host_size) const override {
--    if (base::SysInfo::IsRunningOnChromeOS()) {
-+    if (root_bounds_from_display_) {
+-    if (base::SysInfo::IsRunningOnChromeOS())
++    if (root_bounds_from_display_)
        return initial_root_bounds_;
-     }
  
-@@ -207,6 +219,7 @@ class AshRootWindowTransformer : public RootWindowTransformer {
+     // If we're running on linux desktop for dev purpose, the host window
+@@ -190,6 +203,7 @@ class AshRootWindowTransformer : public RootWindowTransformer {
    gfx::Transform insets_and_scale_transform_;
    gfx::Rect initial_root_bounds_;
    gfx::Size initial_host_size_;
@@ -169,10 +177,10 @@ index ebacff2efbbe..6d4ebeff6bb1 100644
  
  // RootWindowTransformer for mirror root window. We simply copy the
 diff --git a/ash/display/window_tree_host_manager.cc b/ash/display/window_tree_host_manager.cc
-index f3e8978c916c..fac9c8f1ee91 100644
+index c72415b813..28b97cdbb2 100644
 --- a/ash/display/window_tree_host_manager.cc
 +++ b/ash/display/window_tree_host_manager.cc
-@@ -210,11 +210,29 @@ display::DisplayManager* GetDisplayManager() {
+@@ -119,11 +119,29 @@ display::DisplayManager* GetDisplayManager() {
    return Shell::Get()->display_manager();
  }
  
@@ -203,7 +211,7 @@ index f3e8978c916c..fac9c8f1ee91 100644
    aura::WindowTreeHost* host = ash_host->AsWindowTreeHost();
    ash_host->UpdateCursorConfig();
    ash_host->SetRootWindowTransformer(
-@@ -677,10 +695,8 @@ void WindowTreeHostManager::CreateDisplay(const display::Display& display) {
+@@ -579,10 +597,8 @@ void WindowTreeHostManager::CreateDisplay(const display::Display& display) {
      primary_display_id = display.id();
      window_tree_hosts_[display.id()] = ash_host;
      GetRootWindowSettings(GetWindow(ash_host))->display_id = display.id();
@@ -214,8 +222,8 @@ index f3e8978c916c..fac9c8f1ee91 100644
 +        GetHostBoundsInPixels(display));
      SetDisplayPropertiesOnHost(ash_host, display);
    } else {
-     if (primary_display_id == display::kInvalidDisplayId) {
-@@ -794,7 +810,7 @@ void WindowTreeHostManager::UpdateDisplayMetrics(
+     if (primary_display_id == display::kInvalidDisplayId)
+@@ -694,7 +710,7 @@ void WindowTreeHostManager::UpdateDisplayMetrics(
    DCHECK(!display_info.bounds_in_native().IsEmpty());
    AshWindowTreeHost* ash_host = window_tree_hosts_[display.id()];
    ash_host->AsWindowTreeHost()->SetBoundsInPixels(
@@ -224,7 +232,7 @@ index f3e8978c916c..fac9c8f1ee91 100644
  
    // Redraw should trigger on bounds/resolution changes. VRR-only changes should
    // not trigger redraws.
-@@ -871,6 +887,12 @@ void WindowTreeHostManager::UpdateHostOfDisplayProviders() {
+@@ -771,6 +787,12 @@ void WindowTreeHostManager::UpdateHostOfDisplayProviders() {
  void WindowTreeHostManager::OnHostResized(aura::WindowTreeHost* host) {
    display::Display display =
        display::Screen::Get()->GetDisplayNearestWindow(host->window());
@@ -236,8 +244,8 @@ index f3e8978c916c..fac9c8f1ee91 100644
 +  }
  
    display::DisplayManager* display_manager = GetDisplayManager();
-   const gfx::Rect host_bounds_in_pixels = host->GetBoundsInPixels();
-@@ -1100,7 +1122,7 @@ AshWindowTreeHost* WindowTreeHostManager::AddWindowTreeHostForDisplay(
+   if (display_manager->UpdateDisplayBounds(display.id(),
+@@ -993,7 +1015,7 @@ AshWindowTreeHost* WindowTreeHostManager::AddWindowTreeHostForDisplay(
    const display::ManagedDisplayInfo& display_info =
        GetDisplayManager()->GetDisplayInfo(display.id());
    AshWindowTreeHostInitParams params_with_bounds(init_params);
@@ -247,22 +255,21 @@ index f3e8978c916c..fac9c8f1ee91 100644
      params_with_bounds.offscreen = true;
      params_with_bounds.delegate = mirror_window_controller();
 diff --git a/ash/wm/native_cursor_manager_ash.cc b/ash/wm/native_cursor_manager_ash.cc
-index 7a9cc6eb5614..22d2e2ef21d0 100644
+index e3b6335a28..fa9a120793 100644
 --- a/ash/wm/native_cursor_manager_ash.cc
 +++ b/ash/wm/native_cursor_manager_ash.cc
-@@ -4,6 +4,7 @@
+@@ -8,6 +8,7 @@
+ #include <optional>
  
- #include "ash/wm/native_cursor_manager_ash.h"
- 
+ #include "ash/constants/ash_constants.h"
 +#include "ash/display/aura_display_source.h"
  #include "ash/display/cursor_window_controller.h"
  #include "ash/display/window_tree_host_manager.h"
  #include "ash/shell.h"
-@@ -78,14 +79,21 @@ display::Display::Rotation NativeCursorManagerAsh::GetRotation() const {
- void NativeCursorManagerAsh::SetDisplay(
+@@ -173,23 +174,31 @@ void NativeCursorManagerAsh::UpdateCursor(
      const display::Display& display,
+     std::optional<int> custom_cursor_size,
      ::wm::NativeCursorManagerDelegate* delegate) {
--  if (cursor_loader_.SetDisplay(display)) {
 +  // KibaOS: the compositor turns the cursor along with the picture of one of
 +  // its monitors, so the cursor is drawn upright there.
 +  display::Display cursor_display = display;
@@ -270,15 +277,30 @@ index 7a9cc6eb5614..22d2e2ef21d0 100644
 +    cursor_display.set_rotation(display::Display::ROTATE_0);
 +    cursor_display.set_panel_rotation(display::Display::ROTATE_0);
 +  }
-+  if (cursor_loader_.SetDisplay(cursor_display)) {
-     SetCursor(delegate->GetCursor(), delegate);
+   const bool custom_size_changed = custom_cursor_size != custom_cursor_size_;
+   // If a custom cursor size is set, use it as is. Otherwise, use a scale that
+   // keeps the cursor at least 4mm tall on internal displays.
+-  const float scale = custom_cursor_size ? display.device_scale_factor()
+-                                         : GetDefaultCursorScale(display);
++  const float scale = custom_cursor_size ? cursor_display.device_scale_factor()
++                                         : GetDefaultCursorScale(cursor_display);
+   const bool loader_changed =
+-      cursor_loader_.UpdateRotationAndScale(display.panel_rotation(), scale);
++      cursor_loader_.UpdateRotationAndScale(cursor_display.panel_rotation(),
++                                            scale);
+   const bool display_changed =
+-      display != display_ ||
+-      display.panel_rotation() != display_.panel_rotation() ||
++      cursor_display != display_ ||
++      cursor_display.panel_rotation() != display_.panel_rotation() ||
+       display.GetPixelsPerInchX() != display_.GetPixelsPerInchX() ||
+       display.GetPixelsPerInchY() != display_.GetPixelsPerInchY() ||
+       (display.is_valid() && !custom_size_changed && loader_changed);
+   if (!display_changed && !custom_size_changed) {
+     return;
    }
+-  display_ = display;
++  display_ = cursor_display;
+   custom_cursor_size_ = custom_cursor_size;
  
-   Shell::Get()
-       ->window_tree_host_manager()
-       ->cursor_window_controller()
--      ->SetDisplay(display);
-+      ->SetDisplay(cursor_display);
- 
-   // Update cursor compositing based on the current display.
-   Shell::Get()->UpdateCursorCompositingEnabled();
+   if (custom_size_changed) {
