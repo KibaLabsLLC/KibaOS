@@ -6,6 +6,14 @@ Reads <root>/src/DEPS (plus any recursedeps DEPS files), then:
   * writes gclient_gn_args_file (e.g. src/build/config/gclient_args.gni),
   * runs pre_deps_hooks and hooks.
 
+The default target is the linux desktop build. Ash, Aura, the linux host
+dependencies, and the ChromeOS-specific Chromium dependencies they need to
+compile are kept, as is the ChromeOS GN configuration (cros_boards stays at
+its empty DEPS default). What only a device build needs is skipped: the
+cros_boards board SDKs, Simple Chrome and device SDK setup (including the
+chromite CrOS SDK), and the Tast test hooks. Android, iOS, Windows and
+macOS-only dependencies stay out unless --target-os asks for them.
+
 Requires python3 (>= 3.8) and git. cipd is only needed if DEPS contains cipd
 dependencies (it ships with depot_tools; gclient itself is never run).
 """
@@ -27,6 +35,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 OS_NAMES = ("android", "chromeos", "fuchsia", "ios", "linux", "mac", "win")
 CPU_NAMES = ("arm", "arm64", "x86", "x64", "mips", "mips64", "ppc", "s390",
              "loong64", "riscv64")
+
+DESKTOP_SKIP_DEP_PATHS = ("src/third_party/chromite",)
+DESKTOP_SKIP_HOOKS = ("tast_control", "tast_control_cq_tests")
+
+# A variable value that is a condition expression rather than a literal
+# string (gclient's idiom, e.g. '"{cros_boards}" != ""').
+COND_VALUE_RE = re.compile(r"==|!=|>=|<=|<|>|\band\b|\bor\b|\bnot\b")
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 URL_REV_RE = re.compile(r"^(.+)@(refs/[^@:]+|[^@:/]+)$")
@@ -119,15 +134,32 @@ def sub_vars(text, vars_):
 
 
 class Scope(dict):
-    """Condition namespace: unknown names are False, and are recorded."""
+    """Condition namespace: unknown names are False, and are recorded.
 
-    def __init__(self, data, missing):
+    A variable whose value is a condition expression is evaluated
+    recursively (gclient does the same), so derived variables such as
+    checkout_simplechrome resolve to a boolean instead of a truthy string.
+    """
+
+    def __init__(self, data, missing, resolver, resolving):
         super().__init__(data)
         self._missing = missing
+        self._resolver = resolver
+        self._resolving = resolving
 
     def __missing__(self, key):
         self._missing.add(key)
         return False
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        if isinstance(value, str) and COND_VALUE_RE.search(value):
+            if key in self._resolving:
+                raise ResolveError("cyclic variable reference: %s" % key)
+            return self._resolver.cond(
+                sub_vars(value, self), self,
+                self._resolving | frozenset((key,)))
+        return value
 
 
 def load_deps_file(path):
@@ -325,17 +357,29 @@ class Resolver:
         self.root = os.path.abspath(args.root)
         self.jobs = args.jobs
         self.skip_hooks = args.skip_hooks
-        target_os = sorted(set(args.target_os or ["linux"]) | {host_os()})
+        self.desktop_target = "linux" in (args.target_os or ["linux"])
+        target_os = set(args.target_os or ["linux"])
+        if self.desktop_target:
+            # Ash and Aura need the ChromeOS-specific Chromium dependencies
+            # to compile, so the desktop target checks those out too. The
+            # build itself still targets linux.
+            target_os.add("chromeos")
         target_cpu = args.target_cpu or [host_cpu()]
-        self.base_vars = builtin_vars(target_os, target_cpu)
+        self.base_vars = builtin_vars(sorted(target_os | {host_os()}),
+                                      target_cpu)
         self.overrides = parse_overrides(args.var)
-        # Ensure Chromium's generated gclient GN args target the generic
-        # amd64 ChromeOS board unless explicitly overridden on the CLI.
-        self.overrides.setdefault("cros_boards", "amd64-generic")
+        # cros_boards stays at its DEPS default: the board SDKs and the
+        # Simple Chrome setup that hang off it are not needed for the
+        # desktop build. Pass --var cros_boards=<board> for a device build.
         self.cipd = args.cipd or shutil.which("cipd")
         self.skip_dep_paths = tuple(
             os.path.normpath(p) for p in (args.skip_dep_path or []))
         self.skip_hook_names = set(args.skip_hook_name or [])
+        if self.desktop_target:
+            self.skip_hook_names.update(DESKTOP_SKIP_HOOKS)
+            if not self.overrides.get("cros_boards"):
+                self.skip_dep_paths += tuple(
+                    os.path.normpath(p) for p in DESKTOP_SKIP_DEP_PATHS)
         self.skip_hook_actions = list(args.skip_hook_action or [])
         self.claimed = {}       # path -> DEPS file that declared it
         self.recursed = set()   # (path, deps filename) already processed
@@ -353,12 +397,14 @@ class Resolver:
         v.update(self.overrides)
         return v
 
-    def cond(self, expr, vars_):
+    def cond(self, expr, vars_, resolving=frozenset()):
         if not expr:
             return True
         try:
-            return bool(eval(expr, {"__builtins__": {}},
-                             Scope(vars_, self.missing)))
+            return bool(eval(sub_vars(expr, vars_), {"__builtins__": {}},
+                             Scope(vars_, self.missing, self, resolving)))
+        except ResolveError:
+            raise
         except Exception as e:  # noqa: BLE001
             raise ResolveError("cannot evaluate condition %r: %s" % (expr, e))
 
@@ -463,6 +509,7 @@ class Resolver:
             active.add(path)
             if any(path == sp or path.startswith(sp + os.sep)
                    for sp in self.skip_dep_paths):
+                log("  skip  %s" % path)
                 continue
             if path in self.claimed:
                 continue  # an ancestor DEPS already owns this path
@@ -501,10 +548,6 @@ class Resolver:
         if gn_file:
             out = os.path.join(self.root, gn_file)
             gn_args = list(ns.get("gclient_gn_args", []))
-            # Lumen builds target the amd64-generic ChromeOS board. Include
-            # this even when the DEPS file does not list it explicitly.
-            if "cros_boards" not in gn_args:
-                gn_args.append("cros_boards")
             write_gn_args(out, gn_args, vars_)
             log("  wrote %s" % gn_file)
 
@@ -533,6 +576,10 @@ class Resolver:
         top = os.path.join(self.root, "src", "DEPS")
         if not os.path.isfile(top):
             raise ResolveError("%s not found" % top)
+        if self.desktop_target:
+            log("==> linux desktop target: keeping Ash, Aura and the "
+                "ChromeOS Chromium dependencies; skipping board SDKs, "
+                "Simple Chrome/device SDK setup and Tast hooks")
         queue = [(top, "src", {})]
         while queue:
             deps_file, prefix, parent_vars = queue.pop(0)
@@ -557,7 +604,9 @@ def main():
     ap.add_argument("--var", action="append", default=[],
                     metavar="NAME=VALUE", help="override a DEPS variable")
     ap.add_argument("--target-os", action="append", default=None,
-                    help="target OS (repeatable); default: chromeos")
+                    help="target OS (repeatable); default: linux, which "
+                         "also checks out the ChromeOS-specific Chromium "
+                         "dependencies the desktop build needs")
     ap.add_argument("--target-cpu", action="append", default=None,
                     help="target CPU (repeatable); default: host CPU")
     ap.add_argument("--cipd", help="path to the cipd binary")
