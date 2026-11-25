@@ -332,6 +332,7 @@ class Resolver:
         self.cipd = args.cipd or shutil.which("cipd")
         self.skip_dep_paths = tuple(
             os.path.normpath(p) for p in (args.skip_dep_path or []))
+        self.skip_hook_names = set(args.skip_hook_name or [])
         self.claimed = {}       # path -> DEPS file that declared it
         self.recursed = set()   # (path, deps filename) already processed
         self.hooks = []         # (name, argv, cwd)
@@ -374,6 +375,9 @@ class Resolver:
 
     def run_hook(self, hook):
         name, action, cwd = hook
+        if name in self.skip_hook_names:
+            log("==> hook: %s (skipped)" % name)
+            return
         log("==> hook: %s" % name)
         try:
             proc = subprocess.run(action, cwd=cwd, env=self.hook_env())
@@ -547,6 +551,9 @@ def main():
                     metavar="PATH_PREFIX",
                     help="skip any dep whose path starts with this prefix "
                          "(repeatable; relative to root)")
+    ap.add_argument("--skip-hook-name", action="append", default=None,
+                    metavar="HOOK_NAME",
+                    help="skip the named hook entirely (repeatable)")
     args = ap.parse_args()
     if args.jobs < 1:
         die("--jobs must be >= 1")

@@ -176,7 +176,16 @@ LEAN_SKIP_DEP_PATHS=(
   "src/third_party/angle/src/tests/restricted_traces"
 )
 
+# Hooks to skip unconditionally (not targeting ChromeOS; chromite not present).
+SKIP_HOOK_NAMES=(
+  "cros_simplechrome_artifacts_with_vm"
+)
+
 resolver_args=()
+
+for hook_name in "${SKIP_HOOK_NAMES[@]}"; do
+  resolver_args+=(--skip-hook-name "${hook_name}")
+done
 
 if [[ "${LEAN_SYNC}" == "1" ]]; then
   for var in "${LEAN_VARS[@]}"; do
