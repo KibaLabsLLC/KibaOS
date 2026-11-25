@@ -181,6 +181,12 @@ resolver_args=()
 # Skip any hook that invokes chromite/bin/cros (not present for linux builds).
 resolver_args+=(--skip-hook-action "chromite/bin/cros")
 
+# Skip any hook whose action directly references the chrome/ directory, and
+# skip named hooks known to scan the chrome/ tree (Lumen is a shell delegate;
+# src/chrome does not exist in this build).
+resolver_args+=(--skip-hook-action "chrome/")
+resolver_args+=(--skip-hook-name "Generate location tags for tests")
+
 if [[ "${LEAN_SYNC}" == "1" ]]; then
   for var in "${LEAN_VARS[@]}"; do
     resolver_args+=(--var "${var}=False")
