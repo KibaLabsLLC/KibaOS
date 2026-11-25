@@ -30,7 +30,7 @@ CPU_NAMES = ("arm", "arm64", "x86", "x64", "mips", "mips64", "ppc", "s390",
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 URL_REV_RE = re.compile(r"^(.+)@(refs/[^@:]+|[^@:/]+)$")
-VAR_RE = re.compile(r"\{(\w+)\}")
+VAR_RE = re.compile(r"\{([\w.\-]+)\}")
 CIPD_VAR_RE = re.compile(r"\$\{\{(\w+)\}\}")
 
 GCS_BASE = os.environ.get("KIBAOS_GCS_BASE",
