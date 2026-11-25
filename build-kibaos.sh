@@ -1232,6 +1232,7 @@ intel-ucode
 mkinitcpio
 mkinitcpio-archiso
 archlinux-keyring
+firefox
 dosfstools
 mtools
 sudo
