@@ -1,12 +1,12 @@
-
 #!/bin/bash
 # Bootstrap the latest Project Lumen source for KibaOS Arch CI.
 #
 # Git:
 #   Fetches and updates Project Lumen.
 #
-# depot_tools / gclient:
-#   Resolves DEPS dependencies and executes Chromium build hooks.
+# ci/resolve-deps.py:
+#   Resolves DEPS git dependencies (and cipd, if available) and runs
+#   Chromium build hooks. No gclient involved.
 #
 # Source:
 #   ${TARGET}/src
@@ -21,7 +21,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-DEPOT_TOOLS="${KIBAOS_DEPOT_TOOLS:-${REPO_ROOT}/depot_tools_fresh}"
+# Optional: only used for cipd / vpython3 if hooks need them.
+DEPOT_TOOLS="${KIBAOS_DEPOT_TOOLS:-}"
 
 LUMEN_REPO="${KIBAOS_LUMEN_REPOSITORY:-https://github.com/KibaLabsLLC/Lumen.git}"
 LUMEN_BRANCH="${KIBAOS_LUMEN_BRANCH:-main}"
@@ -35,6 +36,7 @@ LEAN_SYNC="${KIBAOS_LEAN_SYNC:-1}"
 mode="plan"
 verify_series=0
 apply_series=0
+skip_hooks=0
 
 usage() {
   cat <<'EOF'
@@ -43,17 +45,18 @@ Usage: ci/bootstrap-chromium-src.sh [options]
 Bootstraps the latest Project Lumen source for KibaOS CI.
 
 Git fetches the latest commit from the configured Lumen branch.
-gclient processes Lumen's DEPS file and executes build hooks.
+ci/resolve-deps.py processes Lumen's DEPS file and executes build hooks.
 
 Options:
-  --target DIR     Checkout parent directory (holds .gclient and src/).
+  --target DIR     Checkout parent directory (holds src/).
   --run            Actually perform the bootstrap.
+  --skip-hooks     Fetch dependencies but do not run DEPS hooks.
   --verify-series  Verify patches/SERIES against the fresh checkout.
   --apply-series   Apply patches/SERIES directly into the checkout.
   -h, --help       Show this help.
 
 Environment:
-  KIBAOS_DEPOT_TOOLS=/path/to/depot_tools
+  KIBAOS_DEPOT_TOOLS=/path/to/depot_tools   (optional; for cipd/vpython3)
   KIBAOS_LUMEN_REPOSITORY=https://github.com/KibaLabsLLC/Lumen.git
   KIBAOS_LUMEN_BRANCH=main
   KIBAOS_BOOTSTRAP_TARGET=/mnt/build/kibaos-work/lumen-bootstrap
@@ -89,6 +92,10 @@ while [[ "$#" -gt 0 ]]; do
       ;;
     --run)
       mode="run"
+      shift
+      ;;
+    --skip-hooks)
+      skip_hooks=1
       shift
       ;;
     --verify-series)
@@ -127,11 +134,16 @@ command -v git >/dev/null 2>&1 || {
   exit 2
 }
 
-if [[ ! -x "${DEPOT_TOOLS}/gclient" ]]; then
-  echo "depot_tools/gclient not found at ${DEPOT_TOOLS}." >&2
-  echo "Set KIBAOS_DEPOT_TOOLS to your depot_tools directory." >&2
+command -v python3 >/dev/null 2>&1 || {
+  echo "python3 is required." >&2
   exit 2
-fi
+}
+
+RESOLVER="${SCRIPT_DIR}/resolve-deps.py"
+[[ -f "${RESOLVER}" ]] || {
+  echo "Missing ${RESOLVER}." >&2
+  exit 2
+}
 
 # Resolve the latest commit on the Lumen branch.
 resolve_lumen_revision() {
@@ -158,11 +170,11 @@ LEAN_VARS=(
   checkout_android
 )
 
-custom_vars=""
+resolver_args=()
 
 if [[ "${LEAN_SYNC}" == "1" ]]; then
   for var in "${LEAN_VARS[@]}"; do
-    custom_vars+="      \"${var}\": False,"$'\n'
+    resolver_args+=(--var "${var}=False")
   done
   lean_note="skipping ${LEAN_VARS[*]}"
 else
@@ -172,7 +184,7 @@ fi
 echo "Project Lumen bootstrap plan:"
 echo "  repository:  ${LUMEN_REPO}"
 echo "  branch:      ${LUMEN_BRANCH}"
-echo "  depot_tools: ${DEPOT_TOOLS}"
+echo "  resolver:    ${RESOLVER}"
 echo "  target:      ${TARGET}"
 echo "  source:      ${SRC_DIR}"
 echo "  jobs:        ${JOBS}"
@@ -182,11 +194,14 @@ echo
 echo "  steps:"
 echo "    1. Resolve latest Lumen commit using Git"
 echo "    2. Fetch and check out Lumen"
-echo "    3. Configure gclient for the Lumen source"
-echo "    4. gclient sync --nohooks --no-history --shallow -j${JOBS}"
-echo "    5. gclient runhooks"
+echo "    3. Resolve DEPS and fetch dependencies (resolve-deps.py)"
+if [[ "${skip_hooks}" == "1" ]]; then
+  echo "    4. Run DEPS hooks (skipped)"
+else
+  echo "    4. Run DEPS hooks"
+fi
 
-step=6
+step=5
 
 if [[ "${verify_series}" == "1" ]]; then
   echo "    ${step}. Verify patches/SERIES"
@@ -203,8 +218,10 @@ if [[ "${mode}" != "run" ]]; then
   exit 0
 fi
 
-# Configure depot_tools.
-export PATH="${DEPOT_TOOLS}:${PATH}"
+# Environment.
+if [[ -n "${DEPOT_TOOLS}" && -d "${DEPOT_TOOLS}" ]]; then
+  export PATH="${DEPOT_TOOLS}:${PATH}"
+fi
 export DEPOT_TOOLS_UPDATE=0
 export GIT_LFS_SKIP_SMUDGE=1
 
@@ -252,44 +269,13 @@ fi
 
 if [[ ! -f "${SRC_DIR}/DEPS" ]]; then
   echo "Error: Lumen has no DEPS file." >&2
-  echo "Cannot run gclient dependency synchronization." >&2
+  echo "Cannot resolve dependencies." >&2
   exit 1
 fi
 
 echo "==> Lumen checked out at ${ACTUAL_REVISION}"
 
-# Write gclient configuration.
-#
-# managed=False leaves ownership of the main source checkout to Git.
-# gclient still processes DEPS and manages dependency checkouts.
-echo "==> Configuring gclient"
-
-{
-  cat <<EOF
-solutions = [
-  {
-    "name": "src",
-    "url": "${LUMEN_REPO}",
-    "managed": False,
-    "custom_deps": {},
-EOF
-
-  if [[ -n "${custom_vars}" ]]; then
-    printf '    "custom_vars": {\n%s    },\n' "${custom_vars}"
-  else
-    printf '    "custom_vars": {},\n'
-  fi
-
-  cat <<'EOF'
-  },
-]
-target_os = ["chromeos"]
-EOF
-} > "${TARGET}/.gclient"
-
-cd "${TARGET}"
-
-# Check whether optional variables exist in this DEPS revision.
+# Warn about lean-sync variables this DEPS revision does not define.
 check_lean_vars() {
   local deps="${SRC_DIR}/DEPS"
   local var
@@ -303,27 +289,24 @@ check_lean_vars() {
   done
 }
 
-# Synchronize external dependencies.
-echo "==> Syncing Lumen dependencies"
-
-gclient sync \
-  --nohooks \
-  --no-history \
-  --shallow \
-  -j"${JOBS}"
-
 check_lean_vars
 
-# Run Chromium's dependency hooks.
-echo "==> Running build hooks"
+# Resolve DEPS, fetch dependencies, write gclient_args.gni, run hooks.
+echo "==> Syncing Lumen dependencies"
 
-gclient runhooks
+resolver_cmd=(python3 "${RESOLVER}" --root "${TARGET}" --jobs "${JOBS}")
+if [[ "${skip_hooks}" == "1" ]]; then
+  resolver_cmd+=(--skip-hooks)
+fi
+resolver_cmd+=("${resolver_args[@]}")
+
+"${resolver_cmd[@]}"
 
 # Ensure the Lumen source was not changed by dependency synchronization.
 FINAL_REVISION="$(git -C "${SRC_DIR}" rev-parse HEAD)"
 
 if [[ "${FINAL_REVISION}" != "${REVISION}" ]]; then
-  echo "Error: Lumen source revision changed during gclient sync." >&2
+  echo "Error: Lumen source revision changed during dependency sync." >&2
   echo "Expected: ${REVISION}" >&2
   echo "Actual:   ${FINAL_REVISION}" >&2
   exit 1
