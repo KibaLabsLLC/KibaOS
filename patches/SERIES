@@ -69,17 +69,10 @@
 0125-desks-and-rotation-survive-software-compositing.patch
 0126-a-monitor-turned-in-settings-is-turned-by-the-compositor.patch
 0131-the-power-menu-offers-sleep.patch
-0132-the-volume-bubble-waits-for-somebody-to-change-the-volume.patch
 0133-the-desktop-wakes-from-sleep-locked-and-drawing.patch
 0134-tooltips-stay-on-the-screen.patch
-0135-sound-devices-go-by-their-short-names.patch
-0137-volume-and-mute-follow-the-sound-card.patch
 0138-release-builds-log-dump-will-be-checks.patch
-0142-the-browsers-built-in-ai-runs-gemma-4-on-the-computer.patch
 0146-android-windows-get-the-desktop-caption.patch
-0147-android-stays-running-when-ash-restarts.patch
-0148-android-app-info-opens-androids-own-screen.patch
-0149-android-bridge-passes-notification-switch.patch
 0154-files-rows-can-be-dragged-to-other-windows.patch
 0156-android-window-modes-are-named-phone-and-tablet.patch
 0157-android-windows-stay-on-the-screen-when-they-grow.patch

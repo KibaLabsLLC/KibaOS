@@ -39,9 +39,9 @@ grep -Eq 'shortcut="Enter\|Ctrl F2"' <<<"$shortcut" || \
 # 3. The dotfile guard. lastIndexOf returns 0 for .bashrc, so the old
 # `!== -1` selected nothing at all and renaming a dotfile looked like the app
 # ignoring the keypress.
-grep -Fq 'selectionEnd > 0' <<<"$code" || \
+grep -Fq 'lastDotIndex > 0' <<<"$code" || \
   fail 'the stem selection no longer excludes a leading dot, so dotfiles select nothing'
-if grep -Eq 'selectionEnd (!== *-1|>= *0)' <<<"$code"; then
+if grep -Eq 'lastDotIndex (!== *-1|>= *0)' <<<"$code"; then
   fail 'the guard admits index 0 again, which is the dotfile bug'
 fi
 

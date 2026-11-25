@@ -1,15 +1,13 @@
 diff --git a/ui/chromeos/file_manager_strings.grdp b/ui/chromeos/file_manager_strings.grdp
-index 8f131eafe6c2..a861baa1981d 100644
+index 2da20ee0f8..6214b22d90 100644
 --- a/ui/chromeos/file_manager_strings.grdp
 +++ b/ui/chromeos/file_manager_strings.grdp
-@@ -1878,9 +1878,15 @@
- 
-   <!-- Renaming removable device notifications -->
-   <message name="IDS_REMOVABLE_DEVICE_RENAMING_OF_DEVICE_FAILED_TITLE" desc="Title of notification message which is shown when renaming process fails">
-     Renaming failed
+@@ -1887,7 +1887,13 @@
+   <message name="IDS_WEBSTORE_WIDGET_LOADING_SPINNER_ALT" desc="Alt text for spinner shown in Chrome Web Store Gallery widget while the widget contents is loading. This is the text that will be read by screen reader when the spinner is focused. The string should be translated as a verb.">
+     Loading
    </message>
-   <message name="IDS_REMOVABLE_DEVICE_RENAMING_OF_DEVICE_FINISHED_FAILURE_MESSAGE" desc="Text of notification message which is shown when there are some errors while renaming.">
-     Aw, Snap! There was an error during renaming.
+   <message name="IDS_WEBSTORE_WIDGET_INSTALLING_SPINNER_ALT" desc="Alt text for spinner shown in Chrome Web Store Gallery widget while an app is being installed from the widget. This is the text that will be read by screen reader when the spinner has focus. The string should be translated as a verb.">
+     Installing
    </message>
 +  <message name="IDS_FILE_BROWSER_KIBAOS_CANNOT_MOVE_THESE" desc="Shown when a cut is refused because at least one of the chosen items cannot be moved.">
 +    Some of these cannot be moved, so nothing was cut.
@@ -18,88 +16,11 @@ index 8f131eafe6c2..a861baa1981d 100644
 +    Some of these cannot be copied, so nothing was copied.
 +  </message>
  </grit-part>
-diff --git a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
-index 67b650656c08..0205966f9af0 100644
---- a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
-+++ b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
-@@ -16,53 +16,70 @@ import type {FilesAppEntry} from '../../common/js/files_app_entry_types.js';
-  * Every other file manager dims a cut file until it is pasted. This is the set
-  * that makes that possible.
-  *
-  * Keyed by URL rather than by entry, because the list rebuilds its entry
-  * objects as rows are recycled, so the object that was cut is not the object
-  * the row is later rendered from. The URL survives that.
-  */
- const cutUrls = new Set<string>();
-+let cutFolders = 0;
- 
- /**
-  * Marks entries as cut, replacing anything marked before.
-  *
-  * There is only ever one clipboard, so a second cut replaces the first rather
-  * than adding to it.
-  */
- export function kibaOsMarkCut(entries: Array<Entry|FilesAppEntry>) {
-   cutUrls.clear();
-+  cutFolders = 0;
-   for (const entry of entries) {
-     cutUrls.add(entry.toURL());
-+    if (entry.isDirectory) {
-+      cutFolders++;
-+    }
-   }
- }
- 
- /**
-  * Forgets what was cut. Returns whether anything was actually forgotten, so a
-  * caller can skip a redraw it does not need.
-  */
- export function kibaOsClearCut(): boolean {
-   if (cutUrls.size === 0) {
-     return false;
-   }
-   cutUrls.clear();
-+  cutFolders = 0;
-   return true;
- }
- 
- /**
-  * How many files are waiting to be moved.
-  *
-  * The dimming only says which ones while you are looking at the folder they
-  * are in. Walk into another folder and the clipboard becomes invisible again,
-  * which is where the status bar picks it up.
-  */
- export function kibaOsCutCount(): number {
-   return cutUrls.size;
- }
- 
-+/**
-+ * How many of the things waiting to be moved are folders.
-+ *
-+ * Counted when the cut is made rather than worked out later. The status bar
-+ * asks from any folder in the app, including ones the cut files are not in,
-+ * and by then there is nothing on hand to ask whether a URL was a directory.
-+ */
-+export function kibaOsCutFolderCount(): number {
-+  return cutFolders;
-+}
-+
- /**
-  * Whether this entry is waiting to be moved.
-  */
- export function kibaOsIsCut(entry: Entry|FilesAppEntry): boolean {
-   if (cutUrls.size === 0) {
-     return false;
-   }
-   return cutUrls.has(entry.toURL());
 diff --git a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
-index 67ada85ccb92..c1e88b9d25e6 100644
+index 8d5cb0206f..13e9f8d375 100644
 --- a/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
 +++ b/ui/file_manager/file_manager/foreground/js/file_transfer_controller.ts
-@@ -1228,17 +1228,21 @@ export class FileTransferController {
- 
-     return !(
+@@ -1230,13 +1230,17 @@ export class FileTransferController {
          (tagName === 'input' &&
           (element && 'type' in element && element?.type === 'text')) ||
          tagName === 'cr-input');
@@ -118,11 +39,7 @@ index 67ada85ccb92..c1e88b9d25e6 100644
      event.preventDefault();
  
      const clipboardData = getClipboardData(event);
-     const effectAllowed = isMove ? 'move' : 'copy';
- 
-@@ -1267,16 +1271,48 @@ export class FileTransferController {
-     if (isMove) {
-       kibaOsMarkCut(this.selectionHandler_.selection.entries);
+@@ -1269,12 +1273,44 @@ export class FileTransferController {
        this.kibaOsRedrawForCutMarks_();
      } else if (kibaOsClearCut()) {
        this.kibaOsRedrawForCutMarks_();
@@ -167,15 +84,81 @@ index 67ada85ccb92..c1e88b9d25e6 100644
     * Deliberately not list.redraw(). Redraw reuses the rows it already has:
     * mergeItems takes cachedItems_[index] when one exists and only calls
     * createItem when it does not, so the render path that applies the class
-    * never runs again for a row that is already on screen. Calling redraw here
-    * dimmed nothing at all, and would have dimmed only the rows scrolled into
+diff --git a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+index 97b70a1ce0..db45b0e514 100644
+--- a/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
++++ b/ui/file_manager/file_manager/foreground/js/kibaos_cut_marks.ts
+@@ -18,35 +18,41 @@ import type {FilesAppEntry} from '../../common/js/files_app_entry_types.js';
+  *
+  * Keyed by URL rather than by entry, because the list rebuilds its entry
+  * objects as rows are recycled, so the object that was cut is not the object
+  * the row is later rendered from. The URL survives that.
+  */
+ const cutUrls = new Set<string>();
++let cutFolders = 0;
+ 
+ /**
+  * Marks entries as cut, replacing anything marked before.
+  *
+  * There is only ever one clipboard, so a second cut replaces the first rather
+  * than adding to it.
+  */
+ export function kibaOsMarkCut(entries: Array<Entry|FilesAppEntry>) {
+   cutUrls.clear();
++  cutFolders = 0;
+   for (const entry of entries) {
+     cutUrls.add(entry.toURL());
++    if (entry.isDirectory) {
++      cutFolders++;
++    }
+   }
+ }
+ 
+ /**
+  * Forgets what was cut. Returns whether anything was actually forgotten, so a
+  * caller can skip a redraw it does not need.
+  */
+ export function kibaOsClearCut(): boolean {
+   if (cutUrls.size === 0) {
+     return false;
+   }
+   cutUrls.clear();
++  cutFolders = 0;
+   return true;
+ }
+ 
+ /**
+  * How many files are waiting to be moved.
+  *
+@@ -55,12 +61,23 @@ export function kibaOsClearCut(): boolean {
+  * which is where the status bar picks it up.
+  */
+ export function kibaOsCutCount(): number {
+   return cutUrls.size;
+ }
+ 
++/**
++ * How many of the things waiting to be moved are folders.
++ *
++ * Counted when the cut is made rather than worked out later. The status bar
++ * asks from any folder in the app, including ones the cut files are not in,
++ * and by then there is nothing on hand to ask whether a URL was a directory.
++ */
++export function kibaOsCutFolderCount(): number {
++  return cutFolders;
++}
++
+ /**
+  * Whether this entry is waiting to be moved.
+  */
+ export function kibaOsIsCut(entry: Entry|FilesAppEntry): boolean {
+   if (cutUrls.size === 0) {
+     return false;
 diff --git a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
-index b2ccf5a33b60..cd2c25ba1373 100644
+index b879d5cf21..26faae3bbf 100644
 --- a/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
 +++ b/ui/file_manager/file_manager/foreground/js/toolbar_controller.ts
-@@ -13,17 +13,17 @@ import {queryRequiredElement} from '../../common/js/dom_utils.js';
- import {isCrosComponentsEnabled} from '../../common/js/flags.js';
- import {bytesToString, str, strf} from '../../common/js/translations.js';
+@@ -15,13 +15,13 @@ import {bytesToString, str, strf} from '../../common/js/translations.js';
  import {canBulkPinningCloudPanelShow} from '../../common/js/util.js';
  import {RootType, VolumeType} from '../../common/js/volume_manager_types.js';
  import {type State} from '../../state/state.js';
@@ -190,11 +173,7 @@ index b2ccf5a33b60..cd2c25ba1373 100644
  import type {MetadataModel} from './metadata/metadata_model.js';
  import {EventType} from './file_selection.js';
  import type {A11yAnnounce} from './ui/a11y_announce.js';
- import {Command} from './ui/command.js';
- import type {FileListSelectionModel} from './ui/file_list_selection_model.js';
-@@ -506,20 +506,27 @@ export class ToolbarController {
-   private kibaOsUpdateClipboard_() {
-     const el = this.kibaOsStatusClipboard_ ??
+@@ -508,16 +508,23 @@ export class ToolbarController {
          document.querySelector<HTMLElement>('#kibaos-status-clipboard');
      if (!el) {
        return;
@@ -222,5 +201,3 @@ index b2ccf5a33b60..cd2c25ba1373 100644
    }
  
    private kibaOsUpdateStatusBar_(selectionText: string) {
-     const count = this.kibaOsStatusCount_ ??
-         document.querySelector<HTMLElement>('#kibaos-status-count');

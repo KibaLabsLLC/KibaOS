@@ -1,8 +1,8 @@
 diff --git a/ash/BUILD.gn b/ash/BUILD.gn
-index eaf7f74f4471..e169cc175105 100644
+index ee06313842..d6dacc76ea 100644
 --- a/ash/BUILD.gn
 +++ b/ash/BUILD.gn
-@@ -585,6 +585,8 @@ component("ash") {
+@@ -584,6 +584,8 @@ component("ash") {
      "detachable_base/detachable_base_notification_controller.h",
      "detachable_base/detachable_base_observer.h",
      "detachable_base/detachable_base_pairing_status.h",
@@ -13,7 +13,7 @@ index eaf7f74f4471..e169cc175105 100644
      "display/cursor_window_controller.cc",
 diff --git a/ash/display/aura_display_source.cc b/ash/display/aura_display_source.cc
 new file mode 100644
-index 000000000000..615824ea0506
+index 0000000000..ebbd355a93
 --- /dev/null
 +++ b/ash/display/aura_display_source.cc
 @@ -0,0 +1,674 @@
@@ -693,7 +693,7 @@ index 000000000000..615824ea0506
 +}  // namespace ash
 diff --git a/ash/display/aura_display_source.h b/ash/display/aura_display_source.h
 new file mode 100644
-index 000000000000..4fcba7684eb9
+index 0000000000..0006034031
 --- /dev/null
 +++ b/ash/display/aura_display_source.h
 @@ -0,0 +1,177 @@
@@ -875,7 +875,7 @@ index 000000000000..4fcba7684eb9
 +
 +#endif  // ASH_DISPLAY_AURA_DISPLAY_SOURCE_H_
 diff --git a/ash/display/display_util.cc b/ash/display/display_util.cc
-index 3e7ef93df068..6e7c5c60a9d4 100644
+index ecdd31df82..44e83a8d31 100644
 --- a/ash/display/display_util.cc
 +++ b/ash/display/display_util.cc
 @@ -9,6 +9,7 @@
@@ -886,7 +886,7 @@ index 3e7ef93df068..6e7c5c60a9d4 100644
  #include "ash/display/display_configuration_controller.h"
  #include "ash/display/extended_mouse_warp_controller.h"
  #include "ash/display/null_mouse_warp_controller.h"
-@@ -63,6 +64,13 @@ std::unique_ptr<MouseWarpController> CreateMouseWarpController(
+@@ -61,6 +62,13 @@ std::unique_ptr<MouseWarpController> CreateMouseWarpController(
    if (manager->IsInUnifiedMode() && manager->num_connected_displays() >= 2) {
      return std::make_unique<UnifiedMouseWarpController>();
    }
@@ -900,37 +900,8 @@ index 3e7ef93df068..6e7c5c60a9d4 100644
    // Extra check for |num_connected_displays()| is for SystemDisplayApiTest
    // that injects MockScreen.
    if (manager->GetNumDisplays() < 2 || manager->num_connected_displays() < 2) {
-diff --git a/ash/display/root_window_transformers.cc b/ash/display/root_window_transformers.cc
-index ddf94619fc89..ebacff2efbbe 100644
---- a/ash/display/root_window_transformers.cc
-+++ b/ash/display/root_window_transformers.cc
-@@ -7,6 +7,7 @@
- #include <cmath>
- 
- #include "ash/accessibility/magnifier/fullscreen_magnifier_controller.h"
-+#include "ash/display/aura_display_source.h"
- #include "ash/display/display_util.h"
- #include "ash/host/root_window_transformer.h"
- #include "ash/shell.h"
-@@ -106,13 +107,15 @@ class AshRootWindowTransformer : public RootWindowTransformer {
-     transform_ = insets_and_rotation_transform;
-     insets_and_scale_transform_ = CreateReverseRotatedInsetsTransform(
-         display.panel_rotation(), host_insets_, display.device_scale_factor());
--    if (!base::SysInfo::IsRunningOnChromeOS()) {
-+    if (!base::SysInfo::IsRunningOnChromeOS() && !AuraDisplaySource::Get()) {
-       // KibaOS compatibility: the ChromeOS display stack applies the device
-       // scale factor below Ash. On a generic Linux/Wayland host, Ash still
-       // shrinks the root window bounds to DIP size, but nothing scales that
-       // root layer back up to the native host surface. Apply the same scale to
-       // the visual layer transform and root event transform so shelf,
-       // wallpaper, windows, and hit testing all share one coordinate map.
-+      // With the compositor's monitors as its displays, each host draws at
-+      // its display's scale as on ChromeOS, and this is not needed.
-       transform_.Scale(display.device_scale_factor(),
-                        display.device_scale_factor());
-       insets_and_scale_transform_.Scale(display.device_scale_factor(),
 diff --git a/ash/display/window_tree_host_manager.cc b/ash/display/window_tree_host_manager.cc
-index 9d5de8e0abdc..f3e8978c916c 100644
+index eaa350b7b0..c72415b813 100644
 --- a/ash/display/window_tree_host_manager.cc
 +++ b/ash/display/window_tree_host_manager.cc
 @@ -12,6 +12,7 @@
@@ -941,20 +912,7 @@ index 9d5de8e0abdc..f3e8978c916c 100644
  #include "ash/display/cursor_window_controller.h"
  #include "ash/display/mirror_window_controller.h"
  #include "ash/display/refresh_rate_controller.h"
-@@ -134,6 +135,12 @@ bool UpdateLinuxDesktopDisplayModeForHostResize(
-   if (base::SysInfo::IsRunningOnChromeOS() || host_bounds_in_pixels.IsEmpty()) {
-     return false;
-   }
-+  // Each monitor's mode and scale come from the compositor and display.conf
-+  // through AuraDisplaySource, not from the host's size and one scale for
-+  // every display.
-+  if (AuraDisplaySource::Get()) {
-+    return false;
-+  }
- 
-   display::ManagedDisplayInfo display_info =
-       display_manager->GetDisplayInfo(display_id);
-@@ -1102,6 +1109,9 @@ AshWindowTreeHost* WindowTreeHostManager::AddWindowTreeHostForDisplay(
+@@ -1001,6 +1002,9 @@ AshWindowTreeHost* WindowTreeHostManager::AddWindowTreeHostForDisplay(
    }
    params_with_bounds.display_id = display.id();
    params_with_bounds.device_scale_factor = display.device_scale_factor();
@@ -965,7 +923,7 @@ index 9d5de8e0abdc..f3e8978c916c 100644
    // TODO(crbug.com/40799092): Temporarily increase compositor memory limit for
    // 4K+ displays to avoid rendering corruption.
 diff --git a/ash/host/ash_window_tree_host.cc b/ash/host/ash_window_tree_host.cc
-index 6aa1f1fc527b..5d7bd45d0780 100644
+index 6aa1f1fc52..5d7bd45d07 100644
 --- a/ash/host/ash_window_tree_host.cc
 +++ b/ash/host/ash_window_tree_host.cc
 @@ -80,6 +80,7 @@ std::unique_ptr<AshWindowTreeHost> AshWindowTreeHost::Create(
@@ -977,7 +935,7 @@ index 6aa1f1fc527b..5d7bd45d0780 100644
                                                       init_params.delegate);
  }
 diff --git a/ash/host/ash_window_tree_host_init_params.h b/ash/host/ash_window_tree_host_init_params.h
-index f8ae7837fb85..130d3ede8e0f 100644
+index f8ae7837fb..130d3ede8e 100644
 --- a/ash/host/ash_window_tree_host_init_params.h
 +++ b/ash/host/ash_window_tree_host_init_params.h
 @@ -26,6 +26,9 @@ struct ASH_EXPORT AshWindowTreeHostInitParams {
@@ -991,7 +949,7 @@ index f8ae7837fb85..130d3ede8e0f 100644
  
  }  // namespace ash
 diff --git a/ash/shell.cc b/ash/shell.cc
-index d6309faf241d..37b655c0623c 100644
+index 16700ffbcb..2eef858b6a 100644
 --- a/ash/shell.cc
 +++ b/ash/shell.cc
 @@ -59,6 +59,7 @@
@@ -1001,16 +959,16 @@ index d6309faf241d..37b655c0623c 100644
 +#include "ash/display/aura_display_source.h"
  #include "ash/display/cros_display_config.h"
  #include "ash/display/cursor_window_controller.h"
- #include "ash/display/display_alignment_controller.h"
-@@ -826,6 +827,7 @@ Shell::~Shell() {
+ #include "ash/display/display_color_manager.h"
+@@ -814,6 +815,7 @@ Shell::~Shell() {
    user_metrics_recorder_->OnShellShuttingDown();
  
    cros_display_config_.reset();
 +  AuraDisplaySource::Shutdown();
    display_configuration_observer_.reset();
    display_prefs_.reset();
-   display_alignment_controller_.reset();
-@@ -1954,6 +1956,11 @@ void Shell::InitializeDisplayManager() {
+ 
+@@ -1934,6 +1936,11 @@ void Shell::InitializeDisplayManager() {
  
    bool display_initialized = display_manager_->InitFromCommandLine();
  
@@ -1023,11 +981,11 @@ index d6309faf241d..37b655c0623c 100644
      if (base::SysInfo::IsRunningOnChromeOS()) {
        display_change_observer_ =
 diff --git a/ui/display/manager/display_manager.cc b/ui/display/manager/display_manager.cc
-index 17ff3c7c5d69..2ef45d8e12a4 100644
+index 0a883c7000..075a7d5c01 100644
 --- a/ui/display/manager/display_manager.cc
 +++ b/ui/display/manager/display_manager.cc
-@@ -885,10 +885,15 @@ void DisplayManager::RegisterDisplayProperty(
-   ManagedDisplayInfo& info = display_info_[display_id];
+@@ -874,10 +874,15 @@ void DisplayManager::RegisterDisplayProperty(
+ 
    info.SetRotation(rotation, Display::RotationSource::USER);
    info.SetRotation(rotation, Display::RotationSource::ACTIVE);
 -  info.set_zoom_factor(display_zoom_factor);
@@ -1044,7 +1002,7 @@ index 17ff3c7c5d69..2ef45d8e12a4 100644
    }
  
    if (overscan_insets) {
-@@ -2454,6 +2459,12 @@ void DisplayManager::ApplyDefaultZoomFactorIfNecessary(
+@@ -2431,6 +2436,12 @@ void DisplayManager::ApplyDefaultZoomFactorIfNecessary(
      return;
    }
  
@@ -1058,10 +1016,10 @@ index 17ff3c7c5d69..2ef45d8e12a4 100644
  }
  
 diff --git a/ui/ozone/platform/wayland/host/wayland_connection.h b/ui/ozone/platform/wayland/host/wayland_connection.h
-index 3df2c14baf15..0c0fd8f9d7fd 100644
+index 3eb4d8327e..5fd28f1317 100644
 --- a/ui/ozone/platform/wayland/host/wayland_connection.h
 +++ b/ui/ozone/platform/wayland/host/wayland_connection.h
-@@ -288,6 +288,13 @@ class WaylandConnection {
+@@ -293,6 +293,13 @@ class WaylandConnection {
  
    bool UsePerSurfaceScaling() const;
    bool IsUiScaleEnabled() const;
@@ -1075,7 +1033,7 @@ index 3df2c14baf15..0c0fd8f9d7fd 100644
    bool ShouldUseOverlayDelegation() const;
  
    wl::SerialTracker& serial_tracker() { return serial_tracker_; }
-@@ -499,6 +506,9 @@ class WaylandConnection {
+@@ -504,6 +511,9 @@ class WaylandConnection {
    // properly scale fractional scaled surfaces.
    bool supports_viewporter_surface_scaling_ = false;
  
@@ -1086,7 +1044,7 @@ index 3df2c14baf15..0c0fd8f9d7fd 100644
  
    // Global Wayland interfaces available in the current session, with their
 diff --git a/ui/ozone/platform/wayland/host/wayland_cursor_factory.cc b/ui/ozone/platform/wayland/host/wayland_cursor_factory.cc
-index 19d66b1f16a7..916e3aeb8de4 100644
+index bb934f4433..b9c8811c04 100644
 --- a/ui/ozone/platform/wayland/host/wayland_cursor_factory.cc
 +++ b/ui/ozone/platform/wayland/host/wayland_cursor_factory.cc
 @@ -91,8 +91,10 @@ scoped_refptr<PlatformCursor> WaylandCursorFactory::CreateImageCursor(
@@ -1113,10 +1071,10 @@ index 19d66b1f16a7..916e3aeb8de4 100644
      std::vector<SkBitmap> scaled_bitmaps;
      for (const auto& bitmap : bitmaps) {
 diff --git a/ui/ozone/platform/wayland/host/wayland_frame_manager.cc b/ui/ozone/platform/wayland/host/wayland_frame_manager.cc
-index b0bea4e3bd15..0a620940b376 100644
+index f037c76551..91f6b29aa7 100644
 --- a/ui/ozone/platform/wayland/host/wayland_frame_manager.cc
 +++ b/ui/ozone/platform/wayland/host/wayland_frame_manager.cc
-@@ -443,8 +443,13 @@ std::optional<bool> WaylandFrameManager::ApplySurfaceConfigure(
+@@ -476,8 +476,13 @@ std::optional<bool> WaylandFrameManager::ApplySurfaceConfigure(
    //   enabled.
    // - frame's window state has already been latched, which is usually done in
    // `MaybeProcessSubmittedFrames`, before calling into this function.
@@ -1132,7 +1090,7 @@ index b0bea4e3bd15..0a620940b376 100644
    surface->set_buffer_transform(
        std::holds_alternative<gfx::OverlayTransform>(config.transform)
 diff --git a/ui/ozone/platform/wayland/host/wayland_output.cc b/ui/ozone/platform/wayland/host/wayland_output.cc
-index 7a47aa5f627c..135778a6f023 100644
+index fd0c71eaeb..5e34560cd6 100644
 --- a/ui/ozone/platform/wayland/host/wayland_output.cc
 +++ b/ui/ozone/platform/wayland/host/wayland_output.cc
 @@ -6,6 +6,8 @@
@@ -1144,7 +1102,7 @@ index 7a47aa5f627c..135778a6f023 100644
  #include "base/logging.h"
  #include "base/strings/string_util.h"
  #include "ui/display/display.h"
-@@ -196,6 +198,10 @@ void WaylandOutput::UpdateMetrics() {
+@@ -190,6 +192,10 @@ void WaylandOutput::UpdateMetrics() {
    metrics_.logical_transform = panel_transform_;
    metrics_.name = name_;
    metrics_.description = description_;
@@ -1155,7 +1113,7 @@ index 7a47aa5f627c..135778a6f023 100644
  
    if (xdg_output_) {
      xdg_output_->UpdateMetrics(
-@@ -224,6 +230,10 @@ void WaylandOutput::OnGeometry(void* data,
+@@ -218,6 +224,10 @@ void WaylandOutput::OnGeometry(void* data,
      MSAN_UNPOISON(&output_transform, sizeof(int32_t));
      self->origin_ = gfx::Point(x, y);
      self->panel_transform_ = output_transform;
@@ -1166,7 +1124,7 @@ index 7a47aa5f627c..135778a6f023 100644
    }
  }
  
-@@ -237,6 +247,7 @@ void WaylandOutput::OnMode(void* data,
+@@ -231,6 +241,7 @@ void WaylandOutput::OnMode(void* data,
    auto* self = static_cast<WaylandOutput*>(data);
    if (self && (flags & WL_OUTPUT_MODE_CURRENT)) {
      self->physical_size_ = gfx::Size(width, height);
@@ -1175,7 +1133,7 @@ index 7a47aa5f627c..135778a6f023 100644
  }
  
 diff --git a/ui/ozone/platform/wayland/host/wayland_output.h b/ui/ozone/platform/wayland/host/wayland_output.h
-index 0905fcfca2e0..d19612f67edd 100644
+index 0905fcfca2..d19612f67e 100644
 --- a/ui/ozone/platform/wayland/host/wayland_output.h
 +++ b/ui/ozone/platform/wayland/host/wayland_output.h
 @@ -82,6 +82,13 @@ class WaylandOutput : public wl::GlobalObjectRegistrar<WaylandOutput> {
@@ -1204,10 +1162,10 @@ index 0905fcfca2e0..d19612f67edd 100644
    // The XDG output specification suggests using it as the primary source of
    // the information about the output.  Two attributes below are used if
 diff --git a/ui/ozone/platform/wayland/host/wayland_screen.cc b/ui/ozone/platform/wayland/host/wayland_screen.cc
-index ec1fa207bc5e..fc2fadc55ef2 100644
+index 565f6a514f..6756bd6af4 100644
 --- a/ui/ozone/platform/wayland/host/wayland_screen.cc
 +++ b/ui/ozone/platform/wayland/host/wayland_screen.cc
-@@ -550,6 +550,33 @@ std::optional<float> WaylandScreen::GetPreferredScaleFactorForAcceleratedWidget(
+@@ -559,6 +559,33 @@ std::optional<float> WaylandScreen::GetPreferredScaleFactorForAcceleratedWidget(
    return std::nullopt;
  }
  
@@ -1242,10 +1200,10 @@ index ec1fa207bc5e..fc2fadc55ef2 100644
    // The number of displays tracked by the display_list_ and the display_id_map_
    // should match.
 diff --git a/ui/ozone/platform/wayland/host/wayland_screen.h b/ui/ozone/platform/wayland/host/wayland_screen.h
-index 10ee3e24cf39..33731eef6ce4 100644
+index ff7ff5b0f0..b087a449db 100644
 --- a/ui/ozone/platform/wayland/host/wayland_screen.h
 +++ b/ui/ozone/platform/wayland/host/wayland_screen.h
-@@ -84,6 +84,7 @@ class WaylandScreen : public PlatformScreen, public DeviceScaleFactorObserver {
+@@ -83,6 +83,7 @@ class WaylandScreen : public PlatformScreen, public DeviceScaleFactorObserver {
        const gfx::GpuExtraInfo& gpu_extra_info) override;
    std::optional<float> GetPreferredScaleFactorForAcceleratedWidget(
        gfx::AcceleratedWidget widget) const override;
@@ -1254,10 +1212,10 @@ index 10ee3e24cf39..33731eef6ce4 100644
    // DeviceScaleFactorObserver:
    void OnDeviceScaleFactorChanged() override;
 diff --git a/ui/ozone/platform/wayland/host/wayland_window.cc b/ui/ozone/platform/wayland/host/wayland_window.cc
-index 597385809995..7d75e5173adb 100644
+index 0eb4646e73..25cbd26702 100644
 --- a/ui/ozone/platform/wayland/host/wayland_window.cc
 +++ b/ui/ozone/platform/wayland/host/wayland_window.cc
-@@ -1013,6 +1013,10 @@ bool WaylandWindow::Initialize(PlatformWindowInitProperties properties) {
+@@ -1153,6 +1153,10 @@ bool WaylandWindow::Initialize(PlatformWindowInitProperties properties) {
  
    opacity_ = properties.opacity;
    type_ = properties.type;
@@ -1268,7 +1226,7 @@ index 597385809995..7d75e5173adb 100644
  
    connection_->window_manager()->AddWindow(GetWidget(), this);
  
-@@ -1327,27 +1331,32 @@ void WaylandWindow::UpdateCursorShape(scoped_refptr<BitmapCursor> cursor) {
+@@ -1489,27 +1493,32 @@ void WaylandWindow::UpdateCursorShape(scoped_refptr<BitmapCursor> cursor) {
    std::optional<uint32_t> shape =
        WaylandCursorShape::ShapeFromType(cursor->type());
  
@@ -1311,10 +1269,10 @@ index 597385809995..7d75e5173adb 100644
  }
  
 diff --git a/ui/ozone/platform/wayland/host/wayland_window.h b/ui/ozone/platform/wayland/host/wayland_window.h
-index 2e2774172dea..31f0d804df88 100644
+index a91917b1e8..56f8c86d0c 100644
 --- a/ui/ozone/platform/wayland/host/wayland_window.h
 +++ b/ui/ozone/platform/wayland/host/wayland_window.h
-@@ -321,6 +321,10 @@ class WaylandWindow : public PlatformWindow,
+@@ -353,6 +353,10 @@ class WaylandWindow : public PlatformWindow,
      return latched_state_;
    }
  
@@ -1322,10 +1280,10 @@ index 2e2774172dea..31f0d804df88 100644
 +  // its output pixel for pixel. See PlatformWindowInitProperties.
 +  bool pixel_exact_buffers() const { return pixel_exact_buffers_; }
 +
-   // Tells if the surface has already been configured. This will be true after
-   // the first set of configure event and ack request, meaning that wl_surface
-   // can attach buffers.
-@@ -634,6 +638,9 @@ class WaylandWindow : public PlatformWindow,
+   // Returns the size of the root surface in Wayland DIP (i.e. not scaled by
+   // `ui_scale`) for `state`: its window geometry plus decoration insets.
+   gfx::Size GetSurfaceSizeInWaylandDIP(
+@@ -725,6 +729,9 @@ class WaylandWindow : public PlatformWindow,
  
    bool has_touch_focus_ = false;
  
@@ -1336,7 +1294,7 @@ index 2e2774172dea..31f0d804df88 100644
    ui::PlatformWindowOpacity opacity_;
  
 diff --git a/ui/ozone/public/platform_screen.cc b/ui/ozone/public/platform_screen.cc
-index 274a685aecfe..3f20a0f43fdb 100644
+index 274a685aec..3f20a0f43f 100644
 --- a/ui/ozone/public/platform_screen.cc
 +++ b/ui/ozone/public/platform_screen.cc
 @@ -66,6 +66,11 @@ bool PlatformScreen::IsHeadless() const {
@@ -1352,7 +1310,7 @@ index 274a685aecfe..3f20a0f43fdb 100644
      base::ListValue& values,
      const std::string& platform_name) {
 diff --git a/ui/ozone/public/platform_screen.h b/ui/ozone/public/platform_screen.h
-index 822a86831115..e2373788e559 100644
+index 822a868311..e2373788e5 100644
 --- a/ui/ozone/public/platform_screen.h
 +++ b/ui/ozone/public/platform_screen.h
 @@ -5,6 +5,7 @@
@@ -1389,10 +1347,10 @@ index 822a86831115..e2373788e559 100644
    void StorePlatformNameIntoListOfValues(base::ListValue& values,
                                           const std::string& platform_name);
 diff --git a/ui/platform_window/platform_window_init_properties.h b/ui/platform_window/platform_window_init_properties.h
-index 21a542a563f3..7840740c1880 100644
+index a6fabe8297..23d107f083 100644
 --- a/ui/platform_window/platform_window_init_properties.h
 +++ b/ui/platform_window/platform_window_init_properties.h
-@@ -156,6 +156,12 @@ struct COMPONENT_EXPORT(PLATFORM_WINDOW) PlatformWindowInitProperties {
+@@ -151,6 +151,12 @@ struct COMPONENT_EXPORT(PLATFORM_WINDOW) PlatformWindowInitProperties {
    std::string session_id;
    int32_t session_window_new_id = 0;
    std::optional<int32_t> session_window_restore_id;
@@ -1405,30 +1363,3 @@ index 21a542a563f3..7840740c1880 100644
  #endif
  
    bool enable_compositing_based_throttling = false;
-diff --git a/ui/wm/core/cursor_loader.cc b/ui/wm/core/cursor_loader.cc
-index 13967a22d7f1..0ca38cc963ab 100644
---- a/ui/wm/core/cursor_loader.cc
-+++ b/ui/wm/core/cursor_loader.cc
-@@ -11,6 +11,7 @@
- #include "base/check.h"
- #include "base/logging.h"
- #include "base/memory/scoped_refptr.h"
-+#include "base/system/sys_info.h"
- #include "base/time/time.h"
- #include "third_party/skia/include/core/SkBitmap.h"
- #include "third_party/skia/include/core/SkColor.h"
-@@ -214,8 +215,13 @@ scoped_refptr<ui::PlatformCursor> CursorLoader::CursorFromType(
- 
- scoped_refptr<ui::PlatformCursor> CursorLoader::LoadCursorFromAsset(
-     CursorType type) {
-+  // The cursors are drawn from vector art. KibaOS on a Linux desktop draws
-+  // them at the display's own scale rather than at the nearest one there
-+  // are image resources for, so a monitor at 150% has a cursor at 150%.
-+  const float draw_scale =
-+      base::SysInfo::IsRunningOnChromeOS() ? resource_scale_ : scale_;
-   std::optional<ui::CursorData> cursor_data = wm::GetCursorData(
--      type, resource_scale_,
-+      type, draw_scale,
-       size_ == ui::CursorSize::kLarge ? std::make_optional(ConvertDipToPixel(
-                                             large_cursor_size_in_dip_, scale_))
-                                       : std::nullopt,
