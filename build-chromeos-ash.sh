@@ -68,49 +68,23 @@ check_prereqs() {
 
 
 prepare_source() {
-    info "Step 1/4: Syncing ChromiumOS minilayout source..."
+    mkdir -p "${CHROMIUMOS_DIR}"
 
-    mkdir -p "${CHROMIUMOS_DIR}" "${DEPOT_TOOLS_DIR}"
-    cd "${CHROMIUMOS_DIR}"
-
-    # Install depot_tools if needed
-    if [ ! -d "${DEPOT_TOOLS_DIR}/.git" ]; then
-        info "Cloning depot_tools..."
-        git clone --depth=1 \
-            https://chromium.googlesource.com/chromium/tools/depot_tools.git \
-            "${DEPOT_TOOLS_DIR}"
+    if [[ -d "${CHROMIUMOS_DIR}/src/.git" ]]; then
+        echo "Updating Lumen source..."
+        git -C "${CHROMIUMOS_DIR}/src" fetch origin
+        git -C "${CHROMIUMOS_DIR}/src" checkout lumen/source
+        git -C "${CHROMIUMOS_DIR}/src" pull --ff-only origin lumen/source
+    else
+        echo "Cloning Project Lumen..."
+        git clone \
+            --branch lumen/source \
+            --depth 1 \
+            https://github.com/KibaLabsLLC/Lumen.git \
+            "${CHROMIUMOS_DIR}/src"
     fi
 
-    export PATH="${DEPOT_TOOLS_DIR}:${PATH}"
-
-    # Install Google's Repo launcher
-    if ! command -v repo >/dev/null 2>&1; then
-        info "Installing Google's Repo..."
-        curl -fsSL \
-            https://storage.googleapis.com/git-repo-downloads/repo \
-            -o "${DEPOT_TOOLS_DIR}/repo"
-        chmod +x "${DEPOT_TOOLS_DIR}/repo"
-    fi
-
-    export PATH="${DEPOT_TOOLS_DIR}:${PATH}"
-
-    # Initialize lumen
-    info "Initializing lumen manifest..."
-
-    repo init \
-        -u https://chromium.googlesource.com/chromiumos/manifest.git \
-        --repo-url=https://github.com/KibaLabsLLC/lumen.git
-
-    # Synchronize source
-    info "Syncing repositories..."
-
-    set -o pipefail
-    repo sync \
-        -j"${REPO_JOBS:-4}" \
-        2>&1 | tee -a "${BUILD_LOG}"
-
-    info "Lumen synchronization complete."
-    info "Source directory: ${CHROMIUMOS_DIR}"
+    echo "Lumen source ready."
 }
 
 
