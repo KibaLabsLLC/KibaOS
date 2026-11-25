@@ -170,11 +170,20 @@ LEAN_VARS=(
   checkout_android
 )
 
+# CIPD dep path prefixes to skip entirely in lean mode.
+# ANGLE restricted traces require CIPD auth and are not needed for the build.
+LEAN_SKIP_DEP_PATHS=(
+  "src/third_party/angle/src/tests/restricted_traces"
+)
+
 resolver_args=()
 
 if [[ "${LEAN_SYNC}" == "1" ]]; then
   for var in "${LEAN_VARS[@]}"; do
     resolver_args+=(--var "${var}=False")
+  done
+  for skip_path in "${LEAN_SKIP_DEP_PATHS[@]}"; do
+    resolver_args+=(--skip-dep-path "${skip_path}")
   done
   lean_note="skipping ${LEAN_VARS[*]}"
 else
