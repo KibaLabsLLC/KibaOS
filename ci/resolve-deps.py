@@ -325,7 +325,7 @@ class Resolver:
         self.root = os.path.abspath(args.root)
         self.jobs = args.jobs
         self.skip_hooks = args.skip_hooks
-        target_os = sorted(set(args.target_os or ["chromeos"]) | {host_os()})
+        target_os = sorted(set(args.target_os or ["linux"]) | {host_os()})
         target_cpu = args.target_cpu or [host_cpu()]
         self.base_vars = builtin_vars(target_os, target_cpu)
         self.overrides = parse_overrides(args.var)

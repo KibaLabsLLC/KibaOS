@@ -209,7 +209,7 @@ solutions = [
     "custom_vars": {},
   },
 ]
-target_os = ["chromeos"]
+target_os = ["linux"]
 EOF
 mv -f "${ROOT}/.gclient.tmp.$$" "${ROOT}/.gclient"
 

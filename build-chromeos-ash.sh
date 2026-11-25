@@ -147,9 +147,9 @@ build_chrome() {
     cd "${src_dir}"
 
     # Configure GN
-    info "Configuring GN (target_os=\"chromeos\", Ozone X11/Wayland/DRM)..."
+    info "Configuring GN (target_os=\"linux\", Ozone X11/Wayland/DRM)..."
     gn gen "${OUTPUT_DIR}" --args="
-        target_os = \"chromeos\"
+        target_os = \"linux\"
         target_cpu = \"x64\"
         is_debug = false
         is_component_build = false
