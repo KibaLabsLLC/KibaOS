@@ -24,7 +24,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEPOT_TOOLS="${KIBAOS_DEPOT_TOOLS:-${REPO_ROOT}/depot_tools_fresh}"
 
 LUMEN_REPO="${KIBAOS_LUMEN_REPOSITORY:-https://github.com/KibaLabsLLC/Lumen.git}"
-LUMEN_BRANCH="${KIBAOS_LUMEN_BRANCH:-lumen/source}"
+LUMEN_BRANCH="${KIBAOS_LUMEN_BRANCH:-main}"
 
 TARGET="${KIBAOS_BOOTSTRAP_TARGET:-/mnt/build/kibaos-work/lumen-bootstrap}"
 SRC_DIR="${TARGET}/src"
@@ -55,7 +55,7 @@ Options:
 Environment:
   KIBAOS_DEPOT_TOOLS=/path/to/depot_tools
   KIBAOS_LUMEN_REPOSITORY=https://github.com/KibaLabsLLC/Lumen.git
-  KIBAOS_LUMEN_BRANCH=lumen/source
+  KIBAOS_LUMEN_BRANCH=main
   KIBAOS_BOOTSTRAP_TARGET=/mnt/build/kibaos-work/lumen-bootstrap
   KIBAOS_BOOTSTRAP_JOBS=8
   KIBAOS_LEAN_SYNC=1
