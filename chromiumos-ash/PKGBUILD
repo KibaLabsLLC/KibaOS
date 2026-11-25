@@ -252,7 +252,7 @@ build() {
     # for the public release, while the runtime config remains an optional
     # user-owned hook for a future private build.
     gn gen "${out_dir}" --args="
-        target_os = \"chromeos\"
+        target_os = \"linux\"
         target_cpu = \"x64\"
         is_debug = false
         is_component_build = false
