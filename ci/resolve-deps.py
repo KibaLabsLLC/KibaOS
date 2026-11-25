@@ -1,164 +1,550 @@
 #!/usr/bin/env python3
-"""Minimal gclient-free DEPS resolver: git deps, optional cipd, hooks."""
-import argparse, os, shutil, subprocess, sys
-from concurrent.futures import ThreadPoolExecutor
+"""gclient-free DEPS resolver for the KibaOS Lumen bootstrap.
+
+Reads <root>/src/DEPS (plus any recursedeps DEPS files), then:
+  * fetches git, cipd and gcs dependencies,
+  * writes gclient_gn_args_file (e.g. src/build/config/gclient_args.gni),
+  * runs pre_deps_hooks and hooks.
+
+Requires python3 (>= 3.8) and git. cipd is only needed if DEPS contains cipd
+dependencies (it ships with depot_tools; gclient itself is never run).
+"""
+import argparse
+import hashlib
+import os
+import platform
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import time
+import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+OS_NAMES = ("android", "chromeos", "fuchsia", "ios", "linux", "mac", "win")
+CPU_NAMES = ("arm", "arm64", "x86", "x64", "mips", "mips64", "ppc", "s390",
+             "loong64", "riscv64")
+
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+URL_REV_RE = re.compile(r"^(.+)@(refs/[^@:]+|[^@:/]+)$")
+VAR_RE = re.compile(r"\{(\w+)\}")
+CIPD_VAR_RE = re.compile(r"\$\{\{(\w+)\}\}")
+
+GCS_BASE = os.environ.get("KIBAOS_GCS_BASE",
+                          "https://storage.googleapis.com").rstrip("/")
+GIT_ENV = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_LFS_SKIP_SMUDGE="1")
 
 
-class Env(dict):
+class ResolveError(Exception):
+    pass
+
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def warn(msg):
+    print("warning: " + msg, file=sys.stderr, flush=True)
+
+
+def die(msg):
+    print("error: " + msg, file=sys.stderr, flush=True)
+    sys.exit(1)
+
+
+# --------------------------------------------------------------------------
+# Host / variable handling
+# --------------------------------------------------------------------------
+
+def host_os():
+    return {"linux": "linux", "darwin": "mac", "windows": "win"}.get(
+        platform.system().lower(), platform.system().lower())
+
+
+def host_cpu():
+    return {"x86_64": "x64", "amd64": "x64", "aarch64": "arm64",
+            "arm64": "arm64", "i386": "x86", "i686": "x86"}.get(
+        platform.machine().lower(), platform.machine().lower())
+
+
+def builtin_vars(target_os, target_cpu):
+    """The variables gclient provides to DEPS files and conditions."""
+    v = {"host_os": host_os(), "host_cpu": host_cpu(),
+         "target_os": list(target_os), "target_cpu": list(target_cpu)}
+    for n in OS_NAMES:
+        v["checkout_" + n] = n in target_os
+    for n in CPU_NAMES:
+        v["checkout_" + n] = n in target_cpu
+    return v
+
+
+def parse_value(text):
+    low = text.lower()
+    if low == "true":
+        return True
+    if low == "false":
+        return False
+    if re.fullmatch(r"-?\d+", text):
+        return int(text)
+    return text
+
+
+def parse_overrides(items):
+    out = {}
+    for item in items:
+        key, sep, value = item.partition("=")
+        if not sep or not key:
+            die("--var needs NAME=VALUE, got %r" % item)
+        out[key] = parse_value(value)
+    return out
+
+
+def sub_vars(text, vars_):
+    """Expand {name} placeholders (what Var('name') evaluates to)."""
+    def repl(m):
+        name = m.group(1)
+        if name in vars_ and not isinstance(vars_[name], (list, dict)):
+            return str(vars_[name])
+        return m.group(0)
+
+    for _ in range(10):
+        new = VAR_RE.sub(repl, text)
+        if new == text:
+            break
+        text = new
+    return text
+
+
+class Scope(dict):
+    """Condition namespace: unknown names are False, and are recorded."""
+
+    def __init__(self, data, missing):
+        super().__init__(data)
+        self._missing = missing
+
     def __missing__(self, key):
-        return False  # unknown checkout_* names evaluate to False
+        self._missing.add(key)
+        return False
 
 
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--root", required=True)   # holds src/
-    p.add_argument("--jobs", type=int, default=8)
-    p.add_argument("--var", action="append", default=[])
-    p.add_argument("--skip-hooks", action="store_true")
-    return p.parse_args()
+def load_deps_file(path):
+    # Var() returns a placeholder; it is expanded once the effective
+    # variables (DEPS vars + parent + builtins + overrides) are known.
+    ns = {"Var": lambda name: "{%s}" % name, "Str": lambda s: s}
+    try:
+        with open(path, encoding="utf-8") as f:
+            code = compile(f.read(), path, "exec")
+        exec(code, ns)
+    except Exception as e:  # noqa: BLE001
+        raise ResolveError("cannot evaluate %s: %s" % (path, e))
+    return ns
 
 
-def load_deps(path, overrides):
-    harvest = {}
-    ns = {"Var": lambda n: "", "Str": lambda s: s}
-    exec(open(path).read(), ns)
-    harvest.update(ns.get("vars", {}))
-    harvest.update(overrides)
+# --------------------------------------------------------------------------
+# Fetchers
+# --------------------------------------------------------------------------
 
-    ns = {"Var": lambda n: harvest[n], "Str": lambda s: s}
-    exec(open(path).read(), ns)
-    base = dict(
-        host_os="linux", host_cpu="x64", checkout_linux=True,
-        checkout_chromeos=True, checkout_x64=True, True=True,
-        False=False, None=None,
-    )
-    cond_env = Env({**base, **harvest})
-    return ns, harvest, cond_env
-
-
-def cond_ok(cond, env):
-    return True if not cond else bool(eval(cond, {}, env))
+def git(args, cwd, retries=1):
+    last = None
+    for attempt in range(retries):
+        if attempt:
+            time.sleep(3 * attempt)
+        proc = subprocess.run(["git"] + args, cwd=cwd, env=GIT_ENV,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              text=True)
+        if proc.returncode == 0:
+            return proc.stdout.strip()
+        last = proc
+    raise ResolveError("git %s failed (exit %d): %s" % (
+        " ".join(args), last.returncode, last.stderr.strip()[-600:]))
 
 
-def git(*args, cwd):
-    subprocess.run(["git", *args], cwd=cwd, check=True,
-                   stdout=subprocess.DEVNULL)
+def split_git_url(spec):
+    m = URL_REV_RE.match(spec)
+    if m:
+        return m.group(1), m.group(2)
+    return spec, "HEAD"
 
 
 def fetch_git(root, path, url, rev):
-    d = os.path.join(root, path)
-    os.makedirs(d, exist_ok=True)
-    if not os.path.isdir(os.path.join(d, ".git")):
-        git("init", "-q", cwd=d)
-        git("remote", "add", "origin", url, cwd=d)
+    dest = os.path.join(root, path)
+    os.makedirs(dest, exist_ok=True)
+    if os.path.isdir(os.path.join(dest, ".git")):
+        try:
+            git(["remote", "set-url", "origin", url], dest)
+        except ResolveError:
+            git(["remote", "add", "origin", url], dest)
+        if SHA_RE.match(rev):
+            try:
+                if git(["rev-parse", "--verify", "-q", "HEAD"], dest) == rev:
+                    return
+            except ResolveError:
+                pass
     else:
-        git("remote", "set-url", "origin", url, cwd=d)
-    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=d,
-                          capture_output=True, text=True).stdout.strip()
-    if head == rev:
-        return
+        git(["init", "-q"], dest)
+        git(["remote", "add", "origin", url], dest)
     try:
-        git("fetch", "-q", "--depth=1", "origin", rev, cwd=d)
-        git("checkout", "-q", "--detach", "--force", "FETCH_HEAD", cwd=d)
-    except subprocess.CalledProcessError:
-        git("fetch", "-q", "origin", cwd=d)
-        git("checkout", "-q", "--detach", "--force", rev, cwd=d)
+        git(["fetch", "-q", "--no-tags", "--depth=1", "origin", rev], dest,
+            retries=3)
+        git(["checkout", "-q", "--detach", "--force", "FETCH_HEAD"], dest)
+    except ResolveError:
+        # Server refused a shallow fetch of that revision: fall back.
+        git(["fetch", "-q", "--tags", "origin",
+             "+refs/heads/*:refs/remotes/origin/*"], dest, retries=3)
+        git(["checkout", "-q", "--detach", "--force", rev], dest)
+    if SHA_RE.match(rev):
+        head = git(["rev-parse", "HEAD"], dest)
+        if head != rev:
+            raise ResolveError("checked out %s, wanted %s" % (head, rev))
 
 
-def fetch_cipd(root, path, packages):
-    lines = "".join(f"{p['package']} {p['version']}\n" for p in packages)
-    subprocess.run(["cipd", "ensure", "-root", os.path.join(root, path),
-                    "-ensure-file", "-"], input=lines, text=True, check=True)
+def fetch_cipd(root, path, packages, cipd):
+    dest = os.path.join(root, path)
+    os.makedirs(dest, exist_ok=True)
+    ensure = "".join("%s %s\n" % (p["package"], p["version"])
+                     for p in packages)
+    proc = subprocess.run([cipd, "ensure", "-root", dest,
+                           "-ensure-file", "-"],
+                          input=ensure, text=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT)
+    if proc.returncode != 0:
+        raise ResolveError("cipd ensure failed (exit %d): %s" % (
+            proc.returncode, proc.stdout.strip()[-600:]))
 
 
-def main():
-    a = parse_args()
-    root = os.path.abspath(a.root)
-    overrides = {}
-    for kv in a.var:
-        k, v = kv.split("=", 1)
-        overrides[k] = {"True": True, "False": False}.get(v, v)
+def download(url, dest, sha256, size):
+    last = None
+    for attempt in range(3):
+        if attempt:
+            time.sleep(3 * attempt)
+        try:
+            digest, total = hashlib.sha256(), 0
+            with urllib.request.urlopen(url, timeout=120) as resp, \
+                    open(dest, "wb") as out:
+                while True:
+                    chunk = resp.read(1 << 20)
+                    if not chunk:
+                        break
+                    digest.update(chunk)
+                    out.write(chunk)
+                    total += len(chunk)
+            if size and total != int(size):
+                raise ResolveError("size %d != expected %s" % (total, size))
+            if sha256 and digest.hexdigest() != sha256:
+                raise ResolveError("sha256 %s != expected %s" % (
+                    digest.hexdigest(), sha256))
+            return
+        except Exception as e:  # noqa: BLE001
+            last = e
+    raise ResolveError("download of %s failed: %s" % (url, last))
 
-    top_deps = os.path.join(root, "src", "DEPS")
-    queue = [(top_deps, "")]
-    seen, hooks, skipped = set(), [], []
-    top_ns = top_env = None
-    have_cipd = shutil.which("cipd") is not None
 
-    while queue:
-        deps_file, prefix = queue.pop(0)
-        ns, vars_, env = load_deps(deps_file, overrides)
-        if top_ns is None:
-            top_ns, top_env = ns, env
+def extract_tar(archive, dest):
+    with tarfile.open(archive, "r:*") as tar:
+        try:
+            tar.extractall(dest, filter="tar")
+        except TypeError:  # Python without extraction filters
+            tar.extractall(dest)
+
+
+def fetch_gcs(root, path, bucket, objects):
+    dest = os.path.join(root, path)
+    os.makedirs(dest, exist_ok=True)
+    stamp = os.path.join(dest, ".kibaos-gcs-stamp")
+    want = "\n".join(sorted("%s %s" % (o["object_name"], o.get("sha256sum", ""))
+                            for o in objects))
+    try:
+        with open(stamp, encoding="utf-8") as f:
+            if f.read() == want:
+                return
+    except OSError:
+        pass
+    for obj in objects:
+        url = "%s/%s/%s" % (GCS_BASE, bucket,
+                            urllib.parse.quote(obj["object_name"]))
+        if obj.get("generation"):
+            url += "?generation=%s" % obj["generation"]
+        fd, tmp = tempfile.mkstemp(prefix=".gcs-", dir=dest)
+        os.close(fd)
+        try:
+            download(url, tmp, obj.get("sha256sum"), obj.get("size_bytes"))
+            if obj.get("output_file"):
+                os.replace(tmp, os.path.join(dest, obj["output_file"]))
+            elif tarfile.is_tarfile(tmp):
+                extract_tar(tmp, dest)
+            else:
+                os.replace(tmp, os.path.join(
+                    dest, os.path.basename(obj["object_name"])))
+        finally:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+    with open(stamp, "w", encoding="utf-8") as f:
+        f.write(want)
+
+
+# --------------------------------------------------------------------------
+# gclient_gn_args_file
+# --------------------------------------------------------------------------
+
+def gn_value(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return str(v)
+    if isinstance(v, (list, tuple)):
+        return "[" + ", ".join(gn_value(x) for x in v) + "]"
+    s = str(v).replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$")
+    return '"%s"' % s
+
+
+def write_gn_args(path, names, vars_):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    lines = ["# Generated from 'DEPS' by ci/resolve-deps.py"]
+    for name in names:
+        if name not in vars_:
+            warn("gclient_gn_args lists %r but no such variable exists; "
+                 "leaving it at its GN default" % name)
+            continue
+        value = vars_[name]
+        if isinstance(value, str):
+            value = sub_vars(value, vars_)
+        lines.append("%s = %s" % (name, gn_value(value)))
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
+# --------------------------------------------------------------------------
+# Resolver
+# --------------------------------------------------------------------------
+
+class Resolver:
+    def __init__(self, args):
+        self.root = os.path.abspath(args.root)
+        self.jobs = args.jobs
+        self.skip_hooks = args.skip_hooks
+        target_os = sorted(set(args.target_os or ["chromeos"]) | {host_os()})
+        target_cpu = args.target_cpu or [host_cpu()]
+        self.base_vars = builtin_vars(target_os, target_cpu)
+        self.overrides = parse_overrides(args.var)
+        self.cipd = args.cipd or shutil.which("cipd")
+        self.claimed = {}       # path -> DEPS file that declared it
+        self.recursed = set()   # (path, deps filename) already processed
+        self.hooks = []         # (name, argv, cwd)
+        self.missing = set()    # condition names that were undefined
+
+    # ---- helpers ---------------------------------------------------------
+
+    def effective_vars(self, ns, parent_vars):
+        # gclient precedence, lowest first: DEPS vars, parent, builtins,
+        # command-line overrides.
+        v = dict(ns.get("vars", {}))
+        v.update(parent_vars)
+        v.update(self.base_vars)
+        v.update(self.overrides)
+        return v
+
+    def cond(self, expr, vars_):
+        if not expr:
+            return True
+        try:
+            return bool(eval(expr, {"__builtins__": {}},
+                             Scope(vars_, self.missing)))
+        except Exception as e:  # noqa: BLE001
+            raise ResolveError("cannot evaluate condition %r: %s" % (expr, e))
+
+    def hook_env(self):
+        env = dict(os.environ, DEPOT_TOOLS_UPDATE="0")
+        depot = os.path.join(self.root, "src", "third_party", "depot_tools")
+        if os.path.isdir(depot):
+            env["PATH"] = env.get("PATH", "") + os.pathsep + depot
+        return env
+
+    def make_hook(self, hook, vars_, cwd):
+        action = [sub_vars(a, vars_) if isinstance(a, str) else a
+                  for a in hook["action"]]
+        if action and action[0] == "python3":
+            action[0] = sys.executable
+        return (hook.get("name") or os.path.basename(str(action[0])),
+                action, cwd)
+
+    def run_hook(self, hook):
+        name, action, cwd = hook
+        log("==> hook: %s" % name)
+        try:
+            proc = subprocess.run(action, cwd=cwd, env=self.hook_env())
+        except OSError as e:
+            raise ResolveError("hook %s could not start: %s" % (name, e))
+        if proc.returncode != 0:
+            raise ResolveError("hook %s failed (exit %d): %s" % (
+                name, proc.returncode, " ".join(map(str, action))))
+
+    def run_task(self, task):
+        kind, path = task[0], task[1]
+        if kind == "git":
+            log("  git   %s @ %s" % (path, task[3][:12]))
+            fetch_git(self.root, path, task[2], task[3])
+        elif kind == "cipd":
+            log("  cipd  %s" % path)
+            fetch_cipd(self.root, path, task[2], self.cipd)
+        else:
+            log("  gcs   %s" % path)
+            fetch_gcs(self.root, path, task[2], task[3])
+
+    def run_tasks(self, tasks):
+        # Shallowest paths first, so a parent checkout never races a
+        # dependency nested inside it.
+        levels = {}
+        for t in tasks:
+            levels.setdefault(t[1].count("/"), []).append(t)
+        errors = []
+        for depth in sorted(levels):
+            with ThreadPoolExecutor(max_workers=self.jobs) as pool:
+                futures = {pool.submit(self.run_task, t): t
+                           for t in levels[depth]}
+                for fut in as_completed(futures):
+                    try:
+                        fut.result()
+                    except Exception as e:  # noqa: BLE001
+                        errors.append("%s: %s" % (futures[fut][1], e))
+            if errors:
+                break
+        if errors:
+            raise ResolveError("dependency sync failed:\n  " +
+                               "\n  ".join(errors))
+
+    # ---- main walk ------------------------------------------------------
+
+    def process(self, deps_file, prefix, parent_vars):
+        log("==> DEPS: %s" % os.path.relpath(deps_file, self.root))
+        ns = load_deps_file(deps_file)
+        vars_ = self.effective_vars(ns, parent_vars)
         rel = bool(ns.get("use_relative_paths"))
         base = prefix if rel else ""
 
-        tasks, nxt = [], []
+        def full(key):
+            p = os.path.normpath(os.path.join(base, key))
+            if p.startswith("..") or os.path.isabs(p):
+                raise ResolveError("dependency path escapes root: %s" % key)
+            return p
+
+        if not self.skip_hooks:
+            for h in ns.get("pre_deps_hooks", []):
+                if self.cond(h.get("condition"), vars_):
+                    self.run_hook(self.make_hook(h, vars_, self.root))
+
+        tasks, active = [], set()
         for key, spec in ns.get("deps", {}).items():
+            if spec is None:
+                continue
             if isinstance(spec, str):
-                spec = {"url": spec, "dep_type": "git"}
-            if not cond_ok(spec.get("condition"), env):
+                spec = {"url": spec}
+            if not self.cond(spec.get("condition"), vars_):
                 continue
-            path = os.path.join(base, key) if base else key
-            if path in seen:
-                continue
-            seen.add(path)
+            path = full(key)
+            active.add(path)
+            if path in self.claimed:
+                continue  # an ancestor DEPS already owns this path
+            self.claimed[path] = deps_file
             kind = spec.get("dep_type", "git")
             if kind == "git":
-                url, _, rev = spec["url"].format(**vars_).rpartition("@")
-                if not url:
-                    url, rev = rev, "HEAD"
+                if not spec.get("url"):
+                    raise ResolveError("git dep %s has no url" % key)
+                url, rev = split_git_url(sub_vars(spec["url"], vars_))
                 tasks.append(("git", path, url, rev))
-            elif kind == "cipd" and have_cipd:
-                tasks.append(("cipd", path, spec["packages"]))
+            elif kind == "cipd":
+                pkgs = [{"package": CIPD_VAR_RE.sub(
+                             r"${\1}", sub_vars(p["package"], vars_)),
+                         "version": sub_vars(p["version"], vars_)}
+                        for p in spec["packages"]]
+                tasks.append(("cipd", path, pkgs))
+            elif kind == "gcs":
+                objs = [o for o in spec["objects"]
+                        if self.cond(o.get("condition"), vars_)]
+                if objs:
+                    tasks.append(("gcs", path, sub_vars(spec["bucket"], vars_),
+                                  objs))
             else:
-                skipped.append(f"{kind}: {path}")
+                raise ResolveError("unknown dep_type %r for %s" % (kind, key))
 
-        def run(t):
-            print(f"  {t[0]}: {t[1]}", flush=True)
-            if t[0] == "git":
-                fetch_git(root, t[1], t[2], t[3])
-            else:
-                fetch_cipd(root, t[1], t[2])
+        if any(t[0] == "cipd" for t in tasks) and not self.cipd:
+            names = ", ".join(t[1] for t in tasks if t[0] == "cipd")
+            raise ResolveError(
+                "DEPS has cipd dependencies (%s) but no cipd binary was "
+                "found. Put depot_tools on PATH (KIBAOS_DEPOT_TOOLS) or "
+                "pass --cipd." % names)
 
-        with ThreadPoolExecutor(max_workers=a.jobs) as ex:
-            list(ex.map(run, tasks))
+        self.run_tasks(tasks)
 
+        gn_file = ns.get("gclient_gn_args_file")
+        if gn_file:
+            out = os.path.join(self.root, gn_file)
+            write_gn_args(out, ns.get("gclient_gn_args", []), vars_)
+            log("  wrote %s" % gn_file)
+
+        hooks_cwd = (os.path.join(self.root, prefix)
+                     if rel and ns.get("use_relative_hooks") else self.root)
         for h in ns.get("hooks", []):
-            if cond_ok(h.get("condition"), env):
-                cwd = os.path.join(root, prefix) if rel else root
-                hooks.append((h.get("name", "hook"), h["action"], cwd))
+            if self.cond(h.get("condition"), vars_):
+                self.hooks.append(self.make_hook(h, vars_, hooks_cwd))
 
+        children = []
         for entry in ns.get("recursedeps", []):
-            name, fname = (entry, "DEPS") if isinstance(entry, str) else entry
-            f = os.path.join(root, name, fname)
-            if os.path.isfile(f):
-                queue.append((f, name))
+            if isinstance(entry, str):
+                name, fname = entry, "DEPS"
+            else:
+                name, fname = entry[0], entry[1]
+            path = full(name)
+            if path not in active or (path, fname) in self.recursed:
+                continue
+            child = os.path.join(self.root, path, fname)
+            if os.path.isfile(child):
+                self.recursed.add((path, fname))
+                children.append((child, path, vars_))
+        return children
 
-    # Equivalent of gclient's gclient_gn_args_file.
-    gn_file = top_ns.get("gclient_gn_args_file")
-    if gn_file:
-        out = os.path.join(root, gn_file)
-        os.makedirs(os.path.dirname(out), exist_ok=True)
-        with open(out, "w") as f:
-            f.write("# Generated by resolve-deps.py\n")
-            for name in top_ns.get("gclient_gn_args", []):
-                v = top_env[name]
-                if isinstance(v, bool):
-                    v = "true" if v else "false"
-                elif isinstance(v, str):
-                    v = '"%s"' % v
-                f.write(f"{name} = {v}\n")
+    def run(self):
+        top = os.path.join(self.root, "src", "DEPS")
+        if not os.path.isfile(top):
+            raise ResolveError("%s not found" % top)
+        queue = [(top, "src", {})]
+        while queue:
+            deps_file, prefix, parent_vars = queue.pop(0)
+            queue.extend(self.process(deps_file, prefix, parent_vars))
 
-    if skipped:
-        print("warning: skipped (need cipd/gcs support):", file=sys.stderr)
-        for s in skipped:
-            print("  " + s, file=sys.stderr)
+        if self.missing:
+            warn("conditions used undefined variables (treated as False): " +
+                 ", ".join(sorted(self.missing)))
 
-    if not a.skip_hooks:
-        for name, action, cwd in hooks:
-            print(f"==> hook: {name}", flush=True)
-            subprocess.run(action, cwd=cwd, check=True)
+        if self.skip_hooks:
+            log("==> hooks skipped")
+            return
+        for hook in self.hooks:
+            self.run_hook(hook)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--root", required=True,
+                    help="directory that holds src/ (the checkout parent)")
+    ap.add_argument("--jobs", type=int, default=8)
+    ap.add_argument("--var", action="append", default=[],
+                    metavar="NAME=VALUE", help="override a DEPS variable")
+    ap.add_argument("--target-os", action="append", default=None,
+                    help="target OS (repeatable); default: chromeos")
+    ap.add_argument("--target-cpu", action="append", default=None,
+                    help="target CPU (repeatable); default: host CPU")
+    ap.add_argument("--cipd", help="path to the cipd binary")
+    ap.add_argument("--skip-hooks", action="store_true")
+    args = ap.parse_args()
+    if args.jobs < 1:
+        die("--jobs must be >= 1")
+    try:
+        Resolver(args).run()
+    except ResolveError as e:
+        die(str(e))
 
 
 if __name__ == "__main__":
