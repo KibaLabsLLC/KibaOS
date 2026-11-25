@@ -94,23 +94,22 @@ prepare_source() {
 
     export PATH="${DEPOT_TOOLS_DIR}:${PATH}"
 
-    # Initialize official ChromiumOS minilayout
-    info "Initializing ChromiumOS minilayout manifest..."
+    # Initialize lumen
+    info "Initializing lumen manifest..."
 
     repo init \
         -u https://chromium.googlesource.com/chromiumos/manifest.git \
-        --repo-url=https://chromium.googlesource.com/external/repo.git \
-        -g minilayout
+        --repo-url=https://github.com/KibaLabsLLC/lumen.git
 
     # Synchronize source
-    info "Syncing minilayout repositories..."
+    info "Syncing repositories..."
 
     set -o pipefail
     repo sync \
         -j"${REPO_JOBS:-4}" \
         2>&1 | tee -a "${BUILD_LOG}"
 
-    info "ChromiumOS minilayout synchronization complete."
+    info "Lumen synchronization complete."
     info "Source directory: ${CHROMIUMOS_DIR}"
 }
 
@@ -195,9 +194,9 @@ build_chrome() {
     " 2>&1 | tee -a "${BUILD_LOG}"
 
     # Build chrome binary and setuid sandbox helper.
-    info "Running ninja (targets: chrome chrome_sandbox, jobs: ${JOBS})..."
+    info "Running ninja (targets: lumen chrome_sandbox, jobs: ${JOBS})..."
     info "This will take 2-4 hours..."
-    ninja -C "${OUTPUT_DIR}" -j"${JOBS}" chrome chrome_sandbox 2>&1 | tee -a "${BUILD_LOG}"
+    ninja -C "${OUTPUT_DIR}" -j"${JOBS}" lumen chrome_sandbox 2>&1 | tee -a "${BUILD_LOG}"
 
     # Verify the binary
     if [ ! -f "${OUTPUT_DIR}/chrome" ]; then
