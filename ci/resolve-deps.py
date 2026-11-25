@@ -330,6 +330,8 @@ class Resolver:
         self.base_vars = builtin_vars(target_os, target_cpu)
         self.overrides = parse_overrides(args.var)
         self.cipd = args.cipd or shutil.which("cipd")
+        self.skip_dep_paths = tuple(
+            os.path.normpath(p) for p in (args.skip_dep_path or []))
         self.claimed = {}       # path -> DEPS file that declared it
         self.recursed = set()   # (path, deps filename) already processed
         self.hooks = []         # (name, argv, cwd)
@@ -445,6 +447,9 @@ class Resolver:
                 continue
             path = full(key)
             active.add(path)
+            if any(path == sp or path.startswith(sp + os.sep)
+                   for sp in self.skip_dep_paths):
+                continue
             if path in self.claimed:
                 continue  # an ancestor DEPS already owns this path
             self.claimed[path] = deps_file
@@ -538,6 +543,10 @@ def main():
                     help="target CPU (repeatable); default: host CPU")
     ap.add_argument("--cipd", help="path to the cipd binary")
     ap.add_argument("--skip-hooks", action="store_true")
+    ap.add_argument("--skip-dep-path", action="append", default=None,
+                    metavar="PATH_PREFIX",
+                    help="skip any dep whose path starts with this prefix "
+                         "(repeatable; relative to root)")
     args = ap.parse_args()
     if args.jobs < 1:
         die("--jobs must be >= 1")
