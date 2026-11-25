@@ -333,6 +333,7 @@ class Resolver:
         self.skip_dep_paths = tuple(
             os.path.normpath(p) for p in (args.skip_dep_path or []))
         self.skip_hook_names = set(args.skip_hook_name or [])
+        self.skip_hook_actions = list(args.skip_hook_action or [])
         self.claimed = {}       # path -> DEPS file that declared it
         self.recursed = set()   # (path, deps filename) already processed
         self.hooks = []         # (name, argv, cwd)
@@ -378,6 +379,12 @@ class Resolver:
         if name in self.skip_hook_names:
             log("==> hook: %s (skipped)" % name)
             return
+        if self.skip_hook_actions:
+            action_str = " ".join(str(a) for a in action)
+            for pattern in self.skip_hook_actions:
+                if pattern in action_str:
+                    log("==> hook: %s (skipped, action matches %r)" % (name, pattern))
+                    return
         log("==> hook: %s" % name)
         try:
             proc = subprocess.run(action, cwd=cwd, env=self.hook_env())
@@ -554,6 +561,10 @@ def main():
     ap.add_argument("--skip-hook-name", action="append", default=None,
                     metavar="HOOK_NAME",
                     help="skip the named hook entirely (repeatable)")
+    ap.add_argument("--skip-hook-action", action="append", default=None,
+                    metavar="SUBSTRING",
+                    help="skip any hook whose action contains this substring "
+                         "(repeatable)")
     args = ap.parse_args()
     if args.jobs < 1:
         die("--jobs must be >= 1")
