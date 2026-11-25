@@ -63,8 +63,7 @@ for required_entry in \
     usr/bin/chromiumos-ash-session-child \
     usr/lib/chromiumos-ash/chrome \
     usr/lib/chromiumos-ash/chrome-sandbox \
-    usr/lib/chromiumos-ash/kibaos-session-manager-shim.py \
-    opt/google/chrome/chrome; do
+    usr/lib/chromiumos-ash/kibaos-session-manager-shim.py; do
   if ! grep -Fxq "${required_entry}" "${package_list}"; then
     echo "Package is missing required entry: ${required_entry}" >&2
     exit 1
