@@ -55,7 +55,7 @@ executors:
   vm-build:
     machine:
       image: ubuntu-2404:current
-    resource_class: 2xlarge
+    resource_class: large
 
 commands:
   load_state:
