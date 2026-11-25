@@ -258,22 +258,11 @@ bootstrap_chromium() {
 
     log "depot_tools ready"
 
-    local revision
-
-    [[ -r "${SCRIPT_DIR}/pins/chromium.sha" ]] ||
-        die "Missing pins/chromium.sha."
-
-    revision="$(tr -d '[:space:]' < "${SCRIPT_DIR}/pins/chromium.sha")"
-
-    [[ "$revision" =~ ^[0-9a-fA-F]{40}$ ]] ||
-        die "Invalid Chromium revision: $revision"
-
-    log "Bootstrapping pinned Chromium source"
+    log "Bootstrapping latest Lumen source"
 
     KIBAOS_DEPOT_TOOLS="$DEPOT_TOOLS" \
     PATH="${DEPOT_TOOLS}:${PATH}" \
         bash "${CI_DIR}/bootstrap-chromium-src.sh" \
-            --revision "$revision" \
             --target "$CHROMIUM_BOOTSTRAP" \
             --run \
             --verify-series
