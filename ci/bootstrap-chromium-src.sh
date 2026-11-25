@@ -155,6 +155,7 @@ LEAN_VARS=(
   checkout_telemetry_dependencies
   checkout_pgo_profiles
   checkout_nacl
+  checkout_android
 )
 
 custom_vars=""
