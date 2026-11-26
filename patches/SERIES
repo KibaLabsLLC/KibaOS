@@ -84,3 +84,5 @@
 0164-the-pruned-build-files-parse-again.patch
 0165-the-vendored-build-files-parse-again.patch
 0166-bundle-data-targets-carry-their-sources-again.patch
+
+0167-cros-system-api-protos-are-restored.patch
