@@ -1,0 +1,1464 @@
+diff --git a/android_webview/variables.gni b/android_webview/variables.gni
+new file mode 100644
+--- /dev/null
++++ b/android_webview/variables.gni
+@@ -0,0 +1,26 @@
++# Copyright 2018 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/android/channel.gni")
++import("//build/config/android/config.gni")
++import("//build/config/compiler/pgo/pgo.gni")
++
++declare_args() {
++  # Show a launcher icon to open WebView developer UI. This is enabled by
++  # default for all prestable builds.
++  webview_devui_show_icon = android_channel != "stable"
++}
++
++upstream_only_webview_deps = [
++  "//android_webview/nonembedded:devui_banner_resources",
++  "//android_webview/nonembedded:icon_resources",
++]
++
++use_webview_pgo_profile = current_cpu == "arm64" && chrome_pgo_phase == 2
++use_webview_pgo_profile_default_toolchain =
++    target_cpu == "arm64" && chrome_pgo_phase_default_toolchain == 2
++
++if (use_webview_pgo_profile_default_toolchain) {
++  webview_toolchain = "//build/toolchain/android:android_clang_arm64_webview"
++}
+diff --git a/chrome/android/features/android_library_factory_tmpl.gni b/chrome/android/features/android_library_factory_tmpl.gni
+new file mode 100644
+--- /dev/null
++++ b/chrome/android/features/android_library_factory_tmpl.gni
+@@ -0,0 +1,110 @@
++# Copyright 2019 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/android/rules.gni")
++
++# Declare an Android library factory target.
++#
++# This target creates an Android library target containing stripped java
++# factory files. The generated target will not contain any .class files as all
++# of them are excluded by jar_excluded_patterns. This target is intended to
++# generate an empty factory that will be swapped out at build time by the real
++# factory.
++#
++# A good way to limit the number of dependencies for these factory files is to
++# encapsulate the creation logic into either the constructor of the internal
++# Impl classes or a static create method in the Impl classes. See the sample
++# code below as an example.
++#
++# Specific requirements for the java factory files are listed in the script:
++# //chrome/android/features/create_stripped_java_factory.py
++#
++# Variables:
++#   sources: A list of all java factory files to be stripped.
++#   deps: Any deps needed by the generated Android library target.
++#   generator_deps: If |sources| is generated, any deps needed to generate |sources|.
++#
++# Example:
++#   android_library_factory("foo_java") {
++#     sources = [
++#       "android/org/chromium/foo/FooFactory.java",
++#     ]
++#     deps = [
++#       ":foo_public_interface"
++#     ]
++#   }
++#
++#   //android/org/chromium/foo/FooFactory.java:
++#   package org.chromium.foo;
++#   public class FooFactory {
++#     private FooFactory () {}
++#
++#     public static Foo createFoo() {
++#       return FooImpl.create();
++#     }
++#   }
++#
++#   //out/Default/.../generated/org/chromium/foo/FooFactory.java:
++#   package org.chromium.foo;
++#   public class FooFactory {
++#     private FooFactory () {}
++#
++#     public static Foo createFoo() {
++#       return null;
++#     }
++#   }
++#
++#   //android/org/chromium/foo/FooImpl.java:
++#   package org.chromium.foo;
++#   import org.chromium.foo.internal.Parameter;
++#   public class FooImpl implements Foo {
++#     FooImpl(Parameter parameter) {}
++#
++#     static Foo create() {
++#       return new FooImpl(new Parameter());
++#     }
++#   }
++#
++template("android_library_factory") {
++  forward_variables_from(invoker, [ "testonly" ])
++
++  # No underscores for factory target name to avoid crbug.com/40603958.
++  _process_factory_target_name = "${target_name}factory"
++  _base_gen_dir = "${target_gen_dir}/${target_name}"
++
++  action_foreach_with_pydeps(_process_factory_target_name) {
++    if (defined(invoker.generator_deps)) {
++      deps = invoker.generator_deps
++    }
++
++    script = "//chrome/android/features/create_stripped_java_factory.py"
++    sources = invoker.sources
++    outputs =
++        [ "$_base_gen_dir/{{source_root_relative_dir}}/{{source_file_part}}" ]
++    args = [
++      "--output",
++      rebase_path(outputs[0], root_build_dir),
++      "--input={{source}}",
++    ]
++  }
++
++  android_library(target_name) {
++    deps = [ ":$_process_factory_target_name" ]
++    if (defined(invoker.deps)) {
++      deps += invoker.deps
++    }
++    sources = get_target_outputs(":$_process_factory_target_name")
++    jar_excluded_patterns = [ "*" ]
++
++    # Mark library as low priority since this one does not contain the actual
++    # impl class. The real android_library() which provides the real
++    # implementation should be first on the classpath.
++    low_classpath_priority = true
++
++    # Although this factory library does not contain the actual impl class, it
++    # should still be the one that almost all targets depend on. This is so the
++    # real implementation can be provided later.
++    preferred_dep = true
++  }
++}
+diff --git a/chrome/process_version_rc_template.gni b/chrome/process_version_rc_template.gni
+new file mode 100644
+--- /dev/null
++++ b/chrome/process_version_rc_template.gni
+@@ -0,0 +1,63 @@
++# Copyright 2016 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/chrome_build.gni")
++import("//build/util/lastchange.gni")
++import("//build/util/process_version.gni")
++
++# This is a wrapper around process_version() that eases the task of processing
++# a .rc.version file (used especially on Windows).
++#
++# This template automatically includes VERSION, LASTCHANGE and BRANDING, and
++# any additional source files are passed after those (so their values can
++# override the ones specified by those 3 files).
++#
++# Parameters:
++#   sources (optional):
++#     List of files with value definitions that will be passed in addition to
++#     VERSION, LASTCHANGE and BRANDING.
++#
++#   template_file (optional):
++#     Template file to use (not a list). If not specified, a default value,
++#     //chrome/app/chrome_version.rc.version will be used.
++#
++# This template forwards all other parameters directly to process_version().
++#
++# Examples:
++#   process_version_rc_template("my_exe_version") {
++#     output = "$target_gen_dir/my_exe_version.rc"
++#     sources = [ "frob/my_exe.ver" ]
++#     extra_args = [ "-e", "FOO=42" ]
++#   }
++#
++#   process_version_rc_template("my_dll_version") {
++#     output = "$target_gen_dir/my_dll_version.rc"
++#     template_file = [ "//foo/bar/my_dll_version.rc.version" ]
++#   }
++template("process_version_rc_template") {
++  if (defined(invoker.template_file)) {
++    _template_file = invoker.template_file
++  } else {
++    _template_file = "//chrome/app/chrome_version.rc.version"
++  }
++  _sources = [
++    "//chrome/VERSION",
++    branding_file_path,
++    lastchange_file,
++  ]
++  if (defined(invoker.sources)) {
++    _sources += invoker.sources
++  }
++
++  process_version(target_name) {
++    template_file = _template_file
++    sources = _sources
++    forward_variables_from(invoker,
++                           "*",
++                           [
++                             "sources",
++                             "template_file",
++                           ])
++  }
++}
+diff --git a/chrome/updater/branding.gni b/chrome/updater/branding.gni
+new file mode 100644
+--- /dev/null
++++ b/chrome/updater/branding.gni
+@@ -0,0 +1,110 @@
++# Copyright 2020 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/chrome_build.gni")
++
++if (is_chrome_branded) {
++  import("//chrome/updater/internal/branding_google.gni")
++} else {
++  browser_name = "Chromium"
++  browser_product_name = "Chromium"
++  crash_product_name = "ChromiumUpdater"
++  crash_upload_url = "https://clients2.google.com/cr/staging_report"
++  help_center_url = "http://support.google.com/installer/"
++  app_logo_url = "https://dl.google.com/update2/installers/icons/"
++  keystone_app_name = "ChromiumSoftwareUpdate"
++  keystone_bundle_identifier = "org.chromium.Keystone"
++  mac_browser_bundle_identifier = "org.chromium.Chromium"
++  mac_updater_bundle_identifier = "org.chromium.ChromiumUpdater"
++  privileged_helper_bundle_name = "ChromiumUpdaterPrivilegedHelper"
++  privileged_helper_name = "org.chromium.Chromium.UpdaterPrivilegedHelper"
++  updater_app_icon_path = "//chrome/app/theme/chromium/mac/app.icns"
++  updater_company_full_name = "Chromium Authors"
++  updater_company_short_name = "Chromium"
++  updater_company_short_name_lowercase = "chromium"
++  updater_company_short_name_uppercase = "CHROMIUM"
++  updater_copyright =
++      "Copyright 2020 The Chromium Authors. All rights reserved."
++  updater_product_full_name = "ChromiumUpdater"
++  updater_product_full_name_dashed_lowercase = "chromium-updater"
++  updater_product_full_display_name = "Chromium Updater"
++  updater_metainstaller_name = "Chromium Installer"
++  mac_team_identifier = "PLACEHOLDER"
++  updater_appid = "{6e8ffa8f-e7e2-4000-9884-589283c27015}"
++  browser_appid = "{5d8d08af-2df9-4da2-86c1-eac353a0ca32}"
++  qualification_appid = "{43f3a046-04b3-4443-a770-d67dae90e440}"
++  platform_experience_helper_appid = "{b84ca560-bb0c-4ec9-a288-df67e15354c7}"
++  crx_pkhash = ""
++  legacy_service_name_prefix = "cupdate"
++  prefs_access_mutex = "{A6B9ECD5-772A-4D3F-BFEB-CF9340534A3E}"
++  setup_mutex_prefix = "{25569F82-3B67-4185-8127-88E4CF803680}"
++  grdfile_name = "chromium_strings"
++  extra_args_is_chrome_branded = "IS_CHROME_BRANDED=False"
++  update_check_url = "https://omaha-qa.sandbox.google.com/service/update2/json"
++  updater_event_logging_url = "https://play.googleapis.com/staging/log/"
++
++  UpdaterLegacyLibGUID = "4C61BB05-94D1-4BAB-B69C-C34195AF92CA"
++  GoogleUpdate3WebUserClassGUID = "75828ED1-7BE8-45D0-8950-AA85CBF74510"
++  GoogleUpdate3WebSystemClassGUID = "283209B7-C761-41CA-BE8D-B5321CD78FD6"
++  GoogleUpdate3WebServiceClassGUID = "B52C8B56-9541-4B78-9B2F-665366B78A9C"
++  PolicyStatusUserClassGUID = "4DAC24AB-B340-4B7E-AD01-1504A7F59EEA"
++  PolicyStatusSystemClassGUID = "83FE19AC-72A6-4A72-B136-724444121586"
++  ProcessLauncherClassGUID = "811A664F-703E-407C-A323-E6E31D1EFFA0"
++
++  IAppVersionWebGUID = "3057E1F8-2498-4C19-99B5-F7F207DA4DC7"
++  IAppVersionWebUserGUID = "F4874A57-8C88-4B1D-AAB8-4B06CF98FB29"
++  IAppVersionWebSystemGUID = "4AF986BF-DD14-45C2-8228-2541622699CD"
++
++  ICurrentStateGUID = "BE5D3E90-A66C-4A0A-9B7B-1A6B9BF3971E"
++  ICurrentStateUserGUID = "AE097E2A-7F4B-4248-8698-D6E515E9C638"
++  ICurrentStateSystemGUID = "E0425C1F-4263-4BA5-9328-423470344FC0"
++
++  IGoogleUpdate3WebGUID = "027234BD-61BB-4F5C-9386-7FE804171C8C"
++  IGoogleUpdate3WebUserGUID = "E2C00808-83C7-4CE4-8075-7E185A90AE04"
++  IGoogleUpdate3WebSystemGUID = "B7DA4837-09FF-4355-BFE1-30598E40F41A"
++
++  IAppBundleWebGUID = "D734C877-21F4-496E-B857-3E5B2E72E4CC"
++  IAppBundleWebUserGUID = "EA08425E-054B-4564-B0A0-8BAAB76F38E9"
++  IAppBundleWebSystemGUID = "D45CFCE3-5297-4D0B-925E-1924A32A7452"
++
++  IAppWebGUID = "2C6218B9-088D-4D25-A4F8-570558124142"
++  IAppWebUserGUID = "2C320333-21CF-4FC8-BF8F-4287DB3795B7"
++  IAppWebSystemGUID = "8CA0CD21-6864-4BD8-BF0F-2D69AF3A0FE8"
++
++  IAppCommandWebGUID = "87DBF75E-F590-4802-93FD-F8D07800E2E9"
++  IAppCommandWebUserGUID = "F8D4B43D-7D22-47FE-B6AD-BAC5ED8A1659"
++  IAppCommandWebSystemGUID = "DF735BF0-0265-4D65-BABA-E244D428EFC5"
++
++  IPolicyStatusGUID = "7D908375-C9D0-44C5-BB98-206F3C24A74C"
++  IPolicyStatusUserGUID = "19309C09-C93C-45DA-8C02-9A8B8198A5E0"
++  IPolicyStatusSystemGUID = "F8197F77-DE9C-4BB0-9F63-459A001154C6"
++
++  IPolicyStatus2GUID = "9D31EA63-2E06-4D41-98C7-CB1F307DB597"
++  IPolicyStatus2UserGUID = "1163C9E6-6391-46E2-96AB-2BCB8907D669"
++  IPolicyStatus2SystemGUID = "78A85A33-F541-4A52-A1F2-0BCBA1F1A4F0"
++
++  IPolicyStatus3GUID = "5C674FC1-80E3-48D2-987B-79D9D286065B"
++  IPolicyStatus3UserGUID = "847BB70C-47D0-46C2-8C97-9000A1F9AD99"
++  IPolicyStatus3SystemGUID = "6F7996CA-5531-4299-BD7F-3C7090520090"
++
++  IPolicyStatus4GUID = "4F08E832-C4AF-4D77-840F-8884083E8324"
++  IPolicyStatus4UserGUID = "3C0435E1-B19F-4B7A-8481-D7EBAEBFAF47"
++  IPolicyStatus4SystemGUID = "DD9F76CA-FCFB-4F8E-B65E-F7C0703AAFBD"
++
++  IPolicyStatusValueGUID = "47C8886A-A4B5-4F6C-865A-41A207074DFA"
++  IPolicyStatusValueUserGUID = "13D172EB-2BFB-4D72-AF10-7D33337B7FC6"
++  IPolicyStatusValueSystemGUID = "CFF9AE0F-C5C5-4D53-8394-7602758A52BA"
++
++  IProcessLauncherGUID = "EED70106-3604-4385-866E-6D540E99CA1A"
++  IProcessLauncherSystemGUID = "437174A3-B9A5-4835-B896-7DE8C1FE2638"
++
++  IProcessLauncher2GUID = "BAEE6326-C925-4FA4-AFE9-5FA69902B021"
++  IProcessLauncher2SystemGUID = "E1C53EEF-2BAB-4420-BDD7-256B91C49D0C"
++
++  if (is_mac) {
++    legacy_google_update_appid = keystone_bundle_identifier
++  } else {
++    legacy_google_update_appid = "{8B2B92A3-1BA2-4154-A89C-DA74C9C505E4}"
++  }
++}
+diff --git a/chrome/version.gni b/chrome/version.gni
+new file mode 100644
+--- /dev/null
++++ b/chrome/version.gni
+@@ -0,0 +1,467 @@
++# Copyright 2015 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++# This exposes the Chrome version as GN variables for use in build files.
++# This also generates the various version codes used for builds of chrome for
++# android.
++#
++# PREFER NOT TO USE THESE. The GYP build uses this kind of thing extensively.
++# However, it is far better to write an action (or use
++# //build/util/process_version.gni) to generate a file at build-time with the
++# information you need. This allows better dependency checking and GN will
++# run faster.
++#
++# These values should only be used if you REALLY need to depend on them at
++# build-time, for example, in the computation of output file names.
++
++# Give version.py a pattern that will expand to a GN scope consisting of
++# all values we need at once.
++_version_dictionary_template = "full = \"@MAJOR@.@MINOR@.@BUILD@.@PATCH@\" " +
++                               "major = \"@MAJOR@\" minor = \"@MINOR@\" " +
++                               "build = \"@BUILD@\" patch = \"@PATCH@\" "
++
++# The file containing the Chrome version number.
++chrome_version_file = "//chrome/VERSION"
++
++_script_arguments = []
++
++if (is_mac) {
++  _version_dictionary_template += "patch_hi = @PATCH_HI@ patch_lo = @PATCH_LO@ "
++
++  _script_arguments += [
++    "-e",
++    "PATCH_HI=int(PATCH)//256",
++    "-e",
++    "PATCH_LO=int(PATCH)%256",
++  ]
++}
++
++if (target_os == "android") {
++  import("//build/config/android/config.gni")
++  import("//build/config/chrome_build.gni")
++
++  _version_dictionary_template +=
++      "chrome_version_code = " + "\"@CHROME_VERSION_CODE@\" " +
++      "chrome_beta_version_code = " + "\"@CHROME_MODERN_VERSION_CODE@\" " +
++      "chrome_auto_version_code = " + "\"@MONOCHROME_VERSION_CODE@\" " +
++      "monochrome_version_code = \"@MONOCHROME_VERSION_CODE@\" " +
++      "trichrome_version_code = \"@TRICHROME_VERSION_CODE@\" " +
++      "trichrome_auto_version_code = \"@TRICHROME_AUTO_VERSION_CODE@\" " +
++      "trichrome_beta_version_code = \"@TRICHROME_BETA_VERSION_CODE@\" " +
++      "webview_stable_version_code = \"@WEBVIEW_STABLE_VERSION_CODE@\" " +
++      "webview_beta_version_code = \"@WEBVIEW_BETA_VERSION_CODE@\" " +
++      "webview_auto_version_code = \"@WEBVIEW_AUTO_VERSION_CODE@\" "
++
++  # Generate hybrid configurations for target_cpu's that can run in hybrid
++  # configurations. i.e. "riscv64" does not show up in this list, as it's a
++  # 64-bit-only target_cpu.
++  if (target_cpu == "arm64" || target_cpu == "x64") {
++    if (is_desktop_android) {
++      _version_dictionary_template +=
++          "chrome_desktop_version_code = \"@CHROME_DESKTOP_VERSION_CODE@\" "
++      _version_dictionary_template += "chrome_desktop_beta_version_code = \"@CHROME_DESKTOP_BETA_VERSION_CODE@\" "
++    }
++    _version_dictionary_template +=
++        "chrome_32_version_code = \"@CHROME_32_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "monochrome_32_version_code = \"@MONOCHROME_32_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "monochrome_32_64_version_code = \"@MONOCHROME_32_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "monochrome_64_32_version_code = \"@MONOCHROME_64_32_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "monochrome_64_version_code = \"@MONOCHROME_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_32_version_code = \"@TRICHROME_32_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_auto_32_version_code = \"@TRICHROME_AUTO_32_VERSION_CODE@\" "
++    _version_dictionary_template += "trichrome_auto_32_64_version_code = \"@TRICHROME_AUTO_32_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_32_64_version_code = \"@TRICHROME_32_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_64_32_version_code = \"@TRICHROME_64_32_VERSION_CODE@\" "
++    _version_dictionary_template += "trichrome_auto_64_32_version_code = \"@TRICHROME_AUTO_64_32_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_64_version_code = \"@TRICHROME_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_auto_64_version_code = \"@TRICHROME_AUTO_64_VERSION_CODE@\" "
++    _version_dictionary_template += "trichrome_desktop_64_version_code = \"@TRICHROME_DESKTOP_64_VERSION_CODE@\" "
++    if (target_cpu == "arm64") {
++      _version_dictionary_template +=
++          "chrome_high_version_code = \"@CHROME_HIGH_VERSION_CODE@\" "
++      _version_dictionary_template +=
++          "chrome_high_beta_version_code = \"@CHROME_HIGH_BETA_VERSION_CODE@\" "
++      _version_dictionary_template += "trichrome_64_32_high_version_code = \"@TRICHROME_64_32_HIGH_VERSION_CODE@\" "
++      _version_dictionary_template += "trichrome_auto_64_32_high_version_code = \"@TRICHROME_AUTO_64_32_HIGH_VERSION_CODE@\" "
++    }
++    _version_dictionary_template +=
++        "trichrome_32_beta_version_code = \"@TRICHROME_32_BETA_VERSION_CODE@\" "
++    _version_dictionary_template += "trichrome_32_64_beta_version_code = \"@TRICHROME_32_64_BETA_VERSION_CODE@\" "
++    _version_dictionary_template += "trichrome_64_32_beta_version_code = \"@TRICHROME_64_32_BETA_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "trichrome_64_beta_version_code = \"@TRICHROME_64_BETA_VERSION_CODE@\" "
++    if (target_cpu == "arm64") {
++      _version_dictionary_template += "trichrome_64_32_high_beta_version_code = \"@TRICHROME_64_32_HIGH_BETA_VERSION_CODE@\" "
++    }
++
++    _version_dictionary_template +=
++        "webview_32_stable_version_code = \"@WEBVIEW_32_STABLE_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_32_64_stable_version_code = \"@WEBVIEW_32_64_STABLE_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "webview_64_stable_version_code = \"@WEBVIEW_64_STABLE_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_64_32_stable_version_code = \"@WEBVIEW_64_32_STABLE_VERSION_CODE@\" "
++    if (target_cpu == "arm64") {
++      _version_dictionary_template += "webview_64_32_high_stable_version_code = \"@WEBVIEW_64_32_HIGH_STABLE_VERSION_CODE@\" "
++    }
++
++    _version_dictionary_template +=
++        "webview_32_beta_version_code = \"@WEBVIEW_32_BETA_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_32_64_beta_version_code = \"@WEBVIEW_32_64_BETA_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "webview_64_beta_version_code = \"@WEBVIEW_64_BETA_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_64_32_beta_version_code = \"@WEBVIEW_64_32_BETA_VERSION_CODE@\" "
++    if (target_cpu == "arm64") {
++      _version_dictionary_template += "webview_64_32_high_beta_version_code = \"@WEBVIEW_64_32_HIGH_BETA_VERSION_CODE@\" "
++    }
++
++    _version_dictionary_template +=
++        "webview_auto_32_version_code = \"@WEBVIEW_AUTO_32_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_auto_32_64_version_code = \"@WEBVIEW_AUTO_32_64_VERSION_CODE@\" "
++    _version_dictionary_template +=
++        "webview_auto_64_version_code = \"@WEBVIEW_AUTO_64_VERSION_CODE@\" "
++    _version_dictionary_template += "webview_auto_64_32_version_code = \"@WEBVIEW_AUTO_64_32_VERSION_CODE@\" "
++    if (target_cpu == "arm64") {
++      _version_dictionary_template += "webview_auto_64_32_high_version_code = \"@WEBVIEW_AUTO_64_32_HIGH_VERSION_CODE@\" "
++    }
++  }
++
++  _script_arguments += [
++    "-a",
++    target_cpu,
++  ]
++}
++
++_script_arguments += [
++  "-f",
++  rebase_path(chrome_version_file, root_build_dir),
++  "-t",
++  _version_dictionary_template,
++  "--os",
++  target_os,
++]
++
++_result = exec_script("//build/util/version.py",
++                      _script_arguments,
++                      "scope",
++                      [
++                        chrome_version_file,
++                        "//build/util/android_chrome_version.py",
++                      ])
++
++# Full version. For example "45.0.12321.0"
++chrome_version_full = _result.full
++
++# The constituent parts of the full version.
++chrome_version_major = _result.major
++chrome_version_minor = _result.minor
++chrome_version_build = _result.build
++chrome_version_patch = _result.patch
++
++if (is_mac) {
++  chrome_version_patch_hi = _result.patch_hi
++  chrome_version_patch_lo = _result.patch_lo
++
++  chrome_dylib_version = "$chrome_version_build.$chrome_version_patch_hi" +
++                         ".$chrome_version_patch_lo"
++} else if (target_os == "android") {
++  forward_variables_from(_result,
++                         [
++                           "chrome_version_code",
++                           "chrome_high_version_code",
++                           "chrome_high_beta_version_code",
++                           "chrome_beta_version_code",
++                           "chrome_auto_version_code",
++                           "chrome_desktop_version_code",
++                           "chrome_desktop_beta_version_code",
++                           "chrome_32_version_code",
++                           "monochrome_version_code",
++                           "monochrome_32_version_code",
++                           "monochrome_32_64_version_code",
++                           "monochrome_64_32_version_code",
++                           "monochrome_64_version_code",
++                           "trichrome_version_code",
++                           "trichrome_auto_version_code",
++                           "trichrome_32_version_code",
++                           "trichrome_auto_32_version_code",
++                           "trichrome_32_64_version_code",
++                           "trichrome_64_32_version_code",
++                           "trichrome_64_32_high_version_code",
++                           "trichrome_auto_32_64_version_code",
++                           "trichrome_auto_64_version_code",
++                           "trichrome_auto_64_32_version_code",
++                           "trichrome_auto_64_32_high_version_code",
++                           "trichrome_desktop_64_version_code",
++                           "trichrome_64_version_code",
++                           "trichrome_beta_version_code",
++                           "trichrome_32_beta_version_code",
++                           "trichrome_32_64_beta_version_code",
++                           "trichrome_64_32_beta_version_code",
++                           "trichrome_64_32_high_beta_version_code",
++                           "trichrome_64_beta_version_code",
++                           "webview_beta_version_code",
++                           "webview_stable_version_code",
++                           "webview_32_beta_version_code",
++                           "webview_32_stable_version_code",
++                           "webview_64_beta_version_code",
++                           "webview_64_stable_version_code",
++                           "webview_32_64_beta_version_code",
++                           "webview_32_64_stable_version_code",
++                           "webview_64_32_beta_version_code",
++                           "webview_64_32_stable_version_code",
++                           "webview_64_32_high_beta_version_code",
++                           "webview_64_32_high_stable_version_code",
++                           "webview_auto_version_code",
++                           "webview_auto_32_version_code",
++                           "webview_auto_32_64_version_code",
++                           "webview_auto_64_version_code",
++                           "webview_auto_64_32_version_code",
++                           "webview_auto_64_32_high_version_code",
++                         ])
++
++  chrome_version_name = chrome_version_full
++
++  # There is a different version code only for arm64.
++  if (is_high_end_android && target_cpu != "arm64") {
++    trichrome_64_32_high_beta_version_code = trichrome_64_32_beta_version_code
++    trichrome_64_32_high_version_code = trichrome_64_32_version_code
++    trichrome_auto_64_32_high_version_code = trichrome_auto_64_32_version_code
++    webview_64_32_high_beta_version_code = webview_64_32_beta_version_code
++    webview_64_32_high_stable_version_code = webview_64_32_stable_version_code
++    webview_auto_64_32_high_version_code = webview_auto_64_32_version_code
++    chrome_high_version_code = chrome_version_code
++    chrome_high_beta_version_code = chrome_beta_version_code
++  }
++}
++
++if (is_android && current_toolchain == default_toolchain) {
++  lines_to_write = [
++    "VersionName: $chrome_version_name",
++    "Chrome: $chrome_version_code",
++    "ChromeOpenBeta: $chrome_beta_version_code",
++    "ChromeAuto: $chrome_auto_version_code",
++    "TrichromeChrome: $trichrome_version_code",
++    "TrichromeChromeOpenBeta: $trichrome_beta_version_code",
++    "TrichromeChromeAuto: $trichrome_auto_version_code",
++    "AndroidWebview: $webview_stable_version_code",
++    "AndroidWebviewOpenBeta: $webview_beta_version_code",
++    "AndroidWebviewStable: $webview_stable_version_code",
++    "AndroidWebviewBeta: $webview_beta_version_code",
++    "AndroidWebviewAuto: $webview_auto_version_code",
++  ]
++
++  if (defined(chrome_desktop_version_code)) {
++    lines_to_write += [
++      "ChromeDesktop: $chrome_desktop_version_code",
++      "ChromeDesktopOpenBeta: $chrome_desktop_beta_version_code",
++    ]
++  }
++
++  if (target_cpu == "arm64") {
++    lines_to_write += [
++      "ChromeHigh: $chrome_high_version_code",
++      "ChromeHighOpenBeta: $chrome_high_beta_version_code",
++    ]
++  }
++
++  if (android_64bit_target_cpu && defined(android_app_secondary_abi)) {
++    lines_to_write += [
++      "Monochrome32: $monochrome_32_version_code",
++      "Monochrome3264: $monochrome_32_64_version_code",
++      "Monochrome6432: $monochrome_64_32_version_code",
++      "Monochrome64: $monochrome_64_version_code",
++      "TrichromeChrome32: $trichrome_32_version_code",
++      "TrichromeChrome3264: $trichrome_32_64_version_code",
++      "TrichromeChrome6432: $trichrome_64_32_version_code",
++      "TrichromeChrome64: $trichrome_64_version_code",
++      "TrichromeChromeAuto32: $trichrome_auto_32_version_code",
++      "TrichromeChromeAuto3264: $trichrome_auto_32_64_version_code",
++      "TrichromeChromeAuto64: $trichrome_auto_64_version_code",
++      "TrichromeChromeAuto6432: $trichrome_auto_64_32_version_code",
++      "TrichromeChromeDesktop64: $trichrome_desktop_64_version_code",
++      "AndroidWebview3264: $webview_32_64_stable_version_code",
++      "AndroidWebview64: $webview_64_stable_version_code",
++      "AndroidWebview6432: $webview_64_32_stable_version_code",
++      "AndroidWebview32: $webview_32_stable_version_code",
++      "AndroidWebviewAuto32: $webview_auto_32_version_code",
++      "AndroidWebviewAuto3264: $webview_auto_32_64_version_code",
++      "AndroidWebviewAuto64: $webview_auto_64_version_code",
++      "AndroidWebviewAuto6432: $webview_auto_64_32_version_code",
++    ]
++    if (target_cpu == "arm64") {
++      lines_to_write += [
++        "TrichromeChrome6432High: $trichrome_64_32_high_version_code",
++        "TrichromeChromeAuto6432High: $trichrome_auto_64_32_high_version_code",
++        "AndroidWebview6432High: $webview_64_32_high_stable_version_code",
++        "AndroidWebviewAuto6432High: $webview_auto_64_32_high_version_code",
++      ]
++    }
++    lines_to_write += [
++      "TrichromeChrome32OpenBeta: $trichrome_32_beta_version_code",
++      "TrichromeChrome3264OpenBeta: $trichrome_32_64_beta_version_code",
++      "TrichromeChrome6432OpenBeta: $trichrome_64_32_beta_version_code",
++      "TrichromeChrome64OpenBeta: $trichrome_64_beta_version_code",
++      "AndroidWebview32OpenBeta: $webview_32_beta_version_code",
++      "AndroidWebview3264OpenBeta: $webview_32_64_beta_version_code",
++      "AndroidWebview6432OpenBeta: $webview_64_32_beta_version_code",
++      "AndroidWebview64OpenBeta: $webview_64_beta_version_code",
++    ]
++    if (target_cpu == "arm64") {
++      lines_to_write += [
++        "TrichromeChrome6432HighOpenBeta: $trichrome_64_32_high_beta_version_code",
++        "AndroidWebview6432HighOpenBeta: $webview_64_32_high_beta_version_code",
++      ]
++    }
++    lines_to_write += [
++      "AndroidWebview32Stable: $webview_32_stable_version_code",
++      "AndroidWebview32Beta: $webview_32_beta_version_code",
++      "AndroidWebview64Stable: $webview_64_stable_version_code",
++      "AndroidWebview64Beta: $webview_64_beta_version_code",
++    ]
++  }
++
++  write_file("$root_out_dir/android_chrome_versions.txt", lines_to_write)
++}
++
++if (is_android) {
++  import("//build/config/android/channel.gni")
++  import("//build/config/android/config.gni")
++  import("//build/config/chrome_build.gni")
++
++  _use_stable_package_name_for_trichrome =
++      use_stable_package_name_for_trichrome && android_channel == "beta"
++
++  # Changing chrome_version_code here to prevent different output
++  # in the android_chrome_versions.txt above
++  if (_use_stable_package_name_for_trichrome) {
++    if (defined(chrome_desktop_beta_version_code)) {
++      chrome_version_code = chrome_desktop_beta_version_code
++    } else if (is_high_end_android) {
++      chrome_version_code = chrome_high_beta_version_code
++    } else {
++      chrome_version_code = chrome_beta_version_code
++    }
++  } else if (defined(chrome_desktop_version_code)) {
++    chrome_version_code = chrome_desktop_version_code
++  } else if (is_high_end_android) {
++    chrome_version_code = chrome_high_version_code
++  }
++
++  # Lookup tables for version codes.
++  # For the list of configurations that exist, see:
++  #     https://chromium.googlesource.com/chromium/src/+/main/docs/android_native_libraries.md#build-variants-eg_monochrome_64_32_apk
++  #
++  # For how version codes are computed, see:
++  #     //build/util/android_chrome_version.py
++
++  # Key:
++  # {android_64bit_target_cpu}_{is_64_bit_browser}_{include_64_bit_webview}_{include_32_bit_webview}
++  TRICHROME_VERSION_MAP = {
++    # 64-bit constants are not generated by version.py on non-64-bit target_cpu.
++    if (android_64bit_target_cpu) {
++      # hybrid constants are not generated by version.py on non-64-bit-only
++      # target_cpu.
++      if (defined(android_app_secondary_abi)) {
++        if (_use_stable_package_name_for_trichrome) {
++          if (is_high_end_android) {
++            true_true_true_true = trichrome_64_32_high_beta_version_code
++          } else {
++            true_true_true_true = trichrome_64_32_beta_version_code
++          }
++          true_true_true_false = trichrome_64_beta_version_code
++          true_false_false_true = trichrome_32_beta_version_code
++          true_false_true_true = trichrome_32_64_beta_version_code
++        } else {
++          if (is_high_end_android) {
++            true_true_true_true = trichrome_64_32_high_version_code
++          } else {
++            true_true_true_true = trichrome_64_32_version_code
++          }
++          if (is_desktop_android) {
++            true_true_true_false = trichrome_desktop_64_version_code
++          } else {
++            true_true_true_false = trichrome_64_version_code
++          }
++          true_false_false_true = trichrome_32_version_code
++          true_false_true_true = trichrome_32_64_version_code
++        }
++      } else {
++        if (_use_stable_package_name_for_trichrome) {
++          true_true_true_false = trichrome_beta_version_code
++        } else {
++          true_true_true_false = trichrome_version_code
++        }
++      }
++    } else {
++      # !android_64bit_target_cpu
++      if (_use_stable_package_name_for_trichrome) {
++        false_false_false_true = trichrome_beta_version_code
++      } else {
++        false_false_false_true = trichrome_version_code
++      }
++    }
++  }
++
++  # We use the beta version code in one of two cases:
++  # 1- For old standalone settings: we check (android_channel == "beta")
++  # 2- For new standalone settings: we check (android_channel == "beta" && use_stable_package_name_for_trichrome)
++  _use_beta_version_code =
++      (!enable_new_standalone_webview_settings && android_channel == "beta") ||
++      (enable_new_standalone_webview_settings &&
++       _use_stable_package_name_for_trichrome)
++
++  # Key:
++  # {android_64bit_target_cpu}_{is_64_bit_browser}_{include_64_bit_webview}_{include_32_bit_webview}
++  WEBVIEW_VERSION_MAP = {
++    # 64-bit constants are not generated by version.py on non-64-bit target_cpu.
++    if (android_64bit_target_cpu) {
++      if (defined(android_app_secondary_abi)) {
++        if (_use_beta_version_code) {
++          true_false_false_true = webview_32_beta_version_code
++          true_true_true_false = webview_64_beta_version_code
++          true_false_true_true = webview_beta_version_code
++          if (is_high_end_android) {
++            true_true_true_true = webview_64_32_high_beta_version_code
++          } else {
++            true_true_true_true = webview_64_32_beta_version_code
++          }
++        } else {
++          if (is_high_end_android) {
++            true_true_true_true = webview_64_32_high_stable_version_code
++          } else {
++            true_true_true_true = webview_64_32_stable_version_code
++          }
++          true_false_false_true = webview_32_stable_version_code
++          true_true_true_false = webview_64_stable_version_code
++          true_false_true_true = webview_stable_version_code
++        }
++      } else {
++        if (_use_beta_version_code) {
++          true_true_true_false = webview_beta_version_code
++        } else {
++          true_true_true_false = webview_stable_version_code
++        }
++      }
++    } else {
++      # !android_64bit_target_cpu
++      if (_use_beta_version_code) {
++        false_false_false_true = webview_beta_version_code
++      } else {
++        false_false_false_true = webview_stable_version_code
++      }
++    }
++
++    true_false_false_false = "1"
++    false_false_false_false = "1"
++  }
++}
+diff --git a/chromecast/chromecast.gni b/chromecast/chromecast.gni
+new file mode 100644
+--- /dev/null
++++ b/chromecast/chromecast.gni
+@@ -0,0 +1,186 @@
++# Copyright 2015 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/cast.gni")
++import("//build/config/locales.gni")
++import("//components/cast_streaming/features.gni")
++import("//media/media_options.gni")
++
++# These args blocks should contain arguments used within the //chromecast
++# directory. Arguments which are used in other Chrome components should
++# be instead declared in //build/config/cast.gni.
++declare_args() {
++  # True if Chromecast build is targeted for linux desktop. This type of build
++  # is useful for testing and development, but currently supports only a subset
++  # of Cast functionality. Though this defaults to true for x86 Linux devices,
++  # this should be overridden manually for an embedded x86 build.
++  is_cast_desktop_build =
++      target_os == "linux" && (target_cpu == "x86" || target_cpu == "x64") &&
++      enable_cast_receiver
++}
++
++declare_args() {
++  # If true, IS_CAST_DEBUG_BUILD() will evaluate to 1 in version.h. Otherwise,
++  # it will evaluate to 0. Overriding this when is_debug=false is useful for
++  # doing engineering builds.
++  cast_is_debug = is_debug
++
++  # The incremental build number. The Cast automated builders will set this
++  # value to indicate the buildset. Note: The default value should be greater
++  # than any value the builder may assign to prevent attempted automatic updates
++  # when the default value is used.
++  cast_build_incremental = "999999"
++
++  # If true, the mixer will be instantiated inside cast_shell. When false, the
++  # mixer is expected to be running in another process.
++  mixer_in_cast_shell = true
++
++  # unified flag to pick monotonic_clock OR monotonic_clock_raw
++  media_clock_monotonic_raw = !is_android && !is_cast_desktop_build
++
++  # Include 'Android' in user agent string to avoid being served desktop
++  # versions of websites.
++  # TODO(halliwell): consider making this default for all Cast hardware.
++  use_android_user_agent = false
++
++  # Contain default command line switches we want to set.
++  # This will get joined into a comma-separated list that looks like:
++  #   "test-flag-one=public,test-flag-two=true,test-flag-three=1,"
++  # TODO(ziyangch): make the parsing logic have ability to quote/escape characters.
++  default_command_line_flags = []
++
++  # Set to true to enable external Mojo services to communicate with services
++  # within cast_shell.
++  enable_external_mojo_services = is_linux || is_chromeos || is_android
++
++  # Recording happens at this sample rate. Must be 16000, 48000 or 96000 Hz.
++  audio_input_sample_rate = 16000
++
++  # Whether use unix sockets in Cast input/output stream.
++  use_unix_sockets = is_linux || is_chromeos || is_android
++
++  # Extra rpath to use for standalone services.
++  iot_service_rpath = ""
++
++  # True to use the Chromium runtime for cast rendering.
++  enable_chromium_runtime_cast_renderer = false
++
++  # device specific string to append to User string.
++  device_user_agent_suffix = ""
++
++  # link vendor-supplied functionality as shared libraries. When true,
++  # cast_shared_library targets are normal shared libraries. When false,
++  # they become source_sets.
++  use_vendor_shlibs = !is_android
++
++  # build APKs/bundles for the listed device types. Each APK has different
++  # features enabled in its manifest to ensure it is only distributed to select
++  # devices.
++  android_device_types = [
++    "generic",
++    "atv",
++    "tablet",
++    "automotive",
++  ]
++
++  # Use Starboard graphics backend. Compile it in statically.
++  enable_starboard_graphics = false
++
++  # Build Starboard graphics backend as shared library.
++  starboard_graphics_is_shared = false
++
++  # Use Starboard media backend.
++  enable_starboard_media = false
++
++  # This is the Cast release version. It should have form that identify a
++  #  release version in a unique way, separately from the incremental build
++  #  number. In example can have a form of <major>.<minor>.
++  # This values is a part if product version used by the crash reporting client,
++  #  and expected to be set by the external build system.
++  # For local user build we set it to "local.${USER}" value.
++  cast_build_release = "local." + getenv("USER")
++}
++
++# All locales supported by Cast builds. This provides a single point of
++# reference for all GN files referencing a locales list.
++# |locales_without_pseudolocales| is declared in //build/config/locales.gni.
++# See https://chromium-review.googlesource.com/488166/ for why we can't use
++# pseudolocales in chromecast.
++cast_locales = locales_without_pseudolocales
++
++# Android currently supports more locales than Desktop and ChromeOS.
++# If Cast will also the android files update this and the Cast grd files.
++if (is_android) {
++  # Subtract out additional Android locales
++  cast_locales -= extended_locales
++}
++if (!(is_ios || is_chromeos)) {
++  # Subtract out the additional desktop locales
++  cast_locales -= [
++    "af",
++    "ur",
++  ]
++}
++
++# Use Chromecast CDMs for protected content. Some Android platforms use
++# MediaDrm for CDM support.
++declare_args() {
++  use_chromecast_cdms = true
++}
++
++foreach(target_type,
++        [
++          "executable",
++          "loadable_module",
++          "source_set",
++        ]) {
++  template("cast_${target_type}") {
++    target(target_type, target_name) {
++      forward_variables_from(invoker, "*", TESTONLY_AND_VISIBILITY)
++      forward_variables_from(invoker, [ "testonly" ])
++
++      configs += [ "//chromecast:cast_config" ]
++    }
++  }
++}
++
++template("cast_shared_library") {
++  if (use_vendor_shlibs) {
++    target_type = "shared_library"
++  } else {
++    target_type = "source_set"
++  }
++
++  target(target_type, target_name) {
++    forward_variables_from(invoker, "*", TESTONLY_AND_VISIBILITY)
++    forward_variables_from(invoker, [ "testonly" ])
++
++    configs += [ "//chromecast:cast_config" ]
++  }
++}
++
++# Set the defaults for each target. The defaults for these target wrappers
++# should match their unwrapped counterparts in BUILDCONFIG.gn. The variables
++# referenced below are declared in BUILDCONFIG.gn.
++set_defaults("cast_executable") {
++  configs = default_executable_configs
++}
++
++set_defaults("cast_shared_library") {
++  configs = default_shared_library_configs
++  if (is_android) {
++    configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
++  }
++}
++
++set_defaults("cast_loadable_module") {
++  configs = default_shared_library_configs
++  if (is_android) {
++    configs -= [ "//build/config/android:hide_all_but_jni_onload" ]
++  }
++}
++
++set_defaults("cast_source_set") {
++  configs = default_compiler_configs
++}
+diff --git a/ios/build/chrome_build.gni b/ios/build/chrome_build.gni
+new file mode 100644
+--- /dev/null
++++ b/ios/build/chrome_build.gni
+@@ -0,0 +1,179 @@
++# Copyright 2016 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/apple/mobile_config.gni")
++import("//build/config/apple/symbols.gni")
++import("//build/config/chrome_build.gni")
++import("//build/config/ios/config.gni")
++import("//build/config/ios/ios_sdk.gni")
++
++assert(target_platform == "iphoneos",
++       "This file must be included only on iOS phone builds.")
++
++# LINT.IfChange
++
++# Xcode 26.0 or higher is required to build Chromium on iOS. This file should
++# only be included when building Chromium, not other related projects (cronet,
++# webrtc, ...).
++#
++# TODO(crbug.com/6910795): remove `|| taget_environment == "catalyst"` when
++# the catalyst bot has been updated to use Xcode 26.0+.
++assert(xcode_version_int >= 2600 || target_environment == "catalyst",
++       "Xcode 26.0 or higher is required ($xcode_version_verbatim detected).")
++
++# LINT.ThenChange(//docs/ios/build_instructions.md)
++
++declare_args() {
++  # Enable share extension.
++  ios_enable_share_extension = true
++
++  # Enable the new share extension UI and entry points.
++  ios_enable_extended_share_extension = true
++
++  # Enable open in extension.
++  ios_enable_open_extension = true
++
++  # Enable credential provider extension.
++  ios_enable_credential_provider_extension = true
++
++  # Enable intents extension.
++  ios_enable_intents_extension = true
++
++  # Enable iOS 14, WidgetKit extension.
++  ios_enable_widget_kit_extension = true
++
++  # Enable iOS 16 lockscreen widget in WidgetKit extension.
++  ios_enable_lockscreen_widget = true
++
++  # Enable iOS Push Notification Service extension.
++  ios_enable_push_notification_service_extension = true
++
++  # Label of the target providing implementation for
++  # AccountVerificationProvider. Overridden when using the Google-internal
++  # repository to build Chrome on iOS.
++  ios_account_verification_provider_target = "//ios/chrome/credential_provider_extension:account_verification_provider_implementation"
++
++  # Label of the targets providing implementation for PasskeyKeychainProvider.
++  # Different for Chrome and extensions due to different internal dependencies.
++  # Overridden when using the Google-internal repository to build Chrome on iOS.
++  ios_passkey_keychain_provider_chrome_target = "//ios/chrome/common/credential_provider:passkey_keychain_provider_implementation"
++  ios_passkey_keychain_provider_extension_target = "//ios/chrome/common/credential_provider:passkey_keychain_provider_implementation"
++
++  # Label of the target providing implementation for FontProvider.
++  # Overridden when using the Google-internal repository to build Chrome on iOS.
++  ios_font_provider_target =
++      "//ios/chrome/credential_provider_extension:font_provider_implementation"
++
++  # Label of the target providing implementation for the
++  # PushNotificationServiceExtension. Overridden when using the Google-internal
++  # repository to build Chrome on iOS.
++  ios_push_notification_service_extension_target = "//ios/chrome/push_notification_service_extension:push_notification_service_extension_implementation"
++
++  # The API key to query Google services in the Credential Provider Extension.
++  ios_credential_provider_extension_api_key = ""
++
++  # Enable background fetch mode for app refresh.
++  ios_enable_background_mode = true
++
++  # Controls whether background continued processing mode is enabled (added to
++  # plist).
++  ios_enable_background_continued_processing = false
++
++  # Enable iOS 26 liquid glass.
++  ios_enable_liquid_glass = true
++
++  # Value of the encryption export compliance code. See "Cryptography and
++  # U.S. Export Compliance" in "Submitting the App to App Review" in the
++  # Apple developer documentation
++  # (https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations).
++  ios_encryption_export_compliance_code = ""
++
++  # List of plist templates to merge when generating chrome Info.plist.
++  ios_chrome_info_plist_additions = []
++
++  # List of targets used to generate the plist listed in
++  # ios_chrome_info_plist_additions variable (if any).
++  ios_chrome_info_plist_addition_targets = []
++
++  # List of plist templates to merge when generating chrome entitlements.
++  ios_chrome_entitlements_additions = []
++
++  # List of plist templates to merge when generating EarlGrey tests
++  # entitlements.
++  ios_egtests_entitlements_additions = []
++
++  # Overridable list of dependencies that are forbidden for
++  # //ios/chrome/app:chrome target.
++  ios_chrome_extra_assert_no_deps = []
++
++  # List of plist templates to merge when generating chrome cpe entitlements.
++  ios_chrome_cpe_entitlements_additions = []
++
++  # Use perf_tests_hook if true
++  ios_is_perf_test = false
++
++  # Enable memory debugging.
++  ios_enable_memory_debugging = !is_chrome_branded
++
++  # The iOS app bundle id.
++  ios_chromium_bundle_id =
++      "$ios_app_bundle_id_prefix.chrome.ios$apple_mobile_app_bundle_id_suffix"
++
++  # Path to a PrivacyInfo.xcprivacy file to be included in app extensions.
++  ios_app_extension_privacy_manifest = ""
++}
++
++if (target_environment == "catalyst") {
++  # Some extensions and background modes use APIs that are not available in
++  # the "catalyst" environment.
++  ios_enable_credential_provider_extension = false
++  ios_enable_widget_kit_extension = false
++  ios_enable_prebuilt_widget_kit_extension = false
++  ios_enable_open_extension = false
++  ios_enable_push_notification_service_extension = false
++  ios_enable_background_continued_processing = false
++}
++
++if (ios_chrome_generate_order_file) {
++  assert(
++      !enable_stripping && !is_debug,
++      "An orderfile should only be generated if enable_stripping is false and is_debug is false to ensure all function calls are included.")
++
++  # Disable all extensions as the order file is only generated based on running
++  # the primary application.
++  ios_enable_credential_provider_extension = false
++  ios_enable_widget_kit_extension = false
++  ios_enable_prebuilt_widget_kit_extension = false
++  ios_enable_push_notification_service_extension = false
++  ios_enable_share_extension = false
++  ios_enable_open_extension = false
++  ios_enable_intents_extension = false
++}
++
++# Configure is_official_release.
++if (is_official_build && is_chrome_branded) {
++  is_official_release = enable_dsyms && target_environment == "device" &&
++                        current_toolchain == default_toolchain
++} else {
++  is_official_release = false
++}
++
++chromium_handoff_id = "$ios_app_bundle_id_prefix.chrome.handoff"
++ios_move_tab_activity_type = "$ios_app_bundle_id_prefix.chrome.move-tab"
++
++if (is_chrome_branded) {
++  chromium_short_name = "Chrome"
++  url_channel_scheme = "googlechrome-dev"
++  url_secure_scheme = "googlechromes"
++  url_ssoauth_scheme = "$ios_app_bundle_id_prefix.sso.chrome.stable"
++  url_unsecure_scheme = "googlechrome"
++  url_x_callback_scheme = "googlechrome-x-callback"
++} else {
++  chromium_short_name = "Chromium"
++  url_channel_scheme = "chromium-dev"
++  url_secure_scheme = "chromiums"
++  url_ssoauth_scheme = "$ios_app_bundle_id_prefix.sso.chromium"
++  url_unsecure_scheme = "chromium"
++  url_x_callback_scheme = "chromium-x-callback"
++}
+diff --git a/ios/build/config.gni b/ios/build/config.gni
+new file mode 100644
+--- /dev/null
++++ b/ios/build/config.gni
+@@ -0,0 +1,47 @@
++# Copyright 2016 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/features.gni")
++
++# Global list of dependencies that are conceptually bad on iOS and should
++# never be added (they will never be supported).
++_ios_conceptually_bad_dependencies = [
++  "//cc/*",
++  "//content/*",
++  "//dbus/*",
++  "//jingle:jingle",
++  "//media/*",
++  "//third_party/blink/*",
++  "//third_party/ffmpeg/*",
++  "//third_party/hunspell_dictionaries/*",
++  "//third_party/webgl/*",
++  "//third_party/webrtc:webrtc",
++]
++
++# Global list of conceptually fine dependencies but currently unsupported
++# on iOS. Exclusions will be removed when the dependencies are fixed.
++_ios_transient_bad_dependencies = []
++
++# Global list of dependencies that should never be added to extensions.
++ios_extension_assert_no_deps = [ "//ios/chrome/browser/*" ]
++
++ios_assert_no_deps = _ios_transient_bad_dependencies
++if (!use_blink) {
++  ios_assert_no_deps += _ios_conceptually_bad_dependencies
++
++  # Disallow all "//net" dependencies, except "//net/base".
++  ios_extension_assert_no_deps += [
++    "//net",
++    "//net/android/*",
++    "//net/base/module/*",
++    "//net/cert/*",
++    "//net/data/*",
++    "//net/dns/*",
++    "//net/http/*",
++    "//net/log/*",
++    "//net/third_party/*",
++    "//net/tools/*",
++    "//net/traffic_annotation/*",
++  ]
++}
+diff --git a/ios/features.gni b/ios/features.gni
+new file mode 100644
+--- /dev/null
++++ b/ios/features.gni
+@@ -0,0 +1,28 @@
++# Copyright 2017 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//build/config/apple/mobile_config.gni")
++
++declare_args() {
++  # Control whether only WebKit is build. This is used by bots building
++  # WebKit for mac but incorrectly setting `target_os="ios"`.
++  is_webkit_only_build = false
++
++  # Control whether iOS builds with DanglingRawPtrChecks when available.
++  # Temporarily disable for rollout -- see crbug.com/424376811 for details.
++  ios_enable_dangling_raw_ptr_checks = true
++
++  # Control whether //ios/chrome and //ios/web targets are build. This
++  # is used by bots from projects based on top of Chromium that want to
++  # only reuse shared code (//ios/net, //remoting/ios, ...).
++  # This is false by default on iOS-based platforms like tvOS.
++  ios_build_chrome = target_platform == "iphoneos"
++
++  # Controls whether universal links are blocked from opening native apps
++  # when the user is browsing in off the record mode.
++  block_universal_links_in_off_the_record_mode = true
++
++  # Controls whether BEContextMenuConfiguration is used.
++  use_be_deferred_context_menu = true
++}
+diff --git a/ios/web/public/js_messaging/optimize_js.gni b/ios/web/public/js_messaging/optimize_js.gni
+new file mode 100644
+--- /dev/null
++++ b/ios/web/public/js_messaging/optimize_js.gni
+@@ -0,0 +1,123 @@
++# Copyright 2022 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//third_party/node/node.gni")
++
++declare_args() {
++  # A global setting to disable script optimization and minification. This
++  # is intended to be used to make debugging the injected JavaScript easier.
++  minify_scripts = true
++}
++
++# Defines a target that bundles one or more JavaScript input files, optionally
++# minimizes it, then copies it to the application resources directory.
++#
++# Variables
++#   primary_script:
++#     The primary JavaScript file.
++#
++#   sources:
++#     The full list of source scripts including `primary_script` and others
++#     referenced from within `primary_script`. Listing all these files here
++#     ensures this target is rebuilt if any of the files are changed.
++#
++#   output_name (optional):
++#     The name of the exported value or namespace. For more details, see
++#     https://rollupjs.org/guide/en/#outputname
++#
++#   output_dir (optional):
++#     The path within the bundle resources directory to place the output file.
++#     If unset, the file is placed directly in the bundle resources directory.
++#
++#   deps (optional):
++#     The dependent targets which produce typescript compiler manifest files.
++#     These manifest files will be used to resolve script imports.
++
++template("optimize_js") {
++  assert(defined(invoker.sources), "sources must be set")
++  assert(defined(invoker.primary_script), "primary_script must be set")
++
++  _primary_script_found_in_sources = false
++  foreach(_source, invoker.sources) {
++    assert(get_path_info(_source, "extension") == "js",
++           "all sources must be .js files")
++    if (_source == invoker.primary_script) {
++      _primary_script_found_in_sources = true
++    }
++  }
++  assert(_primary_script_found_in_sources,
++         "primary_script must be listed in sources")
++
++  optimize_target_name = target_name + "_optimize"
++  _target_name = target_name
++
++  node(optimize_target_name) {
++    visibility = [ ":$_target_name" ]
++
++    forward_variables_from(invoker,
++                           [
++                             "deps",
++                             "sources",
++                             "testonly",
++                           ])
++
++    script = "//ios/web/public/js_messaging/optimize_js.py"
++
++    inputs =
++        [ "//ios/web/public/js_messaging/rollup_plugin_src_path_resolver.mjs" ]
++
++    output_js_file_name = get_path_info(invoker.primary_script, "file")
++    output_js_file = "$target_gen_dir/" + output_js_file_name
++
++    outputs = [ output_js_file ]
++
++    args = [
++      "--primary-script",
++      rebase_path(invoker.primary_script, root_build_dir),
++      "--js-out-file",
++      rebase_path(output_js_file, root_build_dir),
++    ]
++
++    if (!minify_scripts) {
++      args += [ "--skip-minification" ]
++    }
++
++    if (defined(invoker.output_name)) {
++      args += [
++        "--output-name",
++        invoker.output_name,
++      ]
++    }
++
++    if (defined(invoker.deps)) {
++      args += [ "--dep-tsconfigs" ]
++      foreach(_dep, invoker.deps) {
++        _dep_gen_dir =
++            rebase_path(get_label_info(_dep, "target_gen_dir"), root_build_dir)
++        name = get_label_info(_dep, "name")
++        args += [ "$_dep_gen_dir/tsconfig_${name}.json" ]
++      }
++    }
++  }
++
++  # copy the output file to the bundle data
++  bundle_data(target_name) {
++    forward_variables_from(invoker,
++                           [
++                             "testonly",
++                             "visibility",
++                           ])
++
++    public_deps = [ ":$optimize_target_name" ]
++
++    sources = get_target_outputs(":$optimize_target_name")
++    if (defined(invoker.output_dir)) {
++      outputs = [
++        "{{bundle_resources_dir}}/${invoker.output_dir}/{{source_file_part}}",
++      ]
++    } else {
++      outputs = [ "{{bundle_resources_dir}}/{{source_file_part}}" ]
++    }
++  }
++}
+diff --git a/ios/web/public/js_messaging/optimize_ts.gni b/ios/web/public/js_messaging/optimize_ts.gni
+new file mode 100644
+--- /dev/null
++++ b/ios/web/public/js_messaging/optimize_ts.gni
+@@ -0,0 +1,70 @@
++# Copyright 2022 The Chromium Authors
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++import("//ios/web/public/js_messaging/compile_ts.gni")
++import("//ios/web/public/js_messaging/optimize_js.gni")
++
++# Defines a target that compiles a single TypeScript or JavaScript file,
++# and copies it to the application resources directory.
++# This template is shorthand for passing a compiled script from
++# //ios/web/public/js_messaging/compile_ts.gni to
++# //ios/web/public/js_messaging/optimize_js.gni
++#
++# Variables
++#   sources:
++#     A single TypeScript (or JavaScript) file to compile and bundle into the
++#     application.
++#
++#   output_name:
++#     The name of the exported value or namespace. For more details, see
++#     https://rollupjs.org/guide/en/#outputname
++#
++#   output_dir (optional):
++#     The path within the bundle resources directory to place the output file.
++#     If unset, the file is placed directly in the bundle resources directory.
++#
++template("optimize_ts") {
++  assert(defined(invoker.sources), "sources must be set")
++  _sources_count = 0
++  foreach(_, invoker.sources) {
++    _sources_count += 1
++  }
++  assert(_sources_count == 1,
++         "only a single source may be provided to optimize_ts")
++
++  _compile_ts_target_name = target_name + "_compile_ts"
++
++  compile_ts(_compile_ts_target_name) {
++    forward_variables_from(invoker,
++                           [
++                             "deps",
++                             "sources",
++                             "testonly",
++                           ])
++  }
++
++  optimize_js(target_name) {
++    forward_variables_from(invoker,
++                           [
++                             "output_dir",
++                             "testonly",
++                             "visibility",
++                           ])
++
++    deps = [ ":$_compile_ts_target_name" ]
++    if (defined(invoker.deps)) {
++      deps += invoker.deps
++    }
++
++    _invoker_sources = invoker.sources
++    _script_name = get_path_info(_invoker_sources[0], "name") + ".js"
++    _script = filter_include(get_target_outputs(":$_compile_ts_target_name"),
++                             [ "*/$_script_name" ])
++    primary_script = _script[0]
++    if (defined(invoker.output_name)) {
++      output_name = invoker.output_name
++    }
++    sources = _script
++  }
++}

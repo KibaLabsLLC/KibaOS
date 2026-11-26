@@ -37,7 +37,7 @@ CPU_NAMES = ("arm", "arm64", "x86", "x64", "mips", "mips64", "ppc", "s390",
              "loong64", "riscv64")
 
 DESKTOP_SKIP_DEP_PATHS = ("src/third_party/chromite",)
-DESKTOP_SKIP_HOOKS = ("tast_control", "tast_control_cq_tests", "ensure_node_modules")
+DESKTOP_SKIP_HOOKS = ("tast_control_cq_tests", "ensure_node_modules")
 
 # A variable value that is a condition expression rather than a literal
 # string (gclient's idiom, e.g. '"{cros_boards}" != ""').

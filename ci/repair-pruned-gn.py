@@ -393,6 +393,83 @@ def next_nonblank(lines, i):
 
 
 # ---------------------------------------------------------------------------
+# Import closure
+# ---------------------------------------------------------------------------
+
+IMPORT_RE = re.compile(r'\bimport\(\s*"([^"]+)"\s*\)')
+
+
+def resolve_import_path(import_path, cur_rel):
+    """Map an import() argument to a tree-relative path."""
+    if import_path.startswith("//"):
+        return import_path[2:]
+    d = os.path.dirname(cur_rel)
+    return os.path.normpath(os.path.join(d, import_path)) if d else import_path
+
+
+def missing_imports(root):
+    """Return {missing relpath: [importer relpaths]} for every import() argument
+    that does not exist locally. Import paths containing GN variables cannot
+    be resolved statically and are skipped."""
+    present = set()
+    for dirpath, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in (".git", "out")]
+        for f in files:
+            if f.endswith(".gn") or f.endswith(".gni"):
+                present.add(os.path.relpath(os.path.join(dirpath, f), root))
+    missing = {}
+    for rel in sorted(present):
+        try:
+            with open(os.path.join(root, rel), encoding="utf-8",
+                      errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        for ip in IMPORT_RE.findall(text):
+            if "$" in ip:
+                continue
+            t = resolve_import_path(ip, rel)
+            if t not in present:
+                missing.setdefault(t, []).append(rel)
+    return missing
+
+
+def verify_imports(lumen, chromium, ref):
+    """Restore pruned importable GN files from upstream at ref.
+
+    Files that upstream does not carry (DEPS-managed trees supplied by
+    ci/resolve-deps.py at bootstrap, hook-generated files, dynamically built
+    import paths) are reported, not guessed at; only file content that exists
+    in the upstream tree is restored, and only when it parses. Returns 0:
+    the report is the deliverable, the authoritative validation is GN itself
+    at build time."""
+    missing = missing_imports(lumen)
+    restores, deferred = [], {}
+    for rel in sorted(missing):
+        up = upstream_show(chromium, ref, rel) if chromium and ref else None
+        if up is not None and parses(up)[0]:
+            dst = os.path.join(lumen, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "w", encoding="utf-8", newline="") as fh:
+                fh.write(up)
+            restores.append(rel)
+        else:
+            deferred[rel] = missing[rel]
+    for rel, who in sorted(missing_imports(lumen).items()):
+        if rel not in missing:
+            deferred.setdefault(rel, who)
+    for rel in sorted(restores):
+        print("restored import %s from upstream %s" % (rel, ref))
+    for rel in sorted(deferred):
+        print("deferred import %s (imported by %s): DEPS-managed, "
+              "hook-generated, or dynamic" %
+              (rel, ", ".join(deferred[rel][:4])))
+    print("summary: %d missing imports, %d restored, %d deferred" %
+          (len(missing), len(restores), len(deferred)))
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # gnrt-generated rust crate repair
 # ---------------------------------------------------------------------------
 # gnrt-generated rust crate repair
@@ -851,8 +928,17 @@ def main():
     ap.add_argument("--check", action="store_true",
                     help="only scan and report broken files")
     ap.add_argument("--overlay", help="validation overlay for --check")
+    ap.add_argument("--verify-imports", action="store_true",
+                    help="restore import() targets deleted by the pruner "
+                         "(needs --chromium and --ref; DEPS-managed paths "
+                         "are reported instead of restored)")
     args = ap.parse_args()
 
+    if args.verify_imports:
+        for req in ("chromium", "ref"):
+            if not getattr(args, req):
+                ap.error("--%s is required with --verify-imports" % req)
+        sys.exit(verify_imports(args.lumen, args.chromium, args.ref))
     if args.check:
         sys.exit(check_only(args.lumen, args.overlay))
     for req in ("chromium", "ref", "out"):

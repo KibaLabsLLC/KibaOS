@@ -88,3 +88,5 @@
 0167-cros-system-api-protos-are-restored.patch
 
 0168-blink-core-generated-deps-are-defined-again.patch
+
+0169-every-import-resolves-again.patch
