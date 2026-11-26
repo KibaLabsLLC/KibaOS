@@ -109,7 +109,7 @@ arch-chroot "${ARCHROOT}" /usr/bin/runuser -u aurabuild -- \
     cd /build/chromium-src
     if [[ "${KIBAOS_SKIP_GN_GEN}" != 1 ]]; then
       gn gen /build/chromium-clean-out/Ash --root=/build/chromium-src --args="
-        target_os = \"linux\"
+        target_os = \"chromeos\"
         target_cpu = \"x64\"
         is_debug = false
         is_component_build = false

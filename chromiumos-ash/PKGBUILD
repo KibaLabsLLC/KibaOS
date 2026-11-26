@@ -267,7 +267,12 @@ build() {
     gn gen "${out_dir}" \
         --root-target="//lumen" \
         --args="
-        target_os = \"linux\"
+        # Ash only builds under is_chromeos, which this tree derives from
+        # current_os in build/config/BUILDCONFIG.gn: it cannot be set as a
+        # gn arg. target_os=chromeos with is_chromeos_device=false is the
+        # upstream linux-chromeos flavor: it compiles with the linux
+        # toolchain on this host and runs as a desktop browser.
+        target_os = \"chromeos\"
         target_cpu = \"x64\"
         is_debug = false
         is_component_build = false

@@ -29,7 +29,7 @@ cd "$CHROME_SRC"
 
 case "$MODE" in
   gn)
-    "$GN" gen "$OUT_DIR" --args='target_os = "linux"
+    "$GN" gen "$OUT_DIR" --args='target_os = "chromeos"
 is_debug = false
 is_component_build = false
 is_official_build = false
