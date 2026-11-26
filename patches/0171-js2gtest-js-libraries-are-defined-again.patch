@@ -1,0 +1,66 @@
+diff --git a/chrome/test/base/ash/js2gtest.gni b/chrome/test/base/ash/js2gtest.gni
+index 0ec3bdc..2a5b8bc 100644
+--- a/chrome/test/base/ash/js2gtest.gni
++++ b/chrome/test/base/ash/js2gtest.gni
+@@ -2,15 +2,53 @@
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+ 
+-# KibaOS: the chrome directory is gone from this tree. Its test-only js2gtest
+-# template was chromeos test infrastructure, which this build does not carry,
+-# and the v8 toolchain .gni files it imports were pruned with the browser.
+-# The importers below assert is_chromeos first, so this template is never
+-# instantiated on the linux host build; it only has to exist and parse.
++# KibaOS: the chrome directory is gone from this tree. Its js2gtest template
++# is chromeos test infrastructure that this build does not carry, so the
++# template expands to a stub group instead of the upstream v8-driven actions,
++# and the v8 toolchain .gni files it imports upstream stay out. The library
++# lists below carry the exact upstream values, because the importers
++# reference them at file scope:
+ #
+-#   ash/webui/system_apps/public/js/BUILD.gn
+-#   ash/webui/web_applications/test/BUILD.gn
+-#   ui/accessibility/extensions/BUILD.gn
++#   ash/webui/system_apps/public/js/BUILD.gn  (template, js2gtest_js_libraries)
++#   ash/webui/web_applications/test/BUILD.gn  (js2gtest_js_libraries)
++#   ui/accessibility/extensions/BUILD.gn      (template, js2gtest_js_libraries)
++#
++# Libraries required to generate the custom test library built with js2gtest.
++# Changing the size or the order of files in this array also requires changing
++# src/chrome/test/base/ash/v8sh.py.
++js2gtest_js_input_libraries = [
++  "//chrome/test/data/webui/chromeos/test_api.js",
++  "//chrome/test/base/ash/js2gtest.js",
++]
++
++# Additional libraries loaded at test runtime.
++js2gtest_runtime_js_libraries =
++    [ "//chrome/test/data/webui/chromeos/chai_v4.js" ]
++
++js2gtest_js_libraries =
++    js2gtest_js_input_libraries + js2gtest_runtime_js_libraries
++
++# Variables:
++#   test_type: One of 'webui', 'unit' or 'extension' indicating what
++#       environment the test runs under.
++#   sources: List of javascript test source files.
++#   deps_js: Javascript file with closure library dependencies.  Only needed
++#       if the test fixtures use closureModuleDeps.
++#   gen_include_files: List of javascript files used in GEN_INCLUDE calls
++#       in the tests and therefore considered input to the C++ generation step.
++#   extra_js_files: List of javascript files needed by the test at runtime,
++#       typically listed in the extraLibraries member of the test fixture.
++#   data
++#   defines
++#   deps
++#   visibility
+ template("js2gtest") {
++  assert(defined(invoker.test_type) &&
++         (invoker.test_type == "webui" || invoker.test_type == "unit" ||
++          invoker.test_type == "extension" ||
++          invoker.test_type == "mojo_lite_webui" ||
++          invoker.test_type == "mojo_webui"))
+   not_needed(invoker, "*")
++  group(target_name) {
++  }
+ }
