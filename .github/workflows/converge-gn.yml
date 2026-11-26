@@ -65,6 +65,17 @@ jobs:
             --ref "$CHROMIUM_REF" \
             --out repaired
 
+      - name: Bootstrap depot_tools
+        run: |
+          if [ ! -d depot_tools/.git ]; then
+            git clone --depth 1 \
+              https://chromium.googlesource.com/chromium/tools/depot_tools.git \
+              depot_tools
+          fi
+          export DEPOT_TOOLS_UPDATE=0
+          echo "$PWD/depot_tools" >> "$GITHUB_PATH"
+          "$PWD/depot_tools/cipd" --version
+
       - name: Sync DEPS
         run: |
           ln -sfn lumen src
