@@ -1,0 +1,15 @@
+diff --git a/third_party/blink/renderer/build/scripts/scripts.gni b/third_party/blink/renderer/build/scripts/scripts.gni
+--- a/third_party/blink/renderer/build/scripts/scripts.gni
++++ b/third_party/blink/renderer/build/scripts/scripts.gni
+@@ -116,6 +116,11 @@ if (host_os == "win") {
+ 
+ _blink_gen_dir = "$root_gen_dir/third_party/blink/renderer"
+ 
++make_core_generated_deps = [
++  "//third_party/blink/renderer/core:core_event_interfaces",
++  "//third_party/blink/renderer/core:generated_testing_idls",
++]
++
+ # A wrapper for python scripts. This adds the following paths to PYTHONPATH,
+ # then run invoker.script.
+ #  - //third_party/blink/renderer/build/scripts
