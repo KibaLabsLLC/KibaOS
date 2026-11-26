@@ -1,0 +1,17 @@
+diff --git a/lumen/BUILD.gn b/lumen/BUILD.gn
+index 49c8d5f6e2..600a337497 100644
+--- a/lumen/BUILD.gn
++++ b/lumen/BUILD.gn
+@@ -4,6 +4,12 @@ executable("chrome") {
+     "lumen_shell_delegate.cc",
+     "lumen_shell_delegate.h",
+   ]
++  # KibaOS: the sandboxed renderer needs the setuid launcher at runtime, and
++  # packaging walks //lumen:chrome's runtime_deps, so carry chrome_sandbox as
++  # a data_dep rather than build it as a separate top level target.
++  data_deps = [
++    "//sandbox/linux:chrome_sandbox",
++  ]
+   deps = [
+     "//ash",
+     "//ash/public/cpp",
