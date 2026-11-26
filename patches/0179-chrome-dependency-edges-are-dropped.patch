@@ -1,0 +1,281 @@
+diff --git a/ash/webui/eche_app_ui/BUILD.gn b/ash/webui/eche_app_ui/BUILD.gn
+index 90a78fdf1d0..484b8e37255 100644
+--- a/ash/webui/eche_app_ui/BUILD.gn
++++ b/ash/webui/eche_app_ui/BUILD.gn
+@@ -296,7 +296,6 @@
+ 
+ ts_library("test_build_ts") {
+   testonly = true
+-  tsconfig_base = "//chrome/test/data/webui/tsconfig_base.json"
+   root_dir = "test"
+   out_dir = "$target_gen_dir/test"
+   in_files = [ "eche_app_ui_browsertest.ts" ]
+@@ -305,7 +304,6 @@
+                     rebase_path("$root_gen_dir/chrome/test/data/webui/tsc/*",
+                                 target_gen_dir) ]
+ 
+-  deps = [ "//chrome/test/data/webui:build_ts" ]
+ }
+ 
+ source_set("browser_tests") {
+diff --git a/ash/webui/sample_system_web_app_ui/BUILD.gn b/ash/webui/sample_system_web_app_ui/BUILD.gn
+index e45c2119b72..7c904ca091f 100644
+--- a/ash/webui/sample_system_web_app_ui/BUILD.gn
++++ b/ash/webui/sample_system_web_app_ui/BUILD.gn
+@@ -33,7 +33,6 @@
+ 
+ ts_library("test_build_ts") {
+   testonly = true
+-  tsconfig_base = "//chrome/test/data/webui/tsconfig_base.json"
+   root_dir = "test"
+   out_dir = "$target_gen_dir/test"
+   in_files = [ "sample_system_web_app_ui_browsertest.ts" ]
+diff --git a/ash/webui/web_applications/test/BUILD.gn b/ash/webui/web_applications/test/BUILD.gn
+index a20c5bfd5ee..7cf49eb83e0 100644
+--- a/ash/webui/web_applications/test/BUILD.gn
++++ b/ash/webui/web_applications/test/BUILD.gn
+@@ -16,7 +16,6 @@
+   ]
+ 
+   data = js2gtest_js_libraries
+-  public_deps = [ "//chrome/test/base:cros_web_ui_browser_test" ]
+   deps = [
+     "//ash/webui/common:trusted_types_test_util",
+     "//ash/webui/web_applications",
+diff --git a/build/fuchsia/cipd/BUILD.gn b/build/fuchsia/cipd/BUILD.gn
+index 7b0cdd06a3b..24ac3fafe93 100644
+--- a/build/fuchsia/cipd/BUILD.gn
++++ b/build/fuchsia/cipd/BUILD.gn
+@@ -270,7 +270,6 @@
+ 
+   prog_name = "${root_out_dir}/clang_x64/chromedriver"
+ 
+-  deps = [ "//chrome/test/chromedriver:chromedriver_server($host_toolchain)" ]
+   script = "//build/gn_run_binary.py"
+   sources = [
+     "${clang_base_path}/bin/llvm-strip",
+diff --git a/chromeos/BUILD.gn b/chromeos/BUILD.gn
+index 2dc2b52f693..a41fe803cc0 100644
+--- a/chromeos/BUILD.gn
++++ b/chromeos/BUILD.gn
+@@ -194,7 +194,6 @@
+     # Most of these are copy targets, for which GN doesn't add their outputs
+     # as runtime-deps. See the link below for more details:
+     # https://chromium.googlesource.com/chromium/src/+/main/tools/gn/docs/reference.md#actions-and-copies
+-    data_deps = [ "//chrome:linux_cros_extra_data" ]
+ 
+     # TODO(bpastene): Figure out what's generating resources/chromeos/ and
+     # declare it as a dep instead of adding the dir directly.
+diff --git a/components/policy/core/common/BUILD.gn b/components/policy/core/common/BUILD.gn
+index f01a3bd1aea..74b38a12c08 100644
+--- a/components/policy/core/common/BUILD.gn
++++ b/components/policy/core/common/BUILD.gn
+@@ -677,7 +677,6 @@
+   }
+   if (is_win || is_linux || is_chromeos) {
+     # Needed by policy_loader_win_unittest.cc
+-    data = [ "//chrome/test/data/policy/" ]
+   }
+   if (is_win) {
+     sources += [
+diff --git a/components/webapk/android/libs/client/BUILD.gn b/components/webapk/android/libs/client/BUILD.gn
+index 4a0e7d6b626..364f4303b4e 100644
+--- a/components/webapk/android/libs/client/BUILD.gn
++++ b/components/webapk/android/libs/client/BUILD.gn
+@@ -25,7 +25,6 @@
+     "src/org/chromium/components/webapk/lib/client/WebApkValidatorTest.java",
+     "src/org/chromium/components/webapk/lib/client/WebApkVerifySignatureTest.java",
+   ]
+-  data = [ "//chrome/test/data/webapks/" ]
+   deps = [
+     ":java",
+     "//base:base_java",
+diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
+index ae33abed264..8e4cd733aee 100644
+--- a/content/test/BUILD.gn
++++ b/content/test/BUILD.gn
+@@ -896,7 +896,6 @@
+       ]
+     } else {
+       data += [ "$root_gen_dir/package_metadata/chrome.meta" ]
+-      data_deps = [ "//chrome/app:chrome_fuchsia" ]
+     }
+   }
+ }
+diff --git a/remoting/host/chromeos/BUILD.gn b/remoting/host/chromeos/BUILD.gn
+index 6960cbd427f..70f161d2279 100644
+--- a/remoting/host/chromeos/BUILD.gn
++++ b/remoting/host/chromeos/BUILD.gn
+@@ -159,7 +159,6 @@
+     ":features",
+     ":remoting_service",
+     "//base/test:test_support",
+-    "//chrome/browser",  # Required for browser_interop
+     "//components/policy/core/common:test_support",
+     "//components/viz/service",
+     "//content/public/browser",
+@@ -193,7 +192,6 @@
+     ":browser_interop",
+     "//base",
+     "//base/test:test_support",
+-    "//chrome/browser",  # Required for browser_interop
+     "//content/public/browser",
+     "//content/test:test_support",
+     "//mojo/public/cpp/bindings",
+diff --git a/remoting/host/file_transfer/BUILD.gn b/remoting/host/file_transfer/BUILD.gn
+index c26c2653966..95b75f0f1af 100644
+--- a/remoting/host/file_transfer/BUILD.gn
++++ b/remoting/host/file_transfer/BUILD.gn
+@@ -104,7 +104,6 @@
+       "directory_helpers.cc",
+       "ensure_user_no_op.cc",
+     ]
+-    deps += [ "//chrome/common:constants" ]
+   } else {
+     sources += [
+       "directory_helpers.cc",
+diff --git a/remoting/host/installer/win/mini_installer/BUILD.gn b/remoting/host/installer/win/mini_installer/BUILD.gn
+index 9f8bfb8e07b..70c68897d01 100644
+--- a/remoting/host/installer/win/mini_installer/BUILD.gn
++++ b/remoting/host/installer/win/mini_installer/BUILD.gn
+@@ -16,7 +16,6 @@
+ 
+   public_deps = [ "//base" ]
+ 
+-  deps = [ "//chrome/installer/util:metainstaller_utils" ]
+ }
+ 
+ source_set("unit_tests") {
+diff --git a/third_party/blink/public/mojom/BUILD.gn b/third_party/blink/public/mojom/BUILD.gn
+index 76cab22f958..44ddbbb189e 100644
+--- a/third_party/blink/public/mojom/BUILD.gn
++++ b/third_party/blink/public/mojom/BUILD.gn
+@@ -907,10 +907,6 @@
+             cpp = "::printing::PrinterStatus::PrinterReason::Reason"
+           },
+         ]
+-        traits_headers =
+-            [ "//chrome/browser/printing/web_api/web_printing_mojom_traits.h" ]
+-        traits_sources =
+-            [ "//chrome/browser/printing/web_api/web_printing_mojom_traits.cc" ]
+         traits_public_deps = [ "//printing:settings" ]
+         traits_deps = [
+           "//printing/backend",
+diff --git a/third_party/closure_compiler/closure_args.gni b/third_party/closure_compiler/closure_args.gni
+index cefbd0d3ac3..c1afd9e33be 100644
+--- a/third_party/closure_compiler/closure_args.gni
++++ b/third_party/closure_compiler/closure_args.gni
+@@ -55,8 +55,6 @@
+     "js_module_root=gen/ash/webui/common/resources/",
+     "browser_resolver_prefix_replacements=\"chrome://resources/ash/common/=./\"",
+     "browser_resolver_prefix_replacements=\"//resources/ash/common/=./\"",
+-    "js_module_root=" +
+-        rebase_path("//chrome/test/data/webui/", root_build_dir),
+     "browser_resolver_prefix_replacements=\"chrome://webui-test/=./\"",
+   ]
+ }
+diff --git a/third_party/unrar/BUILD.gn b/third_party/unrar/BUILD.gn
+index 5990f50dd9f..10aa372c485 100644
+--- a/third_party/unrar/BUILD.gn
++++ b/third_party/unrar/BUILD.gn
+@@ -121,5 +121,4 @@
+     ":unrar",
+     "//base",
+   ]
+-  seed_corpus = "//chrome/test/data/safe_browsing/rar"
+ }
+diff --git a/tools/cygprofile/BUILD.gn b/tools/cygprofile/BUILD.gn
+index b479ae7c06d..b2c39f0cd7c 100644
+--- a/tools/cygprofile/BUILD.gn
++++ b/tools/cygprofile/BUILD.gn
+@@ -62,8 +62,6 @@
+   arch = "arm"
+   profile_webview = true
+   if (enable_chrome_android_internal) {
+-    data_deps =
+-        [ "//chrome/test:telemetry_perf_tests_android_clank_webview_bundle" ]
+   }
+ }
+ 
+diff --git a/tools/perf/BUILD.gn b/tools/perf/BUILD.gn
+index 1db838d9436..3d9992f6876 100644
+--- a/tools/perf/BUILD.gn
++++ b/tools/perf/BUILD.gn
+@@ -22,7 +22,6 @@
+       "//tools/perf/chrome_telemetry_build:telemetry_chrome_test",
+     ]
+     if (is_linux || is_mac || is_win) {
+-      data_deps += [ "//chrome/test/chromedriver:chromedriver_server" ]
+     }
+   }
+ } else {
+diff --git a/tools/perf/contrib/vr_benchmarks/BUILD.gn b/tools/perf/contrib/vr_benchmarks/BUILD.gn
+index 5e8543748c4..e8cf6aac2e8 100644
+--- a/tools/perf/contrib/vr_benchmarks/BUILD.gn
++++ b/tools/perf/contrib/vr_benchmarks/BUILD.gn
+@@ -24,7 +24,6 @@
+   data_deps = [ "//testing:run_perf_test" ]
+ 
+   if (is_android) {
+-    data_deps += [ "//chrome/android:chrome_public_bundle" ]
+   }
+ 
+   if (is_win) {
+diff --git a/tools/perf/chrome_telemetry_build/BUILD.gn b/tools/perf/chrome_telemetry_build/BUILD.gn
+index a1e0198e06b..8a9d564a476 100644
+--- a/tools/perf/chrome_telemetry_build/BUILD.gn
++++ b/tools/perf/chrome_telemetry_build/BUILD.gn
+@@ -49,11 +49,9 @@
+   }
+ 
+   if (!is_fuchsia && !is_android && !is_castos && !is_ios) {
+-    data_deps += [ "//chrome" ]
+   }
+ 
+   if (is_win) {
+-    data_deps += [ "//chrome:reorder_imports" ]
+   }
+ 
+   if (is_linux || is_chromeos) {
+diff --git a/tools/pgo/BUILD.gn b/tools/pgo/BUILD.gn
+index b2d0b1e1b5a..00b508e142c 100644
+--- a/tools/pgo/BUILD.gn
++++ b/tools/pgo/BUILD.gn
+@@ -66,7 +66,6 @@
+         "//third_party/jdk:java_data",
+       ]
+     } else {
+-      data_deps += [ "//chrome/test:telemetry_perf_tests" ]
+     }
+ 
+     # This avoids generate_profile.py attempting to download it on demand.
+@@ -101,10 +100,7 @@
+ 
+       data_deps = []
+       if (enable_chrome_android_internal) {
+-        data_deps += [ "//chrome/test:telemetry_perf_tests_android_clank_webview_64_32_bundle" ]
+       } else {
+-        data_deps +=
+-            [ "//chrome/test:telemetry_perf_tests_android_webview_bundle" ]
+       }
+ 
+       # This avoids generate_profile_webview.py attempting to download it on
+diff --git a/ui/webui/resources/tools/build_webui.gni b/ui/webui/resources/tools/build_webui.gni
+index 70385092b8b..64de41e2216 100644
+--- a/ui/webui/resources/tools/build_webui.gni
++++ b/ui/webui/resources/tools/build_webui.gni
+@@ -34,14 +34,9 @@
+   ash_folders = [
+     # Source code folders
+     "//ash/webui",
+-    "//chrome/browser/resources/ash",
+-    "//chrome/browser/resources/chromeos",
+-    "//chrome/browser/resources/dlp_internals",
+     "//ui/file_manager",
+ 
+     # Test folders
+-    "//chrome/test/data/webui/chromeos",
+-    "//chrome/test/data/webui/cr_components/chromeos",
+   ]
+ }
+ 
