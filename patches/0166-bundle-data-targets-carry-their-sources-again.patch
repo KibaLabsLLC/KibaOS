@@ -1,0 +1,377 @@
+diff --git a/components/autofill/core/browser/BUILD.gn b/components/autofill/core/browser/BUILD.gn
+--- a/components/autofill/core/browser/BUILD.gn
++++ b/components/autofill/core/browser/BUILD.gn
+@@ -2034,6 +2034,37 @@
+ 
+ bundle_data("unit_tests_bundle_data") {
+   sources = [
++    "//components/test/data/autofill/merge/input/addressLinesLessInfo.in",
++    "//components/test/data/autofill/merge/input/addressLinesMoreInfo.in",
++    "//components/test/data/autofill/merge/input/ambiguous.in",
++    "//components/test/data/autofill/merge/input/case.in",
++    "//components/test/data/autofill/merge/input/email.in",
++    "//components/test/data/autofill/merge/input/identical.in",
++    "//components/test/data/autofill/merge/input/moreInfo.in",
++    "//components/test/data/autofill/merge/input/names.in",
++    "//components/test/data/autofill/merge/input/primarycase.in",
++    "//components/test/data/autofill/merge/input/punctuation.in",
++    "//components/test/data/autofill/merge/input/singlemerge.in",
++    "//components/test/data/autofill/merge/input/streetaddress.in",
++    "//components/test/data/autofill/merge/input/validation.in",
++    "//components/test/data/autofill/merge/output/addressLinesLessInfo.out",
++    "//components/test/data/autofill/merge/output/addressLinesMoreInfo.out",
++    "//components/test/data/autofill/merge/output/ambiguous.out",
++    "//components/test/data/autofill/merge/output/case.out",
++    "//components/test/data/autofill/merge/output/email.out",
++    "//components/test/data/autofill/merge/output/identical.out",
++    "//components/test/data/autofill/merge/output/moreInfo.out",
++    "//components/test/data/autofill/merge/output/names.out",
++    "//components/test/data/autofill/merge/output/primarycase.out",
++    "//components/test/data/autofill/merge/output/punctuation.out",
++    "//components/test/data/autofill/merge/output/singlemerge.out",
++    "//components/test/data/autofill/merge/output/streetaddress.out",
++    "//components/test/data/autofill/merge/output/validation.out",
++    "//components/test/data/autofill/ml_model/autofill_model-fold-one.tflite",
++    "//components/test/data/autofill/ml_model/autofill_model_metadata.binarypb",
++    "//components/test/data/autofill/ml_model/model_with_form_features_metadata.binarypb",
++    "//components/test/data/autofill/ml_model/model_with_repeated_predicted_types.binarypb",
++    "//components/test/data/autofill/ml_model/model_with_repeated_predicted_types.tflite",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/bookmarks/browser/BUILD.gn b/components/bookmarks/browser/BUILD.gn
+--- a/components/bookmarks/browser/BUILD.gn
++++ b/components/bookmarks/browser/BUILD.gn
+@@ -133,6 +133,14 @@
+ bundle_data("unit_tests_bundle_data") {
+   testonly = true
+   sources = [
++    "//components/test/data/bookmarks/meta_info_as_string.json",
++    "//components/test/data/bookmarks/model_invalid_json.json",
++    "//components/test/data/bookmarks/model_nested_user_folders.json",
++    "//components/test/data/bookmarks/model_with_duplicate_ids.json",
++    "//components/test/data/bookmarks/model_with_sync_metadata_1.json",
++    "//components/test/data/bookmarks/model_with_sync_metadata_2.json",
++    "//components/test/data/bookmarks/model_without_mobile_bookmarks.json",
++    "//components/test/data/bookmarks/model_without_version.json",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/crx_file/BUILD.gn b/components/crx_file/BUILD.gn
+--- a/components/crx_file/BUILD.gn
++++ b/components/crx_file/BUILD.gn
+@@ -40,6 +40,12 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/crx_file/sample.zip",
++    "//components/test/data/crx_file/unsigned.crx3",
++    "//components/test/data/crx_file/valid.crx2",
++    "//components/test/data/crx_file/valid_no_publisher.crx3",
++    "//components/test/data/crx_file/valid_publisher.crx3",
++    "//components/test/data/crx_file/valid_test_publisher.crx3",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/image_fetcher/ios/BUILD.gn b/components/image_fetcher/ios/BUILD.gn
+--- a/components/image_fetcher/ios/BUILD.gn
++++ b/components/image_fetcher/ios/BUILD.gn
+@@ -42,6 +42,12 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/webp_transcode/test.jpg",
++    "//components/test/data/webp_transcode/test.webp",
++    "//components/test/data/webp_transcode/test_alpha.png",
++    "//components/test/data/webp_transcode/test_alpha.webp",
++    "//components/test/data/webp_transcode/test_small.tiff",
++    "//components/test/data/webp_transcode/test_small.webp",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/{{source_root_relative_dir}}/" +
+               "{{source_file_part}}" ]
+diff --git a/components/omnibox/browser/BUILD.gn b/components/omnibox/browser/BUILD.gn
+--- a/components/omnibox/browser/BUILD.gn
++++ b/components/omnibox/browser/BUILD.gn
+@@ -876,6 +876,19 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/omnibox/Shortcuts.no_fill_into_edit.sql",
++    "//components/test/data/omnibox/Shortcuts.v0.sql",
++    "//components/test/data/omnibox/Shortcuts.v1.sql",
++    "//components/test/data/omnibox/adder.tflite",
++    "//components/test/data/omnibox/badword_hashes_test.txt",
++    "//components/test/data/omnibox/denylist_test.txt",
++    "//components/test/data/omnibox/in_memory_url_index_test.sql",
++    "//components/test/data/omnibox/in_memory_url_index_test_limited.sql",
++    "//components/test/data/omnibox/on_device_head_test_deep_model.bin",
++    "//components/test/data/omnibox/on_device_head_test_model_index.bin",
++    "//components/test/data/omnibox/test_tail_model.tflite",
++    "//components/test/data/omnibox/vocab_i18n_test.txt",
++    "//components/test/data/omnibox/vocab_test.txt",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/password_manager/ios/BUILD.gn b/components/password_manager/ios/BUILD.gn
+--- a/components/password_manager/ios/BUILD.gn
++++ b/components/password_manager/ios/BUILD.gn
+@@ -7,6 +7,11 @@
+ bundle_data("auto_submit_test_bundle_data") {
+   testonly = true
+   sources = [
++    "//components/test/data/password_manager/auto_submit_disabled_field_after.html",
++    "//components/test/data/password_manager/auto_submit_disabled_field_between.html",
++    "//components/test/data/password_manager/auto_submit_synthetic_form.html",
++    "//components/test/data/password_manager/auto_submit_test.html",
++    "//components/test/data/password_manager/auto_submit_with_preceding_field.html",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/search_provider_logos/BUILD.gn b/components/search_provider_logos/BUILD.gn
+--- a/components/search_provider_logos/BUILD.gn
++++ b/components/search_provider_logos/BUILD.gn
+@@ -51,6 +51,36 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/search_provider_logos/ddljson_android0.json",
++    "//components/test/data/search_provider_logos/ddljson_android0_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_android1.json",
++    "//components/test/data/search_provider_logos/ddljson_android1_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_android2.json",
++    "//components/test/data/search_provider_logos/ddljson_android2_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_android3.json",
++    "//components/test/data/search_provider_logos/ddljson_android3_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_android4.json",
++    "//components/test/data/search_provider_logos/ddljson_android4_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop0.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop0_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop1.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop1_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop2.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop2_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop3.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop3_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop4.json",
++    "//components/test/data/search_provider_logos/ddljson_desktop4_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_ios0.json",
++    "//components/test/data/search_provider_logos/ddljson_ios0_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_ios1.json",
++    "//components/test/data/search_provider_logos/ddljson_ios1_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_ios2.json",
++    "//components/test/data/search_provider_logos/ddljson_ios2_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_ios3.json",
++    "//components/test/data/search_provider_logos/ddljson_ios3_fp.json",
++    "//components/test/data/search_provider_logos/ddljson_ios4.json",
++    "//components/test/data/search_provider_logos/ddljson_ios4_fp.json",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/services/patch/BUILD.gn b/components/services/patch/BUILD.gn
+--- a/components/services/patch/BUILD.gn
++++ b/components/services/patch/BUILD.gn
+@@ -45,6 +45,9 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/patch_service/new_file",
++    "//components/test/data/patch_service/old_file",
++    "//components/test/data/patch_service/patch_file",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/services/unzip/BUILD.gn b/components/services/unzip/BUILD.gn
+--- a/components/services/unzip/BUILD.gn
++++ b/components/services/unzip/BUILD.gn
+@@ -48,6 +48,39 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/unzip_service/DifferentEncryptions.zip",
++    "//components/test/data/unzip_service/Duplicate Filenames.zip",
++    "//components/test/data/unzip_service/SJIS 00.zip",
++    "//components/test/data/unzip_service/SJIS 01.zip",
++    "//components/test/data/unzip_service/SJIS 02.zip",
++    "//components/test/data/unzip_service/SJIS 03.zip",
++    "//components/test/data/unzip_service/SJIS 04.zip",
++    "//components/test/data/unzip_service/SJIS 05.zip",
++    "//components/test/data/unzip_service/SJIS 06.zip",
++    "//components/test/data/unzip_service/SJIS 07.zip",
++    "//components/test/data/unzip_service/SJIS 08.zip",
++    "//components/test/data/unzip_service/SJIS 09.zip",
++    "//components/test/data/unzip_service/SJIS 10.zip",
++    "//components/test/data/unzip_service/SJIS 11.zip",
++    "//components/test/data/unzip_service/SJIS 12.zip",
++    "//components/test/data/unzip_service/SJIS 13.zip",
++    "//components/test/data/unzip_service/UTF8 (Bug 903664).zip",
++    "//components/test/data/unzip_service/Wrong CRC.zip",
++    "//components/test/data/unzip_service/bad_archive.zip",
++    "//components/test/data/unzip_service/bad_archive_hang.zip",
++    "//components/test/data/unzip_service/bd646",
++    "//components/test/data/unzip_service/bd646.xz",
++    "//components/test/data/unzip_service/bug953599.zip",
++    "//components/test/data/unzip_service/encrypted_archive.zip",
++    "//components/test/data/unzip_service/file1",
++    "//components/test/data/unzip_service/file1.xz",
++    "//components/test/data/unzip_service/good_archive.zip",
++    "//components/test/data/unzip_service/good_archive_prefixed.zip",
++    "//components/test/data/unzip_service/good_zip64.zip",
++    "//components/test/data/unzip_service/good_zip64_prefixed.zip",
++    "//components/test/data/unzip_service/zip64_in_zip.zip",
++    "//components/test/data/unzip_service/zip64_in_zip64.zip",
++    "//components/test/data/unzip_service/zip_with_two_interesting_zip64s.zip",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/sessions/BUILD.gn b/components/sessions/BUILD.gn
+--- a/components/sessions/BUILD.gn
++++ b/components/sessions/BUILD.gn
+@@ -246,6 +246,14 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/sessions/OSCryptKey-k1",
++    "//components/test/data/sessions/Session-v1NoMarker",
++    "//components/test/data/sessions/Session-v2NoMarkerEncrypted",
++    "//components/test/data/sessions/Session-v3With2Appends",
++    "//components/test/data/sessions/Session-v3WithMarker",
++    "//components/test/data/sessions/Session-v4WithMarkerEncrypted",
++    "//components/test/data/sessions/Session-v5",
++    "//components/test/data/sessions/Session-v5With2Appends",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/update_client/BUILD.gn b/components/update_client/BUILD.gn
+--- a/components/update_client/BUILD.gn
++++ b/components/update_client/BUILD.gn
+@@ -264,6 +264,30 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/update_client/binary_input.bin",
++    "//components/test/data/update_client/binary_output.bin",
++    "//components/test/data/update_client/empty_file",
++    "//components/test/data/update_client/file1",
++    "//components/test/data/update_client/file1.xz",
++    "//components/test/data/update_client/gndmhdcefbhlchkhipcnnbkcmicncehk_22_314.crx3",
++    "//components/test/data/update_client/ihfokbkgjpifnbbojhneepfflplebdkc_1.crx",
++    "//components/test/data/update_client/ihfokbkgjpifnbbojhneepfflplebdkc_1to2.crx",
++    "//components/test/data/update_client/ihfokbkgjpifnbbojhneepfflplebdkc_1to2.puff",
++    "//components/test/data/update_client/ihfokbkgjpifnbbojhneepfflplebdkc_2.crx",
++    "//components/test/data/update_client/jebgalgnebhfojomionfpkfelancnnkf.crx",
++    "//components/test/data/update_client/puffin_patch_test/puffin_app_v1.crx3",
++    "//components/test/data/update_client/puffin_patch_test/puffin_app_v1_to_v2.puff",
++    "//components/test/data/update_client/puffin_patch_test/puffin_app_v2.crx3",
++    "//components/test/data/update_client/puffin_patch_test/puffin_app_v2_to_v1.puff",
++    "//components/test/data/update_client/runaction_test_win.crx3",
++    "//components/test/data/update_client/updatecheck_reply_1.json",
++    "//components/test/data/update_client/updatecheck_reply_4.json",
++    "//components/test/data/update_client/updatecheck_reply_noupdate.json",
++    "//components/test/data/update_client/updatecheck_reply_parse_error.json",
++    "//components/test/data/update_client/updatecheck_reply_unknownapp.json",
++    "//components/test/data/update_client/zucchini_patch_test/app1.zip",
++    "//components/test/data/update_client/zucchini_patch_test/app1_to_app2.zucchini",
++    "//components/test/data/update_client/zucchini_patch_test/app2.zip",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/components/web_distiller/core/BUILD.gn b/components/web_distiller/core/BUILD.gn
+--- a/components/web_distiller/core/BUILD.gn
++++ b/components/web_distiller/core/BUILD.gn
+@@ -135,6 +135,8 @@
+   visibility = [ ":unit_tests" ]
+   testonly = true
+   sources = [
++    "//components/test/data/web_distiller/core_features.json",
++    "//components/test/data/web_distiller/derived_features.json",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/net/BUILD.gn b/net/BUILD.gn
+--- a/net/BUILD.gn
++++ b/net/BUILD.gn
+@@ -2957,7 +2957,9 @@
+   bundle_data("registry_controlled_domains_bundle_data") {
+     testonly = true
+     sources = [
+-    ]
++    "//net/base/registry_controlled_domains/effective_tld_names.dat",
++    "//net/base/registry_controlled_domains/effective_tld_names.gperf",
++  ]
+     outputs = [ "{{bundle_resources_dir}}/" +
+                 "{{source_root_relative_dir}}/{{source_file_part}}" ]
+   }
+diff --git a/remoting/host/it2me/BUILD.gn b/remoting/host/it2me/BUILD.gn
+--- a/remoting/host/it2me/BUILD.gn
++++ b/remoting/host/it2me/BUILD.gn
+@@ -261,7 +261,9 @@
+ 
+       bundle_data("remote_assistance_host_icons") {
+         sources = [
+-        ]
++    "//remoting/host/mac/remoting_host.icns",
++    "//remoting/resources/chromoting128.png",
++  ]
+ 
+         outputs = [ "{{bundle_resources_dir}}/{{source_file_part}}" ]
+       }
+diff --git a/services/test/BUILD.gn b/services/test/BUILD.gn
+--- a/services/test/BUILD.gn
++++ b/services/test/BUILD.gn
+@@ -42,6 +42,35 @@
+   visibility = [ ":run_all_unittests" ]
+   testonly = true
+   sources = [
++    "//services/test/data/content-sniffer-test0.html",
++    "//services/test/data/content-sniffer-test0.html.gz",
++    "//services/test/data/content-sniffer-test0.html.gz.mock-http-headers",
++    "//services/test/data/content-sniffer-test0.html.mock-http-headers",
++    "//services/test/data/content-sniffer-test1.html",
++    "//services/test/data/content-sniffer-test1.html.mock-http-headers",
++    "//services/test/data/content-sniffer-test2.html",
++    "//services/test/data/content-sniffer-test2.html.mock-http-headers",
++    "//services/test/data/content-sniffer-test4.html",
++    "//services/test/data/content-sniffer-test4.html.mock-http-headers",
++    "//services/test/data/decoder/google.br",
++    "//services/test/data/decoder/google.gz",
++    "//services/test/data/decoder/google.gz.br",
++    "//services/test/data/decoder/google.txt",
++    "//services/test/data/decoder/google.zst",
++    "//services/test/data/empty.html",
++    "//services/test/data/has_favicon.html",
++    "//services/test/data/hello.html",
++    "//services/test/data/hello.html.gz",
++    "//services/test/data/hello.html.gz.mock-http-headers",
++    "//services/test/data/hello.html.mock-http-headers",
++    "//services/test/data/nocache.html",
++    "//services/test/data/nocache.html.mock-http-headers",
++    "//services/test/data/nosniff-test.html",
++    "//services/test/data/nosniff-test.html.mock-http-headers",
++    "//services/test/data/redirect307-to-echo",
++    "//services/test/data/redirect307-to-echo.mock-http-headers",
++    "//services/test/data/simple_page.html",
++    "//services/test/data/title1.html",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+diff --git a/testing/buildbot/filters/BUILD.gn b/testing/buildbot/filters/BUILD.gn
+--- a/testing/buildbot/filters/BUILD.gn
++++ b/testing/buildbot/filters/BUILD.gn
+@@ -105,6 +105,8 @@
+ bundle_data("components_browsertests_use_blink_filters_bundle_data") {
+   testonly = true
+   sources = [
++    "//testing/buildbot/filters/ios.use_blink.components_browsertests.filter",
++    "//testing/buildbot/filters/tvos.components_browsertests.filter",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
+@@ -121,6 +123,8 @@
+ bundle_data("content_unittests_filters_bundle_data") {
+   testonly = true
+   sources = [
++    "//testing/buildbot/filters/ios.content_unittests.filter",
++    "//testing/buildbot/filters/tvos.content_unittests.filter",
+   ]
+   outputs = [ "{{bundle_resources_dir}}/" +
+               "{{source_root_relative_dir}}/{{source_file_part}}" ]
