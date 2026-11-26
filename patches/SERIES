@@ -94,3 +94,4 @@
 0170-branding-and-version-carry-identity-again.patch
 0171-js2gtest-js-libraries-are-defined-again.patch
 0172-webui-tabstrip-buildflag-is-defined-again.patch
+0173-wayland-protocol-lists-are-restored-again.patch
