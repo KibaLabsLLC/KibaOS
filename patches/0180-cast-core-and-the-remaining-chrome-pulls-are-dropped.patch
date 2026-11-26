@@ -1,0 +1,90 @@
+diff --git a/components/policy/test_support/BUILD.gn b/components/policy/test_support/BUILD.gn
+index ca1698232d..d26b9665ae 100644
+--- a/components/policy/test_support/BUILD.gn
++++ b/components/policy/test_support/BUILD.gn
+@@ -2,8 +2,6 @@
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+ 
+-import("//third_party/cast_core/public/src/proto/proto.gni")
+-
+ static_library("test_support") {
+   testonly = true
+ 
+@@ -105,7 +103,6 @@ static_library("test_support") {
+   ]
+ 
+   if (is_chromeos || (is_linux && !is_cfi && target_cpu != "arm64")) {
+-    public_deps += [ ":remote_commands_service_castcore" ]
+     deps += [ "//components/policy:generated_testonly" ]
+     data_deps = [ "//third_party/protobuf:protoc($host_toolchain)" ]
+     data = [
+@@ -144,24 +141,6 @@ static_library("test_support") {
+ }
+ 
+ if (is_chromeos || (is_linux && !is_cfi && target_cpu != "arm64")) {
+-  cast_core_grpc_library("remote_commands_service") {
+-    testonly = true
+-    sources = [ "remote_commands_service.proto" ]
+-    deps = [
+-      "//components/policy/proto:proto_internal",
+-      "//third_party/private_membership:private_membership_proto",
+-    ]
+-
+-    extra_configs =
+-        [ "//third_party/private_membership:private_membership_config" ]
+-    import_dirs = [
+-      "//components/policy/proto",
+-      "//third_party/private_membership/src",
+-      "//third_party/shell-encryption/src",
+-    ]
+-    generate_castcore_stubs = true
+-  }
+-
+   executable("fake_dmserver") {
+     testonly = true
+     output_name = "fake_dmserver"
+diff --git a/BUILD.gn b/BUILD.gn
+index 5b0d8d7d04..66863076da 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -478,7 +478,6 @@ group("gn_all") {
+       }
+ 
+       if (!is_castos) {
+-        deps += [ "//chrome:linux_cros_extra_data" ]
+       }
+ 
+       if (use_dbus) {
+@@ -490,7 +489,6 @@ group("gn_all") {
+ 
+       if (is_chrome_branded && is_official_build) {
+         # TODO(dpranke): add the linux_dump_symbols flag?
+-        deps += [ "//chrome:linux_symbols" ]
+       }
+     }
+ 
+@@ -1138,7 +1136,6 @@ if (use_blink && !is_cronet_build) {
+       }
+       data_deps = [
+         ":blink_web_tests_support_data",
+-        "//chrome",
+         "//third_party/blink/tools:wpt_tests_isolate",
+         "//third_party/blink/web_tests:wpt_tests",
+       ]
+@@ -1522,7 +1519,6 @@ group("chromium_builder_perf") {
+       # In GN builds, this is controlled by the 'linux_dump_symbols'
+       # flag, which defaults to 1 for official builds. For now,
+       # we skip the separate flag and just key off of is_official_build.
+-      data_deps += [ "//chrome:linux_symbols" ]
+     }
+ 
+     data_deps += [ "//tools/perf/clear_system_cache" ]
+@@ -1546,7 +1542,6 @@ if (!is_ios && !is_android && !is_castos && !is_cronet_build) {
+       "//v8:d8",
+     ]
+     if (!is_fuchsia) {
+-      data_deps += [ "//chrome" ]
+     }
+     if (!is_win) {
+       data_deps += [ "//skia:filter_fuzz_stub" ]
