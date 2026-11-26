@@ -90,3 +90,5 @@
 0168-blink-core-generated-deps-are-defined-again.patch
 
 0169-every-import-resolves-again.patch
+
+0170-branding-and-version-carry-identity-again.patch
