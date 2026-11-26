@@ -1,0 +1,53 @@
+diff --git a/third_party/blink/renderer/core/BUILD.gn b/third_party/blink/renderer/core/BUILD.gn
+index 8b932d5..ee9a594 100644
+--- a/third_party/blink/renderer/core/BUILD.gn
++++ b/third_party/blink/renderer/core/BUILD.gn
+@@ -99,6 +99,8 @@ if (is_ios) {
+ }
+ 
+ visibility = [
++  "//third_party/blink/public/*",
++  "//third_party/blink/renderer/*",
+ ]
+ 
+ rel_blink_core_gen_dir = rebase_path(blink_core_output_dir, root_build_dir)
+diff --git a/third_party/blink/renderer/extensions/webview/BUILD.gn b/third_party/blink/renderer/extensions/webview/BUILD.gn
+index 7c25ce4..e0ecd6f 100644
+--- a/third_party/blink/renderer/extensions/webview/BUILD.gn
++++ b/third_party/blink/renderer/extensions/webview/BUILD.gn
+@@ -11,6 +11,8 @@ import("//third_party/blink/renderer/extensions/extensions.gni")
+ assert(use_blink_extensions_webview)
+ 
+ visibility = [
++  "//third_party/blink/renderer/bindings/extensions/*",
++  "//third_party/blink/renderer/extensions/*",
+ ]
+ 
+ config("extensions_webview_implementation") {
+diff --git a/ui/file_manager/file_manager/foreground/js/BUILD.gn b/ui/file_manager/file_manager/foreground/js/BUILD.gn
+index 3e5e1b4..c1997b3 100644
+--- a/ui/file_manager/file_manager/foreground/js/BUILD.gn
++++ b/ui/file_manager/file_manager/foreground/js/BUILD.gn
+@@ -5,6 +5,9 @@
+ import("//ui/webui/resources/tools/optimize_webui.gni")
+ 
+ visibility = [
++  "//ui/file_manager/file_manager/externs/*",
++  "//ui/file_manager/file_manager/foreground/*",
++  "//ui/file_manager/file_manager/test/*",
+ ]
+ 
+ # Root directory for the foreground bundle.
+diff --git a/ui/ozone/platform/cast/BUILD.gn b/ui/ozone/platform/cast/BUILD.gn
+index 9a2f244..c88334f 100644
+--- a/ui/ozone/platform/cast/BUILD.gn
++++ b/ui/ozone/platform/cast/BUILD.gn
+@@ -7,6 +7,8 @@ import("//build/config/ozone.gni")
+ import("//chromecast/chromecast.gni")
+ 
+ visibility = [
++  "//chromecast/*",
++  "//ui/ozone/*",
+ ]
+ 
+ # TODO(slan): gn check needs deps on ozone and media to pass. Correct this.

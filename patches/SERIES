@@ -95,3 +95,4 @@
 0171-js2gtest-js-libraries-are-defined-again.patch
 0172-webui-tabstrip-buildflag-is-defined-again.patch
 0173-wayland-protocol-lists-are-restored-again.patch
+0174-visibility-lists-are-restored-again.patch
