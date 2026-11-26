@@ -80,3 +80,4 @@
 0161-kiba-start-menu-icon.patch
 
 0162-the-build-loads-gn-without-the-chrome-directory.patch
+0163-the-chrome-binary-carries-its-sandbox-helper.patch

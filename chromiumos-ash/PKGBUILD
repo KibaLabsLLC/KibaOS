@@ -254,13 +254,18 @@ build() {
     # This tree has no chrome/ source: Lumen's shell delegation in lumen/
     # replaces the browser UI chrome would provide. Root BUILD.gn still imports
     # a handful of chrome/*.gni config files unconditionally, carried as
-    # config-only shims by patch 0162, and root targets still reference
-    # //chrome/* targets that no longer exist. Limiting gn gen to the two
-    # targets we actually build keeps only those, plus their transitive
-    # dependencies, defined, so the pruned tree configures cleanly.
+    # config-only shims by patch 0162, and its group targets still reference
+    # //chrome/* targets that do not exist, so it cannot be the build file gn
+    # loads first. --root-target points the bootstrap at //lumen/BUILD.gn
+    # instead, so the graph is exactly //lumen:chrome plus its transitive
+    # dependencies and the pruned tree configures cleanly. --root-pattern
+    # cannot do this job: it only restricts which targets generate, and gn
+    # still boots from root BUILD.gn, so nothing ever loads //lumen/BUILD.gn
+    # and the graph ends up empty. chrome_sandbox is a data_dep of
+    # //lumen:chrome (patch 0163), so building chrome builds the sandbox
+    # helper too.
     gn gen "${out_dir}" \
-        --root-pattern="//lumen:chrome" \
-        --root-pattern="//sandbox/linux:chrome_sandbox" \
+        --root-target="//lumen" \
         --args="
         target_os = \"linux\"
         target_cpu = \"x64\"
@@ -273,7 +278,6 @@ build() {
         blink_symbol_level = 0
         v8_symbol_level = 0
         treat_warnings_as_errors = false
-        use_goma = false
         use_sysroot = true
         use_ozone = true
         ozone_platform_wayland = true
