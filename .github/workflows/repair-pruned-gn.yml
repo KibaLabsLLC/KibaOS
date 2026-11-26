@@ -64,6 +64,14 @@ jobs:
             --ref "$CHROMIUM_REF" \
             --out repaired
 
+      - name: Restore missing GN imports
+        run: |
+          python3 ci/repair-pruned-gn.py \
+            --lumen lumen \
+            --chromium chromium-mirror \
+            --ref "$CHROMIUM_REF" \
+            --verify-imports
+
       - name: Resolve repair branch
         run: |
           branch="${{ inputs.pr_branch }}"
