@@ -86,3 +86,5 @@
 0166-bundle-data-targets-carry-their-sources-again.patch
 
 0167-cros-system-api-protos-are-restored.patch
+
+0168-blink-core-generated-deps-are-defined-again.patch
