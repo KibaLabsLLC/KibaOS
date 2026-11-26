@@ -395,16 +395,11 @@ def next_nonblank(lines, i):
 # ---------------------------------------------------------------------------
 # gnrt-generated rust crate repair
 # ---------------------------------------------------------------------------
+# gnrt-generated rust crate repair
+# ---------------------------------------------------------------------------
 
 KEY_RE = re.compile(r"^  ([a-z_]+) =")
 CONT_START = ('"', "[", "{")
-DERIVABLE_KEYS = ("crate_root", "sources", "inputs",
-                  "build_root", "build_sources", "build_script_inputs")
-PKG_META_KEYS = {
-    "cargo_pkg_description": "description",
-    "cargo_pkg_repository": "repository",
-    "cargo_pkg_authors": "authors",
-}
 
 
 def parse_crate_blocks(txt):
@@ -477,6 +472,7 @@ def vendor_dir_for(lumen, lines, upto):
 
 
 def walk_vendor_src(vendor, vdir):
+    """gnrt sources = .rs files under <vendor>/<vdir>/src/, sorted by path."""
     out = []
     for dirpath, dirnames, filenames in os.walk(os.path.join(vendor, vdir, "src")):
         dirnames.sort()
@@ -487,9 +483,9 @@ def walk_vendor_src(vendor, vdir):
     return sorted(out)
 
 
-def derive_from_vendor(lumen, key, vdir):
+def derive_value_lines(lumen, key, vdir):
+    """Value line(s) only; the caller keeps the corrupt `key =` line itself."""
     vendor = os.path.join(lumen, VENDOR_URL[2:])
-    out = []
     if key == "crate_root":
         root = os.path.join(vdir, "src/lib.rs")
         if not os.path.exists(os.path.join(vendor, root)):
@@ -498,34 +494,28 @@ def derive_from_vendor(lumen, key, vdir):
                 for fn in sorted(fns):
                     if fn == "lib.rs":
                         found = os.path.relpath(os.path.join(dp, fn), vendor)
+                        break
+                if found:
+                    break
             if not found:
                 raise RuntimeError("no lib.rs in %s" % vdir)
             root = found
-        out = ['      "%s/%s"' % (VENDOR_URL, root.replace(os.sep, "/"))]
-    elif key == "sources":
+        return ['      "%s/%s"' % (VENDOR_URL, root.replace(os.sep, "/"))]
+    if key == "sources":
         entries = walk_vendor_src(vendor, vdir)
         if not entries:
             raise RuntimeError("no .rs sources in %s" % vdir)
-        out = ['    "%s",' % e for e in entries]
-    elif key == "inputs":
-        out = ["  ]"]
-    elif key == "build_root":
+        return ['    "%s",' % e for e in entries]
+    if key == "inputs":
+        return []
+    if key in ("build_root", "build_sources", "build_script_inputs"):
         if not os.path.exists(os.path.join(vendor, vdir, "build.rs")):
             raise RuntimeError("no build.rs in %s" % vdir)
-        out = ['  build_root =',
-               '      "%s/%s/build.rs"' % (VENDOR_URL, vdir)]
-    elif key == "build_sources":
-        if not os.path.exists(os.path.join(vendor, vdir, "build.rs")):
-            raise RuntimeError("no build.rs in %s" % vdir)
-        out = ['  build_sources = [ "%s/%s/build.rs" ]' % (VENDOR_URL, vdir)]
-    elif key == "build_script_inputs":
-        if not os.path.exists(os.path.join(vendor, vdir, "build.rs")):
-            raise RuntimeError("no build.rs in %s" % vdir)
-        out = ['  build_script_inputs = [ "%s/%s/src/../build.rs" ]'
-               % (VENDOR_URL, vdir)]
-    else:
-        raise RuntimeError("no derivation for key %s" % key)
-    return out
+        target = {"build_root": "      \"%s/%s/build.rs\"",
+                  "build_sources": "      [ \"%s/%s/build.rs\" ]",
+                  "build_script_inputs": "      [ \"%s/%s/src/../build.rs\" ]"}[key]
+        return [target % (VENDOR_URL, vdir)]
+    raise RuntimeError("no derivation for key %s" % key)
 
 
 def cargo_toml_value(lumen, vdir, key):
@@ -564,6 +554,13 @@ def cargo_toml_value(lumen, vdir, key):
     return out
 
 
+PKG_META_KEYS = {
+    "cargo_pkg_description": "description",
+    "cargo_pkg_repository": "repository",
+    "cargo_pkg_authors": "authors",
+}
+
+
 def corrupt_regions(lines):
     """(key, start, end) assignments whose value line(s) the pruner deleted."""
     n = len(lines)
@@ -586,8 +583,12 @@ def corrupt_regions(lines):
         i += 1
 
 
+def block_of(lines, upto):
+    return len(re.findall(r'cargo_crate\("',
+                          "".join(l + "\n" for l in lines[:upto]))) - 1
+
+
 def repair_rust_file(lumen, relpath, up_text):
-    """Return (new_text, repairs) or raise RuntimeError with a reason."""
     vendor = os.path.join(lumen, VENDOR_URL[2:])
     path = os.path.join(lumen, relpath)
     with open(path, encoding="utf-8", errors="replace") as fh:
@@ -596,29 +597,37 @@ def repair_rust_file(lumen, relpath, up_text):
 
     repairs = {}
     for key, s, e in corrupt_regions(lines):
-        block_idx = len(re.findall(r'cargo_crate\("',
-                                   "".join(l + "\n" for l in lines[:s]))) - 1
+        idx = block_of(lines, s)
         upval = None
-        if up_blocks and block_idx < len(up_blocks):
-            upval = up_blocks[block_idx].get(key)
+        if up_blocks and idx < len(up_blocks):
+            upval = up_blocks[idx].get(key)
         if upval and len(upval) > 1 and paths_exist(lumen, "\n".join(upval[1:])):
             repairs[s] = (e, [lines[s]] + upval[1:])
             continue
+        if key == "crate_root" and upval and len(upval) > 1:
+            val = "\n".join(upval[1:])
+            p = re.search(r'"(//[^"]+)"', val)
+            if p and os.path.exists(os.path.join(lumen, p.group(1)[2:])):
+                repairs[s] = (e, [lines[s]] + upval[1:])
+                continue
         vdir = vendor_dir_for(lumen, lines, s)
         if not vdir:
-            raise RuntimeError("no vendor dir for key=%s (block %d)" % (key, block_idx))
-        if key in DERIVABLE_KEYS:
-            repairs[s] = (e, derive_from_vendor(lumen, key, vdir))
+            raise RuntimeError("no vendor dir for key=%s (block %d)" % (key, idx))
+        if key in ("crate_root", "sources", "inputs",
+                   "build_root", "build_sources", "build_script_inputs"):
+            repl = [lines[s]] + derive_value_lines(lumen, key, vdir)
+            if e > s + 1:
+                repl.append(lines[e - 1])
+            repairs[s] = (e, repl)
         elif key in PKG_META_KEYS:
             val = cargo_toml_value(lumen, vdir, PKG_META_KEYS[key])
             if val is None:
                 raise RuntimeError("no Cargo.toml value for %s" % key)
             text = ", ".join(val) if PKG_META_KEYS[key] == "authors" else val
-            repairs[s] = (e, ['      "%s"' % text.replace('"', '\\"')])
+            repairs[s] = (e, [lines[s], '      "%s"' % text.replace('"', '\\"')])
         else:
             raise RuntimeError("unknown corrupt key %s" % key)
 
-    ends = dict((s, e) for s, (e, _r) in repairs.items())
     out = lines
     for s in sorted(repairs, reverse=True):
         e, repl = repairs[s]
@@ -627,34 +636,166 @@ def repair_rust_file(lumen, relpath, up_text):
 
 
 # ---------------------------------------------------------------------------
-# Generic (non-rust) repair: alignment against upstream
+# Generic repair: aligned against upstream, parse-gated passes
 # ---------------------------------------------------------------------------
 
-def repair_generic_file(lumen, relpath, up_text):
-    path = os.path.join(lumen, relpath)
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        lumen_lines = fh.read().split("\n")
-    up_lines = up_text.split("\n")
+BARE_KEY_RE = re.compile(r"^(\s*)([a-z_][a-z0-9_]*)\s*=\s*$")
+
+
+# Values the pruner stripped from Lumen-authored (not upstream) lines, where
+# no upstream counterpart exists to align against.
+HAND_FIXES = {
+    "third_party/android_sdk/BUILD.gn": {
+        "api_versions_xml_path =":
+            'api_versions_xml_path =\n'
+            '        "//third_party/android_system_sdk/cipd/api-versions_system.xml"',
+    },
+}
+
+
+def apply_hand_fixes(relpath, lines):
+    fixes = HAND_FIXES.get(relpath)
+    if not fixes:
+        return lines, 0
+    out, n = [], 0
+    for line in lines:
+        stripped = line.strip()
+        if stripped in fixes:
+            parts = fixes[stripped].split("\n")
+            indent = line[:len(line) - len(line.lstrip())]
+            out.append(indent + parts[0])
+            out.extend(parts[1:])
+            n += 1
+        else:
+            out.append(line)
+    return out, n
+
+
+def corrupt_constructs(lines, err_msg=None):
+    """(start, end) line windows around corruption in an arbitrary .gn file.
+
+    Empty-list sites are listed only opportunistically: they parse fine, so
+    they are adopted only when the upstream entries all exist locally.
+    """
+    constructs = []
+    n = len(lines)
+    i = 0
+    while i < n:
+        m = BARE_KEY_RE.match(lines[i].rstrip())
+        if m:
+            _j, nxt = next_nonblank(lines, i + 1)
+            if not nxt.lstrip().startswith(CONT_START):
+                constructs.append((i, i + 1, True))
+                i += 1
+                continue
+        m2 = re.match(r"^(\s*)([a-z_][a-z0-9_]*) = \[\s*$", lines[i].rstrip())
+        if m2:
+            _j, nxt = next_nonblank(lines, i + 1)
+            if nxt.lstrip() == "]":
+                constructs.append((i, _j + 1, False))
+                i += 1
+                continue
+        i += 1
+    if err_msg:
+        m = re.match(r"line (\d+): (\w+) called with (\d+) args", err_msg)
+        if m:
+            err0 = int(m.group(1)) - 1
+            constructs.append((max(err0 - 1, 0), err0 + 3, True))
+    return constructs
+
+
+def window_repair(lumen_lines, up_lines, indices):
+    """Adopt upstream lines only in the construct windows. True = fragile."""
     sm = difflib.SequenceMatcher(None, lumen_lines, up_lines, autojunk=False)
     out = []
     for tag, i1, i2, j1, j2 in sm.get_opcodes():
-        if tag == "equal":
+        fragile = any(ws <= i1 <= we for ws, we, _ in indices if we > ws) or \
+                  any(ws < i2 and we > ws for ws, we, force in indices
+                      if not force)
+        if tag == "equal" or tag == "delete" or (tag == "replace" and not any(
+                ws <= i1 <= we for ws, we, force in indices if force)):
             out.extend(lumen_lines[i1:i2])
-        elif tag == "insert":
-            candidate = up_lines[j1:j2]
-            if paths_exist(lumen, "\n".join(candidate)):
-                out.extend(candidate)
+        elif tag == "replace" and any(ws < i2 and we > ws for ws, we, _ in indices):
+            out.extend(up_lines[j1:j2])
+        elif tag == "insert" and fragile:
+            out.extend(up_lines[j1:j2])
         else:
             out.extend(lumen_lines[i1:i2])
     return "\n".join(out)
+
+
+def strict_repair(lumen, lumen_lines, up_lines):
+    sm = difflib.SequenceMatcher(None, lumen_lines, up_lines, autojunk=False)
+    out = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == "equal" or tag in ("delete", "replace"):
+            out.extend(lumen_lines[i1:i2])
+        elif paths_exist(lumen, "\n".join(up_lines[j1:j2])):
+            out.extend(up_lines[j1:j2])
+        else:
+            out.extend(lumen_lines[i1:i2])
+    return "\n".join(out)
+
+
+def relaxed_repair(lumen_lines, up_lines, err_line):
+    """Adopt every insert within +-6 aligned lines of a parse error."""
+    sm = difflib.SequenceMatcher(None, lumen_lines, up_lines, autojunk=False)
+    out = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        near = i1 - 6 <= err_line <= i2 + 6
+        if tag in ("insert", "replace") and near:
+            out.extend(up_lines[j1:j2])
+        elif tag == "insert":
+            out.extend(lumen_lines[i1:i2])
+        else:
+            out.extend(lumen_lines[i1:i2])
+    return "\n".join(out)
+
+
+def repair_generic_file(lumen, relpath, up_text, err_msg=None):
+    path = os.path.join(lumen, relpath)
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+    lumen_lines = text.split("\n")
+    up_lines = up_text.split("\n")
+
+    fixed, n = apply_hand_fixes(relpath, lumen_lines)
+    if n:
+        ok, _ = parses("\n".join(fixed))
+        if ok:
+            return "\n".join(fixed), "hand fix"
+
+    candidate = strict_repair(lumen, lumen_lines, up_lines)
+    ok, _ = parses(candidate)
+    if ok:
+        return candidate, "aligned (verified local paths only)"
+
+    constructs = corrupt_constructs(lumen_lines, err_msg)
+    if constructs:
+        candidate = window_repair(lumen_lines, up_lines, constructs)
+        ok, err = parses(candidate)
+        if ok:
+            return candidate, "restored around corrupt constructs"
+
+    err0 = None
+    if err_msg:
+        m = re.match(r"line (\d+):", err_msg)
+        if m:
+            err0 = int(m.group(1)) - 1
+    if err0 is not None:
+        candidate = relaxed_repair(lumen_lines, up_lines, err0)
+        ok, _ = parses(candidate)
+        if ok:
+            return candidate, "restored near parse error (paths unverified)"
+    raise RuntimeError("alignment could not restore a parseable file")
 
 
 # ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
 
-def check_only(lumen):
-    broken = scan_tree(lumen)
+def check_only(lumen, overlay=None):
+    broken = scan_tree(lumen, overlay)
     for rel in sorted(broken):
         print("BROKEN %s: %s" % (rel, broken[rel]))
     print("%d broken" % len(broken))
@@ -664,36 +805,36 @@ def check_only(lumen):
 def repair(lumen, chromium, ref, out_dir):
     broken = scan_tree(lumen)
     print("scanned: %d broken files" % len(broken))
-    os.makedirs(out_dir, exist_ok=True)
     repaired, unrepaired = [], []
     for rel in sorted(broken):
+        err_msg = broken[rel]
         try:
             if RUST_FILE_RE.match(rel):
                 up_text = upstream_show(chromium, ref, rel)
                 new_text, n = repair_rust_file(lumen, rel, up_text)
+                note = "%d sites" % n
             else:
                 up_text = upstream_show(chromium, ref, rel)
                 if up_text is None:
                     raise RuntimeError("no upstream counterpart at %s" % ref)
-                n = 0
-                new_text = repair_generic_file(lumen, rel, up_text)
+                new_text, note = repair_generic_file(lumen, rel, up_text, err_msg)
         except RuntimeError as e:
-            unrepaired.append((rel, str(e)))
+            unrepaired.append(rel)
             print("UNREPAIRED %s: %s" % (rel, e))
             continue
         ok, err = parses(new_text)
         if not ok:
-            unrepaired.append((rel, "repair still invalid: %s" % err))
+            unrepaired.append(rel)
             print("UNREPAIRED %s: repair still invalid: %s" % (rel, err))
             continue
         dest = os.path.join(out_dir, rel)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, "w", encoding="utf-8") as fh:
             fh.write(new_text)
-        repaired.append((rel, n))
-        print("REPAIRED %s (%s)" % (rel, "%d sites" % n if n else "aligned"))
+        repaired.append(rel)
+        print("REPAIRED %s (%s)" % (rel, note))
 
-    remaining = scan_tree(lumen, overlay=out_dir)
+    remaining = scan_tree(lumen, out_dir)
     print("summary: %d repaired, %d unrepaired, %d files still broken"
           % (len(repaired), len(unrepaired), len(remaining)))
     for rel in sorted(remaining):
@@ -702,17 +843,18 @@ def repair(lumen, chromium, ref, out_dir):
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap = argparse.ArgumentParser(description="Repair pruner-stripped GN files")
     ap.add_argument("--lumen", required=True, help="Lumen checkout root")
     ap.add_argument("--chromium", help="chromium mirror checkout (git)")
     ap.add_argument("--ref", help="chromium ref (e.g. pins/chromium.sha)")
     ap.add_argument("--out", help="directory receiving repaired files")
     ap.add_argument("--check", action="store_true",
                     help="only scan and report broken files")
+    ap.add_argument("--overlay", help="validation overlay for --check")
     args = ap.parse_args()
 
     if args.check:
-        sys.exit(check_only(args.lumen))
+        sys.exit(check_only(args.lumen, args.overlay))
     for req in ("chromium", "ref", "out"):
         if not getattr(args, req):
             ap.error("--%s is required without --check" % req)
