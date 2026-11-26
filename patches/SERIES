@@ -96,3 +96,4 @@
 0172-webui-tabstrip-buildflag-is-defined-again.patch
 0173-wayland-protocol-lists-are-restored-again.patch
 0174-visibility-lists-are-restored-again.patch
+0175-test-archive-copy-targets-carry-their-sources-again.patch
