@@ -1,0 +1,150 @@
+diff --git a/third_party/abseil-cpp/BUILD.gn b/third_party/abseil-cpp/BUILD.gn
+index 99bc312778..c7cabe0999 100644
+--- a/third_party/abseil-cpp/BUILD.gn
++++ b/third_party/abseil-cpp/BUILD.gn
+@@ -45,6 +45,7 @@ component("absl") {
+       # absl.natvis listed as an input here instead of in
+       # //tools/win/DebugVisualizers:absl to prevent unnecessary size increase
+       # in generated build files.
++      "//tools/win/DebugVisualizers/absl.natvis",
+     ]
+   }
+ }
+@@ -205,7 +206,9 @@ source_set("absl_full") {
+     visibility = [
+       # Used by some test executables, but not by anything that is a
+       # part of Chrome.
++      "//components/optimization_guide/internal/*",
+       "//third_party/fuzztest:*",
++      "//third_party/webrtc/*",
+ 
+       # GoogleTest doesn't actually need absl_full, but this makes gn check
+       # happier.
+diff --git a/third_party/abseil-cpp/absl/base/BUILD.gn b/third_party/abseil-cpp/absl/base/BUILD.gn
+index 42226210f3..95e4acf933 100644
+--- a/third_party/abseil-cpp/absl/base/BUILD.gn
++++ b/third_party/abseil-cpp/absl/base/BUILD.gn
+@@ -73,6 +73,7 @@ absl_source_set("raw_logging_internal") {
+   public = [ "internal/raw_logging.h" ]
+   visibility = [
+     "//third_party/abseil-cpp:absl_component_deps",
++    "//third_party/abseil-cpp/absl/*",
+   ]
+   deps = [
+     ":atomic_hook",
+@@ -125,6 +126,7 @@ absl_source_set("dynamic_annotations") {
+   public = [ "dynamic_annotations.h" ]
+   visibility = [
+     "//third_party/abseil-cpp:absl_component_deps",
++    "//third_party/abseil-cpp/absl/*",
+   ]
+   deps = [
+     ":config",
+diff --git a/third_party/abseil-cpp/absl/container/BUILD.gn b/third_party/abseil-cpp/absl/container/BUILD.gn
+index 2ad2ef7b59..c8b9a02837 100644
+--- a/third_party/abseil-cpp/absl/container/BUILD.gn
++++ b/third_party/abseil-cpp/absl/container/BUILD.gn
+@@ -520,6 +520,7 @@ absl_source_set("raw_hash_set") {
+   deps = [
+     ":common",
+     ":common_policy_traits",
++    ":compressed_tuple",
+     ":container_memory",
+     ":hash_function_defaults",
+     ":hash_policy_traits",
+@@ -563,6 +564,7 @@ absl_source_set("layout") {
+   public = [ "internal/layout.h" ]
+   visibility = [
+     "//third_party/abseil-cpp:absl_component_deps",
++    "//third_party/abseil-cpp/absl/*",
+   ]
+   deps = [
+     "//third_party/abseil-cpp/absl/base:config",
+diff --git a/third_party/abseil-cpp/absl/flags/BUILD.gn b/third_party/abseil-cpp/absl/flags/BUILD.gn
+index 15cdb19778..0fe88eec59 100644
+--- a/third_party/abseil-cpp/absl/flags/BUILD.gn
++++ b/third_party/abseil-cpp/absl/flags/BUILD.gn
+@@ -67,6 +67,7 @@ absl_source_set("marshalling") {
+     "//third_party/abseil-cpp/absl/base:log_severity",
+     "//third_party/abseil-cpp/absl/numeric:int128",
+     "//third_party/abseil-cpp/absl/strings",
++    "//third_party/abseil-cpp/absl/strings:str_format",
+     "//third_party/abseil-cpp/absl/strings:string_view",
+     "//third_party/abseil-cpp/absl/types:optional",
+   ]
+@@ -140,6 +141,7 @@ absl_source_set("flag_internal") {
+   ]
+   visibility = [
+     ":*",
++    "//third_party/abseil-cpp/absl/base/*",
+   ]
+   deps = [
+     ":commandlineflag",
+diff --git a/third_party/abseil-cpp/absl/log/internal/BUILD.gn b/third_party/abseil-cpp/absl/log/internal/BUILD.gn
+index 26ba32508f..63b7da6fa6 100644
+--- a/third_party/abseil-cpp/absl/log/internal/BUILD.gn
++++ b/third_party/abseil-cpp/absl/log/internal/BUILD.gn
+@@ -257,6 +257,7 @@ absl_source_set("structured") {
+   visibility = [
+     ":*",
+     "//third_party/abseil-cpp/absl/log:*",
++    "//third_party/abseil-cpp/absl/log/*",
+   ]
+   deps = [
+     ":log_message",
+@@ -274,6 +275,7 @@ absl_source_set("structured_proto") {
+   public = [ "structured_proto.h" ]
+   visibility = [
+     ":*",
++    "//third_party/abseil-cpp/absl/log/*",
+   ]
+   deps = [
+     ":proto",
+@@ -319,6 +321,7 @@ absl_source_set("test_helpers") {
+   visibility = [
+     ":*",
+     "//third_party/abseil-cpp/absl/log:*",
++    "//third_party/abseil-cpp/absl/log/*",
+   ]
+   deps = [
+     ":globals",
+@@ -338,6 +341,7 @@ absl_source_set("test_matchers") {
+   visibility = [
+     ":*",
+     "//third_party/abseil-cpp/absl/log:*",
++    "//third_party/abseil-cpp/absl/log/*",
+   ]
+   deps = [
+     ":test_helpers",
+@@ -399,6 +403,7 @@ absl_source_set("vlog_config") {
+   visibility = [
+     ":*",
+     "//third_party/abseil-cpp/absl/status:*",
++    "//third_party/abseil-cpp/absl/log/*",
+   ]
+   deps = [
+     ":fnmatch",
+diff --git a/third_party/abseil-cpp/absl/random/BUILD.gn b/third_party/abseil-cpp/absl/random/BUILD.gn
+index ca7a6e4674..c3bf3a9076 100644
+--- a/third_party/abseil-cpp/absl/random/BUILD.gn
++++ b/third_party/abseil-cpp/absl/random/BUILD.gn
+@@ -82,6 +82,7 @@ absl_source_set("bit_gen_ref") {
+   public = [ "bit_gen_ref.h" ]
+   deps = [
+     ":mocking_access",
++    ":random",
+     "//third_party/abseil-cpp/absl/base:config",
+     "//third_party/abseil-cpp/absl/base:core_headers",
+     "//third_party/abseil-cpp/absl/base:fast_type_id",
+diff --git a/third_party/abseil-cpp/absl/strings/BUILD.gn b/third_party/abseil-cpp/absl/strings/BUILD.gn
+index 1addfe02ea..022bfa63c9 100644
+--- a/third_party/abseil-cpp/absl/strings/BUILD.gn
++++ b/third_party/abseil-cpp/absl/strings/BUILD.gn
+@@ -411,6 +411,7 @@ absl_source_set("cord") {
+     ":cordz_info",
+     ":cordz_update_scope",
+     ":cordz_update_tracker",
++    ":internal",
+     ":resize_and_overwrite",
+     ":string_view",
+     ":strings",

@@ -97,3 +97,4 @@
 0173-wayland-protocol-lists-are-restored-again.patch
 0174-visibility-lists-are-restored-again.patch
 0175-test-archive-copy-targets-carry-their-sources-again.patch
+0176-absl-visibility-lists-are-restored-again.patch
