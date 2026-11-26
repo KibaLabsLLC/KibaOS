@@ -114,7 +114,7 @@ jobs:
       - name: Clean build outputs
         run: rm -rf lumen/out
 
-      - name: Emit 0171 patch
+      - name: Emit convergence patch
         working-directory: lumen
         if: success()
         run: |
@@ -129,9 +129,9 @@ jobs:
             commit -qm "series state (diff anchor)"
           rsync -a ../repaired/ .
           git add -A
-          git diff --cached HEAD~1 > ../patches/0171-gn-evaluation-converges.patch
-          grep -q '^0171-gn-evaluation-converges.patch$' ../patches/SERIES || \
-            printf '0171-gn-evaluation-converges.patch\n' >> ../patches/SERIES
+          git diff --cached HEAD~1 > ../patches/0900-gn-evaluation-converges.patch
+          grep -q '^0900-gn-evaluation-converges.patch$' ../patches/SERIES || \
+            printf '0900-gn-evaluation-converges.patch\n' >> ../patches/SERIES
 
       - name: Commit and push
         if: success()
@@ -152,7 +152,7 @@ jobs:
           else
             git checkout -b "$branch"
           fi
-          git add patches/0171-gn-evaluation-converges.patch patches/SERIES
+          git add patches/0900-gn-evaluation-converges.patch patches/SERIES
           if git diff --cached --quiet; then
             echo "No changes to commit" >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -174,7 +174,7 @@ jobs:
           ## Summary
           - Adds `ci/converge-gn.py` plus a `workflow_dispatch` workflow that runs the real `gn gen` (built from `tools/gn` at the pins sha) on the series-patched Lumen checkout with the ash package's argument block
           - Missing evaluation-time files (`import()`/`exec_script`/`read_file` inputs the pruner deleted) are restored from the chromium mirror and retried, up to 8 rounds
-          - Non-missing-file failures (undefined identifiers, emptied sources, unresolved labels) stop the loop with the full gn log; the converged fixes are emitted as `patches/0171-gn-evaluation-converges.patch`
+          - Non-missing-file failures (undefined identifiers, emptied sources, unresolved labels) stop the loop with the full gn log; the converged fixes are emitted as `patches/0900-gn-evaluation-converges.patch`
 
           ## Verification
           - Trigger with: `gh workflow run converge-gn.yml --ref <branch>`
