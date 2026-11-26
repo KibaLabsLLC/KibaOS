@@ -1,0 +1,67 @@
+diff --git a/ash/webui/resources/BUILD.gn b/ash/webui/resources/BUILD.gn
+index a0cebe0..c5e8104 100644
+--- a/ash/webui/resources/BUILD.gn
++++ b/ash/webui/resources/BUILD.gn
+@@ -48,6 +48,7 @@ grit("boca_app_bundle_resources") {
+     source = "//ash/webui/boca_ui/resources/prod/boca_app_bundle_resources.grd"
+   } else {
+     source =
++        "//ash/webui/boca_ui/resources/mock/boca_app_bundle_mock_resources.grd"
+     deps = [ "//ash/webui/boca_ui/resources/mock:build_ts" ]
+   }
+   use_brotli = true
+@@ -113,6 +114,7 @@ grit("help_app_bundle_resources") {
+   if (enable_cros_help_app) {
+     # Obtained via an internal CIPD package in src/DEPS.
+     source =
++        "//ash/webui/help_app_ui/resources/prod/help_app_bundle_resources.grd"
+   } else {
+     source = "//ash/webui/help_app_ui/resources/mock/help_app_bundle_mock_resources.grd"
+     deps = [ "//ash/webui/help_app_ui/resources/mock:build_ts" ]
+@@ -183,6 +185,7 @@ grit("media_app_bundle_resources") {
+   if (enable_cros_media_app) {
+     # Obtained via an internal CIPD package in src/DEPS.
+     source =
++        "//ash/webui/media_app_ui/resources/prod/media_app_bundle_resources.grd"
+   } else {
+     source = "//ash/webui/media_app_ui/resources/mock/media_app_bundle_mock_resources.grd"
+     deps = [ "//ash/webui/media_app_ui/resources/mock/js:build_ts" ]
+@@ -245,6 +248,7 @@ grit("eche_bundle_resources") {
+   if (enable_cros_eche_app) {
+     # Obtained via an internal CIPD package in src/DEPS.
+     source =
++        "//ash/webui/eche_app_ui/resources/prod/ash_eche_bundle_resources.grd"
+   } else {
+     source = "//ash/webui/eche_app_ui/resources/mock/ash_eche_bundle_mock_resources.grd"
+   }
+@@ -265,6 +269,7 @@ grit("eche_bundle_resources") {
+ 
+ grit("multidevice_debug_resources") {
+   source =
++      "//ash/webui/multidevice_debug/resources/multidevice_debug_resources.grd"
+ 
+   outputs = [
+     "grit/ash_multidevice_debug_resources.h",
+diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
+index 33eb5f9..b01adf0 100644
+--- a/build/config/compiler/BUILD.gn
++++ b/build/config/compiler/BUILD.gn
+@@ -255,8 +255,10 @@ if (is_android) {
+           chrome_orderfile_path = ""
+         } else if (current_cpu == "arm64" || current_cpu == "x64") {
+           chrome_orderfile_path =
++              "//chrome/android/orderfiles/arm64/orderfile.arm64.out"
+         } else if (current_cpu == "arm" || current_cpu == "x86") {
+           chrome_orderfile_path =
++              "//chrome/android/orderfiles/arm/orderfile.arm.out"
+         }
+       }
+     }
+@@ -2844,6 +2846,7 @@ if (is_clang && is_a_target_toolchain) {
+                  chromeos_afdo_platform == "arm",
+              "Only 'atom', 'bigcore', and 'arm' are valid ChromeOS profiles.")
+       _clang_sample_profile =
++          "//chromeos/profiles/${chromeos_afdo_platform}.afdo.prof"
+     }
+   }
+ }

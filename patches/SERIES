@@ -81,3 +81,4 @@
 
 0162-the-build-loads-gn-without-the-chrome-directory.patch
 0163-the-chrome-binary-carries-its-sandbox-helper.patch
+0164-the-pruned-build-files-parse-again.patch
