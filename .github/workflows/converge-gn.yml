@@ -93,25 +93,20 @@ jobs:
             --skip-hook-action 'chrome/' \
             --skip-hook-name 'Generate location tags for tests'
 
-      - name: Install GN build prerequisites
+      - name: Verify the DEPS-provided gn
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build
-
-      - name: Build gn
-        working-directory: lumen
-        run: |
-          mkdir -p /tmp/gn-bin
-          python3 tools/gn/bootstrap/bootstrap.py \
-            --skip-generate-buildfiles \
-            -j 4 -o /tmp/gn-bin/gn
-          /tmp/gn-bin/gn --version
+          gn_bin="lumen/buildtools/linux64/gn"
+          if [ ! -x "$gn_bin" ]; then
+            echo "gn was not materialized by the DEPS sync" >&2
+            exit 1
+          fi
+          "$gn_bin" --version
 
       - name: Converge gn gen
         run: |
           python3 ci/converge-gn.py \
             --lumen lumen \
-            --gn /tmp/gn-bin/gn \
+            --gn "$PWD/lumen/buildtools/linux64/gn" \
             --chromium chromium-mirror \
             --ref "$CHROMIUM_REF" \
             --out-dir out/Ash
