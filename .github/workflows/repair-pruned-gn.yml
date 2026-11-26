@@ -1,0 +1,123 @@
+name: Repair pruned GN sources
+
+on:
+  workflow_dispatch:
+    inputs:
+      chromium_ref:
+        description: "Chromium mirror ref (defaults to pins/chromium.sha)"
+        required: false
+        default: ""
+      pr_branch:
+        description: "Branch for the repair PR"
+        required: false
+        default: "vibe/repair-pruned-gn"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: repair-pruned-gn
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: blacksmith-4vcpu-ubuntu-2604
+    steps:
+      - name: Checkout KibaOS
+        uses: actions/checkout@v4
+
+      - name: Checkout Lumen
+        uses: actions/checkout@v4
+        with:
+          repository: KibaLabsLLC/Lumen
+          path: lumen
+
+      - name: Resolve chromium ref
+        run: |
+          ref="${{ inputs.chromium_ref }}"
+          if [ -z "$ref" ]; then
+            ref="$(tr -d '[:space:]' < pins/chromium.sha)"
+          fi
+          echo "CHROMIUM_REF=$ref" >> "$GITHUB_ENV"
+
+      - name: Fetch chromium mirror
+        run: |
+          git clone --filter=blob:none --no-checkout --depth 1 \
+            https://github.com/chromium/chromium.git chromium-mirror
+          git -C chromium-mirror fetch --depth 1 origin "$CHROMIUM_REF"
+
+      - name: Apply patch series onto Lumen
+        working-directory: lumen
+        run: |
+          while IFS= read -r patch; do
+            [ -z "$patch" ] && continue
+            case "$patch" in \#*) continue ;; esac
+            git apply --whitespace=nowarn ../patches/"$patch"
+          done < ../patches/SERIES
+
+      - name: Repair and validate
+        run: |
+          python3 ci/repair-pruned-gn.py \
+            --lumen lumen \
+            --chromium chromium-mirror \
+            --ref "$CHROMIUM_REF" \
+            --out repaired
+
+      - name: Emit 0165 patch
+        working-directory: lumen
+        if: success()
+        run: |
+          if [ ! -d ../repaired ] || [ -z "$(find ../repaired -type f | head -1)" ]; then
+            echo "Nothing to repair" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          rsync -a ../repaired/ .
+          git add -A
+          git diff --cached > ../patches/0165-the-vendored-build-files-parse-again.patch
+          grep -q '^0165-the-vendored-build-files-parse-again.patch$' ../patches/SERIES || \
+            printf '0165-the-vendored-build-files-parse-again.patch\n' >> ../patches/SERIES
+
+      - name: Commit and push
+        run: |
+          branch="${{ inputs.pr_branch }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git show-ref --verify --quiet "refs/remotes/origin/$branch" || \
+             git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+            git fetch origin "$branch"
+            git checkout "$branch"
+          else
+            git checkout -b "$branch"
+          fi
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Restore the vendored build files the pruner stripped"
+          git push origin "$branch"
+
+      - name: Open PR
+        run: |
+          branch="${{ inputs.pr_branch }}"
+          n="$(gh pr list --head "$branch" --state open --json number -q 'length')"
+          if [ "$n" != "0" ]; then
+            echo "PR already open"
+            exit 0
+          fi
+          cat > /tmp/pr-body.md <<'EOF'
+          ## Summary
+          - Adds `ci/repair-pruned-gn.py` plus a one-time `workflow_dispatch` workflow
+          - The workflow applies `patches/SERIES` to a Lumen checkout, parses every `.gn`/`.gni` file with a GN-compatible parser, restores the RHS lines the source pruner stripped (vendored rust crate values regenerated from the local vendor trees, all other files aligned against chromium at `pins/chromium.sha`), re-parses every repaired file, and emits `patches/0165-the-vendored-build-files-parse-again.patch`
+          - Sites whose upstream value references pruned paths are reported instead of guessed at; they stay the domain of hand-written patches like 0164
+
+          ## Verification
+          - The repair step fails the run if any scanned file still does not parse; every emitted patched file is validated before being written
+          - Trigger with: `gh workflow run repair-pruned-gn.yml --ref <branch>`
+          EOF
+          gh pr create --draft --head "$branch" \
+            --title "Restore the vendored build files the pruner stripped" \
+            --body-file /tmp/pr-body.md
+        env:
+          GH_TOKEN: ${{ github.token }}
