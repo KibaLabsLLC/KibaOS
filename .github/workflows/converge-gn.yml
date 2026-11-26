@@ -1,0 +1,180 @@
+name: Converge GN evaluation
+
+on:
+  workflow_dispatch:
+    inputs:
+      chromium_ref:
+        description: "Chromium mirror ref (defaults to pins/chromium.sha)"
+        required: false
+        default: ""
+      pr_branch:
+        description: "Branch for the convergence PR"
+        required: false
+        default: "vibe/gn-convergence"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: repair-pruned-gn
+  cancel-in-progress: false
+
+jobs:
+  converge:
+    runs-on: blacksmith-4vcpu-ubuntu-2604
+    timeout-minutes: 150
+    steps:
+      - name: Checkout KibaOS
+        uses: actions/checkout@v4
+
+      - name: Checkout Lumen
+        uses: actions/checkout@v4
+        with:
+          repository: KibaLabsLLC/Lumen
+          path: lumen
+
+      - name: Resolve chromium ref
+        run: |
+          ref="${{ inputs.chromium_ref }}"
+          if [ -z "$ref" ]; then
+            ref="$(tr -d '[:space:]' < pins/chromium.sha)"
+          fi
+          echo "CHROMIUM_REF=$ref" >> "$GITHUB_ENV"
+
+      - name: Fetch chromium mirror
+        run: |
+          git clone --filter=blob:none --no-checkout --depth 1 \
+            https://github.com/chromium/chromium.git chromium-mirror
+          git -C chromium-mirror fetch --depth 1 origin "$CHROMIUM_REF"
+
+      - name: Apply patch series onto Lumen
+        working-directory: lumen
+        run: |
+          while IFS= read -r patch; do
+            [ -z "$patch" ] && continue
+            case "$patch" in \#*) continue ;; esac
+            git apply --whitespace=nowarn ../patches/"$patch"
+          done < ../patches/SERIES
+
+      - name: Repair and validate
+        run: |
+          python3 ci/repair-pruned-gn.py \
+            --lumen lumen \
+            --chromium chromium-mirror \
+            --ref "$CHROMIUM_REF" \
+            --out repaired
+
+      - name: Sync DEPS
+        run: |
+          ln -sfn lumen src
+          python3 ci/resolve-deps.py \
+            --root . \
+            --target-os linux \
+            --target-cpu x64 \
+            --jobs 8 \
+            --var checkout_telemetry_dependencies=False \
+            --var checkout_pgo_profiles=False \
+            --var checkout_nacl=False \
+            --var checkout_android=False \
+            --skip-dep-path 'src/third_party/angle/src/tests/restricted_traces' \
+            --skip-hook-action 'chromite/bin/cros' \
+            --skip-hook-action 'chrome/' \
+            --skip-hook-name 'Generate location tags for tests'
+
+      - name: Install GN build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+
+      - name: Build gn
+        working-directory: lumen
+        run: |
+          mkdir -p /tmp/gn-bin
+          python3 tools/gn/bootstrap/bootstrap.py \
+            --skip-generate-buildfiles \
+            -j 4 -o /tmp/gn-bin/gn
+          /tmp/gn-bin/gn --version
+
+      - name: Converge gn gen
+        run: |
+          python3 ci/converge-gn.py \
+            --lumen lumen \
+            --gn /tmp/gn-bin/gn \
+            --chromium chromium-mirror \
+            --ref "$CHROMIUM_REF" \
+            --out-dir out/Ash
+
+      - name: Clean build outputs
+        run: rm -rf lumen/out
+
+      - name: Emit 0171 patch
+        working-directory: lumen
+        if: success()
+        run: |
+          if [ -z "$(find ../repaired -type f | head -1)" ] && \
+             [ -z "$(git status --porcelain)" ]; then
+            echo "Nothing converged beyond the current series" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git add -A
+          git -c user.name "github-actions[bot]" \
+            -c user.email "github-actions[bot]@users.noreply.github.com" \
+            commit -qm "series state (diff anchor)"
+          rsync -a ../repaired/ .
+          git add -A
+          git diff --cached HEAD~1 > ../patches/0171-gn-evaluation-converges.patch
+          grep -q '^0171-gn-evaluation-converges.patch$' ../patches/SERIES || \
+            printf '0171-gn-evaluation-converges.patch\n' >> ../patches/SERIES
+
+      - name: Commit and push
+        if: success()
+        run: |
+          branch="${{ inputs.pr_branch }}"
+          if [ -z "$branch" ]; then
+            branch="vibe/gn-convergence"
+          fi
+          if [ "$branch" = "main" ]; then
+            echo "Refusing to push the convergence onto main" >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+            git fetch origin "$branch"
+            git checkout "$branch"
+          else
+            git checkout -b "$branch"
+          fi
+          git add patches/0171-gn-evaluation-converges.patch patches/SERIES
+          if git diff --cached --quiet; then
+            echo "No changes to commit" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Converge gn evaluation with the real binary"
+          git push origin "$branch"
+
+      - name: Open PR
+        if: success()
+        run: |
+          branch="${{ inputs.pr_branch }}"
+          [ -z "$branch" ] && branch="vibe/gn-convergence"
+          n="$(gh pr list --head "$branch" --state open --json number -q 'length')"
+          if [ "$n" != "0" ]; then
+            echo "PR already open"
+            exit 0
+          fi
+          cat > /tmp/pr-body.md <<'EOF'
+          ## Summary
+          - Adds `ci/converge-gn.py` plus a `workflow_dispatch` workflow that runs the real `gn gen` (built from `tools/gn` at the pins sha) on the series-patched Lumen checkout with the ash package's argument block
+          - Missing evaluation-time files (`import()`/`exec_script`/`read_file` inputs the pruner deleted) are restored from the chromium mirror and retried, up to 8 rounds
+          - Non-missing-file failures (undefined identifiers, emptied sources, unresolved labels) stop the loop with the full gn log; the converged fixes are emitted as `patches/0171-gn-evaluation-converges.patch`
+
+          ## Verification
+          - Trigger with: `gh workflow run converge-gn.yml --ref <branch>`
+          EOF
+          gh pr create --draft --head "$branch" \
+            --title "Converge gn evaluation with the real binary" \
+            --body-file /tmp/pr-body.md
+        env:
+          GH_TOKEN: ${{ github.token }}
