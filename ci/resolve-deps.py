@@ -332,15 +332,21 @@ def gn_value(v):
     return '"%s"' % s
 
 
-def write_gn_args(path, names, vars_):
+def write_gn_args(path, names, vars_, resolver):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     lines = ["# Generated from 'DEPS' by ci/resolve-deps.py"]
+    # A DEPS variable can hold a condition expression instead of a literal
+    # (gclient's idiom, e.g. checkout_openxr). Evaluating the value through
+    # the same scope DEPS conditions use turns those into real booleans;
+    # quoting them would make GN's && on gclient_args.gni fail with "Type is
+    # string instead".
+    scope = Scope(vars_, resolver.missing, resolver, frozenset())
     for name in names:
         if name not in vars_:
             warn("gclient_gn_args lists %r but no such variable exists; "
                  "leaving it at its GN default" % name)
             continue
-        value = vars_[name]
+        value = scope[name]
         if isinstance(value, str):
             value = sub_vars(value, vars_)
         lines.append("%s = %s" % (name, gn_value(value)))
@@ -548,7 +554,7 @@ class Resolver:
         if gn_file:
             out = os.path.join(self.root, gn_file)
             gn_args = list(ns.get("gclient_gn_args", []))
-            write_gn_args(out, gn_args, vars_)
+            write_gn_args(out, gn_args, vars_, self)
             log("  wrote %s" % gn_file)
 
         hooks_cwd = (os.path.join(self.root, prefix)

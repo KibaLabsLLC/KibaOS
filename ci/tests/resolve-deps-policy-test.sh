@@ -75,6 +75,7 @@ deps = {
 gclient_gn_args_file = 'src/build/config/gclient_args.gni'
 gclient_gn_args = [
   'cros_boards',
+  'checkout_simplechrome',
 ]
 hooks = [
   {
@@ -115,6 +116,12 @@ run_resolver "${root}" > "${tmp}/resolver.log"
   || fail "gclient_args.gni was not written"
 grep -Fx 'cros_boards = ""' "${root}/src/build/config/gclient_args.gni" \
   || fail "cros_boards should stay at the empty DEPS default"
+# A DEPS variable holding a condition expression must reach GN as a boolean,
+# not a string, or GN's && on buildflags (e.g. checkout_openxr) fails with
+# "Type is string instead".
+grep -Fx 'checkout_simplechrome = false' \
+  "${root}/src/build/config/gclient_args.gni" \
+  || fail "a condition-valued DEPS variable must be written as a boolean"
 
 # Skip: device SDK tooling and everything behind cros_boards.
 [[ ! -d "${root}/src/third_party/chromite" ]] \
@@ -151,5 +158,8 @@ run_resolver "${device}" --var cros_boards=amd64-generic \
 grep -Fx 'cros_boards = "amd64-generic"' \
   "${device}/src/build/config/gclient_args.gni" \
   || fail "the explicit board should reach the GN args"
+grep -Fx 'checkout_simplechrome = true' \
+  "${device}/src/build/config/gclient_args.gni" \
+  || fail "checkout_simplechrome should evaluate to true with a board set"
 
 echo "resolve-deps policy test passed"
