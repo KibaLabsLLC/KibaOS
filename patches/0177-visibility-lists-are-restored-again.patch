@@ -1,0 +1,326 @@
+--- a/remoting/host/base/BUILD.gn
++++ b/remoting/host/base/BUILD.gn
+@@ -6,6 +6,9 @@
+ 
+ static_library("base") {
+   visibility = [
++    "//remoting/host/*",
++    "//remoting/test/*",
++    "//remoting/tools/*",
+   ]
+ 
+   public = [
+--- a/third_party/openxr/BUILD.gn
++++ b/third_party/openxr/BUILD.gn
+@@ -39,6 +39,10 @@
+     # If you'd like to expand this visibility, you will need to make similar
+     # DEPS rules for it as are present in the below locations.
+     visibility = [
++      "//chrome/browser/vr/*",
++      "//chrome/test/*",
++      "//components/webxr/*",
++      "//device/vr/*",
+     ]
+ 
+     sources = [ "src/include/openxr/openxr_platform.h" ]
+@@ -96,6 +100,10 @@
+     # If you'd like to expand this visibility, you will need to make similar
+     # DEPS rules for it as are present in the below locations.
+     visibility = [
++      "//chrome/browser/vr/*",
++      "//chrome/test/*",
++      "//components/webxr/*",
++      "//device/vr/*",
+     ]
+     sources = [
+       "dev/xr_android.h",
+--- a/third_party/blink/public/common/BUILD.gn
++++ b/third_party/blink/public/common/BUILD.gn
+@@ -90,6 +90,8 @@
+ 
+ source_set("common_export") {
+   visibility = [
++    "//third_party/blink/common/*",
++    "//third_party/blink/public/common/*",
+   ]
+   sources = [ "common_export.h" ]
+ }
+--- a/third_party/blink/renderer/bindings/core/v8/BUILD.gn
++++ b/third_party/blink/renderer/bindings/core/v8/BUILD.gn
+@@ -58,6 +58,8 @@
+ group("generated") {
+   visibility = []
+   visibility = [
++    "//third_party/blink/renderer/bindings/core/v8/*",
++    "//third_party/blink/renderer/core/*",
+   ]
+ 
+   public_deps = [
+--- a/third_party/blink/renderer/bindings/modules/v8/BUILD.gn
++++ b/third_party/blink/renderer/bindings/modules/v8/BUILD.gn
+@@ -62,6 +62,8 @@
+ group("generated") {
+   visibility = []
+   visibility = [
++    "//third_party/blink/renderer/bindings/modules/v8/*",
++    "//third_party/blink/renderer/modules/*",
+   ]
+ 
+   public_deps =
+--- a/third_party/blink/renderer/platform/image-decoders/BUILD.gn
++++ b/third_party/blink/renderer/platform/image-decoders/BUILD.gn
+@@ -10,6 +10,8 @@
+ 
+ component("image_decoders") {
+   visibility = [
++    "//third_party/blink/renderer/core/*",
++    "//third_party/blink/renderer/platform/*",
+   ]
+   output_name = "image_decoders"
+ 
+--- a/third_party/windows_app_sdk_headers/BUILD.gn
++++ b/third_party/windows_app_sdk_headers/BUILD.gn
+@@ -19,6 +19,8 @@
+   public_deps = [ ":version_info" ]
+ 
+   visibility = [
++    "//chrome/browser/webnn/*",
++    "//services/webnn/*",
+   ]
+ }
+ 
+--- a/device/vr/BUILD.gn
++++ b/device/vr/BUILD.gn
+@@ -44,6 +44,9 @@
+     # we opted to leave the exception.
+     visibility = [
+       # TODO(crbug.com/41389193): Move arcore_device
++      "//chrome/browser/*",
++      "//content/services/isolated_xr_device/*",
++      "//device/vr/*",
+     ]
+ 
+     output_name = "device_vr_base"
+--- a/media/gpu/ipc/service/BUILD.gn
++++ b/media/gpu/ipc/service/BUILD.gn
+@@ -10,6 +10,10 @@
+ 
+ target(link_target_type, "service") {
+   visibility = [
++    "//components/viz/service/*",
++    "//content/gpu/*",
++    "//content/public/gpu/*",
++    "//media/*",
+   ]
+ 
+   sources = [
+--- a/pdf/loader/BUILD.gn
++++ b/pdf/loader/BUILD.gn
+@@ -12,6 +12,8 @@
+     # TODO(crbug.com/40161525): Eliminate
+     # pdf_find_request_manager_browsertest.cc's dependence on
+     # document_loader_impl.h.
++    "//chrome/browser/pdf:browser_tests",
++    "//pdf/*",
+   ]
+ 
+   friend = [
+@@ -66,6 +68,8 @@
+     "url_loader_wrapper_impl_unittest.cc",
+   ]
+ 
++  configs += [ "//pdf:strict" ]
++
+   deps = [
+     ":loader",
+     "//base",
+--- a/gpu/ipc/common/BUILD.gn
++++ b/gpu/ipc/common/BUILD.gn
+@@ -196,6 +196,8 @@
+   generate_blink = true
+   generate_java = true
+   visibility = [
++    "//gpu/*",
++    "//services/*",
+   ]
+   sources = [ "shared_image_pool_client_interface.mojom" ]
+   deps = [ "//mojo/public/mojom/base" ]
+--- a/components/reporting/resources/BUILD.gn
++++ b/components/reporting/resources/BUILD.gn
+@@ -4,6 +4,9 @@
+ 
+ static_library("resource_manager") {
+   visibility = [
++    "//chrome/browser/*",
++    "//chrome/test/*",
++    "//components/reporting/*",
+   ]
+   sources = [
+     "resource_manager.cc",
+@@ -15,6 +18,9 @@
+ 
+ static_library("resource_managed_buffer") {
+   visibility = [
++    "//chrome/browser/*",
++    "//chrome/test/*",
++    "//components/reporting/*",
+   ]
+ 
+   sources = [
+--- a/components/cdm/renderer/BUILD.gn
++++ b/components/cdm/renderer/BUILD.gn
+@@ -8,6 +8,12 @@
+ static_library("renderer") {
+   # See //components/cdm/README.md
+   visibility = [
++    "//android_webview/*",
++    "//chrome/*",
++    "//chromecast/*",
++    "//components/cdm/*",
++    "//content/shell/*",
++    "//fuchsia_web/*",
+   ]
+ 
+   sources = [
+--- a/components/cdm/common/BUILD.gn
++++ b/components/cdm/common/BUILD.gn
+@@ -16,6 +16,12 @@
+ 
+   # See //components/cdm/README.md
+   visibility = [
++    "//android_webview/*",
++    "//chrome/*",
++    "//chromecast/*",
++    "//components/cdm/*",
++    "//content/shell/*",
++    "//fuchsia_web/*",
+   ]
+ 
+   deps = [
+--- a/components/cdm/browser/BUILD.gn
++++ b/components/cdm/browser/BUILD.gn
+@@ -8,6 +8,12 @@
+   source_set("browser") {
+     # See //components/cdm/README.md
+     visibility = [
++      "//android_webview/*",
++      "//chrome/*",
++      "//chromecast/*",
++      "//components/cdm/*",
++      "//content/shell/*",
++      "//fuchsia_web/*",
+     ]
+ 
+     if (is_android) {
+--- a/components/stream_transport/internal/proto/BUILD.gn
++++ b/components/stream_transport/internal/proto/BUILD.gn
+@@ -7,6 +7,10 @@
+ 
+ proto_library("proto") {
+   visibility = [
++    "//chrome/browser/browser_actuator/internals:*",
++    "//chrome/browser/sharing/browser_actuator/*",
++    "//components/browser_actuator/*",
++    "//components/stream_transport/*",
+   ]
+   sources = [ "transport_messages.proto" ]
+   deps = [
+--- a/components/browser_actuator/public/profile_registry/proto/BUILD.gn
++++ b/components/browser_actuator/public/profile_registry/proto/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ proto_library("proto") {
+   visibility = [
++    "//chrome/browser/browser_actuator/*",
++    "//components/browser_actuator/*",
+   ]
+   sources = [ "chrome_profile_registry_entry.proto" ]
+   proto_in_dir = "//"
+--- a/components/browser_actuator/local_actuation/proto/BUILD.gn
++++ b/components/browser_actuator/local_actuation/proto/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ proto_library("proto") {
+   visibility = [
++    "//chrome/browser/browser_actuator/*",
++    "//components/browser_actuator/*",
+   ]
+   sources = [ "local_actuation_ipc.proto" ]
+   proto_in_dir = "//"
+--- a/components/browser_actuator/colocation/proto/BUILD.gn
++++ b/components/browser_actuator/colocation/proto/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ proto_library("proto") {
+   visibility = [
++    "//chrome/browser/browser_actuator/*",
++    "//components/browser_actuator/*",
+   ]
+   sources = [ "chrome_colocation_proof.proto" ]
+   proto_in_dir = "//"
+--- a/components/browser_actuator/internal/proto/BUILD.gn
++++ b/components/browser_actuator/internal/proto/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ proto_library("task_ingress_proto") {
+   visibility = [
++    "//chrome/browser/browser_actuator/*",
++    "//components/browser_actuator/*",
+   ]
+   sources = [ "task_ingress.proto" ]
+   deps = [ "//third_party/protobuf:any_proto" ]
+--- a/components/policy/core/common/BUILD.gn
++++ b/components/policy/core/common/BUILD.gn
+@@ -69,6 +69,8 @@
+ 
+ source_set("internal") {
+   visibility = [
++    "//components/policy/*",
++    "//components/privacy_sandbox/*",
+   ]
+ 
+   configs += [ "//components/policy:component_implementation" ]
+--- a/components/services/app_service/public/cpp/BUILD.gn
++++ b/components/services/app_service/public/cpp/BUILD.gn
+@@ -205,6 +205,8 @@
+   # Not exported through //components/services/app_service, and only exposed to
+   # App Service code.
+   visibility = [
++    "//chrome/browser/apps/app_service/*",
++    "//components/services/app_service/*",
+   ]
+ }
+ 
+--- a/components/payments/content/browser_binding/BUILD.gn
++++ b/components/payments/content/browser_binding/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ source_set("browser_binding") {
+   visibility = [
++    "//chrome/browser/payments/browser_binding/*",
++    "//components/payments/content/*",
+   ]
+   public_deps = [
+     ":interface",
+--- a/components/update_client/BUILD.gn
++++ b/components/update_client/BUILD.gn
+@@ -295,6 +295,8 @@
+ 
+ bundle_data("recovery_component_tests_bundle_data") {
+   visibility = [
++    "//chrome/browser/component_updater:unit_tests",
++    "//chrome/test:unit_tests",
+   ]
+   testonly = true
+   sources = [ "//components/test/data/update_client/ChromeRecovery.crx3" ]
+--- a/components/webapps/isolated_web_apps/key_distribution/proto/BUILD.gn
++++ b/components/webapps/isolated_web_apps/key_distribution/proto/BUILD.gn
+@@ -6,6 +6,8 @@
+ 
+ proto_library("proto") {
+   visibility = [
++    "//chrome/browser/web_applications/*",
++    "//components/webapps/isolated_web_apps/*",
+   ]
+   sources = [ "key_distribution.proto" ]
+   cc_generator_options = "lite=true:"
