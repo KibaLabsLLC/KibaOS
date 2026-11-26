@@ -135,3 +135,12 @@ installer/wallpapers/.private/
 # kibaos-boot draws into build/ and packs that into kibaos-boot-drawn.tar;
 # only the archive is kept.
 kibaos-boot/build/
+
+# Transient repair-workflow state: the repair-pruned-gn workflow checks out
+# Lumen and a chromium mirror inside this repository and stages repaired
+# files under repaired/ before emitting patches/0165. None of that is
+# repository content; 0165's committed staging copies (and an empty-field
+# pr_branch resolving to main) slipped a bot commit onto main once already.
+/lumen/
+/chromium-mirror/
+/repaired/

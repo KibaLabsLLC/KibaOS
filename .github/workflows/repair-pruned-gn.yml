@@ -64,6 +64,18 @@ jobs:
             --ref "$CHROMIUM_REF" \
             --out repaired
 
+      - name: Resolve repair branch
+        run: |
+          branch="${{ inputs.pr_branch }}"
+          if [ -z "$branch" ]; then
+            branch="vibe/repair-pruned-gn"
+          fi
+          if [ "$branch" = "main" ]; then
+            echo "Refusing to push the repair onto main" >&2
+            exit 1
+          fi
+          echo "REPAIR_BRANCH=$branch" >> "$GITHUB_ENV"
+
       - name: Emit 0165 patch
         working-directory: lumen
         if: success()
@@ -72,15 +84,19 @@ jobs:
             echo "Nothing to repair" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
+          git add -A
+          git -c user.name "github-actions[bot]" \
+            -c user.email "github-actions[bot]@users.noreply.github.com" \
+            commit -qm "series state (diff anchor)"
           rsync -a ../repaired/ .
           git add -A
-          git diff --cached > ../patches/0165-the-vendored-build-files-parse-again.patch
+          git diff --cached HEAD~1 > ../patches/0165-the-vendored-build-files-parse-again.patch
           grep -q '^0165-the-vendored-build-files-parse-again.patch$' ../patches/SERIES || \
             printf '0165-the-vendored-build-files-parse-again.patch\n' >> ../patches/SERIES
 
       - name: Commit and push
         run: |
-          branch="${{ inputs.pr_branch }}"
+          branch="${REPAIR_BRANCH}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if git show-ref --verify --quiet "refs/remotes/origin/$branch" || \
@@ -90,7 +106,7 @@ jobs:
           else
             git checkout -b "$branch"
           fi
-          git add -A
+          git add patches/0165-the-vendored-build-files-parse-again.patch patches/SERIES
           if git diff --cached --quiet; then
             echo "No changes to commit" >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -100,7 +116,7 @@ jobs:
 
       - name: Open PR
         run: |
-          branch="${{ inputs.pr_branch }}"
+          branch="${REPAIR_BRANCH}"
           n="$(gh pr list --head "$branch" --state open --json number -q 'length')"
           if [ "$n" != "0" ]; then
             echo "PR already open"
