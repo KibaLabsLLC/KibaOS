@@ -103,4 +103,5 @@
 0179-chrome-dependency-edges-are-dropped.patch
 0180-cast-core-and-the-remaining-chrome-pulls-are-dropped.patch
 0181-unicode-width-sources-are-declared.patch
+0182-codespan-reporting-sources-are-declared.patch
 0900-gn-evaluation-converges.patch

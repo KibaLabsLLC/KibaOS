@@ -1,0 +1,17 @@
+diff --git a/third_party/rust/codespan_reporting/v0_13/BUILD.gn b/third_party/rust/codespan_reporting/v0_13/BUILD.gn
+--- a/third_party/rust/codespan_reporting/v0_13/BUILD.gn
++++ b/third_party/rust/codespan_reporting/v0_13/BUILD.gn
+@@ -13,6 +13,13 @@
+   crate_type = "rlib"
+   crate_root = "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/lib.rs"
+   sources = [
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/lib.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/diagnostic.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/files.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/term/mod.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/term/config.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/term/renderer.rs",
++    "//third_party/rust/chromium_crates_io/vendor/codespan-reporting-v0_13/src/term/views.rs",
+   ]
+   inputs = []
+ 
