@@ -3,13 +3,15 @@
 
 ci/repair-pruned-gn.py fixes what fails to parse; this fixes what only fails
 once GN evaluates the graph. It runs the Ash package's exact `gn gen` command
-(chromiumos-ash/PKGBUILD), and for every failure class that is a missing file
--- imports, exec_script and read_file inputs deleted by the source pruner --
-restores the file from the chromium mirror at the pinned sha and retries.
-
-Failures that are not missing files (undefined identifiers, emptied sources,
-unresolved labels) are reported verbatim and stop the loop: real gn is the
-referee, so what it rejects is never guessed at.
+(chromiumos-ash/PKGBUILD) and after every failure applies one round of
+ci/gn_edge_cut.py recovery: inert files the pruner deleted (import targets,
+exec_script and read_file inputs) come back from the chromium mirror at the
+pinned sha, while dep edges into build files the pruner deleted are cut in
+the referrer gn names -- a tree that must not load chrome at all converges
+by shedding every edge into the pruned subtree instead of growing chrome
+back. Failures that are not missing files (undefined identifiers, emptied
+sources, unresolved labels) are reported verbatim and stop the loop: real gn
+is the referee, so what it rejects is never guessed at.
 
 The chromium mirror must be checked out at the ref passed via --ref and the
 src tree must carry its sync'd dependency checkout (ci/resolve-deps.py), the
@@ -19,9 +21,10 @@ missing file.
 """
 import argparse
 import os
-import re
 import subprocess
 import sys
+
+from gn_edge_cut import MAX_ITERATIONS, recover
 
 GN_ARGS = """\
 target_os = "chromeos"
@@ -44,65 +47,6 @@ use_official_google_api_keys = false
 dcheck_always_on = false
 """
 
-UNABLE_RE = re.compile(r'Unable to load "([^"]+)"')
-MISSING_FILE_RE = re.compile(
-    r"FileNotFoundError: \[Errno 2\] No such file or directory: '([^']+)'")
-
-MAX_ITERATIONS = 8
-
-
-def up_show(chromium, ref, relpath):
-    proc = subprocess.run(
-        ["git", "-C", chromium, "show", "%s:%s" % (ref, relpath)],
-        capture_output=True)
-    return proc.stdout if proc.returncode == 0 else None
-
-
-def candidates(root, out_dir, raw):
-    """Tree-relative candidates for a path gn complained about."""
-    cands = []
-    p = raw
-    if os.path.isabs(p):
-        cands.append(os.path.relpath(p, root))
-    else:
-        cands.append(os.path.normpath(p))
-        cands.append(os.path.relpath(os.path.normpath(
-            os.path.join(out_dir, p)), root))
-        cands.append(os.path.relpath(os.path.normpath(
-            os.path.join(root, out_dir, p)), root))
-    out = []
-    for c in cands:
-        if not c.startswith("..") and c not in out:
-            out.append(c)
-    return out
-
-
-def fixable_paths(root, out_dir, text):
-    """Missing files gn reported that we can name within the source tree."""
-    found = []
-    for raw in UNABLE_RE.findall(text) + MISSING_FILE_RE.findall(text):
-        found.extend(candidates(root, out_dir, raw))
-    return found
-
-
-def restore(root, chromium, ref, rels):
-    restorable, missing_upstream = [], {}
-    for rel in rels:
-        if os.path.exists(os.path.join(root, rel)):
-            continue
-        up = up_show(chromium, ref, rel)
-        if up is None:
-            missing_upstream.setdefault(rel, None)
-            continue
-        dst = os.path.join(root, rel)
-        parent = os.path.dirname(dst)
-        if parent:
-            os.makedirs(parent, exist_ok=True)
-        with open(dst, "wb") as fh:
-            fh.write(up)
-        restorable.append(rel)
-    return restorable, sorted(missing_upstream)
-
 
 def main():
     ap = argparse.ArgumentParser(description="Converge gn gen on Lumen")
@@ -117,7 +61,6 @@ def main():
     args = ap.parse_args()
 
     root = os.path.abspath(args.lumen)
-    out_dir = os.path.join(root, args.out_dir)
     cmd = [os.path.abspath(args.gn), "gen", args.out_dir,
            "--root-target=//lumen", "--args=" + GN_ARGS]
 
@@ -131,22 +74,15 @@ def main():
         if proc.returncode == 0:
             print("==> gn gen converged", flush=True)
             return 0
-        rels = []
-        for cand in fixable_paths(root, args.out_dir, text):
-            full = os.path.join(root, cand)
-            if not os.path.exists(full) and cand not in rels:
-                rels.append(cand)
-        if not rels:
-            break
-        restorable, upstream_missing = restore(
-            root, args.chromium, args.ref, rels)
-        for r in restorable:
-            print("==> converge: restored %s from upstream %s"
-                  % (r, args.ref), flush=True)
-        for m in upstream_missing:
-            print("==> converge: not in upstream, cannot restore: %s" % m,
-                  flush=True)
-        if not restorable:
+        error_line = next((line for line in text.splitlines()
+                           if line.startswith("ERROR at ")), "")
+        if error_line:
+            print("==> converge: %s" % error_line, flush=True)
+        changed, actions = recover(root, args.out_dir, text,
+                                   args.chromium, args.ref)
+        for action in actions:
+            print("==> converge: %s" % action, flush=True)
+        if not changed:
             break
 
     print("==> converge: gn did not converge", flush=True)

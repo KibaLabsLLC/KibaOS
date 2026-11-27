@@ -264,7 +264,14 @@ build() {
     # and the graph ends up empty. chrome_sandbox is a data_dep of
     # //lumen:chrome (patch 0163), so building chrome builds the sandbox
     # helper too.
-    gn gen "${out_dir}" \
+    #
+    # gn surfaces one pruned-file failure per attempt, so the call below is
+    # a loop: every failed attempt hands its log to ci/gn_edge_cut.py, which
+    # restores inert files when a mirror is available and cuts the dep edge
+    # that requested a deleted build file. The graph sheds its edges into
+    # the pruned chrome/ subtree instead of growing the browser back.
+    _ash_gn_gen() {
+        gn gen "${out_dir}" \
         --root-target="//lumen" \
         --args="
         # Ash only builds under is_chromeos, which this tree derives from
@@ -300,6 +307,38 @@ build() {
         # the bring up tree keeps it.
         dcheck_always_on = false
     "
+    }
+
+    local ci_dir="${KIBAOS_CI_DIR:-${startdir}/../ci}"
+    local gn_log="${srcdir}/gn-gen.log"
+    local gn_attempt=1
+    local gn_max="${KIBAOS_GN_RECOVERY_ATTEMPTS:-200}"
+    while :; do
+        echo "==> gn gen attempt ${gn_attempt}/${gn_max}"
+        if _ash_gn_gen >"${gn_log}" 2>&1; then
+            rm -f "${gn_log}"
+            break
+        fi
+        cat "${gn_log}"
+        if [ "${gn_attempt}" -ge "${gn_max}" ]; then
+            echo "ERROR: gn gen did not converge within ${gn_max} attempts" >&2
+            exit 1
+        fi
+        if [ ! -f "${ci_dir}/gn_edge_cut.py" ]; then
+            echo "ERROR: ci/gn_edge_cut.py not found at ${ci_dir} to recover the gn gen failure above" >&2
+            exit 1
+        fi
+        if ! python3 "${ci_dir}/gn_edge_cut.py" \
+            --lumen "${chrome_src}" \
+            --out-dir "${out_dir}" \
+            ${KIBAOS_CHROMIUM_MIRROR:+--chromium "${KIBAOS_CHROMIUM_MIRROR}"} \
+            ${KIBAOS_CHROMIUM_REF:+--ref "${KIBAOS_CHROMIUM_REF}"} \
+            --log-file "${gn_log}"; then
+            echo "ERROR: nothing in the gn log above is recoverable" >&2
+            exit 1
+        fi
+        gn_attempt=$((gn_attempt + 1))
+    done
 
     if grep -Eq '^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"' "${out_dir}/args.gn"; then
         echo 'ERROR: no-key KibaOS build contains a Google credential' >&2
