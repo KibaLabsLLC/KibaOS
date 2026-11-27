@@ -1697,7 +1697,6 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/ascii.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/backtrace.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/backtrace/tests.rs",
-+    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/bstr.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/collections/hash/map.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/collections/hash/map/tests.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/collections/hash/mod.rs",
