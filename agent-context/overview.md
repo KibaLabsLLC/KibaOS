@@ -39,12 +39,7 @@ ChromiumOS branding, no browser chrome.
 - **[Lumen](https://github.com/KibaLabsLLC/Lumen)** — the KibaOS windowing
   compositor: the Chromium fork without `chrome/`. This is where Ash lives.
   See [lumen-and-kibade.md](lumen-and-kibade.md).
-- **[Okami](https://github.com/KibaLabsLLC/Okami)** — the app store (Qt/Kirigami/QML).
-- **[Roko](https://github.com/KibaLabsLLC/Roko)** — the installer (Vala/GTK4).
-- **[KibaDE](https://github.com/KibaLabsLLC/KibaDE)** — the desktop environment
-  release point; release tooling here (`ci/release.sh`) publishes the desktop
-  packages under the `KibaLabsLLC/KibaDE` repo.
-
+  
 ## How the Pieces Fit
 
 ```
