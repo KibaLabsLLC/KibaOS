@@ -2438,7 +2438,7 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
    ]
    rustenv = [
      "CFG_DISABLE_UNSTABLE_FEATURES=0",
-@@ -948,6 +3252,48 @@
+@@ -948,6 +3252,47 @@
    crate_type = "rlib"
    crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/lib.rs"
    sources = [
@@ -2448,7 +2448,6 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/mips.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/mod.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/powerpc.rs",
-+    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/powerpc64.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/riscv.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/s390x.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/detect/arch/x86.rs",
