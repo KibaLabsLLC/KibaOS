@@ -1687,7 +1687,7 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
    ]
    inputs = []
    no_std = true
-@@ -870,9 +2444,734 @@
+@@ -870,9 +2444,733 @@
  cargo_crate("std") {
    crate_type = "rlib"
    crate_root =
@@ -2218,7 +2218,6 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/linux.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/mod.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/motor.rs",
-+    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/redox.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/sgx.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/solid.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/sys/random/teeos.rs",
