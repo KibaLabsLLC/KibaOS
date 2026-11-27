@@ -6,12 +6,13 @@ once GN evaluates the graph. It runs the Ash package's exact `gn gen` command
 (chromiumos-ash/PKGBUILD) and after every failure applies one round of
 ci/gn_edge_cut.py recovery: inert files the pruner deleted (import targets,
 exec_script and read_file inputs) come back from the chromium mirror at the
-pinned sha, while dep edges into build files the pruner deleted are cut in
+pinned sha, while dep edges into build files the pruner deleted and refs to
+targets the pruner dropped (gn's "Unresolved dependencies" pairs) are cut in
 the referrer gn names -- a tree that must not load chrome at all converges
 by shedding every edge into the pruned subtree instead of growing chrome
-back. Failures that are not missing files (undefined identifiers, emptied
-sources, unresolved labels) are reported verbatim and stop the loop: real gn
-is the referee, so what it rejects is never guessed at.
+back. Failures that are neither missing files nor unresolved pruned targets
+(undefined identifiers, emptied sources) are reported verbatim and stop the
+loop: real gn is the referee, so what it rejects is never guessed at.
 
 The chromium mirror must be checked out at the ref passed via --ref and the
 src tree must carry its sync'd dependency checkout (ci/resolve-deps.py), the
