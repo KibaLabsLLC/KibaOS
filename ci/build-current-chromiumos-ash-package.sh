@@ -31,9 +31,11 @@ rsync -a --exclude pkg --exclude src \
 
 export CHROME_SRC
 # The PKGBUILD is rsynced away from ci/, so hand it the tool that puts the
-# Files page into resources.pak and the recovery tool its gn gen loop needs.
+# Files page into resources.pak, the recovery tool its gn gen loop needs, and
+# the path to the shill-nm-adapter source its fail-closed network guard checks.
 export KIBAOS_FILES_PAK_TOOL="${REPO_ROOT}/ci/build-files-pak.sh"
 export KIBAOS_CI_DIR="${REPO_ROOT}/ci"
+export KIBAOS_SHILL_ADAPTER_DIR="${REPO_ROOT}/shill-nm-adapter"
 export BUILDDIR="${WORKDIR}/build"
 export PKGDEST="${WORKDIR}/pkgdest"
 export SRCDEST="${WORKDIR}/srcdest"

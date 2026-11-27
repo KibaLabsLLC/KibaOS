@@ -343,16 +343,22 @@ build() {
         gn_attempt=$((gn_attempt + 1))
     done
 
-    if grep -Eq '^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"' "${out_dir}/args.gn"; then
+    if grep -Eq '^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*"[^"]+"' "${out_dir}/args.gn"; then
         echo 'ERROR: no-key KibaOS build contains a Google credential' >&2
         exit 1
     fi
 
     # Fail closed if the build would publish the desktop fake network services,
-    # which look like real connections in Ash. What makes them real on generic
-    # Linux is patch 0038: ash_dbus_helper routes the Shill clients to their own
-    # narrowly scoped bus rather than to the global one, which does not exist
-    # here. Check for that routing.
+    # which look like real connections in Ash. What made them real on generic
+    # Linux was patch 0038: ash_dbus_helper routed the Shill clients to their
+    # own narrowly scoped bus rather than to the global one, which does not
+    # exist here. That call site left with the chrome/ tree — //lumen:chrome is
+    # the shell delegation entry, not a browser — and the routing now lives on
+    # the KibaOS side: the shill-nm-adapter service at the root of this repo
+    # owns org.chromium.flimflam on the system bus, this package depends on it,
+    # and patch 0055 keeps the remaining dbus clients off the fake environment.
+    # The chromium source carries no network routing of its own any more, so
+    # the guard checks the adapter the runtime bridge depends on.
     #
     # This used to check toolchain.ninja for -DUSE_REAL_DBUS_CLIENTS. That flag
     # was the mechanism before 0038 existed, and it stopped being safe on
@@ -360,12 +366,11 @@ build() {
     # chromeos/ash/components/dbus a CHECK(bus) on Initialize. Setting it also
     # sets use_real_chromeos_services via chromeos/features.gni, which drops the
     # fake mojo service manager from the build entirely, so a build carrying the
-    # define aborts in PostEarlyInitialization before any window appears. The
-    # binary that boots does not have it.
-    local shill_router="${chrome_src}/chrome/browser/ash/dbus/ash_dbus_helper.cc"
-    if [[ ! -r "${shill_router}" ]] ||
-       ! grep -Fq 'shill_clients::InitializeKibaOs' "${shill_router}"; then
-        echo 'ERROR: Chromium source is missing the real Shill routing from patch 0038' >&2
+    # define aborts in PostEarlyInitialization before any window appears.
+    local shill_adapter="${KIBAOS_SHILL_ADAPTER_DIR:-${startdir}/../shill-nm-adapter}/shill_nm_adapter.py"
+    if [[ ! -r "${shill_adapter}" ]] ||
+       ! grep -Fq 'org.chromium.flimflam' "${shill_adapter}"; then
+        echo 'ERROR: missing the real Shill routing: shill-nm-adapter is not in the KibaOS source tree' >&2
         return 1
     fi
 
