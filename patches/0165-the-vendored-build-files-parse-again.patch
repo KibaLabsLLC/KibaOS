@@ -348,7 +348,7 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
    ]
    no_std = true
  
-@@ -177,8 +487,522 @@
+@@ -177,8 +487,520 @@
    crate_type = "rlib"
    crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/lib.rs"
    sources = [
@@ -372,8 +372,6 @@ diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/attribute_docs.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/bool.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/borrow.rs",
-+    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/bstr/mod.rs",
-+    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/bstr/traits.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/cell.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/cell/covariant_unsafe_cell.rs",
 +    "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/cell/lazy.rs",
