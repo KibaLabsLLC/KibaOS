@@ -14,6 +14,10 @@ Files deleted by the source pruner fall into two classes:
     pruner dropped its targets, so the dep edge that requests it is cut from
     the referrer gn names (ERROR at //path:line:col). An import target no
     mirror can provide gets its import line cut too.
+  * Targets the pruner dropped while keeping their referrers surface as gn
+    "Unresolved dependencies" pairs; the referrer's dep token for each such
+    target is cut (absolute "//path:name", dir-only "//path" and relative
+    ":name" spellings).
 
 Everything else in the gn log is left alone: real gn is the referee, so what
 it rejects is never guessed at.
@@ -28,6 +32,8 @@ MISSING_FILE_RE = re.compile(
     r"FileNotFoundError: \[Errno 2\] No such file or directory: '([^']+)'")
 UNABLE_BLOCK_RE = re.compile(
     r'^ERROR at //(\S+):(\d+):(\d+): Unable to load "([^"]+)"', re.M)
+UNRESOLVED_HEADER_RE = re.compile(
+    r'^ERROR Unresolved dependencies\.\n', re.M)
 
 MAX_ITERATIONS = 1000
 
@@ -129,6 +135,88 @@ def drop_import(line):
     return line[:start] + line[end + 1:]
 
 
+def unresolved_pairs(text):
+    """(referrer label, needed label) pairs from Unresolved dependencies."""
+    m = UNRESOLVED_HEADER_RE.search(text)
+    if not m:
+        return []
+    rest = text[m.end():]
+    nxt = re.search(r'^ERROR ', rest, re.M)
+    if nxt:
+        rest = rest[:nxt.start()]
+    pairs, referrer = [], None
+    for line in rest.splitlines():
+        if line.startswith("  needs "):
+            if referrer:
+                pairs.append((referrer, line.strip()[6:]))
+        elif line.startswith("//"):
+            referrer = line.strip()
+        elif not line.strip():
+            referrer = None
+    out, seen = [], set()
+    for pair in pairs:
+        if pair not in seen:
+            seen.add(pair)
+            out.append(pair)
+    return out
+
+
+def label_parts(label):
+    """Split a toolchain-qualified label into (build-dir path, target name)."""
+    label = label.split("(", 1)[0]
+    if ":" in label:
+        path, name = label.split(":", 1)
+    else:
+        path, name = label, label.rsplit("/", 1)[-1]
+    if path.startswith("//"):
+        path = path[2:]
+    return path, name
+
+
+def dep_tokens(ref_path, needed_path, needed_name):
+    """Quoted-in-source spellings that reference the needed label."""
+    toks = ["//%s:%s" % (needed_path, needed_name)]
+    if ref_path == needed_path:
+        toks.append(":%s" % needed_name)
+    if needed_name == needed_path.rsplit("/", 1)[-1]:
+        toks.append("//%s" % needed_path)
+    return toks
+
+
+def cut_unresolved(root, text):
+    """Cut refs to targets gn could not resolve; returns drop strings."""
+    drops = []
+    for referrer, needed in unresolved_pairs(text):
+        ref_path, _ = label_parts(referrer)
+        needed_path, needed_name = label_parts(needed)
+        rel = "%s/BUILD.gn" % ref_path
+        try:
+            with open(os.path.join(root, rel), encoding="utf-8") as fh:
+                lines = fh.readlines()
+        except OSError:
+            continue
+        toks = dep_tokens(ref_path, needed_path, needed_name)
+        changed, blank = False, []
+        for i, line in enumerate(lines):
+            for tok in toks:
+                while '"%s"' % tok in line:
+                    new = drop_token(line, '"%s"' % tok)
+                    if new is None:
+                        break
+                    line = new
+                    changed = True
+                    drops.append('%s:%d "%s"' % (rel, i + 1, tok))
+            lines[i] = line
+            if not line.strip():
+                blank.append(i)
+        if changed:
+            for i in reversed(blank):
+                del lines[i]
+            with open(os.path.join(root, rel), "w", encoding="utf-8") as fh:
+                fh.writelines(lines)
+    return drops
+
+
 def cut_edges(root, out_dir, text, chromium=None, ref=None):
     """Handle the build files gn cannot load.
 
@@ -190,7 +278,8 @@ def recover(root, out_dir, text, chromium=None, ref=None):
     and the caller should re-run gn; actions are human-readable strings.
     """
     drops, import_rels = cut_edges(root, out_dir, text, chromium, ref)
-    actions = ["dropped %s" % d for d in drops]
+    unresolved = cut_unresolved(root, text)
+    actions = ["dropped %s" % d for d in drops + unresolved]
     rels = missing_inputs(root, out_dir, text) + import_rels
     if chromium and ref:
         restorable, missing_upstream = restore(root, chromium, ref, rels)
@@ -200,7 +289,7 @@ def recover(root, out_dir, text, chromium=None, ref=None):
         actions.append("restored %s from upstream %s" % (r, ref))
     for m in missing_upstream:
         actions.append("not in upstream, cannot restore: %s" % m)
-    return bool(drops or restorable), actions
+    return bool(drops or unresolved or restorable), actions
 
 
 def main():
