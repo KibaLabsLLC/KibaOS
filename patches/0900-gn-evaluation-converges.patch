@@ -1,0 +1,1089 @@
+diff --git a/build/rust/std/rules/BUILD.gn b/build/rust/std/rules/BUILD.gn
+index 78bf125126..5b34d567d3 100644
+--- a/build/rust/std/rules/BUILD.gn
++++ b/build/rust/std/rules/BUILD.gn
+@@ -1,12 +1,9 @@
+ # Copyright 2023 The Chromium Authors
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+-
+ # @generated from build/rust/std/BUILD.gn.hbs by tools/crates/gnrt. Do not edit!
+-
+ import("//build/config/rust.gni")
+ import("//build/rust/cargo_crate.gni")
+-
+ config("max_codegen_units") {
+   # Force one CGU per module (it won't actually be 10,000). This is useful for
+   # compiler-builtins, which should have one intrinsic defined per object file.
+@@ -14,7 +11,6 @@ config("max_codegen_units") {
+   # -Ccodegen-units=1.
+   rustflags = [ "-Ccodegen-units=10000" ]
+ }
+-
+ cargo_crate("alloc") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/alloc/src/lib.rs"
+@@ -118,14 +114,12 @@ cargo_crate("alloc") {
+   ]
+   inputs = []
+   no_std = true
+-
+   cpp_api_from_rust = {
+     target_name = "alloc_bindings"
+     cpp_namespace = "rs::alloc"
+     h_out = "$root_gen_dir/third_party/crubit/support/rs_std/rs_alloc.h"
+     bindings_deps = [ ":core_bindings" ]
+   }
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -161,14 +155,12 @@ cargo_crate("alloc") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("cfg_if") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/cfg-if-1.0.4/src/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/cfg-if-1.0.4/src/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2018"
+@@ -211,7 +203,6 @@ cargo_crate("cfg_if") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("compiler_builtins") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins/src/lib.rs"
+@@ -434,7 +425,6 @@ cargo_crate("compiler_builtins") {
+     "//third_party/rust-toolchain/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins/src/../../libm/src/math/trunc.rs",
+   ]
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -482,7 +472,6 @@ cargo_crate("compiler_builtins") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("core") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/lib.rs"
+@@ -1005,14 +994,12 @@ cargo_crate("core") {
+     "//third_party/rust-toolchain/lib/rustlib/src/rust/library/core/src/sync/atomic_store_volatile.md",
+   ]
+   no_std = true
+-
+   cpp_api_from_rust = {
+     target_name = "core_bindings"
+     cpp_namespace = "rs::core"
+     h_out = "$root_gen_dir/third_party/crubit/support/rs_std/rs_core.h"
+     bindings_deps = []
+   }
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -1047,7 +1034,6 @@ cargo_crate("core") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("getopts") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/getopts-0.2.24/src/lib.rs"
+@@ -1057,7 +1043,6 @@ cargo_crate("getopts") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2021"
+@@ -1103,7 +1088,6 @@ cargo_crate("getopts") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("gimli") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/gimli-0.34.0/src/lib.rs"
+@@ -1160,7 +1144,6 @@ cargo_crate("gimli") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -1210,7 +1193,6 @@ cargo_crate("gimli") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("hashbrown") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/hashbrown-0.17.1/src/lib.rs"
+@@ -1246,7 +1228,6 @@ cargo_crate("hashbrown") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -1293,7 +1274,6 @@ cargo_crate("hashbrown") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("libc") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/libc-0.2.191/src/lib.rs"
+@@ -1689,7 +1669,6 @@ cargo_crate("libc") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2021"
+@@ -1731,7 +1710,6 @@ cargo_crate("libc") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("memchr") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/memchr-2.8.3/src/lib.rs"
+@@ -1785,7 +1763,6 @@ cargo_crate("memchr") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2021"
+@@ -1830,7 +1807,6 @@ cargo_crate("memchr") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("miniz_oxide") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/miniz_oxide-0.9.1/src/lib.rs"
+@@ -1853,7 +1829,6 @@ cargo_crate("miniz_oxide") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2021"
+@@ -1879,7 +1854,6 @@ cargo_crate("miniz_oxide") {
+   ]
+   if (!is_win) {
+     deps += [
+-      ":adler2",
+       ":rustc_std_workspace_alloc",
+       ":rustc_std_workspace_core",
+     ]
+@@ -1905,7 +1879,6 @@ cargo_crate("miniz_oxide") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("object") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/object-0.39.1/src/lib.rs"
+@@ -1997,7 +1970,6 @@ cargo_crate("object") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2018"
+@@ -2058,7 +2030,6 @@ cargo_crate("object") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("panic_abort") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/panic_abort/src/lib.rs"
+@@ -2069,7 +2040,6 @@ cargo_crate("panic_abort") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2111,7 +2081,6 @@ cargo_crate("panic_abort") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("proc_macro") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/proc_macro/src/lib.rs"
+@@ -2136,7 +2105,6 @@ cargo_crate("proc_macro") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2175,14 +2143,12 @@ cargo_crate("proc_macro") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("profiler_builtins") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/profiler_builtins/src/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/profiler_builtins/src/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2216,7 +2182,6 @@ cargo_crate("profiler_builtins") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("rustc_demangle") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/rustc-demangle-0.1.28/src/lib.rs"
+@@ -2227,7 +2192,6 @@ cargo_crate("rustc_demangle") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2015"
+@@ -2270,14 +2234,12 @@ cargo_crate("rustc_demangle") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("rustc_literal_escaper") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/rustc-literal-escaper-0.0.8/src/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/vendor/rustc-literal-escaper-0.0.8/src/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2021"
+@@ -2316,14 +2278,12 @@ cargo_crate("rustc_literal_escaper") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("rustc_std_workspace_alloc") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-alloc/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-alloc/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2357,14 +2317,12 @@ cargo_crate("rustc_std_workspace_alloc") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("rustc_std_workspace_core") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-core/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-core/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2399,14 +2357,12 @@ cargo_crate("rustc_std_workspace_core") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("rustc_std_workspace_std") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-std/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/rustc-std-workspace-std/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -2440,7 +2396,6 @@ cargo_crate("rustc_std_workspace_std") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("std") {
+   crate_type = "rlib"
+   crate_root =
+@@ -3175,7 +3130,6 @@ cargo_crate("std") {
+     "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std/src/../../stdarch/crates/core_arch/src/core_arch_docs.md",
+   ]
+   no_std = true
+-
+   cpp_api_from_rust = {
+     target_name = "std_bindings"
+     cpp_namespace = "rs::std"
+@@ -3185,7 +3139,6 @@ cargo_crate("std") {
+       ":core_bindings",
+     ]
+   }
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -3220,7 +3173,6 @@ cargo_crate("std") {
+   ]
+   if (!is_win) {
+     deps += [
+-      ":addr2line",
+       ":libc",
+       ":miniz_oxide",
+       ":object",
+@@ -3247,7 +3199,6 @@ cargo_crate("std") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("std_detect") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/std_detect/src/lib.rs"
+@@ -3298,7 +3249,6 @@ cargo_crate("std_detect") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -3342,14 +3292,12 @@ cargo_crate("std_detect") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("sysroot") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/sysroot/src/lib.rs"
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/sysroot/src/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -3386,7 +3334,6 @@ cargo_crate("sysroot") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("test") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/test/src/lib.rs"
+@@ -3424,7 +3371,6 @@ cargo_crate("test") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -3467,7 +3413,6 @@ cargo_crate("test") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("unwind") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/unwind/src/lib.rs"
+@@ -3479,7 +3424,6 @@ cargo_crate("unwind") {
+   ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+@@ -3520,7 +3464,6 @@ cargo_crate("unwind") {
+   output_dir =
+       "$root_out_dir/local_rustc_sysroot/lib/rustlib/$rust_abi_target/lib/"
+ }
+-
+ cargo_crate("windows_link") {
+   crate_type = "rlib"
+   crate_root = "//third_party/rust-toolchain/lib/rustlib/src/rust/library/windows_link/src/lib.rs"
+@@ -3528,7 +3471,6 @@ cargo_crate("windows_link") {
+   sources = [ "//third_party/rust-toolchain/lib/rustlib/src/rust/library/windows_link/src/lib.rs" ]
+   inputs = []
+   no_std = true
+-
+   # Unit tests skipped. Generate with --with-tests to include them.
+   build_native_rust_unit_tests = false
+   edition = "2024"
+diff --git a/chromeos/ash/components/emoji/BUILD.gn b/chromeos/ash/components/emoji/BUILD.gn
+index f49aea58cb..dce4f1f2ec 100644
+--- a/chromeos/ash/components/emoji/BUILD.gn
++++ b/chromeos/ash/components/emoji/BUILD.gn
+@@ -673,8 +673,6 @@ grit("resources") {
+   ]
+ 
+   inputs = [
+-    "$target_gen_dir/emoji_15_0_ordering_remaining.json",
+-    "$target_gen_dir/emoji_15_0_ordering_start.json",
+     "$target_gen_dir/emoji_da_remaining.json",
+     "$target_gen_dir/emoji_da_start.json",
+     "$target_gen_dir/emoji_de_remaining.json",
+@@ -693,7 +691,6 @@ grit("resources") {
+     "$target_gen_dir/emoji_sv_start.json",
+     "$target_gen_dir/emoji_test_ordering_remaining.json",
+     "$target_gen_dir/emoji_test_ordering_start.json",
+-    "$target_gen_dir/emoticon_ordering.json",
+     "$target_gen_dir/emoticon_test_ordering.json",
+     "$target_gen_dir/symbol_ordering.json",
+     "$target_gen_dir/symbol_test_ordering.json",
+diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimization_guide/core/BUILD.gn
+index 3607e2b431..56ed3cae74 100644
+--- a/components/optimization_guide/core/BUILD.gn
++++ b/components/optimization_guide/core/BUILD.gn
+@@ -266,7 +266,6 @@ source_set("ondevice") {
+   sources = [
+     "model_execution/on_device_capability.cc",
+     "model_execution/on_device_capability.h",
+-    "model_execution/on_device_model_names.cc",
+     "model_execution/on_device_model_names.h",
+     "model_execution/on_device_prefs.cc",
+     "model_execution/on_device_prefs.h",
+diff --git a/content/browser/resources/indexed_db/BUILD.gn b/content/browser/resources/indexed_db/BUILD.gn
+index e2208fe3da..c2be2450d8 100644
+--- a/content/browser/resources/indexed_db/BUILD.gn
++++ b/content/browser/resources/indexed_db/BUILD.gn
+@@ -55,6 +55,13 @@ build_webui("build") {
+   ]
+ 
+   mojo_files_deps = [
++    "//components/services/storage/privileged/mojom:mojom_webui_ts__generator",
++    "//components/services/storage/public/mojom/buckets:buckets_ts__generator",
++    "//content/browser/indexed_db:internals_mojo_bindings_ts__generator",
++    "//services/network/public/mojom:mojom_schemeful_site_ts__generator",
++    "//third_party/blink/public/mojom/quota:quota_ts__generator",
++    "//third_party/blink/public/mojom/storage_key:storage_key_ts__generator",
++    "//third_party/blink/public/mojom/tokens:tokens_ts__generator",
+   ]
+ 
+   grit_output_dir = "$root_gen_dir/content"
+diff --git a/net/BUILD.gn b/net/BUILD.gn
+index a4a2ea2117..99369be0f4 100644
+--- a/net/BUILD.gn
++++ b/net/BUILD.gn
+@@ -3879,7 +3879,7 @@ target(_test_target_type, "net_unittests") {
+   }
+ 
+   if (chrome_root_store_supported || is_fuchsia) {
+-    sources += [ "cert/ev_root_ca_metadata_unittest.cc" ]
++    sources += [  ]
+     deps += [ "//net/data/ssl/chrome_root_store:gen_root_store_test_inc" ]
+ 
+     if (chrome_root_store_supported) {
+diff --git a/services/network/public/cpp/BUILD.gn b/services/network/public/cpp/BUILD.gn
+index 28bba1f3f6..c6533727d0 100644
+--- a/services/network/public/cpp/BUILD.gn
++++ b/services/network/public/cpp/BUILD.gn
+@@ -1,7 +1,6 @@
+ # Copyright 2017 The Chromium Authors
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+-
+ import("//build/buildflag_header.gni")
+ import("//build/rust/rust_api_from_cpp.gni")
+ import("//build/rust/rust_static_library.gni")
+@@ -11,9 +10,7 @@ import("//services/network/public/cpp/features.gni")
+ import("//testing/libfuzzer/fuzzer_test.gni")
+ import("//testing/test.gni")
+ import("//third_party/blink/renderer/build/scripts/scripts.gni")  # TODO(crbug.com/397934758)
+-
+ _is_directory_transfer_required = is_fuchsia
+-
+ buildflag_header("buildflags") {
+   header = "network_service_buildflags.h"
+   flags = [
+@@ -22,20 +19,17 @@ buildflag_header("buildflags") {
+     "IS_DIRECTORY_TRANSFER_REQUIRED=$_is_directory_transfer_required",
+   ]
+ }
+-
+ # TODO(crbug.com/397934758): Move `blink_python_runner` out of Blink and update
+ # this action.
+ blink_python_runner("make_generated_permissions_policy_features") {
+   script =
+       "//services/network/build/scripts/make_permissions_policy_features.py"
+-
+   inputs = scripts_for_json5_files + [
+              "//services/network/build/scripts/make_permissions_policy_features.py",
+              "//services/network/public/cpp/permissions_policy/permissions_policy_features.json5",
+              "//services/network/build/scripts/templates/permissions_policy_features_generated.cc.tmpl",
+            ]
+   outputs = [ "$root_gen_dir/services/network/public/cpp/permissions_policy/permissions_policy_features_generated.cc" ]
+-
+   args = [
+     rebase_path(
+         "//services/network/public/cpp/permissions_policy/permissions_policy_features.json5",
+@@ -45,7 +39,6 @@ blink_python_runner("make_generated_permissions_policy_features") {
+                 root_build_dir),
+   ]
+ }
+-
+ component("crash_keys") {
+   sources = [
+     "crash_keys.cc",
+@@ -54,31 +47,26 @@ component("crash_keys") {
+   deps = [ "//base" ]
+   defines = [ "IS_NETWORK_CPP_CRASH_KEYS_IMPL" ]
+ }
+-
+ config("cpp_impl_config") {
+   visibility = [ ":*" ]
+   defines = [ "IS_NETWORK_CPP_IMPL" ]
+ }
+-
+ source_set("orb_sniffers_headers") {
+   visibility = [ ":*" ]
+   sources = [ "orb/orb_sniffers.h" ]
+   public_deps = [ "//base" ]
+ }
+-
+ source_set("orb_sniffers_headers_impl") {
+   visibility = [ ":*" ]
+   public_configs = [ ":cpp_impl_config" ]
+   public_deps = [ ":orb_sniffers_headers" ]
+ }
+-
+ rust_api_from_cpp("orb_sniffers_rs_api") {
+   visibility = [ ":*" ]
+   bindings_target = ":orb_sniffers_headers_impl"
+   public_headers = [ "orb/orb_sniffers.h" ]
+   root_namespaces = [ "network::orb" ]
+ }
+-
+ rust_static_library("orb_sniffers_rust") {
+   crate_root = "orb/orb_sniffers.rs"
+   sources = [ crate_root ]
+@@ -91,7 +79,6 @@ rust_static_library("orb_sniffers_rust") {
+     bindings_deps = [ ":orb_sniffers_rs_api" ]
+   }
+ }
+-
+ source_set("orb_sniffers") {
+   visibility = [ ":cpp" ]
+   public = []
+@@ -103,10 +90,8 @@ source_set("orb_sniffers") {
+     "//base",
+   ]
+ }
+-
+ component("cpp") {
+   output_name = "network_cpp"
+-
+   sources = [
+     "avail_language_header_parser.cc",
+     "avail_language_header_parser.h",
+@@ -245,7 +230,6 @@ component("cpp") {
+     "x_frame_options_parser.cc",
+     "x_frame_options_parser.h",
+   ]
+-
+   public_deps = [
+     ":buildflags",
+     ":cpp_base",
+@@ -258,7 +242,6 @@ component("cpp") {
+     "//url",
+     "//url/ipc:url_ipc",
+   ]
+-
+   deps = [
+     ":orb_sniffers",
+     "//base",
+@@ -271,17 +254,14 @@ component("cpp") {
+     "//net",
+     "//services/proxy_resolver/public/mojom",
+   ]
+-
+   if (enable_disk_cache_sql_backend) {
+     sources += [ "shared_http_cache_client.cc" ]
+     deps += [ "//components/sqlite_vfs" ]
+   } else {
+     sources += [ "shared_http_cache_client_stub.cc" ]
+   }
+-
+   defines = [ "IS_NETWORK_CPP_IMPL" ]
+ }
+-
+ # These interfaces are put in their own target so that modules that only
+ # need to depend on mojom_ip_address does not depend on the entire cpp_base.
+ component("ip_address_mojom_support") {
+@@ -307,7 +287,6 @@ component("ip_address_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_IP_ADDRESS_IMPL" ]
+ }
+-
+ component("host_resolver_mojom_support") {
+   sources = [
+     "host_resolver_mojom_traits.cc",
+@@ -322,7 +301,6 @@ component("host_resolver_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_HOST_RESOLVER_IMPL" ]
+ }
+-
+ component("integrity_metadata_mojom_support") {
+   sources = [
+     "integrity_metadata.cc",
+@@ -336,7 +314,6 @@ component("integrity_metadata_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_INTEGRITY_METADATA_IMPL" ]
+ }
+-
+ component("integrity_policy") {
+   sources = [
+     "integrity_policy.cc",
+@@ -353,7 +330,6 @@ component("integrity_policy") {
+   ]
+   defines = [ "IS_NETWORK_CPP_INTEGRITY_POLICY_IMPL" ]
+ }
+-
+ component("connection_allowlist") {
+   sources = [
+     "connection_allowlist.cc",
+@@ -374,7 +350,6 @@ component("connection_allowlist") {
+   ]
+   defines = [ "IS_NETWORK_CPP_CONNECTION_ALLOWLIST_IMPL" ]
+ }
+-
+ component("fetch_retry_options") {
+   sources = [
+     "fetch_retry_options.cc",
+@@ -386,7 +361,6 @@ component("fetch_retry_options") {
+   ]
+   defines = [ "IS_NETWORK_CPP_FETCH_RETRY_OPTIONS_IMPL" ]
+ }
+-
+ component("cookies_mojom_support") {
+   sources = [
+     "cookie_manager_shared_mojom_traits.cc",
+@@ -400,7 +374,6 @@ component("cookies_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_COOKIES_IMPL" ]
+ }
+-
+ component("network_param_mojom_support") {
+   sources = [
+     "auth_mojom_traits.cc",
+@@ -440,7 +413,6 @@ component("network_param_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_NETWORK_PARAM_IMPL" ]
+ }
+-
+ component("proxy_config_mojom_support") {
+   sources = [
+     "mutable_network_traffic_annotation_tag_mojom_traits.h",
+@@ -459,7 +431,6 @@ component("proxy_config_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_PROXY_CONFIG_IMPL" ]
+ }
+-
+ component("flags_and_switches") {
+   sources = [
+     "features.cc",
+@@ -477,7 +448,6 @@ component("flags_and_switches") {
+   ]
+   defines = [ "IS_NETWORK_CPP_FLAGS_AND_SWITCHES_IMPL" ]
+ }
+-
+ source_set("is_potentially_trustworthy") {
+   sources = [ "is_potentially_trustworthy.h" ]
+   public_deps = [
+@@ -488,7 +458,6 @@ source_set("is_potentially_trustworthy") {
+   ]
+   defines = [ "IS_NETWORK_CPP_IS_POTENTIALLY_TRUSTWORTHY_IMPL" ]
+ }
+-
+ component("web_platform") {
+   sources = [
+     "client_hints.cc",
+@@ -537,7 +506,6 @@ component("web_platform") {
+   ]
+   defines = [ "IS_NETWORK_CPP_WEB_PLATFORM_IMPL" ]
+ }
+-
+ # This component is separate from cpp_base as it is a dependency of
+ # //services/network/public/mojom:url_loader_base.
+ component("cross_origin_embedder_policy") {
+@@ -547,21 +515,17 @@ component("cross_origin_embedder_policy") {
+     "cross_origin_embedder_policy_mojom_traits.cc",
+     "cross_origin_embedder_policy_mojom_traits.h",
+   ]
+-
+   deps = [
+     "//base",
+     "//mojo/public/mojom/base",
+     "//services/network/public/mojom:url_loader_base_shared",
+   ]
+-
+   defines = [ "IS_NETWORK_CPP_CROSS_ORIGIN_IMPL" ]
+ }
+-
+ source_set("cache_storage_side_data_writer_mojom_traits") {
+   sources = [ "cache_storage_side_data_writer_mojom_traits.h" ]
+   public_deps = [ "//mojo/public/cpp/bindings" ]
+ }
+-
+ # This component is separate from cpp_base as it is a dependency of
+ # //services/network/public/mojom:url_loader_base.
+ component("document_isolation_policy") {
+@@ -571,29 +535,23 @@ component("document_isolation_policy") {
+     "document_isolation_policy_mojom_traits.cc",
+     "document_isolation_policy_mojom_traits.h",
+   ]
+-
+   deps = [
+     "//base",
+     "//mojo/public/mojom/base",
+     "//services/network/public/mojom:url_loader_base_shared",
+   ]
+-
+   defines = [ "IS_NETWORK_CPP_DOCUMENT_ISOLATION_IMPL" ]
+ }
+-
+ source_set("ip_address_space_overrides_test_utils") {
+   testonly = true
+-
+   sources = [
+     "ip_address_space_overrides_test_utils.cc",
+     "ip_address_space_overrides_test_utils.h",
+   ]
+-
+   public_deps = [
+     "//base",
+     "//services/network/public/mojom:mojom_ip_address_shared",
+   ]
+-
+   deps = [
+     ":cpp",
+     ":flags_and_switches",
+@@ -601,7 +559,6 @@ source_set("ip_address_space_overrides_test_utils") {
+     "//net:test_support",
+   ]
+ }
+-
+ # This component is separate from cpp_base as it is a dependency of
+ # //services/network/public/mojom:cookies_mojom.
+ component("schemeful_site_mojom_support") {
+@@ -616,7 +573,6 @@ component("schemeful_site_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_SCHEMEFUL_IMPL" ]
+ }
+-
+ # This component is separate from cpp_base as it is a dependency of
+ # //services/network/public/mojom:cookies_mojom.
+ component("storage_access_api_mojom_support") {
+@@ -631,7 +587,6 @@ component("storage_access_api_mojom_support") {
+   ]
+   defines = [ "IS_STORAGE_ACCESS_API_MOJOM_TRAITS_IMPL" ]
+ }
+-
+ # This component is separate from cpp_base as it is a dependency of
+ # //services/network/public/mojom:mojom_http_request_headers.
+ component("http_request_headers_mojom_support") {
+@@ -652,10 +607,8 @@ component("http_request_headers_mojom_support") {
+   ]
+   defines = [ "IS_NETWORK_CPP_HTTP_REQUEST_HEADERS_IMPL" ]
+ }
+-
+ component("cpp_base") {
+   output_name = "network_cpp_base"
+-
+   sources = [
+     "cookie_setting_overrides_mojom_traits.cc",
+     "cookie_setting_overrides_mojom_traits.h",
+@@ -718,7 +671,6 @@ component("cpp_base") {
+     "web_transport_send_stream_stats_mojom_traits.cc",
+     "web_transport_send_stream_stats_mojom_traits.h",
+   ]
+-
+   public_deps = [
+     ":connection_allowlist",
+     ":cookies_mojom_support",
+@@ -734,7 +686,6 @@ component("cpp_base") {
+     ":proxy_config_mojom_support",
+     ":schemeful_site_mojom_support",
+     ":storage_access_api_mojom_support",
+-    ":structured_headers_mojom_support",
+     ":web_platform",
+     "//services/network/public/mojom:url_loader_base",
+     "//url/ipc:url_ipc",
+@@ -754,38 +705,30 @@ component("cpp_base") {
+     "//services/network/public/mojom:url_loader_base",
+   ]
+   defines = [ "IS_NETWORK_CPP_BASE_IMPL" ]
+-
+   if (is_fuchsia) {
+     sources += [ "transferable_directory_fuchsia.cc" ]
+   }
+-
+   if (is_linux) {
+     sources += [
+       "network_interface_change_listener_mojom_traits.cc",
+       "network_interface_change_listener_mojom_traits.h",
+     ]
+   }
+-
+   # TODO(crbug.com/40915226): Remove the need to ignore this warning.
+   if (is_win && is_component_build) {
+     ldflags = [ "/IGNORE:4217" ]
+   }
+ }
+-
+ if (is_p2p_enabled) {
+   component("cpp_p2p") {
+     output_name = "network_cpp_p2p"
+-
+     sources = [
+       "p2p_param_traits.cc",
+       "p2p_param_traits.h",
+       "p2p_socket_type.h",
+     ]
+-
+     defines = [ "IS_NETWORK_CPP_P2P_IMPL" ]
+-
+     public_deps = [ "//third_party/webrtc_overrides:webrtc_component" ]
+-
+     deps = [
+       ":network_param_mojom_support",
+       "//ipc",
+@@ -794,20 +737,16 @@ if (is_p2p_enabled) {
+     ]
+   }
+ }
+-
+ mojom("test_interfaces") {
+   sources = [ "network_traits_test_service.mojom" ]
+   public_deps = [ "//services/network/public/mojom" ]
+ }
+-
+ source_set("test_support") {
+   testonly = true
+-
+   sources = [
+     "data_buffer_factory_test_util.h",
+     "is_potentially_trustworthy_unittest.h",
+   ]
+-
+   public_deps = [
+     ":cpp",
+     "//base",
+@@ -817,10 +756,8 @@ source_set("test_support") {
+     "//url:url_test_support",
+   ]
+ }
+-
+ source_set("tests") {
+   testonly = true
+-
+   sources = [
+     "avail_language_header_parser_unittest.cc",
+     "basic_data_buffer_factory_unittest.cc",
+@@ -926,15 +863,12 @@ source_set("tests") {
+     "websocket_utils_unittest.cc",
+     "x_frame_options_parser_unittest.cc",
+   ]
+-
+   if (is_linux) {
+     sources += [ "network_interface_change_listener_mojom_traits_unittest.cc" ]
+   }
+-
+   if (enable_disk_cache_sql_backend) {
+     sources += [ "shared_http_cache_client_unittest.cc" ]
+   }
+-
+   deps = [
+     ":cpp",
+     ":test_interfaces",
+@@ -951,19 +885,14 @@ source_set("tests") {
+     "//testing/gtest",
+     "//third_party/fuzztest",
+   ]
+-
+   public_deps = [ ":buildflags" ]
+-
+   # TODO(crbug.com/40031409): Fix code that adds exit-time destructors and
+   # enable the diagnostic by removing this line.
+   configs += [ "//build/config/compiler:no_exit_time_destructors" ]
+ }
+-
+ source_set("perftests") {
+   testonly = true
+-
+   sources = [ "url_request_mojom_traits_perftest.cc" ]
+-
+   deps = [
+     ":cpp_base",
+     "//base",
+@@ -976,7 +905,6 @@ source_set("perftests") {
+     "//third_party/google_benchmark",
+   ]
+ }
+-
+ test("coep_fuzztest") {
+   sources = [ "cross_origin_embedder_policy_parser_fuzztest.cc" ]
+   fuzztests = [ "CrossOriginEmbedderPolicyParserTest.CrossOriginEmbedderPolicyParserFuzzerTest" ]
+@@ -985,25 +913,21 @@ test("coep_fuzztest") {
+     "//third_party/fuzztest:fuzztest_gtest_main",
+   ]
+ }
+-
+ fuzzer_test("coop_fuzzer") {
+   sources = [ "cross_origin_opener_policy_parser_fuzzer.cc" ]
+   dict = "cross_origin_opener_policy.dict"
+   deps = [ ":cpp" ]
+ }
+-
+ fuzzer_test("xfo_fuzzer") {
+   sources = [ "x_frame_options_parser_fuzzer.cc" ]
+   dict = "x_frame_options.dict"
+   deps = [ ":cpp" ]
+ }
+-
+ fuzzer_test("cors_fuzzer") {
+   sources = [ "cors/cors_fuzzer.cc" ]
+   deps = [ ":cpp" ]
+   seed_corpus = "//services/network/public/cpp/cors/corpus"
+ }
+-
+ fuzzer_test("client_hints_fuzzer") {
+   sources = [ "client_hints_fuzzer.cc" ]
+   deps = [
+diff --git a/third_party/cros_system_api/dbus/arc/arc.proto b/third_party/cros_system_api/dbus/arc/arc.proto
+index df3ba26c26..696f32de83 100644
+--- a/third_party/cros_system_api/dbus/arc/arc.proto
++++ b/third_party/cros_system_api/dbus/arc/arc.proto
+@@ -9,10 +9,7 @@ option optimize_for = LITE_RUNTIME;
+ package arc;
+ option go_package = "go.chromium.org/chromiumos/system_api/arc_proto";
+ 
+-// ARC start options sent from Chrome to session manager. This message is used
+-// in the SessionManagerInterface.StartArcMiniContainer method for ARC
+-// container. It is also being used by concierge when the device is running on
+-// ARCVM.
++// ARC start options sent from Chrome to concierge in StartArcVmRequest.
+ message StartArcMiniInstanceRequest {
+   enum PlayStoreAutoUpdate {
+     // Play Store auto-update is left unchanged.
+@@ -107,84 +104,6 @@ message StartArcMiniInstanceRequest {
+   // Next ID to use: 24
+ }
+ 
+-// ARC upgrade options sent from Chrome to session manager. This message is used
+-// in the SessionManagerInterface.UpgradeArcContainer method.
+-message UpgradeArcContainerRequest {
+-  enum PackageCacheMode {
+-    // Performs packages cache setup if the pre-generated cache exists.
+-    DEFAULT = 0;
+-    // Performs packages cache setup if the pre-generated cache exists and
+-    // copies resulting packages.xml to the temporary location after
+-    // SystemServer initialized the package manager.
+-    COPY_ON_INIT = 1;
+-    // Skips packages cache setup and copies resulting packages.xml to the
+-    // temporary location after SystemServer initialized the package manager.
+-    SKIP_SETUP_COPY_ON_INIT = 2;
+-  }
+-
+-  enum ManagementTransition {
+-    // No transition necessary.
+-    NONE = 0;
+-    // Child user is transitioning to regular account, need to lift supervision.
+-    CHILD_TO_REGULAR = 1;
+-    // Regular user is transitioning to child account, need to enable
+-    // supervision.
+-    REGULAR_TO_CHILD = 2;
+-    // Unmanaged user is transitioning to managed state, need to enable
+-    // management.
+-    UNMANAGED_TO_MANAGED = 3;
+-  }
+-
+-  // Account ID of the user to start ARC for. This must be the same as the
+-  // one given in StartSession.
+-  required string account_id = 1;
+-
+-  // Whether the account is managed.
+-  optional bool is_account_managed = 14;
+-
+-  // Whether adb sideloading is allowed when the account and/or the device is
+-  // managed.
+-  optional bool is_managed_adb_sideloading_allowed = 16;
+-
+-  // Option to disable ACTION_BOOT_COMPLETED broadcast for 3rd party apps.
+-  optional bool skip_boot_completed_broadcast = 2 [default = false];
+-
+-  // Optional mode for packages cache tests.
+-  optional PackageCacheMode packages_cache_mode = 4 [default = DEFAULT];
+-
+-  // Option to disable GMS CORE cache.
+-  optional bool skip_gms_core_cache = 13 [default = false];
+-
+-  // Whether the container is being upgraded for a Chrome OS demo session.
+-  optional bool is_demo_session = 10;
+-
+-  // Non-empty only if the ARC container is being upgraded for a Chrome OS demo
+-  // session. The absolute path to the squashfs image that contains the set of
+-  // Android apps to be pre-installed into demo sessions. Note that arc-setup
+-  // expects this to be a path loaded by the imageloader service.
+-  optional string demo_session_apps_path = 6;
+-
+-  // Locale to set in Android container during the boot.
+-  optional string locale = 7;
+-
+-  // Preferred languages to set in Android container during the boot.
+-  repeated string preferred_languages = 8;
+-
+-  // Option to notify ARC that it should transition from a managed state to an
+-  // unmanaged state, and vice-versa.
+-  optional ManagementTransition management_transition = 11;
+-
+-  // Option to enable Arc Nearby Share.
+-  optional bool enable_arc_nearby_share = 17 [default = false];
+-
+-  // Option to skip pregenerated TTS cache setup.
+-  optional bool skip_tts_cache = 18 [default = false];
+-
+-  reserved 9, 15;
+-
+-  // Next ID to use: 19
+-}
+-
+ // It requests to execute a command on ARC shell.
+ // Available requests are managed by ArcCroshService in ARC.
+ // ArcCroshServiceProvider in Chrome proxies and translates the message for
