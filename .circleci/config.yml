@@ -121,7 +121,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - chromium-src-v1-{{ checksum "pins/chromium.sha" }}
+            - chromium-src-v2-{{ checksum "pins/chromium.sha" }}
       - run:
           name: Run build in Docker
           no_output_timeout: 300m
@@ -133,7 +133,7 @@ jobs:
               "archlinux:latest" \
               /bin/bash -c 'useradd -m kibaos-builder && export KIBAOS_BUILD_USER=kibaos-builder && exec bash /w/build-kibaos.sh'
       - save_cache:
-          key: chromium-src-v1-{{ checksum "pins/chromium.sha" }}
+          key: chromium-src-v2-{{ checksum "pins/chromium.sha" }}
           paths:
             - .build/chromium-bootstrap
             - .build/depot_tools

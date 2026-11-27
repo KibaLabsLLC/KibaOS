@@ -282,18 +282,59 @@ def extract_tar(archive, dest):
             tar.extractall(dest)
 
 
+GCS_RECEIPT_NAME = ".kibaos-gcs-receipt"
+
+
+def gcs_receipt_entries(dest, skip):
+    """Sorted relpath + size for every file under dest, stamp files excluded."""
+    entries = []
+    for dirpath, dirnames, filenames in os.walk(dest):
+        dirnames.sort()
+        for name in sorted(filenames):
+            p = os.path.join(dirpath, name)
+            if p in skip:
+                continue
+            rel = os.path.relpath(p, dest)
+            try:
+                entries.append("%s %d" % (rel, os.stat(p).st_size))
+            except OSError:
+                entries.append("%s missing" % rel)
+    entries.sort()
+    return entries
+
+
+def gcs_receipt_matches(dest, skip):
+    """True when the on-disk tree still matches the recorded extraction."""
+    try:
+        with open(os.path.join(dest, GCS_RECEIPT_NAME), encoding="utf-8") as f:
+            recorded = f.read().splitlines()
+    except OSError:
+        return False
+    return recorded == gcs_receipt_entries(dest, skip)
+
+
 def fetch_gcs(root, path, bucket, objects):
     dest = os.path.join(root, path)
     os.makedirs(dest, exist_ok=True)
     stamp = os.path.join(dest, ".kibaos-gcs-stamp")
+    receipt = os.path.join(dest, GCS_RECEIPT_NAME)
     want = "\n".join(sorted("%s %s" % (o["object_name"], o.get("sha256sum", ""))
                             for o in objects))
+    skip = {stamp, receipt}
     try:
         with open(stamp, encoding="utf-8") as f:
-            if f.read() == want:
-                return
+            up_to_date = f.read() == want
     except OSError:
-        pass
+        up_to_date = False
+    if up_to_date and gcs_receipt_matches(dest, skip):
+        return
+    if up_to_date:
+        # The stamp says this bucket was synced, but the tree no longer matches
+        # what the extraction left behind: a truncated cache restore or a
+        # partial copy silently dropped files (a missing rust std source, for
+        # example, only surfaces as a ninja input error much later). The stamp
+        # alone must not be trusted; refetch and rewrite the receipt.
+        log("  gcs   %s (receipt mismatch; refetching)" % path)
     for obj in objects:
         url = "%s/%s/%s" % (GCS_BASE, bucket,
                             urllib.parse.quote(obj["object_name"]))
@@ -315,6 +356,8 @@ def fetch_gcs(root, path, bucket, objects):
                 os.remove(tmp)
     with open(stamp, "w", encoding="utf-8") as f:
         f.write(want)
+    with open(receipt, "w", encoding="utf-8") as f:
+        f.write("\n".join(gcs_receipt_entries(dest, skip)) + "\n")
 
 
 # --------------------------------------------------------------------------
