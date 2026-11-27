@@ -38,6 +38,3 @@ Read the `agent-context/` folder before making changes:
 ## Sibling Repositories
 
 - [Lumen](https://github.com/KibaLabsLLC/Lumen) — the compositor (Ash without chrome).
-- [Okami](https://github.com/KibaLabsLLC/Okami) — the app store.
-- [Roko](https://github.com/KibaLabsLLC/Roko) — the installer.
-- [KibaDE](https://github.com/KibaLabsLLC/KibaDE) — the desktop release point.
