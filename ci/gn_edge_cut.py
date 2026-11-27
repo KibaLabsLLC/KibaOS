@@ -228,11 +228,11 @@ def target_span(lines, name):
     """(start, end) line indexes of the target block named `name`."""
     hdr = re.compile(
         r'^\s*\w+\(\s*"%s"\s*\)\s*{'
-        r'|^\s*target\(\s*"\w+"\s*,\s*"%s"\s*\)\s*{' % (
+        r'|^\s*target\(\s*[^,()]+,\s*"%s"\s*\)\s*{' % (
             re.escape(name), re.escape(name)))
     start, depth = None, 0
     for i, line in enumerate(lines):
-        bare = re.sub(r'"[^"\n]*"', '""', line)
+        bare = re.sub(r'#.*$', '', re.sub(r'"[^"\n]*"', '""', line))
         if start is None:
             if hdr.match(line) and "{" in bare:
                 start = i
