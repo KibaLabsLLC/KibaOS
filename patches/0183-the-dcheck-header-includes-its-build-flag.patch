@@ -1,0 +1,12 @@
+diff --git a/base/dcheck_is_on.h b/base/dcheck_is_on.h
+index 27caa9010b..ef268dd9dc 100644
+--- a/base/dcheck_is_on.h
++++ b/base/dcheck_is_on.h
+@@ -5,6 +5,7 @@
+ #ifndef BASE_DCHECK_IS_ON_H_
+ #define BASE_DCHECK_IS_ON_H_
+ 
++#include "build/buildflag.h"
+ 
+ #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
+ #define DCHECK_IS_ON() false
