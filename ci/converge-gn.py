@@ -49,6 +49,12 @@ use_system_minigbm = true
 enable_rust = true
 use_official_google_api_keys = false
 dcheck_always_on = false
+
+# Chromium's Clang modules build modularizes headers per target; on this pruned
+# tree one lost header or dep edge turns a target into an empty module and its
+# headers stop defining macros (the first abseil TU then fails on
+# ABSL_NAMESPACE_BEGIN/ABSL_RAW_LOG). Build textually instead.
+use_clang_modules = false
 """
 
 

@@ -309,6 +309,15 @@ build() {
         # where a development build asserts, so the assert comes off here and
         # the bring up tree keeps it.
         dcheck_always_on = false
+
+        # Chromium's Clang modules build (use_clang_modules) modularizes every
+        # target's headers, so a target whose header or dep edges were pruned
+        # or rewritten becomes an empty module and its headers define nothing.
+        # That is what stops the first abseil TU here: ABSL_NAMESPACE_BEGIN,
+        # ABSL_RAW_LOG and FATAL all arrive undefined because absl/base/config.h
+        # was consumed as a module instead of being preprocessed. This tree is
+        # pruned and patched, so compile textually as the pre-modules tree did.
+        use_clang_modules = false
     "
     }
 

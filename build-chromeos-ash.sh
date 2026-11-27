@@ -165,6 +165,10 @@ build_chrome() {
         enable_rust = true
         use_real_dbus_clients = true
         use_official_google_api_keys = false
+
+        # Chromium's experimental Clang modules build fails on the pruned
+        # abseil target graph, so compile textually.
+        use_clang_modules = false
     " 2>&1 | tee -a "${BUILD_LOG}"
 
     # Build chrome binary and setuid sandbox helper.
