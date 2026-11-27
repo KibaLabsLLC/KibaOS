@@ -9,10 +9,13 @@
 # was use_real_dbus_clients=true, and this fixture asserted that flag was set.
 # Patch 0038 replaced it with a narrowly scoped real bus for the Shill clients,
 # and that patch lived in the chrome/ half of the series, which the current
-# Lumen build does not carry. What remains here are the facts that must hold
+# Lumen build does not carry. The routing now lives on the KibaOS side: the
+# shill-nm-adapter service at the root of this repo owns org.chromium.flimflam
+# on the system bus, and the chromiumos-ash PKGBUILD fails closed on that
+# adapter being absent. What remains here are the facts that must hold
 # regardless of the mechanism: the flag stays out of everything that generates
 # build args, and the PKGBUILD's fail-closed guard on the Shill routing stays
-# in place.
+# in place, pointed at the adapter.
 #
 # The flag is actively harmful and must stay out:
 #
@@ -59,8 +62,10 @@ fi
 
 # --- but the guard itself must still exist, pointed at the real mechanism ---
 
-grep -Fq 'shill_clients::InitializeKibaOs' "$PKGBUILD" || \
+grep -Fq 'shill-nm-adapter' "$PKGBUILD" || \
   fail 'the PKGBUILD no longer fails closed on the real Shill routing being absent'
+grep -Fq 'org.chromium.flimflam' "$PKGBUILD" || \
+  fail 'the fail closed guard no longer checks the bus name the adapter owns'
 grep -Fq 'missing the real Shill routing' "$PKGBUILD" || \
   fail 'the fail closed message for the Shill routing is gone'
 
