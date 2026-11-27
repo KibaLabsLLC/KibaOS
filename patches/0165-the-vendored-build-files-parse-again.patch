@@ -175,25 +175,7 @@ diff --git a/components/cronet/android/BUILD.gn b/components/cronet/android/BUIL
 diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimization_guide/core/BUILD.gn
 --- a/components/optimization_guide/core/BUILD.gn
 +++ b/components/optimization_guide/core/BUILD.gn
-@@ -70,12 +70,17 @@
- 
-     # TODO(crbug.com/514743962): This is mostly on-device model things,
-     # with a couple stray remote model execution things.
-+    "model_execution/model_execution_prefs.cc",
-+    "model_execution/model_execution_prefs.h",
-     "model_execution/on_device_features.cc",
-     "model_execution/on_device_features.h",
- 
-     # TODO(crbug.com/514743962): These should all be broken up and removed.
-+    "optimization_guide_enums.h",
-     "optimization_guide_features.cc",
-     "optimization_guide_features.h",
-+    "optimization_guide_prefs.cc",
-+    "optimization_guide_prefs.h",
-   ]
-   public_deps = [
-     "//base",
-@@ -87,7 +92,11 @@
+@@ -87,7 +87,11 @@
      "//components/optimization_guide/proto:optimization_guide_proto",
      "//components/optimization_guide/public/mojom:mojom_shared_cpp_sources",
      "//components/prefs",
@@ -205,7 +187,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
    ]
    if (is_android) {
      deps += [ "//components/version_info/android:channel_getter" ]
-@@ -182,6 +191,7 @@
+@@ -182,6 +186,7 @@
  }
  
  source_set("model_execution") {
@@ -213,7 +195,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
    sources = [
      "model_execution/component_download_observer.cc",
      "model_execution/component_download_observer.h",
-@@ -293,6 +303,8 @@
+@@ -293,6 +298,8 @@
        "model_execution/model_broker_client.h",
        "model_execution/model_broker_impl.cc",
        "model_execution/model_broker_impl.h",
@@ -222,7 +204,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        "model_execution/multimodal_message.cc",
        "model_execution/multimodal_message.h",
        "model_execution/on_device_context.cc",
-@@ -309,6 +321,8 @@
+@@ -309,6 +316,8 @@
        "model_execution/on_device_model_execution_proto_value_utils.h",
        "model_execution/on_device_model_feature_adapter.cc",
        "model_execution/on_device_model_feature_adapter.h",
@@ -231,7 +213,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        "model_execution/on_device_model_validator.cc",
        "model_execution/on_device_model_validator.h",
        "model_execution/on_device_telemetry_logger.cc",
-@@ -337,6 +351,8 @@
+@@ -337,6 +346,8 @@
      public_deps += [ ":on_device_model_execution_proto_generator" ]
      deps += [
        ":core_util",
@@ -240,7 +222,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        "//components/component_updater",
        "//components/prefs",
        "//components/update_client",
-@@ -354,6 +370,8 @@
+@@ -354,6 +365,8 @@
          "model_execution/android/android_manifest.h",
          "model_execution/android/model_broker_android.cc",
          "model_execution/android/model_broker_android.h",
@@ -249,7 +231,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        ]
        deps += [
          ":manifest_provider",
-@@ -432,6 +450,7 @@
+@@ -432,6 +445,7 @@
      deps = [
        ":features",
        ":manifest_broker",
@@ -257,7 +239,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        ":ondevice",
        ":ondevice_test_support",
        "//base",
-@@ -611,12 +630,17 @@
+@@ -611,12 +625,17 @@
    ]
    deps = [
      ":core_util",
@@ -275,7 +257,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
    ]
  }
  
-@@ -634,6 +658,8 @@
+@@ -634,6 +653,8 @@
        "model_execution/test/mock_download_progress_observer.h",
        "model_execution/test/mock_on_device_capability.cc",
        "model_execution/test/mock_on_device_capability.h",
@@ -284,7 +266,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
        "model_execution/test/request_builder.cc",
        "model_execution/test/request_builder.h",
        "model_execution/test/response_holder.cc",
-@@ -690,6 +716,17 @@
+@@ -690,6 +711,17 @@
    }
  }
  
@@ -302,7 +284,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
  source_set("filters_unit_tests") {
    testonly = true
    sources = [
-@@ -802,9 +839,11 @@
+@@ -802,9 +834,11 @@
    ]
    deps = [
      ":core_util",
@@ -314,7 +296,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
      "//base",
      "//base/test:test_proto",
      "//base/test:test_support",
-@@ -847,19 +886,27 @@
+@@ -847,19 +881,27 @@
        "model_execution/manifest_broker/manifest_validation_unittest.cc",
        "model_execution/manifest_broker/override_manifest_asset_manager_delegate_unittest.cc",
        "model_execution/model_broker_client_unittest.cc",
@@ -342,7 +324,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
      ]
      deps = [
        ":core_util",
-@@ -950,6 +997,9 @@
+@@ -950,6 +992,9 @@
    visibility = [ ":unit_tests" ]
    testonly = true
    sources = [
@@ -352,7 +334,7 @@ diff --git a/components/optimization_guide/core/BUILD.gn b/components/optimizati
    ]
    outputs = [ "{{bundle_resources_dir}}/" +
                "{{source_root_relative_dir}}/{{source_file_part}}" ]
-@@ -985,6 +1035,7 @@
+@@ -985,6 +1030,7 @@
  
  action("on_device_model_execution_proto_generator") {
    script =
