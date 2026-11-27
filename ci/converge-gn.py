@@ -9,11 +9,13 @@ exec_script and read_file inputs) come back from the chromium mirror at the
 pinned sha, while dep edges into build files the pruner deleted, refs to
 targets the pruner dropped (gn's "Unresolved dependencies" pairs), and
 duplicate source listings that collide into one object file are cut in the
-referrer gn names -- a tree that must not load chrome at all converges
-by shedding every edge into the pruned subtree instead of growing chrome
-back. Failures that are none of those (undefined identifiers, emptied
-sources) are reported verbatim and stop the loop: real gn is the referee,
-so what it rejects is never guessed at.
+referrer gn names; input refs nothing generates are cut and inputs whose
+generators lack a dep path get those generators added as deps -- a tree that
+must not load chrome at all converges by shedding every edge into the
+pruned subtree instead of growing chrome back. Failures that are none of
+those (undefined identifiers, emptied sources) are reported verbatim and
+stop the loop: real gn is the referee, so what it rejects is never guessed
+at.
 
 The chromium mirror must be checked out at the ref passed via --ref and the
 src tree must carry its sync'd dependency checkout (ci/resolve-deps.py), the
