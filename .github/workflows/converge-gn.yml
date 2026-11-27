@@ -56,6 +56,11 @@ jobs:
             case "$patch" in \#*) continue ;; esac
             git apply --whitespace=nowarn ../patches/"$patch"
           done < ../patches/SERIES
+          git add -A
+          git diff --cached --quiet || \
+            git -c user.name="github-actions[bot]" \
+              -c user.email="github-actions[bot]@users.noreply.github.com" \
+              commit -qm "series state (diff anchor)"
 
       - name: Repair and validate
         run: |
@@ -118,18 +123,19 @@ jobs:
         working-directory: lumen
         if: success()
         run: |
+          mkdir -p ../repaired
           if [ -z "$(find ../repaired -type f | head -1)" ] && \
-             [ -z "$(git status --porcelain)" ]; then
+             [ -z "$(git status --porcelain --untracked-files=no)" ]; then
             echo "Nothing converged beyond the current series" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          git add -A
-          git -c user.name "github-actions[bot]" \
-            -c user.email "github-actions[bot]@users.noreply.github.com" \
-            commit -qm "series state (diff anchor)"
+          git add -u
           rsync -a ../repaired/ .
-          git add -A
-          git diff --cached HEAD~1 > ../patches/0900-gn-evaluation-converges.patch
+          if [ -n "$(find ../repaired -type f -print -quit)" ]; then
+            (cd ../repaired && find . -type f -printf '%P\n') | \
+              xargs -r -d '\n' git add --
+          fi
+          git diff --cached HEAD > ../patches/0900-gn-evaluation-converges.patch
           grep -q '^0900-gn-evaluation-converges.patch$' ../patches/SERIES || \
             printf '0900-gn-evaluation-converges.patch\n' >> ../patches/SERIES
 
@@ -152,7 +158,12 @@ jobs:
           else
             git checkout -b "$branch"
           fi
-          git add patches/0900-gn-evaluation-converges.patch patches/SERIES
+          if [ -f patches/0900-gn-evaluation-converges.patch ]; then
+            git add patches/0900-gn-evaluation-converges.patch patches/SERIES
+          else
+            echo "No convergence patch to commit" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           if git diff --cached --quiet; then
             echo "No changes to commit" >> "$GITHUB_STEP_SUMMARY"
             exit 0
