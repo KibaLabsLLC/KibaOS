@@ -268,10 +268,10 @@ build() {
     # gn surfaces one pruned-file failure per attempt, so the call below is
     # a loop: every failed attempt hands its log to ci/gn_edge_cut.py, which
     # restores inert files when a mirror is available, cuts the dep edge
-    # that requested a deleted build file, and cuts refs to targets the
-    # pruner dropped (gn's Unresolved dependencies). The graph sheds its
-    # edges into the pruned chrome/ subtree instead of growing the browser
-    # back.
+    # that requested a deleted build file, cuts refs to targets the pruner
+    # dropped (gn's Unresolved dependencies), and dedupes source listings
+    # that collide into one object file. The graph sheds its edges into the
+    # pruned chrome/ subtree instead of growing the browser back.
     _ash_gn_gen() {
         gn gen "${out_dir}" \
         --root-target="//lumen" \
