@@ -6,7 +6,7 @@ index 27caa9010b..ef268dd9dc 100644
  #ifndef BASE_DCHECK_IS_ON_H_
  #define BASE_DCHECK_IS_ON_H_
  
-+#include "build/buildflag.h"
++#include "base/debug/debugging_buildflags.h"
  
  #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON)
  #define DCHECK_IS_ON() false
