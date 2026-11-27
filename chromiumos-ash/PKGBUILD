@@ -248,6 +248,19 @@ build() {
         return
     fi
 
+    # A dependency file truncated by a bad copy surfaces much later as a
+    # compile error about a declaration that is not there (abseil's
+    # cycleclock.h lost its contents and the first TU to need it failed), so
+    # check every checkout, nested DEPS deps included, before ninja starts.
+    # Only files that still exist and are modified outside chrome/ and the
+    # patch series are restored; the pruned browser subtree never comes back.
+    local ci_dir="${KIBAOS_CI_DIR:-${startdir}/../ci}"
+    if [ -f "${ci_dir}/restore-truncated-sources.py" ]; then
+        python3 "${ci_dir}/restore-truncated-sources.py" \
+            --tree "${chrome_src}" --apply --quiet-chrome ||
+            echo "WARNING: some source files could not be restored; ninja will name what is missing" >&2
+    fi
+
     # Generate GN args without Google credentials. KibaOS uses local accounts
     # for the public release, while the runtime config remains an optional
     # user-owned hook for a future private build.
@@ -321,7 +334,6 @@ build() {
     "
     }
 
-    local ci_dir="${KIBAOS_CI_DIR:-${startdir}/../ci}"
     local gn_log="${srcdir}/gn-gen.log"
     local gn_attempt=1
     local gn_max="${KIBAOS_GN_RECOVERY_ATTEMPTS:-200}"

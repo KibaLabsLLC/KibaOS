@@ -332,6 +332,18 @@ fi
 
 echo "==> Dependencies and hooks completed"
 
+# A truncated dependency file is silent until something includes it, and then
+# it reads as a compile error about a missing declaration rather than a bad
+# copy. Check every checkout now that the sync has finished: the tool restores
+# only files that still exist and are modified outside chrome/ and the patch
+# series, so a pruned file stays pruned and a patched one stays patched.
+echo "==> Checking dependency sources"
+
+if ! python3 "${REPO_ROOT}/ci/restore-truncated-sources.py" \
+    --tree "${SRC_DIR}" --apply --quiet-chrome; then
+  echo "warning: some source files could not be restored" >&2
+fi
+
 # Verify patches against the fetched source.
 if [[ "${verify_series}" == "1" ]]; then
   echo "==> Verifying patch series"
