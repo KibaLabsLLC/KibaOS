@@ -345,7 +345,11 @@ def fetch_gcs(root, path, bucket, objects):
         try:
             download(url, tmp, obj.get("sha256sum"), obj.get("size_bytes"))
             if obj.get("output_file"):
-                os.replace(tmp, os.path.join(dest, obj["output_file"]))
+                archive = os.path.join(dest, obj["output_file"])
+                os.replace(tmp, archive)
+                if tarfile.is_tarfile(archive):
+                    extract_tar(archive, dest)
+                    os.remove(archive)
             elif tarfile.is_tarfile(tmp):
                 extract_tar(tmp, dest)
             else:
