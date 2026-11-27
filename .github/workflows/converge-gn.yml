@@ -173,8 +173,8 @@ jobs:
           cat > /tmp/pr-body.md <<'EOF'
           ## Summary
           - Adds `ci/converge-gn.py` plus a `workflow_dispatch` workflow that runs the real `gn gen` (built from `tools/gn` at the pins sha) on the series-patched Lumen checkout with the ash package's argument block
-          - Missing evaluation-time files (`import()`/`exec_script`/`read_file` inputs the pruner deleted) are restored from the chromium mirror; dep edges into build files the pruner deleted (anything under `chrome/` included) and refs to targets the pruner dropped (gn's "Unresolved dependencies" pairs) are cut in the referrer gn names, so the browser is never restored nor loaded — retried until `gn gen` converges (bounded at 1000 attempts, `--max-iterations` overrides)
-          - Failures that are neither missing files nor unresolved pruned targets (undefined identifiers, emptied sources) stop the loop with the full gn log; the converged fixes are emitted as `patches/0900-gn-evaluation-converges.patch`
+          - Missing evaluation-time files (`import()`/`exec_script`/`read_file` inputs the pruner deleted) are restored from the chromium mirror; dep edges into build files the pruner deleted (anything under `chrome/` included), refs to targets the pruner dropped (gn's "Unresolved dependencies" pairs), and duplicate source listings that collide into one object file are cut in the referrer gn names, so the browser is never restored nor loaded — retried until `gn gen` converges (bounded at 1000 attempts, `--max-iterations` overrides)
+          - Failures that are none of those (undefined identifiers, emptied sources) stop the loop with the full gn log; the converged fixes are emitted as `patches/0900-gn-evaluation-converges.patch`
 
           ## Verification
           - Trigger with: `gh workflow run converge-gn.yml --ref <branch>`

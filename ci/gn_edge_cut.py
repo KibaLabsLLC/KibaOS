@@ -18,6 +18,9 @@ Files deleted by the source pruner fall into two classes:
     "Unresolved dependencies" pairs; the referrer's dep token for each such
     target is cut (absolute "//path:name", dir-only "//path" and relative
     ":name" spellings).
+  * Targets with a source listed twice produce one object file twice and gn
+    aborts with "Duplicate object file"; all but one listing of that source
+    in the target are cut, keeping the deepest-indented (conditional) one.
 
 Everything else in the gn log is left alone: real gn is the referee, so what
 it rejects is never guessed at.
@@ -34,6 +37,10 @@ UNABLE_BLOCK_RE = re.compile(
     r'^ERROR at //(\S+):(\d+):(\d+): Unable to load "([^"]+)"', re.M)
 UNRESOLVED_HEADER_RE = re.compile(
     r'^ERROR Unresolved dependencies\.\n', re.M)
+DUP_OBJ_RE = re.compile(
+    r'^The target //(\S+)\ngenerates two object files with the same name:\n'
+    r'\s+(\S+\.o)\n', re.M)
+SOURCE_EXTS = (".cc", ".cpp", ".cxx", ".c", ".m", ".mm", ".s", ".S", ".asm")
 
 MAX_ITERATIONS = 1000
 
@@ -217,6 +224,73 @@ def cut_unresolved(root, text):
     return drops
 
 
+def target_span(lines, name):
+    """(start, end) line indexes of the target block named `name`."""
+    hdr = re.compile(
+        r'^\s*\w+\(\s*"%s"\s*\)\s*{'
+        r'|^\s*target\(\s*"\w+"\s*,\s*"%s"\s*\)\s*{' % (
+            re.escape(name), re.escape(name)))
+    start, depth = None, 0
+    for i, line in enumerate(lines):
+        bare = re.sub(r'"[^"\n]*"', '""', line)
+        if start is None:
+            if hdr.match(line) and "{" in bare:
+                start = i
+                depth = bare.count("{") - bare.count("}")
+                if depth <= 0:
+                    return (start, start)
+        else:
+            depth += bare.count("{") - bare.count("}")
+            if depth <= 0:
+                return (start, i)
+    return (start, len(lines) - 1) if start is not None else None
+
+
+def dedupe_object_sources(root, text):
+    """Cut repeat listings of sources that collide into one object file."""
+    drops = []
+    for label, obj in DUP_OBJ_RE.findall(text):
+        path, name = label_parts(label)
+        rel = "%s/BUILD.gn" % path
+        try:
+            with open(os.path.join(root, rel), encoding="utf-8") as fh:
+                lines = fh.readlines()
+        except OSError:
+            continue
+        span = target_span(lines, name)
+        if span is None:
+            continue
+        stem = os.path.basename(obj)[:-2]
+        cands = []
+        for i in range(span[0], span[1] + 1):
+            for m in re.finditer(r'"([^"\n]+)"', lines[i]):
+                base, ext = os.path.splitext(os.path.basename(m.group(1)))
+                if base == stem and ext in SOURCE_EXTS:
+                    indent = len(lines[i]) - len(lines[i].lstrip())
+                    cands.append((i, m.group(1), indent))
+        if len(cands) < 2:
+            continue
+        keep = max(range(len(cands)), key=lambda k: (cands[k][2], -k))
+        changed, blank = False, []
+        for k, (i, src, _) in enumerate(cands):
+            if k == keep:
+                continue
+            new = drop_token(lines[i], '"%s"' % src)
+            if new is None:
+                continue
+            lines[i] = new
+            changed = True
+            drops.append('%s:%d "%s"' % (rel, i + 1, src))
+            if not new.strip():
+                blank.append(i)
+        if changed:
+            for i in reversed(blank):
+                del lines[i]
+            with open(os.path.join(root, rel), "w", encoding="utf-8") as fh:
+                fh.writelines(lines)
+    return drops
+
+
 def cut_edges(root, out_dir, text, chromium=None, ref=None):
     """Handle the build files gn cannot load.
 
@@ -279,7 +353,8 @@ def recover(root, out_dir, text, chromium=None, ref=None):
     """
     drops, import_rels = cut_edges(root, out_dir, text, chromium, ref)
     unresolved = cut_unresolved(root, text)
-    actions = ["dropped %s" % d for d in drops + unresolved]
+    deduped = dedupe_object_sources(root, text)
+    actions = ["dropped %s" % d for d in drops + unresolved + deduped]
     rels = missing_inputs(root, out_dir, text) + import_rels
     if chromium and ref:
         restorable, missing_upstream = restore(root, chromium, ref, rels)
@@ -289,7 +364,7 @@ def recover(root, out_dir, text, chromium=None, ref=None):
         actions.append("restored %s from upstream %s" % (r, ref))
     for m in missing_upstream:
         actions.append("not in upstream, cannot restore: %s" % m)
-    return bool(drops or unresolved or restorable), actions
+    return bool(drops or unresolved or deduped or restorable), actions
 
 
 def main():
