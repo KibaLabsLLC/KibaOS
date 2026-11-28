@@ -29,6 +29,11 @@ Any such file that GN loads then fails to parse. This tool:
 
 Repaired files are written to --out preserving relative paths; the caller
 overlays them on the Lumen checkout and records the diff as a KibaOS patch.
+With --apply they are written back into the checkout itself, which is what the
+chromiumos-ash package build runs before ninja so a crate the series does not
+name is refilled on every build; --apply needs no --out, and --chromium/--ref
+stay optional because `sources` come from the vendored tree and only `inputs`
+need the mirror.
 
 Requires python3 (>= 3.8) and git.
 """
@@ -382,6 +387,9 @@ def scan_tree(root, overlay=None):
 # ---------------------------------------------------------------------------
 
 def upstream_show(chromium, ref, relpath):
+    """Chromium's copy of relpath at ref, or None without a mirror."""
+    if not chromium or not ref:
+        return None
     proc = subprocess.run(
         ["git", "-C", chromium, "show", "%s:%s" % (ref, relpath)],
         capture_output=True, text=True)
@@ -992,12 +1000,13 @@ def check_only(lumen, overlay=None, chromium=None, ref=None):
     return 1 if broken or pruned else 0
 
 
-def repair(lumen, chromium, ref, out_dir):
+def repair(lumen, chromium, ref, out_dir=None, apply=False):
+    """Repair into out_dir for the caller to overlay, or in place with apply."""
     broken = scan_tree(lumen)
     pruned = scan_rust_lists(lumen, chromium, ref)
     print("scanned: %d broken files, %d with emptied rust lists"
           % (len(broken), len(pruned)))
-    repaired, unrepaired = [], []
+    repaired, unrepaired, skipped = [], [], []
     for rel in sorted(set(broken) | set(pruned)):
         err_msg = broken.get(rel)
         try:
@@ -1008,6 +1017,15 @@ def repair(lumen, chromium, ref, out_dir):
             else:
                 up_text = upstream_show(chromium, ref, rel)
                 if up_text is None:
+                    # In a checkout being built in place there is no mirror to
+                    # align against; the caller's gn run is the referee for
+                    # that file, so report it and leave it exactly as found
+                    # instead of stopping a build it would otherwise finish.
+                    if apply and not (chromium and ref):
+                        skipped.append(rel)
+                        print("SKIPPED %s: broken, and no chromium mirror to "
+                              "align against" % rel)
+                        continue
                     raise RuntimeError("no upstream counterpart at %s" % ref)
                 new_text, note = repair_generic_file(lumen, rel, up_text, err_msg)
         except RuntimeError as e:
@@ -1019,18 +1037,32 @@ def repair(lumen, chromium, ref, out_dir):
             unrepaired.append(rel)
             print("UNREPAIRED %s: repair still invalid: %s" % (rel, err))
             continue
-        dest = os.path.join(out_dir, rel)
+        dest = os.path.join(lumen, rel) if apply else os.path.join(out_dir, rel)
+        try:
+            with open(dest, encoding="utf-8", errors="replace") as fh:
+                if fh.read() == new_text:
+                    repaired.append(rel)
+                    print("UNCHANGED %s (%s)" % (rel, note))
+                    continue
+        except OSError:
+            pass
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         with open(dest, "w", encoding="utf-8") as fh:
             fh.write(new_text)
         repaired.append(rel)
         print("REPAIRED %s (%s)" % (rel, note))
 
-    remaining = scan_tree(lumen, out_dir)
-    for rel, keys in scan_rust_lists(lumen, chromium, ref, out_dir).items():
+    overlay = None if apply else out_dir
+    remaining = scan_tree(lumen, overlay)
+    # A file skipped above is reported, not repaired: without a mirror it is
+    # gn's to reject, so it must not fail a build that would otherwise finish.
+    for rel in skipped:
+        remaining.pop(rel, None)
+    for rel, keys in scan_rust_lists(lumen, chromium, ref, overlay).items():
         remaining.setdefault(rel, "emptied %s lists" % ", ".join(keys))
-    print("summary: %d repaired, %d unrepaired, %d files still broken"
-          % (len(repaired), len(unrepaired), len(remaining)))
+    print("summary: %d repaired, %d unrepaired, %d skipped, "
+          "%d files still broken"
+          % (len(repaired), len(unrepaired), len(skipped), len(remaining)))
     for rel in sorted(remaining):
         print("STILL BROKEN %s: %s" % (rel, remaining[rel]))
     return 0 if not remaining else 2
@@ -1042,6 +1074,10 @@ def main():
     ap.add_argument("--chromium", help="chromium mirror checkout (git)")
     ap.add_argument("--ref", help="chromium ref (e.g. pins/chromium.sha)")
     ap.add_argument("--out", help="directory receiving repaired files")
+    ap.add_argument("--apply", action="store_true",
+                    help="write the repairs back into --lumen in place "
+                         "instead of --out (what the package build runs "
+                         "before ninja; sources need no chromium mirror)")
     ap.add_argument("--check", action="store_true",
                     help="only scan and report broken files and emptied rust "
                          "crate lists")
@@ -1059,10 +1095,13 @@ def main():
         sys.exit(verify_imports(args.lumen, args.chromium, args.ref))
     if args.check:
         sys.exit(check_only(args.lumen, args.overlay, args.chromium, args.ref))
-    for req in ("chromium", "ref", "out"):
-        if not getattr(args, req):
-            ap.error("--%s is required without --check" % req)
-    sys.exit(repair(args.lumen, args.chromium, args.ref, args.out))
+    if args.apply and args.out:
+        ap.error("--apply and --out are mutually exclusive")
+    if bool(args.chromium) != bool(args.ref):
+        ap.error("--chromium and --ref must be given together")
+    if not args.apply and not args.out:
+        ap.error("--out or --apply is required without --check")
+    sys.exit(repair(args.lumen, args.chromium, args.ref, args.out, args.apply))
 
 
 if __name__ == "__main__":

@@ -240,4 +240,44 @@ python3 "${tool}" --lumen "${lumen}" --chromium "${mirror}" --ref HEAD \
 diff -r "${out}" "${work}/again" >"${log}" 2>&1 ||
     fail "the second repair is not byte-identical"
 
+echo "==> --apply refills the checkout in place, with no mirror to align against"
+apply_tree="${work}/apply-tree"
+cp -a "${lumen}" "${apply_tree}"
+orphan_sum="$(sha256sum "${apply_tree}/third_party/rust/orphan/v1/BUILD.gn")"
+# A broken GN file: with no mirror there is nothing to align it against, so it
+# is reported and left exactly as found rather than stopping the build.
+write "${apply_tree}/build/edge.gni" \
+    'group("edge") {' \
+    '  sources =' \
+    '}'
+python3 "${tool}" --lumen "${apply_tree}" --apply >"${log}" 2>&1 ||
+    fail "--apply failed on a tree with no chromium mirror"
+grep -qF "\"${url}/demo-v1/src/inner.rs\"" \
+    "${apply_tree}/third_party/rust/demo/v1/BUILD.gn" ||
+    fail "--apply did not refill demo's sources in place"
+grep -qF "\"${url}/plain-v1/src/lib.rs\"" \
+    "${apply_tree}/third_party/rust/plain/v1/BUILD.gn" ||
+    fail "--apply did not refill plain's sources in place"
+grep -qx '  sources =' "${apply_tree}/build/edge.gni" ||
+    fail "--apply rewrote a file it had nothing to align against"
+grep -qF 'SKIPPED build/edge.gni' "${log}" ||
+    fail "--apply did not report the file only a mirror could repair"
+orphan_after="$(sha256sum "${apply_tree}/third_party/rust/orphan/v1/BUILD.gn")"
+[[ "${orphan_after}" == "${orphan_sum}" ]] ||
+    fail "--apply rewrote a crate with nothing to derive from"
+
+apply_sum="$(sha256sum "${apply_tree}/third_party/rust/demo/v1/BUILD.gn")"
+python3 "${tool}" --lumen "${apply_tree}" --apply >"${log}" 2>&1 ||
+    fail "the second --apply failed"
+apply_after="$(sha256sum "${apply_tree}/third_party/rust/demo/v1/BUILD.gn")"
+[[ "${apply_after}" == "${apply_sum}" ]] ||
+    fail "the second --apply changed the tree again"
+
+status=0
+python3 "${tool}" --lumen "${apply_tree}" >"${log}" 2>&1 || status=$?
+[[ ${status} -eq 2 ]] ||
+    fail "a repair with neither --out nor --apply exited ${status}, expected 2"
+grep -qF -- '--out or --apply is required' "${log}" ||
+    fail "--apply/--out are not required together with --lumen"
+
 echo "==> all pruned rust list cases passed"

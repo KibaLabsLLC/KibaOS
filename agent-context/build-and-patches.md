@@ -110,7 +110,10 @@ Full builds need Docker, ~15 GB free space, and Linux.
   discovered and GN never declared. It now refills them in the same run —
   sources from the vendored crate's `src/`, inputs from the pinned upstream —
   and keeps an input only when its path exists in the checkout. `0181`, `0182`
-  and `0185` predate that and stand as written.
+  and `0185` predate that and stand as written. The `chromiumos-ash` package
+  build runs the tool with `--apply` immediately before `gn gen`, so a crate
+  the series does not name is refilled from its vendored tree on every build;
+  `0186` declares itoa and ryu for trees built without `ci/` beside them.
 - `patches/generated/` holds machine-produced content. Do not hand-edit it;
   regenerate via CI tooling instead.
 

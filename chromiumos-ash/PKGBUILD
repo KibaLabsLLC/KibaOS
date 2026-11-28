@@ -283,7 +283,8 @@ build() {
     # are not self-contained, so the first abseil TU fails on
     # ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`. This
     # runs after the source check above, which restores modified files from
-    # HEAD and would undo it. Every manifest beside the tool is applied. Every
+    # HEAD and would undo it; the rust crate lists are refilled after this, for
+    # the same reason. Every manifest beside the tool is applied. Every
     # block goes back between the two lines it sat between, so the result is
     # Chromium's copy again, and a file Lumen has already restored is left as
     # it is.
@@ -294,6 +295,28 @@ build() {
         if ! python3 "${ci_dir}/restore-imported-includes.py" \
                 --tree "${chrome_src}" --apply; then
             echo "ERROR: the includes the import dropped could not be restored (see the ==> imported-includes: lines above); ninja would fail on a header that looks intact" >&2
+            exit 1
+        fi
+    fi
+
+    # The import that pruned this tree also emptied the `sources`/`inputs`
+    # lists of the gnrt-generated rust crate BUILD.gn files: those lists still
+    # parse, so nothing that loads them fails, and the build instead dies much
+    # later in rustc_wrapper.py on every file rustc discovered (following `mod`
+    # declarations from the crate root) that GN never declared. Refill them in
+    # the checkout before ninja starts so a crate the series does not name is
+    # repaired on every build rather than needing a hand-written patch. Sources
+    # come from the vendored crate's own src/; inputs need the chromium mirror
+    # (KIBAOS_CHROMIUM_MIRROR/KIBAOS_CHROMIUM_REF, the same pair the gn gen
+    # loop recovers with) and are left as they are without one. This runs after
+    # the restore steps above, which restore from HEAD and would undo it, and
+    # stop here rather than let ninja report a source file GN never listed.
+    if [ -f "${ci_dir}/repair-pruned-gn.py" ]; then
+        if ! python3 "${ci_dir}/repair-pruned-gn.py" \
+                --lumen "${chrome_src}" --apply \
+                ${KIBAOS_CHROMIUM_MIRROR:+--chromium "${KIBAOS_CHROMIUM_MIRROR}"} \
+                ${KIBAOS_CHROMIUM_REF:+--ref "${KIBAOS_CHROMIUM_REF}"}; then
+            echo "ERROR: the rust crate sources the import emptied could not be refilled (see the ==> lines above); ninja would fail in rustc_wrapper.py on files GN never declared" >&2
             exit 1
         fi
     fi
