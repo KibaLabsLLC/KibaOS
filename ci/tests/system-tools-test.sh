@@ -36,6 +36,15 @@ fake_bin() {
 src="${tmp}/src"
 mkdir -p "${src}"
 : >"${src}/DEPS"
+# The tree's .gn names its interpreter and its flags, which recent GN writes as
+# a list; the packaged GN has to be new enough to read that.
+cat >"${src}/.gn" <<'EOF'
+buildconfig = "//build/config/BUILDCONFIG.gn"
+script_executable = [
+  "//third_party/cpython3/host/bin/python3",
+  "-ES",
+]
+EOF
 
 # run_link [NAME=VALUE ...] -- runs the helper with the fake pacman and bin dir;
 # extra assignments are handed to env and reach the script as its environment.
@@ -135,5 +144,76 @@ FAKE_PACMAN_INSTALLED="${tmp}/installed" \
   KIBAOS_PACMAN_BIN="${tmp}/pacman" \
   "${TOOLS}" --resolver-args "${src}" >"${tmp}/resolver-c"
 [[ ! -s "${tmp}/resolver-c" ]] || fail "the resolver arguments are not empty while switched off"
+
+# D: a gn that fails for an unrelated reason is still usable; only the list
+# form it cannot parse makes the package too old.
+rm -rf "${src}/buildtools" "${src}/out"
+printf 'gn\n' >"${tmp}/installed"
+cat >"${tmp}/bin/gn" <<'EOF'
+#!/bin/sh
+echo 'ERROR: No buildconfig file.' >&2
+exit 1
+EOF
+chmod +x "${tmp}/bin/gn"
+
+run_link KIBAOS_PACMAN=0 >"${tmp}/link-d0.log" 2>&1 || {
+  cat "${tmp}/link-d0.log" >&2
+  fail "link failed when the packaged gn fails for its own reasons"
+}
+[[ -L "${src}/buildtools/linux64/gn" ]] ||
+  fail "a gn that fails for an unrelated reason was dropped"
+
+# E: the packaged GN is older than the tree's list-form .gn, so GN keeps
+# Chromium's copy and the resolver still fetches it.
+rm -rf "${src}/buildtools" "${src}/third_party/ninja" "${src}/out"
+printf 'gn\nninja\n' >"${tmp}/installed"
+cat >"${tmp}/bin/gn" <<'EOF'
+#!/bin/sh
+root=
+for arg in "$@"; do
+  case "${arg}" in
+    --root=*) root="${arg#--root=}" ;;
+  esac
+done
+if [ -n "${root}" ] && grep -q 'script_executable = \[' "${root}/.gn"; then
+  echo 'ERROR at //.gn:18:21: This is not a string.' >&2
+  exit 1
+fi
+exit 0
+EOF
+chmod +x "${tmp}/bin/gn"
+
+# A link left by an earlier run must not survive the fallback, or the
+# resolver's download would find the old gn in its place.
+mkdir -p "${src}/buildtools/linux64"
+ln -sfn "${tmp}/bin/gn" "${src}/buildtools/linux64/gn"
+
+run_link KIBAOS_PACMAN=0 >"${tmp}/link-d.log" 2>&1 || {
+  cat "${tmp}/link-d.log" >&2
+  fail "link failed when the packaged gn cannot read the tree's .gn"
+}
+
+if [[ -L "${src}/buildtools/linux64/gn" ]]; then
+  fail "a gn that cannot read the tree's .gn was linked anyway"
+fi
+grep -q 'cannot read the list-form script_executable' "${tmp}/link-d.log" ||
+  fail "the old gn was left out without saying why"
+[[ -L "${src}/third_party/ninja/ninja" ]] ||
+  fail "ninja was dropped along with gn"
+if grep -Fxq 'gn=gn' "${src}/out/.kibaos/system-tools.conf"; then
+  fail "an unusable gn was recorded as substituted"
+fi
+
+KIBAOS_PACMAN=0 \
+  FAKE_PACMAN_INSTALLED="${tmp}/installed" \
+  KIBAOS_SYSTEM_BIN_DIR="${tmp}/bin" \
+  KIBAOS_PACMAN_BIN="${tmp}/pacman" \
+  "${TOOLS}" --resolver-args "${src}" >"${tmp}/resolver-d"
+
+if grep -Fxq 'src/buildtools/linux64' "${tmp}/resolver-d"; then
+  fail "the resolver skips a GN that was not substituted"
+fi
+grep -Fxq 'src/third_party/ninja' "${tmp}/resolver-d" ||
+  fail "the resolver stopped skipping Ninja"
 
 echo "system-tools test passed"

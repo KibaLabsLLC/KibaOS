@@ -29,7 +29,10 @@
 #
 # A tool is substituted only when its packages are installed (or can be
 # installed) and its binaries are there; otherwise that tool keeps Chromium's
-# copy and the build continues as before.
+# copy and the build continues as before. GN also has to be able to read the
+# tree's own .gn (see gn_reads_dotfile): a gn too old for the form this tree
+# uses stops before any build argument is read, and Chromium's pinned copy is
+# the version the tree was written against.
 set -euo pipefail
 
 SYS_BIN="${KIBAOS_SYSTEM_BIN_DIR:-/usr/bin}"
@@ -132,6 +135,45 @@ link_tree() {
   ln -sfn "${bin}" "${dest}"
 }
 
+# Chromium moved .gn's script_executable from a string to a list, because it
+# names the interpreter and its flags ("-ES"). A gn from before that change
+# stops at //.gn with "This is not a string" before it reads a single build
+# argument, so the packaged gn may only be used when it can parse the form this
+# tree's .gn uses. The probe is a throwaway root holding exactly that form.
+gn_reads_dotfile() {
+  local src="$1"
+  local gn="$2"
+  local probe out
+
+  [[ -f "${src}/.gn" ]] || return 0
+  grep -qE '^[[:space:]]*script_executable[[:space:]]*=[[:space:]]*\[' \
+    "${src}/.gn" || return 0
+
+  # No buildconfig and no BUILD.gn on purpose: a gn that understands the list
+  # stops later on something else, while one that does not stops here with
+  # "This is not a string". Only that message means the package is too old.
+  probe="$(mktemp -d)"
+  {
+    printf 'buildconfig = "//BUILDCONFIG.gn"\n'
+    printf 'script_executable = [ "python3", "-ES" ]\n'
+  } >"${probe}/.gn"
+  out="$("${gn}" gen "${probe}/out" --root="${probe}" 2>&1 || true)"
+  rm -rf "${probe}"
+  ! grep -q 'is not a string' <<<"${out}"
+}
+
+# A tool that keeps Chromium's copy must not find a link from an earlier run:
+# the resolver downloads into that same path, and a link would stand in its way.
+drop_link() {
+  local src="$1"
+  local rel="$2"
+
+  if [[ -L "${src}/${rel}" ]]; then
+    rm -f "${src}/${rel}"
+  fi
+  return 0
+}
+
 clang_complete() {
   local bin
 
@@ -165,12 +207,16 @@ link_tools() {
   fi
 
   if use_packages gn && [[ -x "${SYS_BIN}/gn" ]]; then
-    if link_tree "${src}" buildtools/linux64/gn "${SYS_BIN}/gn"; then
+    if ! gn_reads_dotfile "${src}" "${SYS_BIN}/gn"; then
+      warn "gn: ${SYS_BIN}/gn cannot read the list-form script_executable this tree's .gn uses; keeping Chromium's prebuilt GN"
+      drop_link "${src}" buildtools/linux64/gn
+    elif link_tree "${src}" buildtools/linux64/gn "${SYS_BIN}/gn"; then
       printf 'gn=gn\n' >>"${conf}"
       log "gn: ${SYS_BIN}/gn"
     fi
   else
     warn "gn: keeping Chromium's prebuilt GN"
+    drop_link "${src}" buildtools/linux64/gn
   fi
 
   if use_packages ninja && [[ -x "${SYS_BIN}/ninja" ]]; then
@@ -180,6 +226,7 @@ link_tools() {
     fi
   else
     warn "ninja: keeping Chromium's prebuilt Ninja"
+    drop_link "${src}" third_party/ninja/ninja
   fi
 
   if use_packages clang llvm lld && clang_complete; then
@@ -213,6 +260,9 @@ EOF
       warn "clang: missing ${missing[*]} in ${SYS_BIN}"
     fi
     warn "clang: keeping Chromium's prebuilt toolchain"
+    for bin in "${CLANG_BINS[@]}"; do
+      drop_link "${src}" "third_party/llvm-build/Release+Asserts/bin/${bin}"
+    done
   fi
 }
 

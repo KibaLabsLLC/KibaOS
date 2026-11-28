@@ -12,7 +12,9 @@
    the patch series will apply. `ci/system-tools.sh` links the build root's
    own `gn`, `ninja` and `clang`/`llvm`/`lld` packages into the checkout and
    has the resolver skip Chromium's prebuilt copies, so only tools pacman does
-   not provide are downloaded; `KIBAOS_SYSTEM_TOOLS=0` keeps the downloads.
+   not provide are downloaded; a package that cannot do the job keeps
+   Chromium's copy instead (an older `gn` cannot read the tree's list-form
+   `script_executable`), and `KIBAOS_SYSTEM_TOOLS=0` keeps the downloads.
    `ci/restore-truncated-sources.py --restore-dir third_party/abseil-cpp`
    puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
    emptied part of it (which reads as undefined `ABSL_*` macros), deletions
