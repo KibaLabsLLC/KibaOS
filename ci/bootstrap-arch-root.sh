@@ -60,6 +60,8 @@ PACKAGES=(
   # llvm-ar, llvm-nm and llvm-strip come from llvm, not from clang.
   llvm
   lld
+  # The clang runtime libraries Chromium's Rust standard library links against.
+  compiler-rt
   gn
   bison
   flex

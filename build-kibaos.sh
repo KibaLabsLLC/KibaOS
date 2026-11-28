@@ -214,6 +214,7 @@ install_host_dependencies() {
         clang \
         llvm \
         lld \
+        compiler-rt \
         gn \
         ninja \
         curl \

@@ -3,12 +3,12 @@
 #
 # Chromium's DEPS brings its own GN (cipd), Ninja (cipd) and a Clang/LLVM
 # toolchain (GCS, well over a gigabyte) into every fresh checkout. On Arch
-# those are pacman packages -- gn, ninja, clang, llvm, lld -- which the build
-# root already installs (ci/bootstrap-arch-root.sh) and which the chromiumos-ash
-# makedepends already name. This script links the installed packages into the
-# checkout and records what it took from pacman, so ci/resolve-deps.py leaves
-# those DEPS entries out and the GN builds pass the clang arguments the system
-# toolchain needs.
+# those are pacman packages -- gn, ninja, clang, llvm, lld, compiler-rt -- which
+# the build root already installs (ci/bootstrap-arch-root.sh) and which the
+# chromiumos-ash makedepends already name. This script links the installed
+# packages into the checkout and records what it took from pacman, so
+# ci/resolve-deps.py leaves those DEPS entries out and the GN builds pass the
+# clang arguments the system toolchain needs.
 #
 # Usage:
 #   ci/system-tools.sh --link SRC          use packages for everything it can
@@ -23,6 +23,13 @@
 # left in the worktree would show up in the patch-series tree check as drift.
 #   system-tools.conf  one tool=packages line per substituted tool
 #   system-tools.gn    matching gn arguments for the system clang
+#
+# The clang substitution also completes SRC/third_party/llvm-build/Release+Asserts,
+# Chromium's default clang_base_path: the binaries are linked there, and
+# provide_clang_toolchain() adds the per-target compiler-rt directory and the
+# cr_build_revision file the build reads from that path. Keeping the toolchain
+# where Chromium expects it means no absolute path is baked into the checkout,
+# so the same tree configures inside the Arch root as on the host.
 #
 # Environment:
 #   KIBAOS_SYSTEM_TOOLS=0            keep Chromium's downloaded toolchains
@@ -209,6 +216,112 @@ clang_complete() {
   "${SYS_BIN}/clang++" --version >/dev/null 2>&1
 }
 
+# Chromium reads its clang toolchain from //third_party/llvm-build/Release+Asserts
+# (clang_base_path's default): bin/ holds the tools, cr_build_revision the
+# revision //tools/clang/scripts/update.py expects, and compiler-rt lives in a
+# per-target directory, lib/clang/<version>/lib/<triple>/libclang_rt.builtins.a.
+# Arch packages the binaries and a flat compiler-rt (lib/linux/...) but no
+# revision file, and the per-target archive is what the Rust standard library
+# links against: without it obj/build/rust/libcxx_cppdeps_lib.a fails with
+# "libclang_rt.builtins.a ... missing and no known rule to make it".
+CLANG_BASE_REL="third_party/llvm-build/Release+Asserts"
+
+clang_triple() {
+  case "$(uname -m)" in
+    x86_64) printf 'x86_64-unknown-linux-gnu\n' ;;
+    aarch64 | arm64) printf 'aarch64-unknown-linux-gnu\n' ;;
+    *) return 1 ;;
+  esac
+}
+
+clang_resource_dir() {
+  local dir
+
+  dir="$("$1" -print-resource-dir 2>/dev/null)" || return 1
+  [[ -n "${dir}" && -d "${dir}" ]] || return 1
+  printf '%s\n' "${dir}"
+}
+
+# The version directory the tree's GN expects, from build/toolchain/toolchain.gni.
+tree_clang_version() {
+  local version
+
+  version="$(sed -nE \
+    's/^[[:space:]]*clang_version[[:space:]]*=[[:space:]]*"([0-9]+)".*/\1/p' \
+    "$1/build/toolchain/toolchain.gni" 2>/dev/null | head -n 1 || true)"
+  [[ -n "${version}" ]] || return 1
+  printf '%s\n' "${version}"
+}
+
+# The revision GN asserts cr_build_revision holds, from the tree's own
+# tools/clang/scripts/update.py.
+tree_clang_revision() {
+  local py="$1/tools/clang/scripts/update.py"
+  local revision sub
+
+  [[ -r "${py}" ]] || return 1
+  revision="$(sed -nE \
+    "s/^[[:space:]]*CLANG_REVISION[[:space:]]*=[[:space:]]*'([^']+)'.*/\1/p" \
+    "${py}" 2>/dev/null | head -n 1 || true)"
+  sub="$(sed -nE \
+    's/^[[:space:]]*CLANG_SUB_REVISION[[:space:]]*=[[:space:]]*([0-9]+).*/\1/p' \
+    "${py}" 2>/dev/null | head -n 1 || true)"
+  [[ -n "${revision}" && -n "${sub}" ]] || return 1
+  printf '%s-%s\n' "${revision}" "${sub}"
+}
+
+# Complete that toolchain directory so the installed clang works from it.
+provide_clang_toolchain() {
+  local src="$1"
+  local base="${src}/${CLANG_BASE_REL}"
+  local triple version revision resource_dir archive candidate arch
+
+  triple="$(clang_triple)" || {
+    warn "clang: no Chromium runtime triple for $(uname -m)"
+    return 1
+  }
+  version="$(tree_clang_version "${src}")" || {
+    warn "clang: cannot read clang_version from build/toolchain/toolchain.gni"
+    return 1
+  }
+  revision="$(tree_clang_revision "${src}")" || {
+    warn "clang: cannot read the clang revision from tools/clang/scripts/update.py"
+    return 1
+  }
+  resource_dir="$(clang_resource_dir "${SYS_BIN}/clang")" || {
+    warn "clang: ${SYS_BIN}/clang reports no resource directory"
+    return 1
+  }
+
+  archive="${base}/lib/clang/${version}/lib/${triple}/libclang_rt.builtins.a"
+  arch="${triple%%-*}"
+  for candidate in \
+    "${resource_dir}/lib/${triple}/libclang_rt.builtins.a" \
+    "${resource_dir}/lib/linux/libclang_rt.builtins-${arch}.a"; do
+    [[ -f "${candidate}" ]] || continue
+    if cmp -s "${candidate}" "${archive}"; then
+      break
+    fi
+    mkdir -p "$(dirname "${archive}")" || return 1
+    # The archive is copied, not linked: the same checkout is configured
+    # again inside the Arch build root, whose /usr may carry a different
+    # clang than the one that bootstrapped it. rm first so a link left by
+    # an older run is replaced instead of written through.
+    rm -f "${archive}" || return 1
+    cp "${candidate}" "${archive}" || return 1
+    break
+  done
+  [[ -f "${archive}" ]] || {
+    warn "clang: ${resource_dir} has no compiler-rt builtins archive for ${triple}"
+    return 1
+  }
+
+  mkdir -p "${base}" || return 1
+  printf '%s\n' "${revision}" >"${base}/cr_build_revision" || return 1
+  log "clang runtime: ${resource_dir} for ${triple} in ${version}"
+  return 0
+}
+
 link_tools() {
   local src="$1"
   local state="${src}/${STATE_REL}"
@@ -253,28 +366,38 @@ link_tools() {
     drop_link "${src}" third_party/ninja/ninja
   fi
 
-  if use_packages clang llvm lld && clang_complete; then
+  # compiler-rt is what the Rust standard library links, so the package is
+  # part of the requirement: install (or find) it before anything is copied
+  # into the toolchain directory, and substitute nothing if it is not there.
+  local have_compiler_rt=0
+  if use_packages compiler-rt; then
+    have_compiler_rt=1
+  else
+    warn "clang: compiler-rt is missing and cannot be installed; the Rust std build needs its libclang_rt.builtins.a"
+  fi
+
+  if use_packages clang llvm lld && clang_complete &&
+    (( have_compiler_rt )) && provide_clang_toolchain "${src}"; then
     for bin in "${CLANG_BINS[@]}"; do
       [[ -x "${SYS_BIN}/${bin}" ]] || continue
       link_tree "${src}" \
-        "third_party/llvm-build/Release+Asserts/bin/${bin}" \
+        "${CLANG_BASE_REL}/bin/${bin}" \
         "${SYS_BIN}/${bin}" ||
         warn "clang: could not link ${bin}"
     done
-    printf 'clang=clang llvm lld\n' >>"${conf}"
+    printf 'clang=clang llvm lld compiler-rt\n' >>"${conf}"
     # Chromium's own clang carries the coding-guideline plugins and the
-    # alloc-token sanitizer build in; another clang has neither. Naming the
-    # toolchain keeps GN's revision checks out of the way too: those assert
-    # that //third_party/llvm-build matches tools/clang/scripts/update.py,
-    # which is exactly the copy this build does not use.
+    # alloc-token sanitizer build in; another clang has neither. The toolchain
+    # stays at its default path, which provide_clang_toolchain() has just
+    # completed, so the revision checks GN runs for that path read the
+    # cr_build_revision written there too.
     cat >>"${gn_args}" <<EOF
-# Arch's clang, llvm and lld replace Chromium's prebuilt toolchain
-# (ci/system-tools.sh); the prebuilt one is not downloaded.
-clang_base_path = "${SYS_BIN%/bin}"
+# Arch's clang, llvm, lld and compiler-rt replace Chromium's prebuilt
+# toolchain (ci/system-tools.sh); the prebuilt one is not downloaded.
 clang_use_chrome_plugins = false
 use_alloc_token = false
 EOF
-    log "clang: ${SYS_BIN}/clang++ with llvm and lld"
+    log "clang: ${SYS_BIN}/clang++ with llvm, lld and compiler-rt"
   else
     local -a missing=()
     for bin in "${CLANG_REQUIRED[@]}"; do
@@ -285,7 +408,7 @@ EOF
     fi
     warn "clang: keeping Chromium's prebuilt toolchain"
     for bin in "${CLANG_BINS[@]}"; do
-      drop_link "${src}" "third_party/llvm-build/Release+Asserts/bin/${bin}"
+      drop_link "${src}" "${CLANG_BASE_REL}/bin/${bin}"
     done
   fi
 }
