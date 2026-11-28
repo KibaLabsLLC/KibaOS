@@ -1,0 +1,187 @@
+diff --git a/build/rust/allocator/allocator_impls.cc b/build/rust/allocator/allocator_impls.cc
+index 1b285afc..bab28f1f 100644
+--- a/build/rust/allocator/allocator_impls.cc
++++ b/build/rust/allocator/allocator_impls.cc
+@@ -21,8 +21,11 @@
+ #endif
+ 
+ #include "build/build_config.h"
++#include "build/rust/allocator/buildflags.h"
+ 
+ #if BUILDFLAG(RUST_ALLOCATOR_USES_PARTITION_ALLOC)
++#include "partition_alloc/partition_alloc_constants.h"  // nogncheck
++#include "partition_alloc/shim/allocator_shim.h"        // nogncheck
+ #elif BUILDFLAG(RUST_ALLOCATOR_USES_ALIGNED_MALLOC)
+ #include <cstdlib>
+ #endif
+diff --git a/build/rust/tests/test_cpp_api_from_rust/target_depending_only_on_bindings.cc b/build/rust/tests/test_cpp_api_from_rust/target_depending_only_on_bindings.cc
+index 9b1a6b4d..24505ab5 100644
+--- a/build/rust/tests/test_cpp_api_from_rust/target_depending_only_on_bindings.cc
++++ b/build/rust/tests/test_cpp_api_from_rust/target_depending_only_on_bindings.cc
+@@ -7,6 +7,7 @@
+ // This file is used to verify that the C++ bindings can be `#include`d
+ // without manually depending on `//build/rust/crubit`. See also
+ // https://crbug.com/546044516
++#include "build/rust/tests/test_cpp_api_from_rust/rust_lib.h"
+ 
+ namespace target_depending_only_on_bindings {
+ 
+diff --git a/build/rust/tests/test_cpp_api_from_rust/unittests.cc b/build/rust/tests/test_cpp_api_from_rust/unittests.cc
+index 7d6c25d5..70ca8a4d 100644
+--- a/build/rust/tests/test_cpp_api_from_rust/unittests.cc
++++ b/build/rust/tests/test_cpp_api_from_rust/unittests.cc
+@@ -3,7 +3,10 @@
+ // found in the LICENSE file.
+ 
+ #include "build/build_config.h"
++#include "build/rust/tests/test_cpp_api_from_rust/rust_lib.h"
+ #include "testing/gtest/include/gtest/gtest.h"
++#include "third_party/crubit/support/rs_std/char.h"
++#include "third_party/crubit/support/rs_std/rs_alloc.h"
+ 
+ TEST(RustCcBindingsFromRs, TestI32) {
+   EXPECT_EQ(12, rust_lib::mul_two_ints_via_rust(3, 4));
+diff --git a/build/rust/tests/test_cpp_including_rust/main.cc b/build/rust/tests/test_cpp_including_rust/main.cc
+index d9d01d02..d515a346 100644
+--- a/build/rust/tests/test_cpp_including_rust/main.cc
++++ b/build/rust/tests/test_cpp_including_rust/main.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include "build/rust/tests/test_rust_static_library/src/lib.rs.h"
+ 
+ int main(int argc, char* argv[]) {
+   say_hello();
+diff --git a/build/rust/tests/test_cpp_including_rust/shared_unittest.cc b/build/rust/tests/test_cpp_including_rust/shared_unittest.cc
+index 42a01bb3..b19940c2 100644
+--- a/build/rust/tests/test_cpp_including_rust/shared_unittest.cc
++++ b/build/rust/tests/test_cpp_including_rust/shared_unittest.cc
+@@ -7,10 +7,16 @@
+ 
+ #include <memory>
+ 
++#include "build/rust/tests/test_rust_shared_library/src/lib.rs.h"
++#include "partition_alloc/buildflags.h"
++#include "partition_alloc/partition_alloc_constants.h"
++#include "partition_alloc/partition_alloc_public_constants.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ 
+ #if PA_BUILDFLAG(HAS_64_BIT_POINTERS)
++#include "partition_alloc/partition_address_space.h"
+ #else
++#include "partition_alloc/address_pool_manager_bitmap.h"
+ #endif
+ 
+ TEST(RustSharedTest, CppCallingIntoRust_BasicFFI) {
+diff --git a/build/rust/tests/test_cpp_including_rust/static_unittest.cc b/build/rust/tests/test_cpp_including_rust/static_unittest.cc
+index f561d5b7..3787b474 100644
+--- a/build/rust/tests/test_cpp_including_rust/static_unittest.cc
++++ b/build/rust/tests/test_cpp_including_rust/static_unittest.cc
+@@ -9,15 +9,21 @@
+ #include <memory>
+ #include <vector>
+ 
++#include "build/rust/tests/test_rust_static_library/src/lib.rs.h"
++#include "partition_alloc/buildflags.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ 
+ #if PA_BUILDFLAG(USE_PARTITION_ALLOC)
+ #if PA_BUILDFLAG(HAS_64_BIT_POINTERS)
++#include "partition_alloc/partition_address_space.h"  // nogncheck
+ #else
++#include "partition_alloc/address_pool_manager_bitmap.h"  // nogncheck
+ #endif
+ #endif
+ 
+ #if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)
++#include "partition_alloc/bucket_lookup.h"              // nogncheck
++#include "partition_alloc/partition_alloc_constants.h"  // nogncheck
+ #endif
+ 
+ TEST(RustStaticTest, CppCallingIntoRust_BasicFFI) {
+diff --git a/build/rust/tests/test_cxx_cfg/cxx_cfg_unittest.cc b/build/rust/tests/test_cxx_cfg/cxx_cfg_unittest.cc
+index fc60107b..4291c3dd 100644
+--- a/build/rust/tests/test_cxx_cfg/cxx_cfg_unittest.cc
++++ b/build/rust/tests/test_cxx_cfg/cxx_cfg_unittest.cc
+@@ -5,6 +5,8 @@
+ #include <stdint.h>
+ 
+ #include "build/build_config.h"
++#include "build/rust/tests/test_cxx_cfg/custom_buildflags.h"
++#include "build/rust/tests/test_cxx_cfg/cxx_cfg_lib.rs.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ 
+ namespace {
+diff --git a/build/rust/tests/test_cxx_circular/cxx_circular_shim.h b/build/rust/tests/test_cxx_circular/cxx_circular_shim.h
+index 450b15aa..73a407bf 100644
+--- a/build/rust/tests/test_cxx_circular/cxx_circular_shim.h
++++ b/build/rust/tests/test_cxx_circular/cxx_circular_shim.h
+@@ -7,6 +7,7 @@
+ 
+ #include <cstdint>
+ 
++#include "build/rust/tests/test_cxx_circular/cxx_circular.rs.h"
+ 
+ namespace cxx_circular_test {
+ 
+diff --git a/build/rust/tests/test_rust_api_from_cpp/lifetimes/explicit_lifetimes.h b/build/rust/tests/test_rust_api_from_cpp/lifetimes/explicit_lifetimes.h
+index 5048cf59..ed6ba83c 100644
+--- a/build/rust/tests/test_rust_api_from_cpp/lifetimes/explicit_lifetimes.h
++++ b/build/rust/tests/test_rust_api_from_cpp/lifetimes/explicit_lifetimes.h
+@@ -5,6 +5,7 @@
+ #ifndef BUILD_RUST_TESTS_TEST_RUST_API_FROM_CPP_LIFETIMES_EXPLICIT_LIFETIMES_H_
+ #define BUILD_RUST_TESTS_TEST_RUST_API_FROM_CPP_LIFETIMES_EXPLICIT_LIFETIMES_H_
+ 
++#include "third_party/crubit/support/lifetime_annotations.h"
+ 
+ struct ExplicitLifetimesStruct final {
+   // The result may refer to `this` or to `other`.  Lifetime elision would
+diff --git a/build/rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.cc b/build/rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.cc
+index a19cf5c6..b6e090c1 100644
+--- a/build/rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.cc
++++ b/build/rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.cc
+@@ -4,6 +4,7 @@
+ 
+ #include "build/rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.h"
+ 
++#include "build/rust/tests/test_rust_api_from_cpp/mutual_recursion/is_odd.h"
+ 
+ namespace parity {
+ 
+diff --git a/build/rust/tests/test_rust_api_from_cpp/round_trip/cpp_lib_using_rust_type.h b/build/rust/tests/test_rust_api_from_cpp/round_trip/cpp_lib_using_rust_type.h
+index 730e4c8a..9507716d 100644
+--- a/build/rust/tests/test_rust_api_from_cpp/round_trip/cpp_lib_using_rust_type.h
++++ b/build/rust/tests/test_rust_api_from_cpp/round_trip/cpp_lib_using_rust_type.h
+@@ -5,6 +5,7 @@
+ #ifndef BUILD_RUST_TESTS_TEST_RUST_API_FROM_CPP_ROUND_TRIP_CPP_LIB_USING_RUST_TYPE_H_
+ #define BUILD_RUST_TESTS_TEST_RUST_API_FROM_CPP_ROUND_TRIP_CPP_LIB_USING_RUST_TYPE_H_
+ 
++#include "build/rust/tests/test_rust_api_from_cpp/round_trip/rust_lib_with_rust_type.h"
+ 
+ inline rust_lib_with_rust_type::RustStruct DoubleRustStruct(
+     rust_lib_with_rust_type::RustStruct s) {
+diff --git a/build/rust/tests/test_rust_api_from_cpp/round_trip/unittests.cc b/build/rust/tests/test_rust_api_from_cpp/round_trip/unittests.cc
+index 3ecaba7d..d601fe27 100644
+--- a/build/rust/tests/test_rust_api_from_cpp/round_trip/unittests.cc
++++ b/build/rust/tests/test_rust_api_from_cpp/round_trip/unittests.cc
+@@ -4,6 +4,7 @@
+ 
+ #include <type_traits>
+ 
++#include "build/rust/tests/test_rust_api_from_cpp/round_trip/rust_lib_using_cpp_type.h"
+ #include "build/rust/tests/test_rust_api_from_cpp/self_contained_target_header2.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ 
+diff --git a/build/rust/tests/test_rust_calling_cpp/main.cc b/build/rust/tests/test_rust_calling_cpp/main.cc
+index d70a8f7a..92402a27 100644
+--- a/build/rust/tests/test_rust_calling_cpp/main.cc
++++ b/build/rust/tests/test_rust_calling_cpp/main.cc
+@@ -2,6 +2,7 @@
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+ 
++#include "build/rust/tests/test_rust_calling_cpp/rust_calling_cpp_rlib.rs.h"
+ 
+ int main() {
+   rust_calling_cpp();
