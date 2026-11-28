@@ -124,6 +124,7 @@ source=(
     'chromiumos-ash.desktop'
     'chromiumos-ash-wayland.desktop'
     'kibaos.features.conf'
+    'kibaos-default-wallpaper.png'
     'google-api.conf.example'
     'test-google-api-config.sh'
     'test-local-account-flags.sh'
@@ -152,7 +153,7 @@ source=(
     'kibaos-lock.pam'
     'LICENSE'
 )
-sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
 noextract=()
 backup=('etc/kibaos/features.conf' 'etc/kibaos/google-api.conf')
 
@@ -559,6 +560,14 @@ EOF
     # Install feature defaults.
     install -Dm644 "${srcdir}/kibaos.features.conf" \
         "${pkgdir}/etc/kibaos/features.conf"
+    # The wallpaper the desktop shows until somebody picks another, and takes
+    # its colours from. The session hands Ash the path KIBAOS_DEFAULT_WALLPAPER
+    # names, so the file has to be installed beside the setting rather than
+    # borrowed from somewhere else: kibaos-wallpapers carries the photographs
+    # Personalization offers, is optional, and a desktop whose first wallpaper
+    # is missing falls back to a grey gradient.
+    install -Dm644 "${srcdir}/kibaos-default-wallpaper.png" \
+        "${pkgdir}/usr/share/kibaos/default-wallpaper.png"
     local google_api_runtime_config="${KIBAOS_GOOGLE_API_CONFIG:-${srcdir}/google-api.conf.example}"
     install -Dm644 "${google_api_runtime_config}" \
         "${pkgdir}/etc/kibaos/google-api.conf"

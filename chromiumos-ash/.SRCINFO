@@ -97,6 +97,7 @@ pkgbase = chromiumos-ash
 	source = chromiumos-ash.desktop
 	source = chromiumos-ash-wayland.desktop
 	source = kibaos.features.conf
+	source = kibaos-default-wallpaper.png
 	source = google-api.conf.example
 	source = test-google-api-config.sh
 	source = test-local-account-flags.sh

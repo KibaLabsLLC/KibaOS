@@ -68,6 +68,10 @@ core
 # as it swallowed the wallpapers, and a silently untracked file in a theme
 # directory is a boot screen that works here and is missing on the image.
 !installer/archiso/airootfs/usr/share/plymouth/themes/kibaos/*.png
+# The desktop's default wallpaper, installed by chromiumos-ash. Same reason as
+# the two rules above: `*.png` is aimed at screenshots, and a wallpaper that is
+# silently untracked is a desktop with no wallpaper on every fresh install.
+!chromiumos-ash/*.png
 *.jpg
 *.jpeg
 *.webp
