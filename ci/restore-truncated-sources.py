@@ -34,8 +34,10 @@ re-syncing the dependency is what does.
 deletions included. That is what a vendored subtree the build needs in full
 needs (third_party/abseil-cpp is the one): a header that is gone there is
 damage, not the pruner's decision, and an emptied one fails much later as an
-undefined macro. The series' hunks under that directory are re-applied after
-the restore, so a patched tree comes out patched instead of reset to HEAD.
+undefined macro. Only the files that are really damaged are restored, so a
+patched tree's series hunks stay where they are and nothing is reported on a
+clean build; a series-owned file that is itself gone or empty is brought back
+by resetting the directory and re-applying the series.
 
 Paths the series patches are recognised by their path in the tree, not by their
 path inside a checkout: the series names `third_party/abseil-cpp/...` while a
@@ -262,16 +264,34 @@ def describe(tree, xy, path):
     return "differs from HEAD"
 
 
+def series_damaged(tree, xy, path):
+    """A file the series edits is only damage when it is gone or empty.
+
+    Anything else is the series doing its job: the patch content is what the
+    file should hold, so a patched tree has nothing to report here.
+    """
+    if "D" in xy:
+        return True
+    try:
+        return os.path.getsize(os.path.join(tree, path)) == 0
+    except OSError:
+        return True
+
+
 def restore_directory(tree, patch_dir, rel_dir, apply_restore, no_patches):
     """Restore one directory from HEAD, deletions included.
 
     The scan above leaves deletions alone because a missing file is usually
     the pruner's decision. A named directory is the other case: it is a
     subtree the build needs whole, so a file that is gone there is damage
-    like an emptied one. git checkout restores both, and the series' own
-    hunks under that directory are re-applied so a patched tree comes out
-    patched. Files outside the directory and untracked files inside it are
-    left alone.
+    like an emptied one.
+
+    The series' own files are not damage just for differing from HEAD, or
+    every build would report and rewrite them. Only the files that are really
+    damaged are restored, which leaves the series' hunks in place; when a
+    series-owned file is itself gone or empty the directory is reset and the
+    series re-applied, because that content can only come back that way.
+    Files outside the directory and untracked files inside it are left alone.
     """
     if not rel_dir or os.path.isabs(rel_dir) or ".." in rel_dir.split("/"):
         print("error: --restore-dir needs a relative path inside the tree",
@@ -298,12 +318,14 @@ def restore_directory(tree, patch_dir, rel_dir, apply_restore, no_patches):
     if entries is None:
         print("error: git status failed under %s" % rel_dir, file=sys.stderr)
         return 2
-    changed = [(xy, path) for xy, path in entries if "A" not in xy]
+    damaged = [(xy, path) for xy, path in entries
+               if "A" not in xy
+               and (path not in patched or series_damaged(tree, xy, path))]
 
-    if not changed:
-        print(PREFIX + "%s matches HEAD" % rel_dir)
+    if not damaged:
+        print(PREFIX + "no damage under %s" % rel_dir)
         return 0
-    for xy, path in changed:
+    for xy, path in damaged:
         print(PREFIX + "would restore: %s (%s)"
               % (path, describe(tree, xy, path)))
     if not apply_restore:
@@ -311,30 +333,41 @@ def restore_directory(tree, patch_dir, rel_dir, apply_restore, no_patches):
                       "HEAD" % rel_dir)
         return 1
 
-    proc = run(["git", "-C", tree, "checkout", "HEAD", "--", rel_dir])
-    if proc.returncode != 0:
-        print("error: git checkout HEAD -- %s failed: %s"
-              % (rel_dir, proc.stderr.decode("utf-8", "replace").strip()),
-              file=sys.stderr)
-        return 1
-    print(PREFIX + "restored %d file(s) under %s from HEAD"
-          % (len(changed), rel_dir))
-
+    # A series-owned file that is gone or empty cannot be patched back: its
+    # hunk has no context left. Reset the directory and re-apply the series.
     reapplied = 0
-    for patch in series_patch_files(patch_dir):
-        if not patch_touches(patch, rel_dir):
-            continue
-        proc = run(["git", "-C", tree, "apply",
-                    "--include=%s/*" % rel_dir, "--whitespace=error-all",
-                    patch])
+    if any(path in patched for xy, path in damaged):
+        proc = run(["git", "-C", tree, "checkout", "HEAD", "--", rel_dir])
         if proc.returncode != 0:
-            print("error: could not re-apply %s under %s: %s"
-                  % (os.path.basename(patch), rel_dir,
-                     proc.stderr.decode("utf-8", "replace").strip()),
+            print("error: git checkout HEAD -- %s failed: %s"
+                  % (rel_dir, proc.stderr.decode("utf-8", "replace").strip()),
                   file=sys.stderr)
             return 1
-        reapplied += 1
-        print(PREFIX + "re-applied %s" % os.path.basename(patch))
+        print(PREFIX + "%s reset from HEAD; re-applying the series" % rel_dir)
+        for patch in series_patch_files(patch_dir):
+            if not patch_touches(patch, rel_dir):
+                continue
+            proc = run(["git", "-C", tree, "apply",
+                        "--include=%s/*" % rel_dir, "--whitespace=error-all",
+                        patch])
+            if proc.returncode != 0:
+                print("error: could not re-apply %s under %s: %s"
+                      % (os.path.basename(patch), rel_dir,
+                         proc.stderr.decode("utf-8", "replace").strip()),
+                      file=sys.stderr)
+                return 1
+            reapplied += 1
+            print(PREFIX + "re-applied %s" % os.path.basename(patch))
+    else:
+        paths = [path for xy, path in damaged]
+        proc = run(["git", "-C", tree, "checkout", "HEAD", "--"] + paths)
+        if proc.returncode != 0:
+            print("error: git checkout HEAD failed under %s: %s"
+                  % (rel_dir, proc.stderr.decode("utf-8", "replace").strip()),
+                  file=sys.stderr)
+            return 1
+        print(PREFIX + "restored %d file(s) under %s from HEAD"
+              % (len(paths), rel_dir))
 
     leftovers = [(xy, path) for xy, path in (status_entries(tree, rel_dir) or [])
                  if path not in patched]

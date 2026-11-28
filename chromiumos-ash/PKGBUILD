@@ -360,6 +360,16 @@ build() {
     "
     }
 
+    # A link at buildtools/linux64/gn is what ci/system-tools.sh leaves when a
+    # package GN is used, and one that cannot read the tree's .gn fails before
+    # a single build argument is read: no amount of recovery changes that, so
+    # stop here and name the command that fetches the pinned GN.
+    if [ -f "${ci_dir}/system-tools.sh" ] &&
+        [ -L "${chrome_src}/buildtools/linux64/gn" ]; then
+        bash "${ci_dir}/system-tools.sh" --check-gn "${chrome_src}" ||
+            exit 1
+    fi
+
     local gn_log="${srcdir}/gn-gen.log"
     local gn_attempt=1
     local gn_max="${KIBAOS_GN_RECOVERY_ATTEMPTS:-200}"

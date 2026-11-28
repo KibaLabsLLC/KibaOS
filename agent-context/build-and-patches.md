@@ -14,7 +14,9 @@
    has the resolver skip Chromium's prebuilt copies, so only tools pacman does
    not provide are downloaded; a package that cannot do the job keeps
    Chromium's copy instead (an older `gn` cannot read the tree's list-form
-   `script_executable`), and `KIBAOS_SYSTEM_TOOLS=0` keeps the downloads.
+   `script_executable`), the package build stops at once on such a `gn` link
+   instead of running the recovery loop, and `KIBAOS_SYSTEM_TOOLS=0` keeps
+   the downloads.
    `ci/restore-truncated-sources.py --restore-dir third_party/abseil-cpp`
    puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
    emptied part of it (which reads as undefined `ABSL_*` macros), deletions

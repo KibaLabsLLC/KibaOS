@@ -70,6 +70,9 @@ grep -q "would restore: .*config.h (empty)" "${out}" ||
     fail "report does not name the emptied header"
 grep -q "would restore: .*attributes.h (missing)" "${out}" ||
     fail "report does not name the deleted header"
+if grep -q "would restore: .*BUILD.gn" "${out}"; then
+    fail "the series' own file was reported as damage"
+fi
 [[ ! -s "${tree}/${dir}/absl/base/config.h" ]] ||
     fail "report mode changed the emptied header"
 [[ ! -e "${tree}/${dir}/absl/base/attributes.h" ]] ||
@@ -109,6 +112,37 @@ python3 "${tool}" --tree "${tree}" --patches "${patches}" \
     fail "the second --apply lost the restored header"
 grep -q 'visibility = \[ "//\*" \]' "${tree}/${dir}/BUILD.gn" ||
     fail "the second --apply lost the series' hunk"
+if grep -q 'would restore' "${out}"; then
+    fail "the second --apply reported the series' own file as damage"
+fi
+
+echo "==> a patched tree reports no damage at all"
+status=0
+python3 "${tool}" --tree "${tree}" --patches "${patches}" \
+    --restore-dir "${dir}" >"${out}" 2>&1 || status=$?
+[[ ${status} -eq 0 ]] || fail "a patched tree exited ${status}, expected 0"
+if grep -q 'would restore' "${out}"; then
+    fail "a patched tree listed files as damage"
+fi
+grep -q 'no damage under' "${out}" || fail "a patched tree was not reported clean"
+
+echo "==> a series file that is gone is damage and comes back patched"
+rm -f "${tree}/${dir}/BUILD.gn"
+status=0
+python3 "${tool}" --tree "${tree}" --patches "${patches}" \
+    --restore-dir "${dir}" >"${out}" 2>&1 || status=$?
+[[ ${status} -eq 1 ]] || fail "a missing series file exited ${status}, expected 1"
+grep -q "would restore: .*BUILD.gn (missing)" "${out}" ||
+    fail "the missing series file was not named"
+if grep -q 'would restore: .*absl/base' "${out}"; then
+    fail "intact files were listed next to the missing series file"
+fi
+python3 "${tool}" --tree "${tree}" --patches "${patches}" \
+    --restore-dir "${dir}" --apply >"${out}" 2>&1 ||
+    fail "--apply failed on a missing series file"
+grep -q 'visibility = \[ "//\*" \]' "${tree}/${dir}/BUILD.gn" ||
+    fail "the series' hunk did not come back"
+grep -q 're-applied' "${out}" || fail "the series was not re-applied"
 
 echo "==> a directory that is not in HEAD is a no-op"
 python3 "${tool}" --tree "${tree}" --patches "${patches}" \

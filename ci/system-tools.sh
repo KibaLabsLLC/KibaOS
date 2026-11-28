@@ -13,6 +13,9 @@
 # Usage:
 #   ci/system-tools.sh --link SRC          use packages for everything it can
 #   ci/system-tools.sh --resolver-args SRC print ci/resolve-deps.py arguments
+#   ci/system-tools.sh --check-gn SRC      fail when SRC's GN link cannot read
+#                                           SRC/.gn (a bootstrap left the old
+#                                           package GN in place)
 #
 # SRC is the Lumen source checkout, the directory that holds DEPS.
 #
@@ -174,6 +177,27 @@ drop_link() {
   return 0
 }
 
+# The package build gets a prepared tree, so a link left at that path by an
+# earlier bootstrap is what crushes gn gen: it stops at //.gn before any build
+# argument is read, and the recovery loop can only report that it cannot help.
+# Fail once, with the command that fixes it.
+check_gn() {
+  local src="$1"
+  local gn="${src}/buildtools/linux64/gn"
+
+  [[ -L "${gn}" ]] || return 0
+  gn_reads_dotfile "${src}" "${gn}" && return 0
+  cat >&2 <<EOF
+error: ${gn} is a link to a GN that cannot read this tree's .gn (it sets
+script_executable to a list, which needs a newer GN), so gn gen would stop
+before reading a single build argument.
+Re-run ci/bootstrap-chromium-src.sh to fetch the pinned GN, or remove the link
+and let ci/resolve-deps.py fetch it:
+  rm -f ${gn}
+EOF
+  return 1
+}
+
 clang_complete() {
   local bin
 
@@ -293,7 +317,7 @@ src=""
 
 while (( $# )); do
   case "$1" in
-    --link | --resolver-args)
+    --link | --resolver-args | --check-gn)
       mode="$1"
       shift
       ;;
@@ -326,4 +350,5 @@ fi
 case "${mode}" in
   --link) link_tools "${src}" ;;
   --resolver-args) resolver_args "${src}" ;;
+  --check-gn) check_gn "${src}" ;;
 esac

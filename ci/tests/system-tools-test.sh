@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Check that ci/system-tools.sh takes a tool from pacman only when the package
-# and its binaries are really there, and that the DEPS-side and GN-side answers
-# match what it substituted.
+# and its binaries are really there, that a GN too old for the tree's .gn is
+# left out, and that the DEPS-side, GN-side and package-build answers match
+# what it substituted.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -215,5 +216,30 @@ if grep -Fxq 'src/buildtools/linux64' "${tmp}/resolver-d"; then
 fi
 grep -Fxq 'src/third_party/ninja' "${tmp}/resolver-d" ||
   fail "the resolver stopped skipping Ninja"
+
+# F: the package build fails fast on a GN link that cannot read the tree's
+# .gn, and accepts one that can.
+mkdir -p "${src}/buildtools/linux64"
+ln -sfn "${tmp}/bin/gn" "${src}/buildtools/linux64/gn"
+
+status=0
+"${TOOLS}" --check-gn "${src}" >"${tmp}/check-gn-bad.log" 2>&1 || status=$?
+[[ ${status} -ne 0 ]] ||
+  fail "--check-gn accepted a GN that cannot read the tree's .gn"
+grep -q 'cannot read this tree' "${tmp}/check-gn-bad.log" ||
+  fail "--check-gn did not say what is wrong"
+grep -q 'bootstrap-chromium-src.sh' "${tmp}/check-gn-bad.log" ||
+  fail "--check-gn did not say how to fix it"
+
+printf '#!/bin/sh\nexit 0\n' >"${tmp}/bin/gn"
+chmod +x "${tmp}/bin/gn"
+"${TOOLS}" --check-gn "${src}" >"${tmp}/check-gn-ok.log" 2>&1 || {
+  cat "${tmp}/check-gn-ok.log" >&2
+  fail "--check-gn rejected a GN that can read the tree's .gn"
+}
+
+rm -f "${src}/buildtools/linux64/gn"
+"${TOOLS}" --check-gn "${src}" >/dev/null 2>&1 ||
+  fail "--check-gn failed without a GN link"
 
 echo "system-tools test passed"
