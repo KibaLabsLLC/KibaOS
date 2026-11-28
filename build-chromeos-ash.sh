@@ -170,8 +170,8 @@ build_chrome() {
         # abseil target graph, so compile textually.
         use_clang_modules = false
 
-        # Tools taken from pacman by ci/system-tools.sh; empty when Chromium's
-        # downloaded toolchain is in use.
+        # GN arguments that go with the tools taken from pacman by
+        # ci/system-tools.sh; empty while only gn and ninja are substituted.
         $(cat "${src_dir}/out/.kibaos/system-tools.gn" 2>/dev/null)
     " 2>&1 | tee -a "${BUILD_LOG}"
 

@@ -72,8 +72,8 @@ KIBAOS_LEAN_SYNC:
   0 = Perform a full dependency sync.
 
 KIBAOS_SYSTEM_TOOLS:
-  1 = Use pacman's gn, ninja and clang/llvm/lld instead of the prebuilt
-      binaries Chromium's DEPS downloads (ci/system-tools.sh).
+  1 = Use pacman's gn and ninja instead of the copies Chromium's DEPS
+      downloads (ci/system-tools.sh); the clang toolchain stays Chromium's.
   0 = Download and use Chromium's toolchains.
 
 KIBAOS_RESTORE_ABSEIL:

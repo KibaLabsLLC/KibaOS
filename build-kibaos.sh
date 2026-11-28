@@ -196,8 +196,9 @@ install_host_dependencies() {
 
     log "Installing host build dependencies"
 
-    # clang, llvm, lld, gn and ninja are here so the Lumen build uses them
-    # instead of the toolchains Chromium's DEPS downloads (ci/system-tools.sh).
+    # gn and ninja are here so the Lumen build uses them instead of the copies
+    # Chromium's DEPS downloads (ci/system-tools.sh); the Chromium build itself
+    # always compiles with Chromium's prebuilt clang toolchain.
     pacman -Syu --needed --noconfirm \
         base-devel \
         git \
@@ -214,7 +215,6 @@ install_host_dependencies() {
         clang \
         llvm \
         lld \
-        compiler-rt \
         gn \
         ninja \
         curl \
