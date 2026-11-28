@@ -102,6 +102,7 @@ makedepends=(
     'clang'
     'llvm'
     'lld'
+    'compiler-rt'
     'gn'
     'python-pip'
     'weston'
