@@ -25,12 +25,19 @@
    included, and re-applies the series' abseil hunks;
    `KIBAOS_RESTORE_ABSEIL=0` leaves it alone. Files that survived the import
    are not self-contained either: it dropped every `#include "absl/..."` line
-   from that directory, and every quoted `#include "..."` line from
-   `third_party/protobuf`, so `ci/restore-imported-includes.py` puts the 4,488
-   abseil lines in `ci/abseil-includes.json` and the 5,929 protobuf lines in
-   `ci/protobuf-includes.json` back where the Chromium copy has them, inside
-   the `#if` that needs them and with their blank lines, which leaves each
-   directory byte for byte as Chromium ships it. A manifest names the
+   from that directory, every quoted `#include "..."` line from
+   `third_party/protobuf`, and every quoted include from
+   `base/allocator/partition_allocator/src/partition_alloc`, so
+   `ci/restore-imported-includes.py` puts the 4,488 abseil lines in
+   `ci/abseil-includes.json`, the 5,929 protobuf lines in
+   `ci/protobuf-includes.json` and the 1,836 partition_alloc lines in
+   `ci/partition-alloc-includes.json` back where the Chromium copy has them,
+   inside the `#if` that needs them and with their blank lines. The first two
+   directories come out byte for byte as Chromium ships them; partition_alloc
+   is repaired against Chromium main, so its files whose code has moved on
+   since Lumen's copy take their includes back while keeping their own
+   revision's lines, and the `partition_alloc/zero_segment.h` include that
+   Lumen's copy is too old to have is not put back. A manifest names the
    directory it repairs, the include lines it owns, and for each block the two
    lines it sat between and the occurrence of that pair -- counted in the tree
    as the repair finds it, because a run taken out from between two blank
@@ -44,7 +51,8 @@
    restored is left exactly as it is. Both tools run before ninja, in the
    package build too, and a header whose includes are still missing fails its
    first user on `ABSL_NAMESPACE_BEGIN` or on a protobuf type (see the
-   `abseil-cpp` section below).
+   `abseil-cpp` section below), and partition_alloc's own `check.cc` on
+   `CheckError` and `PA_BUILDFLAG`.
 3. **Patch series** — the patches in `patches/SERIES` are applied to the
    Lumen tree. `ci/verify-patch-series.sh` and `ci/refresh-bootstrap-series.sh`
    manage this; the series is the integration contract between the two repos.

@@ -1,0 +1,1277 @@
+{
+  "baseline": "chromium/src main, base/allocator/partition_allocator/src/partition_alloc, regenerated 2026-11-28",
+  "directory": "base/allocator/partition_allocator/src/partition_alloc",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "aarch64_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "address_pool_manager.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_stats.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/thread_isolation/alignment.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "address_pool_manager.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_address_space_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/thread_isolation/alignment.h\"\n", "#include \"partition_alloc/thread_isolation/pkey.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]}
+    ],
+    "address_pool_manager_bitmap.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "address_pool_manager_bitmap.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "address_pool_manager_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/address_space_stats.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "address_space_randomization.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_randomization.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/random.h\"\n"]}
+    ],
+    "address_space_randomization.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "address_space_randomization_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_randomization.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/random.h\"\n"]}
+    ],
+    "address_space_stats.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "allocation_guard.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/allocation_guard.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_tls.h\"\n"]}
+    ],
+    "allocation_guard.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "allocator_config.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/allocator_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/random.h\"\n"]}
+    ],
+    "allocator_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "arm_bti_test_functions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "bounds_checks.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bounds_checks.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "bounds_checks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "bucket_lookup.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "build_config.h": [
+      {"after": "// Definition of PA_BUILDFLAG(...) macro.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflag.h\"  // IWYU pragma: export\n"]},
+      {"after": "// Definition of PA_BUILDFLAG(IS_CHROMEOS).\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"  // IWYU pragma: export\n"]}
+    ],
+    "compressed_pointer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/compressed_pointer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "compressed_pointer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "compressed_pointer_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/compressed_pointer.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "dangling_raw_ptr_checks.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "dangling_raw_ptr_checks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "debug_data_on_stack.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n"]}
+    ],
+    "encoded_next_freelist.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(PA_ARCH_CPU_BIG_ENDIAN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/reverse_bytes.h\"\n"]}
+    ],
+    "extended_api.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/extended_api.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "extended_api.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "extent_in_bounds.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bounds_checks.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "free_hint.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/types/strong_alias.h\"\n"]}
+    ],
+    "gwp_asan_support.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/gwp_asan_support.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_page_internal.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "gwp_asan_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "hardening_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/allocator_config.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_page_internal.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/internal/reservation_offset_table_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/use_death_tests.h\"\n"]}
+    ],
+    "in_slot_metadata.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/in_slot_metadata.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "in_slot_metadata.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_APPLE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/bits.h\"\n"]}
+    ],
+    "intended_leak.cc": [
+      {"after": "// clang-format off\n", "before": "// clang-format on\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "internal/page_allocator_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]}
+    ],
+    "internal/partition_address_space_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_THREAD_ISOLATION)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "internal/partition_page_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/address_pool_manager_types.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal_forward.h\"\n", "#include \"partition_alloc/internal/partition_superpage_extent_entry_internal.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_dcheck_helper.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(DCHECKS_ARE_ON)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "internal/partition_root_exports.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "internal/partition_root_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_types.h\"\n", "#include \"partition_alloc/allocation_guard.h\"\n", "#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_page_internal.h\"\n", "#include \"partition_alloc/internal/partition_root_internal_forward.h\"\n", "#include \"partition_alloc/internal/reservation_offset_table_internal.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_allocation_data.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/optional.h\"\n", "#include \"partition_alloc/partition_alloc_base/export_template.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_hooks.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_cookie.h\"\n", "#include \"partition_alloc/partition_dcheck_helper.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_oom.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "internal/partition_root_internal_forward.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n"]}
+    ],
+    "internal/partition_superpage_extent_entry_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/address_pool_manager_types.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_dcheck_helper.h\"\n", "#include \"partition_alloc/partition_superpage_extent_entry.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n"]}
+    ],
+    "internal/reservation_offset_table_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n"]}
+    ],
+    "internal/thread_cache_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/optional.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/partition_tls.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(PA_ARCH_CPU_X86_64) && PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]}
+    ],
+    "internal_allocator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal_allocator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal.h\"\n"]}
+    ],
+    "internal_allocator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal_allocator_forward.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "internal_allocator_forward.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "linux_name_region.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]}
+    ],
+    "memory_reclaimer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/memory_reclaimer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "memory_reclaimer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "memory_reclaimer_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/memory_reclaimer.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/gtest_util.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "    PA_CONFIG(THREAD_CACHE_SUPPORTED)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n"]}
+    ],
+    "memory_tool_replaces_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_hooks.h\"\n"]}
+    ],
+    "oom.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/oom.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/oom_callback.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n"]}
+    ],
+    "oom.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/allocation_guard.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "oom_callback.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/oom_callback.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "oom_callback.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "page_allocator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_randomization.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/page_allocator_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]},
+      {"after": "\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_handle_util.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#elif PA_BUILDFLAG(IS_POSIX)\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator_internals_win.h\"\n"]},
+      {"after": "#elif PA_BUILDFLAG(IS_POSIX)\n", "before": "#elif PA_BUILDFLAG(IS_FUCHSIA)\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator_internals_posix.h\"\n"]},
+      {"after": "#elif PA_BUILDFLAG(IS_FUCHSIA)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator_internals_fuchsia.h\"\n"]}
+    ],
+    "page_allocator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "page_allocator_constants.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "page_allocator_internals_fuchsia.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/fuchsia/fuchsia_logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "page_allocator_internals_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/page_allocator_internal.h\"\n", "#include \"partition_alloc/linux_name_region.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_APPLE)\n", "before": "#if PA_BUILDFLAG(IS_IOS)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/apple/foundation_util.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_IOS)\n", "before": "#elif PA_BUILDFLAG(IS_MAC)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/ios/ios_util.h\"\n"]},
+      {"after": "#elif PA_BUILDFLAG(IS_MAC)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/mac/mac_util.h\"\n"]},
+      {"after": "\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/apple/scoped_cftyperef.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/aarch64_support.h\"\n"]}
+    ],
+    "page_allocator_internals_posix.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/linux_name_region.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "page_allocator_internals_win.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/page_allocator_internal.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "page_allocator_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_randomization.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/linux_name_region.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "#if defined(LINUX_NAME_REGION)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/proc_maps_linux.h\"  // nogncheck\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/arm_bti_test_functions.h\"\n"]}
+    ],
+    "partition_address_space.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_address_space.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/allocator_config.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/compressed_pointer.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/files/platform_file.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "partition_address_space.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/alignment.h\"\n", "#include \"partition_alloc/thread_isolation/pkey.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_THREAD_ISOLATION)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "partition_address_space_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/page_allocator_internal.h\"\n", "#include \"partition_alloc/internal/partition_address_space_internal.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/use_death_tests.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc-inl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/random.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "partition_alloc.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/memory_reclaimer.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_hooks.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_oom.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n"]}
+    ],
+    "partition_alloc.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_oom.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "partition_alloc_allocation_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/foundation_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/foundation_util.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/apple/foundation_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/mach_logging.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/apple/mach_logging.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/stringprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/mach_logging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/scoped_cftyperef.h": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/partition_alloc_base/apple/scoped_typeref.h\"\n"]}
+    ],
+    "partition_alloc_base/apple/scoped_typeref.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/scoped_policy.h\"\n"]}
+    ],
+    "partition_alloc_base/bits.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_base/bits_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n"]}
+    ],
+    "partition_alloc_base/check.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/check.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/log_message.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/cstring_builder.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN) && PA_BUILDFLAG(IS_COMPONENT_BUILD)\n", "before": "#endif  // PA_BUILDFLAG(IS_WIN) && PA_BUILDFLAG(IS_COMPONENT_BUILD)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/compiler_specific.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/component_export.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/component_export_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/checked_iterators.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span_forward_internal.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/flat_map.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/flat_tree.h\"\n", "#include \"partition_alloc/partition_alloc_base/template_util.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/flat_map_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/flat_map.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/move_only_int.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/flat_tree.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/flat_tree_pa_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/flat_tree.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/template_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/gtest_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/move_only_int.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/span.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/bit_cast.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/checked_iterators.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span_forward_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_base/types/to_address.h\"\n"]}
+    ],
+    "partition_alloc_base/containers/span_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/bit_cast.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/checked_iterators.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/gtest_util.h\"\n", "#include \"partition_alloc/use_death_tests.h\"\n"]}
+    ],
+    "partition_alloc_base/cpu.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/cpu.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]}
+    ],
+    "partition_alloc_base/cpu.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/cpu_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n"]}
+    ],
+    "partition_alloc_base/cxx_wrapper/algorithm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN) && PA_BUILDFLAG(IS_COMPONENT_BUILD)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/cxx_wrapper/optional.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN) && PA_BUILDFLAG(IS_COMPONENT_BUILD)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/alias.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/alias.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/proc_maps_linux.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/proc_maps_linux.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/files/file_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/proc_maps_linux.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/process/process_handle.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace_android.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace_linux.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace_mac.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/debug/stack_trace_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/process/process_handle.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/files/file_path.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]}
+    ],
+    "partition_alloc_base/files/file_path.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/files/file_path_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n"]}
+    ],
+    "partition_alloc_base/files/file_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]}
+    ],
+    "partition_alloc_base/files/file_util_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/files/file_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n"]}
+    ],
+    "partition_alloc_base/files/platform_file.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_base/fuchsia/fuchsia_logging.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/fuchsia/fuchsia_logging.h\"\n"]}
+    ],
+    "partition_alloc_base/fuchsia/fuchsia_logging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/fuchsia/fuchsia_logging_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/fuchsia/fuchsia_logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/immediate_crash.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/ios/ios_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/ios/ios_util.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/ios/ios_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/system/sys_info.h\"\n"]}
+    ],
+    "partition_alloc_base/log_message.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/log_message.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/string_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/stringprintf.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_POSIX) || PA_BUILDFLAG(IS_FUCHSIA)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/posix/safe_strerror.h\"\n"]}
+    ],
+    "partition_alloc_base/log_message.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/scoped_clear_last_error.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/cstring_builder.h\"\n"]}
+    ],
+    "partition_alloc_base/logging.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n"]}
+    ],
+    "partition_alloc_base/logging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/log_message.h\"\n"]}
+    ],
+    "partition_alloc_base/logging_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/mac/mac_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/mac/mac_util.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/mac/mac_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n"]}
+    ],
+    "partition_alloc_base/memory/page_size.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/memory/page_size_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/memory/page_size.h\"\n"]}
+    ],
+    "partition_alloc_base/memory/page_size_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/memory/page_size.h\"\n"]}
+    ],
+    "partition_alloc_base/native_library.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/native_library.h\"\n"]}
+    ],
+    "partition_alloc_base/native_library.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n"]}
+    ],
+    "partition_alloc_base/native_library_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n", "#include \"partition_alloc/partition_alloc_base/native_library.h\"\n"]}
+    ],
+    "partition_alloc_base/native_library_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/native_library.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n"]}
+    ],
+    "partition_alloc_base/no_destructor_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n"]}
+    ],
+    "partition_alloc_base/notreached.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/checked_math.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/checked_math_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/checked_math_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_math_shared_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/clamped_math.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/clamped_math_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/clamped_math_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_math_shared_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_conversions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions_impl.h\"\n"]},
+      {"after": "#if defined(__ARMEL__)\n", "before": "#define PA_BASE_HAS_OPTIMIZED_SAFE_CONVERSIONS (1)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions_arm_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_conversions_arm_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_conversions_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_math.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/clamped_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_math_arm_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_math_clang_gcc_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]},
+      {"after": "#if defined(__ARMEL__)\n", "before": "#define PA_BASE_HAS_ASSEMBLER_SAFE_MATH (1)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_math_arm_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/numerics/safe_math_shared_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]},
+      {"after": "    (defined(__GNUC__) && __GNUC__ >= 5)\n", "before": "#define PA_BASE_HAS_OPTIMIZED_SAFE_MATH (1)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_math_clang_gcc_impl.h\"\n"]}
+    ],
+    "partition_alloc_base/posix/eintr_wrapper.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/posix/safe_strerror.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/posix/safe_strerror.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/posix/safe_strerror.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]}
+    ],
+    "partition_alloc_base/process/process_handle.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_base/process/process_handle_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/process/process_handle.h\"\n"]}
+    ],
+    "partition_alloc_base/process/process_handle_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/process/process_handle.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util_fuchsia.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "#endif  // PA_BUILDFLAG(IS_MAC)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/files/file_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_base/posix/eintr_wrapper.h\"\n"]}
+    ],
+    "partition_alloc_base/rand_util_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]}
+    ],
+    "partition_alloc_base/scoped_clear_last_error.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/scoped_clear_last_error_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/scoped_clear_last_error.h\"\n"]}
+    ],
+    "partition_alloc_base/scoped_clear_last_error_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/scoped_clear_last_error.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/cstring_builder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/cstring_builder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(DCHECKS_ARE_ON)\n", "before": "#define PA_RAW_DCHECK PA_RAW_CHECK\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/cstring_builder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/cstring_builder_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/cstring_builder.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/safe_sprintf.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]},
+      {"after": "//      behavior.\n", "before": "#define DEBUG_CHECK PA_RAW_CHECK\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/safe_sprintf.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/safe_sprintf_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/safe_sprintf.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/string_util.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/string_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/string_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/string_util_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/string_util.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/stringprintf.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/strings/stringprintf.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/scoped_clear_last_error.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/stringprintf.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/strings/stringprintf_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/stringprintf.h\"\n"]}
+    ],
+    "partition_alloc_base/system/sys_info.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/system/sys_info_ios.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/system/sys_info.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "partition_alloc_base/system/sys_info_mac.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/system/sys_info.h\"\n"]},
+      {"after": "#import <Foundation/Foundation.h>\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "partition_alloc_base/template_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_base/template_util_pa_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/template_util.h\"\n"]}
+    ],
+    "partition_alloc_base/test/gtest_util.h": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/thread_annotations.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_base/thread_annotations_pa_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_ref.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#elif PA_BUILDFLAG(IS_FUCHSIA)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_android_for_testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_apple_for_testing.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_for_testing.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_fuchsia_for_testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_internal_posix.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_linux_for_testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_internal_posix.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_posix_for_testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_internal_posix.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_ref.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#elif PA_BUILDFLAG(IS_POSIX) || PA_BUILDFLAG(IS_FUCHSIA)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/threading/platform_thread_win_for_testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/clamped_math.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_APPLE)\n", "before": "#endif  // PA_BUILDFLAG(IS_APPLE)\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_apple.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "\n", "before": "#if PA_BUILDFLAG(IS_IOS)\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_conversion_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_fuchsia.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_now_posix.cc": [
+      {"after": "\n", "before": "#if PA_BUILDFLAG(IS_ANDROID) && !defined(__LP64__)\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/notreached.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_override.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_override.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]}
+    ],
+    "partition_alloc_base/time/time_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/bit_cast.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time_override.h\"\n"]}
+    ],
+    "partition_alloc_base/timer/lap_timer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/timer/lap_timer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "partition_alloc_base/timer/lap_timer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/time/time.h\"\n"]}
+    ],
+    "partition_alloc_base/win/win_handle_types.h": [
+      {"after": "  typedef struct name##__* name;\n", "before": "#undef PA_WINDOWS_HANDLE_TYPE\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/win_handle_types_list.inc\"\n"]}
+    ],
+    "partition_alloc_base/win/windows_handle_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_alloc_check.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n"]}
+    ],
+    "partition_alloc_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "partition_alloc_constants.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(HAS_MEMORY_TAGGING)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "partition_alloc_for_testing.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n"]}
+    ],
+    "partition_alloc_forward.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/simple_algorithms.h\"\n"]}
+    ],
+    "partition_alloc_hooks.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_hooks.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "partition_alloc_hooks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "partition_alloc_perftest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/strings/stringprintf.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_base/timer/lap_timer.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "partition_alloc_public_constants.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/flags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_alloc_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/address_space_randomization.h\"\n", "#include \"partition_alloc/bounds_checks.h\"\n", "#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/memory_reclaimer.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/system/sys_info.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/gtest_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_cookie.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n", "#include \"partition_alloc/use_death_tests.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_MAC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/mac/mac_util.h\"\n"]},
+      {"after": "    PA_BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif  // PA_BUILDFLAG(IS_LINUX) || PA_BUILDFLAG(IS_ANDROID) ||\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/debug/proc_maps_linux.h\"  // nogncheck\n"]}
+    ],
+    "partition_bucket.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_bucket.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_oom.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "partition_bucket.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal_forward.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_page_constants.h\"\n"]}
+    ],
+    "partition_cookie.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_cookie.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n"]}
+    ],
+    "partition_cookie.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(SMALLER_PARTITION_COOKIE)\n", "before": "#endif  // PA_BUILDFLAG(SMALLER_PARTITION_COOKIE)\n", "n": 1, "add": ["#include \"partition_alloc/in_slot_metadata.h\"\n"]}
+    ],
+    "partition_dcheck_helper.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_dcheck_helper.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_page.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "partition_dcheck_helper.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n"]}
+    ],
+    "partition_direct_map_extent.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_page.h\"\n"]}
+    ],
+    "partition_freelist_entry.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_freelist_entry.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n"]}
+    ],
+    "partition_freelist_entry.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/pool_offset_freelist.h\"\n"]},
+      {"after": "#else\n", "before": "#endif  // PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "n": 1, "add": ["#include \"partition_alloc/encoded_next_freelist.h\"\n"]}
+    ],
+    "partition_lock.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/spinning_mutex.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "partition_lock_perftest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_lock.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_base/timer/lap_timer.h\"\n"]}
+    ],
+    "partition_lock_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_lock.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/spinning_mutex.h\"\n"]}
+    ],
+    "partition_oom.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_oom.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n"]}
+    ],
+    "partition_oom.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "partition_page.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_page_internal.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "partition_page.h": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal_forward.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_page_constants.h\"\n", "#include \"partition_alloc/partition_superpage_extent_entry.h\"\n"]}
+    ],
+    "partition_page_constants.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n"]}
+    ],
+    "partition_root.cc": [
+      {"after": "// clang-format off\n", "before": "// clang-format on\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_cookie.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_oom.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/spinning_mutex.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_MAC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/mac/mac_util.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]},
+      {"after": "\n", "before": "#endif\n", "n": 1, "add": ["#include \"wow64apiset.h\"\n"]},
+      {"after": "#undef PARTITION_ALLOC_INTERNAL_PARTITION_ROOT_EXPORTS_H_\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_exports.h\"\n"]}
+    ],
+    "partition_root.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/free_hint.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_allocation_data.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/optional.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_bucket.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_exports.h\"\n"]}
+    ],
+    "partition_stats.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_stats.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "partition_stats.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]},
+      {"after": "#if PA_CONFIG(THREAD_CACHE_ALLOC_STATS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n"]}
+    ],
+    "partition_superpage_extent_entry.h": [
+      {"after": "\n", "before": "// Should not include partition_root.h, partition_bucket.h, partition_page.h.\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "partition_tls.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_tls.h\"\n"]}
+    ],
+    "partition_tls.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "partition_tls_posix.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_tls.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "partition_tls_win.cc": [
+      {"after": "// clang-format off\n", "before": "// clang-format on\n", "n": 1, "add": ["#include \"partition_alloc/partition_tls.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "pointers/instance_tracer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/instance_tracer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/stack_trace.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "pointers/instance_tracer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "pointers/raw_ptr.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/flags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/types/same_as_any.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/pointers/instance_tracer.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_noop_impl.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/win_handle_types.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "// Live implementation of MiraclePtr being built.\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_RAW_PTR_BACKUP_REF_IMPL)\n", "before": "#elif PA_BUILDFLAG(USE_RAW_PTR_ASAN_UNOWNED_IMPL)\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_backup_ref_impl.h\"\n"]},
+      {"after": "#elif PA_BUILDFLAG(USE_RAW_PTR_ASAN_UNOWNED_IMPL)\n", "before": "#elif PA_BUILDFLAG(USE_RAW_PTR_HOOKABLE_IMPL)\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_asan_unowned_impl.h\"\n"]},
+      {"after": "#elif PA_BUILDFLAG(USE_RAW_PTR_HOOKABLE_IMPL)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_hookable_impl.h\"\n"]},
+      {"after": "#define PA_WINDOWS_HANDLE_TYPE(name) name##__,\n", "before": "#undef PA_WINDOWS_HANDLE_TYPE\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/win_handle_types_list.inc\"\n"]}
+    ],
+    "pointers/raw_ptr_asan_unowned_impl.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_asan_unowned_impl.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "pointers/raw_ptr_asan_unowned_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n"]}
+    ],
+    "pointers/raw_ptr_backup_ref_impl.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_backup_ref_impl.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bounds_checks.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "pointers/raw_ptr_backup_ref_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/pointers/instance_tracer.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]}
+    ],
+    "pointers/raw_ptr_counting_impl_for_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_counting_impl_for_test.h\"\n"]}
+    ],
+    "pointers/raw_ptr_counting_impl_for_test.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_noop_impl.h\"\n"]}
+    ],
+    "pointers/raw_ptr_exclusion.h": [
+      {"after": "// `!use_partition_alloc`, which is okay because it's a leaf header.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"  // nogncheck\n"]}
+    ],
+    "pointers/raw_ptr_hookable_impl.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_hookable_impl.h\"\n"]}
+    ],
+    "pointers/raw_ptr_hookable_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n"]}
+    ],
+    "pointers/raw_ptr_noop_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n"]}
+    ],
+    "pointers/raw_ptr_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr.h\"\n"]},
+      {"after": "#include \"base/types/to_address.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_hooks.h\"\n", "#include \"partition_alloc/pointers/instance_tracer.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_counting_impl_for_test.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_test_support.h\"\n", "#include \"partition_alloc/pointers/raw_ref.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "pointers/raw_ref.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/pointers/raw_ptr.h\"\n"]}
+    ],
+    "pointers/raw_ref_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ref.h\"\n"]},
+      {"after": "#include \"base/test/gtest_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/pointers/raw_ptr.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_counting_impl_for_test.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_test_support.h\"\n"]}
+    ],
+    "pointers/realloc_protected_iterator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/realloc_protected_iterator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_BACKUP_REF_PTR_SUPPORT)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "pointers/realloc_protected_iterator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/types/to_address.h\"\n", "#include \"partition_alloc/pointers/raw_ptr_exclusion.h\"\n", "#include \"partition_alloc/slot_address_and_size.h\"\n"]}
+    ],
+    "pointers/realloc_protected_iterator_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/realloc_protected_iterator.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/test/gtest_util.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_BACKUP_REF_PTR_SUPPORT)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n"]}
+    ],
+    "pool_offset_freelist.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_address_space_internal.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(PA_ARCH_CPU_BIG_ENDIAN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/reverse_bytes.h\"\n"]}
+    ],
+    "random.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/random.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "random.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "reservation_offset_table.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/reservation_offset_table_internal.h\"\n"]}
+    ],
+    "reservation_offset_table.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/tagging.h\"\n", "#include \"partition_alloc/thread_isolation/alignment.h\"\n"]}
+    ],
+    "reverse_bytes.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "reverse_bytes_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/reverse_bytes.h\"\n"]}
+    ],
+    "safety_checks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/stack_allocated.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal_allocator_forward.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/export_template.h\"\n", "#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine_perftest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/partition_alloc_base/rand_util.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine_support.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/stack_allocated.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n"]}
+    ],
+    "scheduler_loop_quarantine_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n", "#include \"partition_alloc/slot_start.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "shim/allocator_dispatch.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/types/strong_alias.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "shim/allocator_interception_apple.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/third_party/apple_apsl/malloc.h\"\n"]}
+    ],
+    "shim/allocator_interception_apple.mm": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/partition_alloc_base/apple/mach_logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n", "#include \"partition_alloc/third_party/apple_apsl/CFBase.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_IOS)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/ios/ios_util.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/mac/mac_util.h\"\n"]}
+    ],
+    "shim/allocator_interception_apple_unittest.mm": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n"]}
+    ],
+    "shim/allocator_shim.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_functions.h\"\n", "#include \"partition_alloc/shim/shim_alloc_functions.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(SHIM_SUPPORTS_ALLOC_TOKEN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_alloc_token_symbols.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/shim/allocator_shim_override_cpp_symbols.h\"\n", "#include \"partition_alloc/shim/allocator_shim_override_libc_symbols.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(PA_LIBC_GLIBC) && PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_glibc_weak_symbols.h\"\n"]}
+    ],
+    "shim/allocator_shim.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/types/strong_alias.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "shim/allocator_shim_alloc_token_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_alloc_token_symbols_apple.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_android.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_functions.h\"\n", "#include \"partition_alloc/shim/shim_alloc_functions.h\"\n"]},
+      {"after": "// allocator_shim::internal::PartitionMallocUnchecked through the shim layer.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_cpp_symbols.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(SHIM_SUPPORTS_ALLOC_TOKEN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_alloc_token_symbols.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 2, "add": ["#include \"partition_alloc/shim/allocator_shim_override_linker_wrapped_symbols.h\"\n"]}
+    ],
+    "shim/allocator_shim_apple.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/apple/mach_logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/allocator_interception_apple.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_functions.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/shim_alloc_functions.h\"\n"]},
+      {"after": "// allocator_shim::internal::PartitionMallocUnchecked through the shim layer.\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_cpp_symbols.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#else  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_apple_default_zone.h\"\n"]},
+      {"after": "#else  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_apple_symbols.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(SHIM_SUPPORTS_ALLOC_TOKEN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_alloc_token_symbols_apple.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_apple_zoned_malloc.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_glibc.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_linker_wrapped_symbols.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_partition_alloc.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/allocation_guard.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/memory_reclaimer.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/export_template.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc_internal.h\"\n", "#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_APPLE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/internal/reservation_offset_table_internal.h\"  // nogncheck\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_partition_alloc.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_partition_alloc_internal.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_partition_alloc_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/page_size.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n"]}
+    ],
+    "shim/allocator_shim_default_dispatch_to_winheap.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]}
+    ],
+    "shim/allocator_shim_dispatch_to_noop_on_free.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_dispatch_to_noop_on_free.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "shim/allocator_shim_dispatch_to_noop_on_free.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "shim/allocator_shim_functions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n", "#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]}
+    ],
+    "shim/allocator_shim_functions_win_component.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/allocator_shim_functions.h\"\n", "#include \"partition_alloc/shim/checked_multiply_win.h\"\n"]}
+    ],
+    "shim/allocator_shim_internals.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_apple_default_zone.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/apple/mach_logging.h\"\n", "#include \"partition_alloc/partition_alloc_base/logging.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/shim/early_zone_registration_utils_apple.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_apple_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n", "#include \"partition_alloc/third_party/apple_apsl/malloc.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_cpp_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_glibc_weak_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_libc_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_linker_wrapped_symbols.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_internals.h\"\n"]}
+    ],
+    "shim/allocator_shim_override_ucrt_symbols_win.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/shim/allocator_shim_internals.h\"\n", "#include \"partition_alloc/shim/shim_alloc_functions.h\"\n", "#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]}
+    ],
+    "shim/allocator_shim_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "#include \"base/threading/platform_thread.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/page_size.h\"\n"]},
+      {"after": "\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n", "#include \"partition_alloc/third_party/apple_apsl/malloc.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "shim/allocator_shim_win_component.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/shim/allocator_dispatch.h\"\n", "#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_override_ucrt_symbols_win.h\"\n"]}
+    ],
+    "shim/allocator_shim_win_static.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/checked_multiply_win.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_functions.h\"\n", "#include \"partition_alloc/shim/allocator_shim_override_ucrt_symbols_win.h\"\n"]}
+    ],
+    "shim/checked_multiply_win.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/checked_math.h\"\n"]}
+    ],
+    "shim/malloc_zone_functions_apple.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/check.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "shim/malloc_zone_functions_apple.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/third_party/apple_apsl/malloc.h\"\n"]}
+    ],
+    "shim/malloc_zone_functions_apple_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/malloc_zone_functions_apple.h\"\n"]}
+    ],
+    "shim/shim_alloc_functions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/memory/page_size.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "shim/winheap_stubs_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "shim/winheap_stubs_win.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]}
+    ],
+    "shim/winheap_stubs_win_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/bits.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "slot_address_and_size.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/slot_address_and_size.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/debug_data_on_stack.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_direct_map_extent.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/reservation_offset_table.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "slot_address_and_size.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "slot_start.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/slot_start.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_page.h\"\n"]}
+    ],
+    "slot_start.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_dcheck_helper.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "slot_start_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_page.h\"\n", "#include \"partition_alloc/use_death_tests.h\"\n"]}
+    ],
+    "spinning_mutex.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/spinning_mutex.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]},
+      {"after": "    !PA_BUILDFLAG(IS_FUCHSIA)\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n"]}
+    ],
+    "spinning_mutex.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_ref.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/yield_processor.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/win/windows_types.h\"\n"]}
+    ],
+    "stack/stack.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n"]}
+    ],
+    "stack/stack.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/flat_map.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "stack/stack_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]}
+    ],
+    "tagging.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/aarch64_support.h\"\n", "#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(IS_ANDROID)\n", "before": "#if PA_BUILDFLAG(HAS_MEMORY_TAGGING)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/files/file_path.h\"\n", "#include \"partition_alloc/partition_alloc_base/native_library.h\"\n"]}
+    ],
+    "tagging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "tagging_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "thread_cache.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/time/time.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/slot_start.h\"\n"]}
+    ],
+    "thread_cache.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/component_export.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(PA_ARCH_CPU_X86_64) && PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/cxx_wrapper/algorithm.h\"\n"]}
+    ],
+    "thread_cache_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"\n", "#include \"partition_alloc/internal_allocator.h\"\n", "#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/thread_annotations.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_freelist_entry.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_tls.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "thread_isolation/alignment.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator_constants.h\"\n"]}
+    ],
+    "thread_isolation/pkey.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/pkey.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]}
+    ],
+    "thread_isolation/pkey.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "#endif  // PA_BUILDFLAG(ENABLE_PKEYS)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/component_export.h\"\n", "#include \"partition_alloc/thread_isolation/alignment.h\"\n"]}
+    ],
+    "thread_isolation/pkey_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/address_space_stats.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/page_allocator_constants.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_base/no_destructor.h\"\n", "#include \"partition_alloc/partition_alloc_forward.h\"\n", "#include \"partition_alloc/thread_isolation/pkey.h\"\n"]}
+    ],
+    "thread_isolation/thread_isolation.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/thread_isolation.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_base/compiler_specific.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/internal/reservation_offset_table_internal.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_PKEYS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/pkey.h\"\n"]}
+    ],
+    "thread_isolation/thread_isolation.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(ENABLE_PKEYS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/thread_isolation/pkey.h\"\n"]}
+    ],
+    "use_death_tests.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n"]}
+    ],
+    "yield_processor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ]
+  }
+}
