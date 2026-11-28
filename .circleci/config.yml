@@ -5,7 +5,7 @@ version: 2.1
 #
 # Required CircleCI context: `kibaos` (Organization Settings -> Contexts), holding:
 #   SF_USER, SF_PASS        SourceForge FRS login
-#   GITHUB_TOKEN            PAT with contents:write (screenshot commits, OTA tags)
+#   GITHUB_TOKEN            PAT with contents:write (screenshot commits)
 #   CCI_API_TOKEN           CircleCI personal API token (finds/downloads artifacts
 #                           of earlier pipelines when skip_build=true)
 # Optional: PROJECT_SLUG    override API slug (default gh/<org>/<repo>; GitHub-App
@@ -20,7 +20,7 @@ parameters:
     type: boolean
     default: false
   skip_build:
-    description: 'Skip building; publish + OTA the newest CircleCI build artifact if SourceForge is older'
+    description: 'Skip building; publish the newest CircleCI build artifact if SourceForge is older'
     type: boolean
     default: false
   run_vmtest:
@@ -216,7 +216,7 @@ jobs:
             fi
             ART="$PATCH_NUM"
 
-            PUB=false; OTA=false
+            PUB=false
             if [ -z "${SF_USER:-}" ] || [ -z "${SF_PASS:-}" ]; then
               echo "SourceForge credentials not configured. Nothing to push."
             else
@@ -425,8 +425,8 @@ jobs:
               echo "${FW}: no selected desktop screenshot -- not updating desktop-${FW}.png."
             fi
 
-            git config user.name "KibaOS OTA Bot"
-            git config user.email "ota@kibaos.wolftech.tech"
+            git config user.name "KibaOS Bot"
+            git config user.email "bot@kibaos.wolftech.tech"
             git remote set-url --push origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
             for i in 1 2 3 4 5 6; do
               git rebase --abort 2>/dev/null || true
@@ -444,7 +444,7 @@ jobs:
             exit 1
 
 workflows:
-  # Normal run: build, then publish/OTA/vmtest as needed.
+  # Normal run: build, then publish/vmtest as needed.
   build_kibaos:
     when:
       and:
