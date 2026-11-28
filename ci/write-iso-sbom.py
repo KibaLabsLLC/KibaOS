@@ -86,6 +86,7 @@ def build_document(iso: Path, repo: Path, bsdtar: str) -> dict:
             "licenseDeclared": "NOASSERTION",
             "copyrightText": "NOASSERTION",
             "packageFileName": iso.name,
+            "checksums": [{"algorithm": "SHA256", "checksumValue": iso_digest}],
         }
     ]
     relationships = []

@@ -24,6 +24,7 @@ fi
 [[ -f $ISO ]] || { echo "verify-iso-artifacts: ISO does not exist: $ISO" >&2; exit 1; }
 
 basename_iso=$(basename -- "$ISO")
+checksum="$ISO.sha256"
 build_info="$ISO.build-info"
 sbom="$ISO.sbom.spdx.json"
 iso_signature="$ISO.sig"
@@ -67,7 +68,8 @@ if not document.get("packages"):
 iso_packages = [p for p in document["packages"] if p.get("packageFileName") == iso_name]
 if len(iso_packages) != 1:
     raise SystemExit("verify-iso-artifacts: SBOM does not identify the ISO exactly once")
-if {c.get("algorithm"): c.get("checksumValue") for c in checksums}.get("SHA256") != iso_digest:
+iso_checksums = iso_packages[0].get("checksums") or []
+if {c.get("algorithm"): c.get("checksumValue") for c in iso_checksums}.get("SHA256") != iso_digest:
     raise SystemExit("verify-iso-artifacts: SBOM ISO checksum does not match the image")
 if not document.get("documentNamespace", "").endswith(iso_digest):
     raise SystemExit("verify-iso-artifacts: SBOM namespace is not bound to the ISO digest")
@@ -135,10 +137,12 @@ if package_count < 1 or package_bytes < 1:
 PY
 
 if [[ -e $iso_signature || -e $sbom_signature || $REQUIRE_SIGNATURE == 1 ]]; then
-  command -v gpg >/dev/null 2>&1 || {
-    echo 'verify-iso-artifacts: gpg is required to verify detached signatures' >&2
-    exit 1
-  }
+  for command in gpg gpgv; do
+    command -v "$command" >/dev/null 2>&1 || {
+      echo "verify-iso-artifacts: $command is required to verify detached signatures" >&2
+      exit 1
+    }
+  done
   [[ -s $iso_signature && -s $sbom_signature ]] || {
     echo 'verify-iso-artifacts: both ISO and SBOM signatures are required together' >&2
     exit 1
@@ -148,9 +152,40 @@ if [[ -e $iso_signature || -e $sbom_signature || $REQUIRE_SIGNATURE == 1 ]]; the
     echo 'verify-iso-artifacts: build-info lacks a full ISO signing fingerprint' >&2
     exit 1
   }
+  # A build with no release key signs with a key made for that build alone and
+  # writes the public half beside the image. When build-info names that file,
+  # it is the only key allowed to vouch for these bytes: anything else on the
+  # machine - the reader's keyring, the builder's, another image's key - is
+  # irrelevant, which is the point of publishing it.
+  signing_key=$(awk -F= '$1 == "iso_signing_key" {print $2; exit}' "$build_info")
+  signing_keyring=
+  if [[ -n $signing_key && $signing_key != not-created ]]; then
+    [[ $signing_key != */* ]] || {
+      echo 'verify-iso-artifacts: iso_signing_key must be a file name beside the ISO' >&2
+      exit 1
+    }
+    signing_keyring=$(dirname -- "$ISO")/$signing_key
+    [[ -s $signing_keyring ]] || {
+      echo "verify-iso-artifacts: missing published signing key: $signing_key" >&2
+      exit 1
+    }
+    # A published key that also carries its private half would let anyone
+    # re-sign a tampered image, so it is refused rather than trusted.
+    if gpg --batch --with-colons --show-keys "$signing_keyring" 2>/dev/null |
+      awk -F: '$1 == "sec" {found=1} END {exit !found}'; then
+      echo 'verify-iso-artifacts: the published signing key contains a secret key' >&2
+      exit 1
+    fi
+  fi
   verify_signature() {
     local signature=$1 payload=$2 label=$3 status signer primary
-    if ! status=$(gpg --batch --status-fd 1 --verify "$signature" "$payload" 2>/dev/null); then
+    if [[ -n $signing_keyring ]]; then
+      status=$(gpgv --keyring "$signing_keyring" \
+        --status-fd 1 "$signature" "$payload" 2>/dev/null) || status=
+    else
+      status=$(gpg --batch --status-fd 1 --verify "$signature" "$payload" 2>/dev/null) || status=
+    fi
+    if [[ -z $status ]]; then
       echo "verify-iso-artifacts: invalid $label signature" >&2
       return 1
     fi

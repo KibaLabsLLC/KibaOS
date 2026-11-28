@@ -64,6 +64,7 @@ TESTS=(
   test-install-dry-run.sh
   test-secure-boot.sh
   test-build-iso-stage.sh
+  test-iso-signing.sh
   test-execute-path-contract.sh
   test-execute-path-gate.sh
   test-leak-gate.sh

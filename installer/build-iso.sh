@@ -40,6 +40,11 @@ MAX_ISO_BYTES=${KIBAOS_MAX_ISO_BYTES:-4294967296}
 ISO_SIGNING_KEY=${KIBAOS_ISO_SIGNING_KEY:-}
 ISO_SIGNING_FINGERPRINT=${KIBAOS_ISO_SIGNING_FINGERPRINT:-}
 REQUIRE_ISO_SIGNATURE=${KIBAOS_REQUIRE_ISO_SIGNATURE:-0}
+# Every image leaves with a signature on it. A release build signs with the
+# release key. Any other build makes a key for that build alone and publishes
+# the public half beside the image, so the image can still be checked by
+# somebody who has never had the release key.
+ISO_RANDOM_SIGNING_KEY=${KIBAOS_ISO_RANDOM_SIGNING_KEY:-1}
 export SOURCE_DATE_EPOCH
 
 [[ $WORK_ROOT == /* && $WORK_ROOT != / ]] || { echo 'build-iso: work root must be an absolute non-root path' >&2; exit 2; }
@@ -49,6 +54,10 @@ export SOURCE_DATE_EPOCH
 }
 [[ $REQUIRE_ISO_SIGNATURE == 0 || $REQUIRE_ISO_SIGNATURE == 1 ]] || {
   echo 'build-iso: KIBAOS_REQUIRE_ISO_SIGNATURE must be 0 or 1' >&2
+  exit 2
+}
+[[ $ISO_RANDOM_SIGNING_KEY == 0 || $ISO_RANDOM_SIGNING_KEY == 1 ]] || {
+  echo 'build-iso: KIBAOS_ISO_RANDOM_SIGNING_KEY must be 0 or 1' >&2
   exit 2
 }
 case $RELEASE_CHANNEL in
@@ -71,12 +80,8 @@ if (( GUI_RELEASE )) && [[ $RELEASE_CHANNEL != candidate && $RELEASE_CHANNEL != 
   exit 2
 fi
 
-if [[ -n $ISO_SIGNING_KEY || $REQUIRE_ISO_SIGNATURE == 1 ]]; then
+if [[ -n $ISO_SIGNING_KEY ]]; then
   command -v gpg >/dev/null || { echo 'build-iso: gpg is required for ISO signatures' >&2; exit 1; }
-  [[ -n $ISO_SIGNING_KEY ]] || {
-    echo 'build-iso: KIBAOS_ISO_SIGNING_KEY is required when ISO signatures are required' >&2
-    exit 1
-  }
   gpg --batch --list-secret-keys "$ISO_SIGNING_KEY" >/dev/null 2>&1 || {
     echo 'build-iso: ISO signing key is not available in the builder keyring' >&2
     exit 1
@@ -96,6 +101,18 @@ if [[ -n $ISO_SIGNING_KEY || $REQUIRE_ISO_SIGNATURE == 1 ]]; then
     echo 'build-iso: ISO signing key does not contain the requested fingerprint' >&2
     exit 1
   }
+elif (( REQUIRE_ISO_SIGNATURE )) && (( ! ISO_RANDOM_SIGNING_KEY )); then
+  echo 'build-iso: KIBAOS_ISO_SIGNING_KEY is required when ISO signatures are required' >&2
+  exit 1
+elif (( ! STAGE_ONLY )) && (( ISO_RANDOM_SIGNING_KEY )); then
+  # The key itself is made after mkarchiso has run, but a builder that cannot
+  # make one should hear about it before the image takes an hour to assemble.
+  for command in gpg gpgv; do
+    command -v "$command" >/dev/null || {
+      echo "build-iso: signing every image needs $command" >&2
+      exit 1
+    }
+  done
 fi
 
 if [[ $ALLOW_UNSIGNED != 1 ]]; then
@@ -390,16 +407,57 @@ python3 "$ROOT/../ci/write-iso-sbom.py" \
   --iso "$iso" \
   --repo-dir "$STAGE/airootfs/opt/kibaos/repo" \
   --output "$sbom"
+# Sign the image and its SBOM.
+#
+# A build with no release key used to leave an unsigned image, and a signature
+# that nobody could check without the builder's own keyring is only slightly
+# better than none. So the key for such a build is made here, used here, and
+# thrown away here, and its public half is written beside the image: a reader
+# needs the image, the signature and the key on that same filesystem, and
+# nothing from this machine.
+sign_artifacts() {
+  local user=$1
+  gpg --batch --yes --local-user "$user" --detach-sign --output "$iso.sig" "$iso"
+  gpg --batch --yes --local-user "$user" --detach-sign --output "$sbom.sig" "$sbom"
+}
+
+iso_signing_key_file=not-created
 if [[ -n $ISO_SIGNING_KEY ]]; then
-  gpg --batch --yes --local-user "$ISO_SIGNING_KEY" --detach-sign \
-    --output "$iso.sig" "$iso"
+  sign_artifacts "$ISO_SIGNING_KEY"
   gpg --batch --verify "$iso.sig" "$iso" >/dev/null 2>&1
-  gpg --batch --yes --local-user "$ISO_SIGNING_KEY" --detach-sign \
-    --output "$sbom.sig" "$sbom"
   gpg --batch --verify "$sbom.sig" "$sbom" >/dev/null 2>&1
-elif (( REQUIRE_ISO_SIGNATURE )); then
-  echo 'build-iso: refusing an unsigned ISO because KIBAOS_REQUIRE_ISO_SIGNATURE=1' >&2
-  exit 1
+elif (( ISO_RANDOM_SIGNING_KEY )); then
+  iso_signing_home=$WORK_ROOT/iso-signing-keyring
+  rm -rf -- "$iso_signing_home"
+  install -d -m 0700 "$iso_signing_home"
+  cat >"$WORK_ROOT/iso-signing-key.params" <<'KEYPARAMS'
+Key-Type: RSA
+Key-Length: 3072
+Key-Usage: sign
+Name-Real: KibaOS ISO build
+Name-Email: iso-signing@kibaos.invalid
+Expire-Date: 0
+%no-protection
+%commit
+KEYPARAMS
+  GNUPGHOME=$iso_signing_home gpg --batch --quiet --generate-key \
+    "$WORK_ROOT/iso-signing-key.params" >/dev/null 2>&1 || {
+    echo 'build-iso: could not generate a signing key for this build' >&2
+    exit 1
+  }
+  expected_iso_fingerprint=$(GNUPGHOME=$iso_signing_home gpg --batch --with-colons \
+    --list-secret-keys 2>/dev/null | awk -F: '$1 == "fpr" {print toupper($10); exit}')
+  [[ $expected_iso_fingerprint =~ ^[0-9A-F]{40,64}$ ]] || {
+    echo 'build-iso: generated signing key has no usable fingerprint' >&2
+    exit 1
+  }
+  iso_signing_key_file=$(basename "$iso").signing-key.gpg
+  iso_signing_key_path="$iso.signing-key.gpg"
+  GNUPGHOME=$iso_signing_home gpg --batch --export "$expected_iso_fingerprint" \
+    >"$iso_signing_key_path"
+  GNUPGHOME=$iso_signing_home sign_artifacts "$expected_iso_fingerprint"
+  # The private half belongs to this build and nothing else.
+  rm -rf -- "$iso_signing_home" "$WORK_ROOT/iso-signing-key.params"
 fi
 sbom_sha256=$(sha256sum "$sbom" | awk '{print $1}')
 {
@@ -417,10 +475,12 @@ sbom_sha256=$(sha256sum "$sbom" | awk '{print $1}')
     printf 'iso_signature=%s\n' "$(basename "$iso.sig")"
     printf 'sbom_signature=%s\n' "$(basename "$sbom.sig")"
     printf 'iso_signing_fingerprint=%s\n' "$expected_iso_fingerprint"
+    printf 'iso_signing_key=%s\n' "$iso_signing_key_file"
   else
     printf 'iso_signature=not-created\n'
     printf 'sbom_signature=not-created\n'
     printf 'iso_signing_fingerprint=not-set\n'
+    printf 'iso_signing_key=not-created\n'
   fi
   printf 'archiso_version=%s\n' "$(pacman -Q archiso 2>/dev/null || printf unknown)"
   printf 'release_channel=%s\n' "$RELEASE_CHANNEL"
@@ -438,4 +498,14 @@ sbom_sha256=$(sha256sum "$sbom" | awk '{print $1}')
   packages_lock_sha256=$(cd "$(dirname "$STAGE/airootfs/opt/kibaos/repo/packages.lock")" && sha256sum packages.lock | awk '{print $1}')
   printf 'packages_lock_sha256=%s\n' "$packages_lock_sha256"
 } >"$iso.build-info"
+
+# The gate that runs before publication, run here as well, so the signature
+# this build just made is checked against the key published beside the image.
+# An image that fails it has not produced a releasable artifact, and learning
+# that now costs the build instead of the upload.
+if [[ -f $iso.sig ]]; then
+  "$ROOT/../ci/verify-iso-artifacts.sh" "$iso" --require-signature
+else
+  "$ROOT/../ci/verify-iso-artifacts.sh" "$iso"
+fi
 printf '%s\n' "$iso"

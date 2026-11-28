@@ -77,13 +77,15 @@ grep -Fq 'build-iso: GUI releases require candidate or public KIBAOS_RELEASE_CHA
 [[ ! -e $TMP/work_gui_development ]]
 
 # A release build must not silently claim provenance when signatures are
-# required.  Stage-only mode still validates this policy before touching the
-# work directory, so this is safe to exercise without mkarchiso or a keyring.
+# required and the build is not allowed to make its own key. Stage-only mode
+# still validates this policy before touching the work directory, so this is
+# safe to exercise without mkarchiso or a keyring.
 if env \
   KIBAOS_ARCH_SNAPSHOT=2026/07/12 \
   KIBAOS_REPO_DIR="$TMP/repo" \
   KIBAOS_ALLOW_UNSIGNED=1 \
   KIBAOS_REQUIRE_ISO_SIGNATURE=1 \
+  KIBAOS_ISO_RANDOM_SIGNING_KEY=0 \
   KIBAOS_INSTALLER_WORK_ROOT="$TMP/work_unsigned_required" \
   "$ROOT/installer/build-iso.sh" --stage-only >"$TMP/unsigned_required.out" 2>&1; then
   echo 'signature-required stage unexpectedly passed without a signing key' >&2

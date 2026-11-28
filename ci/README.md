@@ -70,6 +70,20 @@ The installer suite must finish with an explicit pass result. ISO structure
 checks do not prove a first boot, so a release still needs a disposable VM or
 physical-machine pass.
 
+`installer/build-iso.sh` signs the ISO and its SBOM every time it builds one. A
+release build signs with the key in `KIBAOS_ISO_SIGNING_KEY`, whose full
+fingerprint must be in `KIBAOS_ISO_SIGNING_FINGERPRINT`. Any other build makes
+a key for that build alone, signs with it, and destroys the private half, so
+the artifact still has a signer without the release key leaving the build
+machine. The public half is published beside the image as
+`<image>.signing-key.gpg`, named in `<image>.build-info` by
+`iso_signing_key` next to `iso_signing_fingerprint`, and
+`ci/verify-iso-artifacts.sh IMAGE --require-signature` checks the signatures
+against that file and nothing else. `KIBAOS_ISO_RANDOM_SIGNING_KEY=0` turns the
+per-build key off, and then `KIBAOS_REQUIRE_ISO_SIGNATURE=1` refuses to finish
+an unsigned image. The build runs the artifact gate on its own output, so an
+image that cannot be verified never reaches a release.
+
 ## Runtime checks
 
 Use the host hypervisor to start a disposable guest, attach the exact image,

@@ -27,6 +27,7 @@ test-gui-widgets.sh	0
 test-hardware-qualify-args.sh	0
 test-install-dry-run.sh	5
 test-installer-failure.sh	0
+test-iso-signing.sh	12
 test-journal.sh	1
 test-leak-gate.sh	2
 test-network-diagnostics.sh	0

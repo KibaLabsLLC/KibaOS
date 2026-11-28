@@ -235,6 +235,63 @@ if GNUPGHOME="$ALT_HOME" "$ROOT/ci/verify-iso-artifacts.sh" "$ISO" \
 fi
 grep -Fq 'signer fingerprint does not match build-info' "$TMP/wrong-signer.out"
 
+# A build with no release key publishes the key it signed with, and the gate
+# then needs nothing at all from the verifier's own keyring.
+SIGNED="$TMP/signed"
+install -d "$SIGNED"
+signed_name=$(basename "$ISO")
+signed_iso=$SIGNED/$signed_name
+cp "$ISO" "$ISO.sha256" "$ISO.sbom.spdx.json" "$ISO.build-info" "$SIGNED/"
+GNUPGHOME="$GPG_HOME" gpg --batch --export "$signing_fingerprint" \
+  >"$signed_iso.signing-key.gpg"
+GNUPGHOME="$GPG_HOME" gpg --batch --yes --local-user "$signing_fingerprint" \
+  --detach-sign --output "$signed_iso.sig" "$signed_iso"
+GNUPGHOME="$GPG_HOME" gpg --batch --yes --local-user "$signing_fingerprint" \
+  --detach-sign --output "$signed_iso.sbom.spdx.json.sig" "$signed_iso.sbom.spdx.json"
+printf 'iso_signing_key=%s.signing-key.gpg\n' "$signed_name" \
+  >>"$signed_iso.build-info"
+EMPTY_HOME="$TMP/empty-gnupg"
+install -d -m 0700 "$EMPTY_HOME"
+GNUPGHOME="$EMPTY_HOME" "$ROOT/ci/verify-iso-artifacts.sh" "$signed_iso" \
+  --require-signature
+
+# The published key is the only one that counts, even when the signature is
+# valid under another key the verifier happens to hold.
+cp "$signed_iso.signing-key.gpg" "$TMP/published-key.gpg"
+GNUPGHOME="$ALT_HOME" gpg --batch --export "$alt_fingerprint" \
+  >"$signed_iso.signing-key.gpg"
+if GNUPGHOME="$EMPTY_HOME" "$ROOT/ci/verify-iso-artifacts.sh" "$signed_iso" \
+    --require-signature >"$TMP/substituted-key.out" 2>&1; then
+  echo 'ISO verified against a substituted published key unexpectedly passed' >&2
+  exit 1
+fi
+grep -Fq 'invalid ISO signature' "$TMP/substituted-key.out"
+cp "$TMP/published-key.gpg" "$signed_iso.signing-key.gpg"
+
+# A published keyring that still holds the private half would let anybody
+# re-sign a changed image, so it is refused instead of trusted.
+GNUPGHOME="$GPG_HOME" gpg --batch --export-secret-keys "$signing_fingerprint" \
+  >"$TMP/secret-key.gpg"
+cp "$TMP/secret-key.gpg" "$signed_iso.signing-key.gpg"
+if GNUPGHOME="$EMPTY_HOME" "$ROOT/ci/verify-iso-artifacts.sh" "$signed_iso" \
+    --require-signature >"$TMP/secret-key.out" 2>&1; then
+  echo 'published keyring with a secret key unexpectedly passed' >&2
+  exit 1
+fi
+grep -Fq 'the published signing key contains a secret key' "$TMP/secret-key.out"
+cp "$TMP/published-key.gpg" "$signed_iso.signing-key.gpg"
+
+# build-info naming a key that is not beside the image is a failure, not an
+# unsigned artifact that falls back to whatever keyring the reader has.
+rm -f "$signed_iso.signing-key.gpg"
+if GNUPGHOME="$EMPTY_HOME" "$ROOT/ci/verify-iso-artifacts.sh" "$signed_iso" \
+    --require-signature >"$TMP/missing-published-key.out" 2>&1; then
+  echo 'signed artifact without its published key unexpectedly passed' >&2
+  exit 1
+fi
+grep -Fq "missing published signing key: $signed_name.signing-key.gpg" \
+  "$TMP/missing-published-key.out"
+
 printf '%s\n' 'tampered' >>"$ISO"
 if "$ROOT/ci/verify-iso-artifacts.sh" "$ISO" >"$TMP/tampered.out" 2>&1; then
   echo 'tampered ISO unexpectedly passed artifact verification' >&2
