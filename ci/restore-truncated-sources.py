@@ -21,6 +21,21 @@ compiled: their own `#include` lines and declarations were gone, while
 `config.h` reached the working TUs. Checking every checkout after a sync is
 cheaper than reading a compiler log for the cause.
 
+A copy interrupted at zero bytes, or a dependency tree that is not a git
+checkout at all (an extracted archive, a cipd or GCS dependency), is worse: the
+file is still there, git has nothing to say about it, and it defines nothing.
+That reads as a header that includes fine and declares nothing -- the first
+abseil TU then fails on `ABSL_NAMESPACE_BEGIN`, `ABSL_INTERNAL_ATOMIC_HOOK_ATTRIBUTES`
+and `absl_nonnull` at once because the headers that define them are empty.
+So empty headers and sources are reported too: git cannot restore those, and
+re-syncing the dependency is what does.
+
+Paths the series patches are recognised by their path in the tree, not by their
+path inside a checkout: the series names `third_party/abseil-cpp/...` while a
+nested dependency checkout reports `absl/base/BUILD.gn`, and comparing the two
+would read every patched file in every dependency as damage and restore it over
+the patch before the build.
+
 Nothing under chrome/ is ever restored. Lumen is the Ash and Aura shell with
 browser behaviour delegated away, so the browser subtree is pruned on purpose;
 a damaged file that happens to sit there is reported and left alone.
@@ -45,6 +60,10 @@ SKIP_DIRS = {".git", "out", "node_modules", ".cipd", ".cipd_bin",
              "__pycache__", ".git_cache"}
 MAX_DEPTH = 8
 PREFIX = "==> source-check: "
+# Source files are never meant to be empty, so one that is has been emptied.
+HOLLOW_EXTS = {".h", ".hh", ".hpp", ".hxx", ".inc", ".cc", ".cpp", ".c",
+               ".mm"}
+HOLLOW_SHOWN = 40
 
 
 def run(args):
@@ -134,6 +153,36 @@ def under_chrome(rel):
     return bool(parts) and parts[0] == "chrome"
 
 
+def hollow_sources(tree, max_depth):
+    """Source files that exist and hold nothing, as paths in the tree."""
+    root = os.path.abspath(tree)
+    hollow = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        rel_dir = os.path.relpath(dirpath, root)
+        depth = 0 if rel_dir == "." else rel_dir.count(os.sep) + 1
+        if depth > max_depth:
+            dirnames[:] = []
+            continue
+        dirnames[:] = [
+            name for name in dirnames
+            if name not in SKIP_DIRS and not name.startswith(".") and
+            not (rel_dir == "." and name == "chrome")
+        ]
+        for name in filenames:
+            if os.path.splitext(name)[1] not in HOLLOW_EXTS:
+                continue
+            full = os.path.join(dirpath, name)
+            try:
+                if os.path.islink(full) or not os.path.isfile(full):
+                    continue
+                if os.path.getsize(full):
+                    continue
+            except OSError:
+                continue
+            hollow.append(os.path.relpath(full, root))
+    return sorted(hollow)
+
+
 def scan(tree, patched, max_depth):
     """Classify what differs from HEAD in every checkout under the tree."""
     damaged, pruned, chrome, patched_hits, added, other = [], 0, [], [], 0, []
@@ -158,7 +207,11 @@ def scan(tree, patched, max_depth):
             if "A" in xy:
                 added += 1
                 continue
-            if rel in patched:
+            # shown is the path in the tree, which is what the series names.
+            # rel is the path inside this checkout, which differs for every
+            # nested DEPS dependency; comparing that would read the series'
+            # own hunks there as damage and restore them away.
+            if shown in patched or rel in patched:
                 patched_hits.append(shown)
                 continue
             full = os.path.join(checkout, rel)
@@ -233,8 +286,28 @@ def main():
     for _, _, shown in damaged:
         print(PREFIX + "damaged: %s" % shown)
 
+    def report_hollow():
+        """Name empty sources, which git cannot restore, after any restore."""
+        hollow = hollow_sources(tree, args.max_depth)
+        for shown in hollow[:HOLLOW_SHOWN]:
+            print(PREFIX + "hollow (empty, defines nothing): %s" % shown)
+        if len(hollow) > HOLLOW_SHOWN:
+            print(PREFIX + "... and %d more hollow file(s)"
+                  % (len(hollow) - HOLLOW_SHOWN))
+        if hollow:
+            print(PREFIX + "%d empty source file(s): a header that is there and "
+                           "declares nothing fails its first user with "
+                           "undeclared names. Nothing here can restore them; "
+                           "re-sync the dependency (ci/resolve-deps.py --root "
+                           "%s) and check free space on the build disk"
+                  % (len(hollow), tree))
+        return hollow
+
     if not damaged:
+        hollow = report_hollow()
         if other:
+            return 1
+        if hollow:
             return 1
         if chrome:
             print(PREFIX + "nothing restorable; %d damaged file(s) under "
@@ -245,6 +318,7 @@ def main():
                            "says")
         return 0
     if not args.apply:
+        report_hollow()
         print(PREFIX + "report only; rerun with --apply to restore these "
                        "from their own checkout")
         return 1
@@ -263,6 +337,8 @@ def main():
               file=sys.stderr)
         return 1
     print(PREFIX + "restored %d file(s)" % len(damaged))
+    if report_hollow():
+        return 1
     return 0
 
 

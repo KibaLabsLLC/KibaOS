@@ -341,7 +341,8 @@ echo "==> Checking dependency sources"
 
 if ! python3 "${REPO_ROOT}/ci/restore-truncated-sources.py" \
     --tree "${SRC_DIR}" --apply --quiet-chrome; then
-  echo "warning: some source files could not be restored" >&2
+  echo "warning: the source check above found damage it could not repair" >&2
+  echo "         (see its ==> source-check: lines; a build now may fail on it)" >&2
 fi
 
 # Verify patches against the fetched source.

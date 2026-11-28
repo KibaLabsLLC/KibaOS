@@ -258,7 +258,7 @@ build() {
     if [ -f "${ci_dir}/restore-truncated-sources.py" ]; then
         python3 "${ci_dir}/restore-truncated-sources.py" \
             --tree "${chrome_src}" --apply --quiet-chrome ||
-            echo "WARNING: some source files could not be restored; ninja will name what is missing" >&2
+            echo "WARNING: the source check above found damage it could not repair (see its ==> source-check: lines); ninja will fail on it later" >&2
     fi
 
     # Generate GN args without Google credentials. KibaOS uses local accounts
