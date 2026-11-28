@@ -17,7 +17,6 @@ pkgbase = chromiumos-ash
 	makedepends = clang
 	makedepends = llvm
 	makedepends = lld
-	makedepends = compiler-rt
 	makedepends = gn
 	makedepends = python-pip
 	depends = shill-nm-adapter

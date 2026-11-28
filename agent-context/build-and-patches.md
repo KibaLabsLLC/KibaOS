@@ -9,16 +9,15 @@
 2. **depot_tools + Lumen bootstrap** — `ci/bootstrap-chromium-src.sh` clones
    `KibaLabsLLC/Lumen` (`KIBAOS_LUMEN_REPOSITORY`, default branch `main`) into
    the build tree, resolves its `DEPS` with `ci/resolve-deps.py`, and verifies
-   the patch series will apply. `ci/system-tools.sh` links the build root's
-   own `gn`, `ninja` and `clang`/`llvm`/`lld`/`compiler-rt` packages into the
-   checkout at Chromium's default toolchain path — including the builtin
-   headers, the per-target `libclang_rt.builtins.a` directory and the
-   `cr_build_revision` file its `clang_base_path` checks read — and has the
-   resolver skip Chromium's
-   prebuilt copies, so only tools pacman does not provide are downloaded; a
-   package that cannot do the job keeps Chromium's copy instead (an older `gn`
-   cannot read the tree's list-form `script_executable`), the package build
-   stops at once on such a `gn` link instead of running the recovery loop, and
+      the patch series will apply. `ci/system-tools.sh` links the build root's
+   own `gn` and `ninja` packages into the checkout and has the resolver skip
+   Chromium's prebuilt copies of those two, so only tools pacman does not
+   provide are downloaded; Chromium's prebuilt Clang/LLVM toolchain is always
+   kept, because the tree's build config pins and asserts that exact clang, and
+   anything an earlier bootstrap put in its path is cleared first. A package
+   that cannot do the job keeps Chromium's copy instead (an older `gn` cannot
+   read the tree's list-form `script_executable`), the package build stops at
+   once on such a `gn` link instead of running the recovery loop, and
    `KIBAOS_SYSTEM_TOOLS=0` keeps the downloads.
    `ci/restore-truncated-sources.py --restore-dir third_party/abseil-cpp`
    puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
