@@ -6,7 +6,6 @@
 0025-diagnostics-linux-hardware.patch
 0028-runtime-resources-linux.patch
 0030-accessibility-linux-tts.patch
-0035-desktop-brand-palette.patch
 0039-files-empty-states-and-search.patch
 0040-files-human-modification-times.patch
 0041-files-exact-byte-count.patch
