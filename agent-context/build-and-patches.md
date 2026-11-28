@@ -30,14 +30,18 @@
    `base/allocator/partition_allocator/src/partition_alloc`, so
    `ci/restore-imported-includes.py` puts the 4,488 abseil lines in
    `ci/abseil-includes.json`, the 5,929 protobuf lines in
-   `ci/protobuf-includes.json` and the 1,836 partition_alloc lines in
+   `ci/protobuf-includes.json` and the 1,842 partition_alloc lines in
    `ci/partition-alloc-includes.json` back where the Chromium copy has them,
    inside the `#if` that needs them and with their blank lines. The first two
    directories come out byte for byte as Chromium ships them; partition_alloc
-   is repaired against Chromium main, so its files whose code has moved on
-   since Lumen's copy take their includes back while keeping their own
-   revision's lines, and the `partition_alloc/zero_segment.h` include that
-   Lumen's copy is too old to have is not put back. A manifest names the
+   is repaired against the Chromium revision the import came from, which each
+   manifest records in its `baseline`, so every file keeps its own revision's
+   lines and takes back only that revision's includes. Regenerate the manifest
+   when the import moves, always against the imported revision and never
+   against Chromium main: main's files have moved on, so a manifest built from
+   it restores headers a file did not have yet and misses ones it did, which
+   is how `partition_address_space.cc` came to be built without
+   `partition_alloc/internal/page_allocator_internal.h`. A manifest names the
    directory it repairs, the include lines it owns, and for each block the two
    lines it sat between and the occurrence of that pair -- counted in the tree
    as the repair finds it, because a run taken out from between two blank
