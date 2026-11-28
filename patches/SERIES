@@ -106,4 +106,5 @@
 0182-codespan-reporting-sources-are-declared.patch
 0183-the-dcheck-header-includes-its-build-flag.patch
 0184-libcxx-sources-are-declared.patch
+0185-clap-sources-and-inputs-are-declared.patch
 0900-gn-evaluation-converges.patch

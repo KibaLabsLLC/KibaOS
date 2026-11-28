@@ -84,7 +84,7 @@ Full builds need Docker, ~15 GB free space, and Linux.
   (e.g. `0071-files-a-cut-file-stays-dimmed.patch`). Match the tone and
   numbering when adding patches.
 - The `00xx-files-*` range builds the KibaOS Files app port inside Ash;
-  `0162`–`0184` reconcile the build after the `chrome/` cut (GN parse fixes,
+  `0162`–`0185` reconcile the build after the `chrome/` cut (GN parse fixes,
   dropped chrome dependency edges, restored protos/buildflags, and the GN list
   entries the pruner emptied); `0900` is the GN evaluation convergence step
   that runs last.
@@ -94,6 +94,13 @@ Full builds need Docker, ~15 GB free space, and Linux.
   `third_party/libc++` and `third_party/libc++abi` arrive from `DEPS`. That is
   why `0184` declares their sources; without it each archive is built empty
   and every executable fails to link on `std::__Cr` symbols.
+- The one exception is a gnrt rust crate's `sources`/`inputs` list that the
+  pruner emptied to `[]`: those lists still parse, so the tool used to leave
+  them alone and the build died later in `rustc_wrapper.py` on files rustc had
+  discovered and GN never declared. It now refills them in the same run —
+  sources from the vendored crate's `src/`, inputs from the pinned upstream —
+  and keeps an input only when its path exists in the checkout. `0181`, `0182`
+  and `0185` predate that and stand as written.
 - `patches/generated/` holds machine-produced content. Do not hand-edit it;
   regenerate via CI tooling instead.
 

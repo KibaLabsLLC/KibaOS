@@ -7,15 +7,25 @@ Any such file that GN loads then fails to parse. This tool:
 
   1. parses every .gn/.gni file in the Lumen tree with a GN-compatible
      tokenizer/parser and collects syntax-broken files,
-  2. repairs each broken file by re-adding the deleted lines:
+  2. also collects gnrt-generated rust crate files whose `sources`/`inputs`
+     lists the pruner emptied to `[]`. Emptied lists still parse, so they are
+     never a step 1 finding, but rustc discovers files GN never declared and
+     rustc_wrapper.py fails the build on them ("Rust source file or input not
+     in GN sources"), which is a compile-time failure no GN parse catches,
+  3. repairs each file by re-adding the deleted lines:
        * gnrt-generated rust crate files: restore cargo_crate assignments
          aligned against the upstream chromium mirror at the pinned sha,
          falling back to values regenerated from the local vendored crates
          (crate_root, sources) or Cargo.toml (package metadata),
+       * emptied rust crate `sources`/`inputs` lists: sources are refilled
+         from the vendored crate's own src/ tree, inputs from the upstream
+         mirror's list (gnrt takes them from `extra_input_roots`, which the
+         vendor tree does not record), keeping each upstream entry only when
+         the path it names exists in the checkout,
        * other files: difflib alignment against upstream; upstream-inserted
          lines are adopted only when every //... path they reference exists
          locally, so drifted content is never reverted,
-  3. re-parses every repaired file and only emits syntax-valid repairs.
+  4. re-parses every repaired file and only emits syntax-valid repairs.
 
 Repaired files are written to --out preserving relative paths; the caller
 overlays them on the Lumen checkout and records the diff as a KibaOS patch.
@@ -561,7 +571,7 @@ def walk_vendor_src(vendor, vdir):
 
 
 def derive_value_lines(lumen, key, vdir):
-    """Value line(s) only; the caller keeps the corrupt `key =` line itself."""
+    """Value line(s) for crate_root/build_*; the caller keeps the `key =` line."""
     vendor = os.path.join(lumen, VENDOR_URL[2:])
     if key == "crate_root":
         root = os.path.join(vdir, "src/lib.rs")
@@ -578,13 +588,6 @@ def derive_value_lines(lumen, key, vdir):
                 raise RuntimeError("no lib.rs in %s" % vdir)
             root = found
         return ['      "%s/%s"' % (VENDOR_URL, root.replace(os.sep, "/"))]
-    if key == "sources":
-        entries = walk_vendor_src(vendor, vdir)
-        if not entries:
-            raise RuntimeError("no .rs sources in %s" % vdir)
-        return ['    "%s",' % e for e in entries]
-    if key == "inputs":
-        return []
     if key in ("build_root", "build_sources", "build_script_inputs"):
         if not os.path.exists(os.path.join(vendor, vdir, "build.rs")):
             raise RuntimeError("no build.rs in %s" % vdir)
@@ -593,6 +596,26 @@ def derive_value_lines(lumen, key, vdir):
                   "build_script_inputs": "      [ \"%s/%s/src/../build.rs\" ]"}[key]
         return [target % (VENDOR_URL, vdir)]
     raise RuntimeError("no derivation for key %s" % key)
+
+
+def crate_entries(lumen, key, vdir, upval):
+    """The value lines an emptied gnrt `sources`/`inputs` list should hold.
+
+    `sources` are the vendored crate's own .rs files. `inputs` come from the
+    upstream mirror's list, because gnrt emits them from `extra_input_roots`
+    and nothing in the vendor tree records that; an entry is kept only when
+    the path it names exists in this checkout, since a declared-but-absent
+    input stops `gn gen`, while a missing one is named by rustc_wrapper.py at
+    build time instead of being guessed at.
+    """
+    if key == "sources":
+        return ['    "%s",' % e for e in walk_vendor_src(
+            os.path.join(lumen, VENDOR_URL[2:]), vdir)]
+    entries = []
+    for p in re.findall(r'"(//[^"]+)"', "\n".join(upval or [])):
+        if os.path.exists(os.path.join(lumen, p[2:])):
+            entries.append('    "%s",' % p)
+    return entries
 
 
 def cargo_toml_value(lumen, vdir, key):
@@ -650,19 +673,86 @@ def corrupt_regions(lines):
                 yield (m.group(1), i, i + 1)
                 i += 1
                 continue
-        m2 = re.match(r"^  (sources|inputs) = \[\s*$", lines[i].rstrip())
-        if m2:
-            _j, nxt = next_nonblank(lines, i + 1)
-            if nxt.lstrip() == "]":
-                yield (m2.group(1), i, _j + 1)
-                i += 1
-                continue
         i += 1
+
+
+def empty_list_regions(lines):
+    """(key, start, end) for rust crate `sources`/`inputs` lists emptied to [].
+
+    Both shapes the pruner leaves behind: the value lines deleted between the
+    brackets, and the whole list collapsed to one `key = []` line. Neither
+    breaks parsing, which is why scan_tree never reports them.
+    """
+    regions = []
+    for i, line in enumerate(lines):
+        m = re.match(r"^  (sources|inputs) = \[\]\s*$", line)
+        if m:
+            regions.append((m.group(1), i, i + 1))
+            continue
+        m = re.match(r"^  (sources|inputs) = \[\s*$", line)
+        if m:
+            _j, nxt = next_nonblank(lines, i + 1)
+            if nxt.strip() == "]":
+                regions.append((m.group(1), i, _j + 1))
+    return regions
 
 
 def block_of(lines, upto):
     return len(re.findall(r'cargo_crate\("',
                           "".join(l + "\n" for l in lines[:upto]))) - 1
+
+
+def rust_list_gaps(lumen, lines, up_text):
+    """{key: value lines} for emptied lists that this tree can refill."""
+    up_blocks = parse_crate_blocks(up_text) if up_text else []
+    gaps = {}
+    for key, s, _e in empty_list_regions(lines):
+        idx = block_of(lines, s)
+        upval = None
+        if up_blocks and idx < len(up_blocks):
+            upval = up_blocks[idx].get(key)
+        vdir = None
+        if key == "sources":
+            vdir = vendor_dir_for(lumen, lines, s)
+            if not vdir:
+                continue
+        entries = crate_entries(lumen, key, vdir, upval)
+        if entries:
+            gaps[key] = entries
+    return gaps
+
+
+def scan_rust_lists(lumen, chromium=None, ref=None, overlay=None):
+    """{relpath: [key, ...]} for emptied rust crate lists that can be refilled.
+
+    These files parse, so scan_tree cannot see them; they fail at compile time
+    in rustc_wrapper.py instead. Only lists with something derivable are
+    reported, so a crate whose upstream `inputs` are empty stays quiet.
+    """
+    found = {}
+    for dirpath, dirs, files in os.walk(lumen):
+        dirs[:] = [d for d in dirs if d not in (".git", "out")]
+        if "BUILD.gn" not in files:
+            continue
+        rel = os.path.relpath(os.path.join(dirpath, "BUILD.gn"), lumen)
+        rel = rel.replace(os.sep, "/")
+        if not RUST_FILE_RE.match(rel):
+            continue
+        path = os.path.join(lumen, rel)
+        if overlay and os.path.exists(os.path.join(overlay, rel)):
+            path = os.path.join(overlay, rel)
+        try:
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                lines = fh.read().split("\n")
+        except OSError:
+            continue
+        if not empty_list_regions(lines):
+            continue
+        up_text = upstream_show(chromium, ref, rel) if chromium and ref else None
+        gaps = rust_list_gaps(lumen, lines, up_text)
+        if gaps:
+            found[rel] = sorted(gaps)
+    return found
 
 
 def repair_rust_file(lumen, relpath, up_text):
@@ -673,11 +763,30 @@ def repair_rust_file(lumen, relpath, up_text):
     up_blocks = parse_crate_blocks(up_text) if up_text else []
 
     repairs = {}
-    for key, s, e in corrupt_regions(lines):
+    regions = list(corrupt_regions(lines)) + list(empty_list_regions(lines))
+    for key, s, e in sorted(regions, key=lambda r: r[1]):
         idx = block_of(lines, s)
         upval = None
         if up_blocks and idx < len(up_blocks):
             upval = up_blocks[idx].get(key)
+        if key in ("sources", "inputs"):
+            vdir = None
+            if key == "sources":
+                vdir = vendor_dir_for(lumen, lines, s)
+                if not vdir:
+                    raise RuntimeError("no vendor dir for key=%s (block %d)"
+                                       % (key, idx))
+            entries = crate_entries(lumen, key, vdir, upval)
+            if not entries:
+                if key == "sources":
+                    raise RuntimeError("no .rs sources in %s" % vdir)
+                continue
+            if e > s + 1:
+                repairs[s] = (e, [lines[s]] + entries + [lines[e - 1]])
+            else:
+                repairs[s] = (e, [lines[s].replace("[]", "[", 1)] + entries +
+                               ["  ]"])
+            continue
         if upval and len(upval) > 1 and paths_exist(lumen, "\n".join(upval[1:])):
             repairs[s] = (e, [lines[s]] + upval[1:])
             continue
@@ -690,8 +799,8 @@ def repair_rust_file(lumen, relpath, up_text):
         vdir = vendor_dir_for(lumen, lines, s)
         if not vdir:
             raise RuntimeError("no vendor dir for key=%s (block %d)" % (key, idx))
-        if key in ("crate_root", "sources", "inputs",
-                   "build_root", "build_sources", "build_script_inputs"):
+        if key in ("crate_root", "build_root", "build_sources",
+                   "build_script_inputs"):
             repl = [lines[s]] + derive_value_lines(lumen, key, vdir)
             if e > s + 1:
                 repl.append(lines[e - 1])
@@ -871,20 +980,26 @@ def repair_generic_file(lumen, relpath, up_text, err_msg=None):
 # Driver
 # ---------------------------------------------------------------------------
 
-def check_only(lumen, overlay=None):
+def check_only(lumen, overlay=None, chromium=None, ref=None):
     broken = scan_tree(lumen, overlay)
+    pruned = scan_rust_lists(lumen, chromium, ref, overlay)
     for rel in sorted(broken):
         print("BROKEN %s: %s" % (rel, broken[rel]))
-    print("%d broken" % len(broken))
-    return 1 if broken else 0
+    for rel in sorted(pruned):
+        print("INCOMPLETE %s: emptied %s list(s) can be refilled"
+              % (rel, ", ".join(pruned[rel])))
+    print("%d broken, %d with emptied rust lists" % (len(broken), len(pruned)))
+    return 1 if broken or pruned else 0
 
 
 def repair(lumen, chromium, ref, out_dir):
     broken = scan_tree(lumen)
-    print("scanned: %d broken files" % len(broken))
+    pruned = scan_rust_lists(lumen, chromium, ref)
+    print("scanned: %d broken files, %d with emptied rust lists"
+          % (len(broken), len(pruned)))
     repaired, unrepaired = [], []
-    for rel in sorted(broken):
-        err_msg = broken[rel]
+    for rel in sorted(set(broken) | set(pruned)):
+        err_msg = broken.get(rel)
         try:
             if RUST_FILE_RE.match(rel):
                 up_text = upstream_show(chromium, ref, rel)
@@ -912,6 +1027,8 @@ def repair(lumen, chromium, ref, out_dir):
         print("REPAIRED %s (%s)" % (rel, note))
 
     remaining = scan_tree(lumen, out_dir)
+    for rel, keys in scan_rust_lists(lumen, chromium, ref, out_dir).items():
+        remaining.setdefault(rel, "emptied %s lists" % ", ".join(keys))
     print("summary: %d repaired, %d unrepaired, %d files still broken"
           % (len(repaired), len(unrepaired), len(remaining)))
     for rel in sorted(remaining):
@@ -926,7 +1043,8 @@ def main():
     ap.add_argument("--ref", help="chromium ref (e.g. pins/chromium.sha)")
     ap.add_argument("--out", help="directory receiving repaired files")
     ap.add_argument("--check", action="store_true",
-                    help="only scan and report broken files")
+                    help="only scan and report broken files and emptied rust "
+                         "crate lists")
     ap.add_argument("--overlay", help="validation overlay for --check")
     ap.add_argument("--verify-imports", action="store_true",
                     help="restore import() targets deleted by the pruner "
@@ -940,7 +1058,7 @@ def main():
                 ap.error("--%s is required with --verify-imports" % req)
         sys.exit(verify_imports(args.lumen, args.chromium, args.ref))
     if args.check:
-        sys.exit(check_only(args.lumen, args.overlay))
+        sys.exit(check_only(args.lumen, args.overlay, args.chromium, args.ref))
     for req in ("chromium", "ref", "out"):
         if not getattr(args, req):
             ap.error("--%s is required without --check" % req)
