@@ -1,5 +1,7 @@
 {
   "baseline": "chromium/src main, third_party/abseil-cpp, regenerated 2026-11-28",
+  "directory": "third_party/abseil-cpp",
+  "include": "^\\s*#\\s*include\\s+\"absl/",
   "files": {
     "CMake/install_test_project/simple.cc": [
       {"after": "#include <iostream>\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/config.h\"\n", "#include \"absl/strings/substitute.h\"\n"]}

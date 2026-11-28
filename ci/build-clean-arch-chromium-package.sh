@@ -71,15 +71,17 @@ if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
   }
 fi
 
-# The import behind that tree also dropped its `#include "absl/..."` lines, so
-# the headers it kept include nothing and the first abseil TU fails on
-# ABSL_NAMESPACE_BEGIN. Restore them as the owner too, so this build fails on
-# its own behaviour rather than on a stripped checkout.
-if [[ -f "${SCRIPT_DIR}/restore-abseil-includes.py" ]]; then
+# The import behind that tree also took its include lines -- every
+# `#include "absl/..."` line from abseil-cpp, every quoted include from
+# protobuf -- so the headers it kept include nothing and the first abseil TU
+# fails on ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`.
+# Restore them as the owner too, so this build fails on its own behaviour
+# rather than on a stripped checkout.
+if [[ -f "${SCRIPT_DIR}/restore-imported-includes.py" ]]; then
   runuser -u "${chrome_owner}" -- \
-    python3 "${SCRIPT_DIR}/restore-abseil-includes.py" \
+    python3 "${SCRIPT_DIR}/restore-imported-includes.py" \
       --tree "${CHROME_SRC}" --apply || {
-    echo "Could not restore the abseil includes in ${CHROME_SRC}." >&2
+    echo "Could not restore the includes the import dropped in ${CHROME_SRC}." >&2
     exit 1
   }
 fi

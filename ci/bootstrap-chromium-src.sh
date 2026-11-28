@@ -434,18 +434,20 @@ if [[ "${apply_series}" == "1" ]]; then
   echo "==> Patch series applied"
 fi
 
-# The import behind the tree also dropped every `#include "absl/..."` line from
-# third_party/abseil-cpp, so the headers it kept include nothing and the first
-# abseil TU fails on ABSL_NAMESPACE_BEGIN. Last, after the source check above:
-# that check restores any modified file it does not recognise, and these files
-# are modified on purpose.
-echo "==> Restoring the abseil includes the source import dropped"
+# The import behind the tree also took the include lines out of the trees it
+# vendored: every `#include "absl/..."` line from third_party/abseil-cpp, and
+# every quoted include from third_party/protobuf. The files it kept include
+# nothing, so the first abseil TU fails on ABSL_NAMESPACE_BEGIN and the first
+# protobuf TU on `absl`. Last, after the source check above: that check
+# restores any modified file it does not recognise, and these files are
+# modified on purpose.
+echo "==> Restoring the includes the source import dropped"
 
-if ! python3 "${SCRIPT_DIR}/restore-abseil-includes.py" \
+if ! python3 "${SCRIPT_DIR}/restore-imported-includes.py" \
     --tree "${SRC_DIR}" --apply; then
-  echo "Error: the abseil includes could not be restored (see the ==>" >&2
-  echo "       abseil-includes: lines above); the build would fail on a header" >&2
-  echo "       that looks intact." >&2
+  echo "Error: the includes the import dropped could not be restored (see" >&2
+  echo "       the ==> imported-includes: lines above); the build would fail on" >&2
+  echo "       a header that looks intact." >&2
   exit 1
 fi
 
