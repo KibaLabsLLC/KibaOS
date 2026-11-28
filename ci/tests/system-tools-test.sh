@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Check that ci/system-tools.sh takes a tool from pacman only when the package
 # and its binaries are really there, that a GN too old for the tree's .gn is
-# left out, that a system clang without compiler-rt's per-target builtins
-# archive is left out too, and that the DEPS-side, GN-side and package-build
-# answers match what it substituted.
+# left out, that a system clang whose resource directory cannot complete
+# Chromium's lib/clang/<version> tree (builtin headers, compiler-rt) is left
+# out too, and that the DEPS-side, GN-side and package-build answers match
+# what it substituted.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -45,11 +46,15 @@ case "$(uname -m)" in
     ;;
 esac
 
-# A fake clang whose resource directory holds compiler-rt in the flat layout
-# Arch installs it; Chromium asks for the per-target directory instead.
+# A fake clang whose resource directory holds the builtin headers and
+# compiler-rt in the flat layout Arch installs it; Chromium asks for the tree's
+# lib/clang/<version> with the headers and a per-target runtime directory.
 resource_dir="${tmp}/lib/clang/22"
-mkdir -p "${resource_dir}/lib/linux"
-: >"${resource_dir}/lib/linux/libclang_rt.builtins-${triple%%-*}.a"
+arch="${triple%%-*}"
+mkdir -p "${resource_dir}/lib/linux" "${resource_dir}/include"
+: >"${resource_dir}/include/stddef.h"
+: >"${resource_dir}/lib/linux/libclang_rt.builtins-${arch}.a"
+: >"${resource_dir}/lib/linux/libclang_rt.profile-${arch}.a"
 
 fake_clang() {
   cat >"${tmp}/bin/clang" <<EOF
@@ -135,6 +140,10 @@ builtins="${clang_base}/lib/clang/24/lib/${triple}/libclang_rt.builtins.a"
 flat_archive="${resource_dir}/lib/linux/libclang_rt.builtins-${triple%%-*}.a"
 cmp -s "${builtins}" "${flat_archive}" ||
   fail "the builtins archive is not Arch's compiler-rt"
+[[ -f "${clang_base}/lib/clang/24/include/stddef.h" ]] ||
+  fail "the builtin headers were not provided"
+[[ -f "${clang_base}/lib/clang/24/lib/${triple}/libclang_rt.profile.a" ]] ||
+  fail "a flat runtime archive was not renamed for the per-target directory"
 grep -Fxq 'llvmorg-24-init-1-gabcd-2' "${clang_base}/cr_build_revision" ||
   fail "cr_build_revision does not match tools/clang/scripts/update.py"
 
