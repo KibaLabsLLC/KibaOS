@@ -275,6 +275,18 @@ build() {
             echo "WARNING: the source check above found damage it could not repair (see its ==> source-check: lines); ninja will fail on it later" >&2
     fi
 
+    # Lumen's source import also dropped every `#include "absl/..."` line from
+    # third_party/abseil-cpp, so the files it kept are not self-contained and
+    # the first abseil TU fails on ABSL_NAMESPACE_BEGIN in a file that looks
+    # intact. This runs after the source check above, which restores modified
+    # files from HEAD and would undo it. A file Lumen has already restored is
+    # left as it is.
+    if [ -f "${ci_dir}/restore-abseil-includes.py" ]; then
+        python3 "${ci_dir}/restore-abseil-includes.py" \
+            --tree "${chrome_src}" --apply ||
+            echo "WARNING: abseil includes could not be restored (see ==> abseil-includes: above); ninja will fail on its headers" >&2
+    fi
+
     # GN arguments for the tools ci/system-tools.sh took from pacman instead of
     # Chromium's prebuilt downloads. They are written beside the checkout's own
     # output directory, which Chromium's .gitignore covers, and are empty when

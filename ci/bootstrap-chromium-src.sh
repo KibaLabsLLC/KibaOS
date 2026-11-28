@@ -434,6 +434,19 @@ if [[ "${apply_series}" == "1" ]]; then
   echo "==> Patch series applied"
 fi
 
+# The import behind the tree also dropped every `#include "absl/..."` line from
+# third_party/abseil-cpp, so the headers it kept include nothing and the first
+# abseil TU fails on ABSL_NAMESPACE_BEGIN. Last, after the source check above:
+# that check restores any modified file it does not recognise, and these files
+# are modified on purpose.
+echo "==> Restoring the abseil includes the source import dropped"
+
+if ! python3 "${SCRIPT_DIR}/restore-abseil-includes.py" \
+    --tree "${SRC_DIR}" --apply; then
+  echo "warning: the abseil includes could not be restored (see ==> abseil-includes:" >&2
+  echo "         above); a build now fails on its headers" >&2
+fi
+
 echo
 echo "========================================"
 echo " Project Lumen bootstrap complete"

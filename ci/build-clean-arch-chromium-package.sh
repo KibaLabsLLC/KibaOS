@@ -71,6 +71,19 @@ if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
   }
 fi
 
+# The import behind that tree also dropped its `#include "absl/..."` lines, so
+# the headers it kept include nothing and the first abseil TU fails on
+# ABSL_NAMESPACE_BEGIN. Restore them as the owner too, so this build fails on
+# its own behaviour rather than on a stripped checkout.
+if [[ -f "${SCRIPT_DIR}/restore-abseil-includes.py" ]]; then
+  runuser -u "${chrome_owner}" -- \
+    python3 "${SCRIPT_DIR}/restore-abseil-includes.py" \
+      --tree "${CHROME_SRC}" --apply || {
+    echo "Could not restore the abseil includes in ${CHROME_SRC}." >&2
+    exit 1
+  }
+fi
+
 runuser -u "${chrome_owner}" -- /usr/bin/env \
   CHROME_SRC="${CHROME_SRC}" KIBAOS_WORKDIR="${series_check_workdir}" \
   "${SCRIPT_DIR}/refresh-bootstrap-series.sh" --check
