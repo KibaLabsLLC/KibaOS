@@ -23,7 +23,23 @@
    puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
    emptied part of it (which reads as undefined `ABSL_*` macros), deletions
    included, and re-applies the series' abseil hunks;
-   `KIBAOS_RESTORE_ABSEIL=0` leaves it alone.
+   `KIBAOS_RESTORE_ABSEIL=0` leaves it alone. Files that survived the import
+   are not self-contained either: it dropped every `#include "absl/..."` line
+   from that directory, so `ci/restore-abseil-includes.py` puts the 4,488
+   lines in `ci/abseil-includes.json` back where the Chromium copy has them,
+   inside the `#if` that needs them and with their blank lines, which leaves
+   the directory byte for byte as Chromium ships it. The manifest names each
+   block with the two lines it sat between and the occurrence of that pair,
+   and is rebuilt by `--generate` from Chromium's copy and Lumen's rather
+   than edited; the repair itself is a fixed order of rules (already there,
+   then the recorded pair, then its last occurrence, then the top of the
+   file, then the line above), so the same tree always produces the same
+   result and a second run writes nothing. A block with nowhere to go stops
+   the build and names itself instead of being guessed at, and a file Lumen
+   has already restored is left exactly as it is. Both tools run before
+   ninja, in the package build too, and a header whose includes are still
+   missing fails its first user on `ABSL_NAMESPACE_BEGIN` (see the
+   `abseil-cpp` section below).
 3. **Patch series** — the patches in `patches/SERIES` are applied to the
    Lumen tree. `ci/verify-patch-series.sh` and `ci/refresh-bootstrap-series.sh`
    manage this; the series is the integration contract between the two repos.
