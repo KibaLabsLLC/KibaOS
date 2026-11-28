@@ -1,0 +1,31 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "apps",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "app_restore_service_browsertest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"content/public/browser/browser_context.h\"\n", "n": 1, "add": ["#include \"chrome/browser/apps/platform_apps/app_browsertest_util.h\"\n", "#include \"chrome/browser/profiles/profile.h\"\n"]}
+    ],
+    "launcher.cc": [
+      {"after": "#include \"extensions/browser/process_manager.h\"\n", "before": "#include \"extensions/common/extension.h\"\n", "n": 1, "add": ["#include \"extensions/common/api/app_runtime.h\"\n"]}
+    ],
+    "launcher.h": [
+      {"after": "\n", "before": "#include \"extensions/common/constants.h\"\n", "n": 1, "add": ["#include \"extensions/common/api/app_runtime.h\"\n"]}
+    ],
+    "load_and_launch_browsertest.cc": [
+      {"after": "#include \"base/test/test_timeouts.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"content/public/common/content_switches.h\"\n", "n": 1, "add": ["#include \"chrome/browser/apps/platform_apps/app_browsertest_util.h\"\n", "#include \"chrome/browser/extensions/extension_browsertest.h\"\n", "#include \"chrome/browser/profiles/profile_manager.h\"\n", "#include \"chrome/browser/ui/simple_message_box_internal.h\"\n", "#include \"chrome/common/chrome_result_codes.h\"\n", "#include \"chrome/common/chrome_switches.h\"\n"]}
+    ],
+    "saved_files_service_unittest.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"extensions/browser/api/file_system/saved_file_entry.h\"\n", "n": 1, "add": ["#include \"chrome/browser/extensions/test_extension_environment.h\"\n", "#include \"chrome/test/base/testing_profile.h\"\n"]}
+    ],
+    "ui/views/app_window_frame_view.cc": [
+      {"after": "#include \"cc/paint/paint_flags.h\"\n", "before": "#include \"extensions/browser/app_window/native_app_window.h\"\n", "n": 1, "add": ["#include \"chrome/grit/theme_resources.h\"\n"]},
+      {"after": "#include \"extensions/browser/app_window/native_app_window.h\"\n", "before": "#include \"ui/base/hit_test.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkRRect.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n"]},
+      {"after": "#include \"ui/gfx/image/image.h\"\n", "before": "#include \"ui/views/accessibility/view_accessibility.h\"\n", "n": 1, "add": ["#include \"ui/strings/grit/ui_strings.h\"  // Accessibility names\n"]}
+    ],
+    "ui/views/app_window_frame_view.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"ui/base/metadata/metadata_header_macros.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ]
+  }
+}

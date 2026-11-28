@@ -1,0 +1,255 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "google_apis",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "api_key_cache.cc": [
+      {"after": "#include \"base/strings/stringize_macros.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"google_apis/default_api_keys.h\"\n", "n": 1, "add": ["#include \"google_apis/buildflags.h\"\n"]}
+    ],
+    "api_key_cache.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"google_apis/google_api_keys.h\"\n", "n": 1, "add": ["#include \"google_apis/buildflags.h\"\n"]}
+    ],
+    "calendar/calendar_api_url_generator_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest.h\"\n"]}
+    ],
+    "classroom/classroom_api_list_course_work_materials_request.cc": [
+      {"after": "#include \"net/base/url_util.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "classroom/classroom_api_list_course_work_materials_request_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "classroom/classroom_api_list_course_work_request.cc": [
+      {"after": "#include \"net/base/url_util.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "classroom/classroom_api_list_courses_request.cc": [
+      {"after": "#include \"net/base/url_util.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "classroom/classroom_api_list_students_request.cc": [
+      {"after": "#include \"net/base/url_util.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "common/base_requests.cc": [
+      {"after": "#include \"services/network/public/cpp/resource_request.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "common/base_requests.h": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader_stream_consumer.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "common/base_requests_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "credentials_mode.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom.h\"\n"]}
+    ],
+    "credentials_mode.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-forward.h\"\n"]}
+    ],
+    "default_api_keys-inc.cc": [
+      {"after": "\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "default_api_keys.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/buildflags.h\"\n"]}
+    ],
+    "drive/drive_api_requests.cc": [
+      {"after": "#include \"net/http/http_response_headers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "drive/drive_api_requests.h": [
+      {"after": "#include \"google_apis/drive/drive_common_callbacks.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "drive/drive_api_requests_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "drive/drive_base_requests.cc": [
+      {"after": "#include \"services/network/public/cpp/resource_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "drive/drive_base_requests.h": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader_stream_consumer.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "drive/drive_base_requests_server_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]}
+    ],
+    "drive/drive_base_requests_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "drive/files_list_request_runner_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "gaia/core_account_id.cc": [
+      {"after": "#include \"base/android/jni_string.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"google_apis/gaia/android/jni_headers/CoreAccountId_jni.h\"\n"]}
+    ],
+    "gaia/fake_gaia.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"google_apis/gaia/gaia_auth_consumer.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/bound_oauth_token.pb.h\"\n"]}
+    ],
+    "gaia/gaia_auth_fetcher.cc": [
+      {"after": "#include \"google_apis/credentials_mode.h\"\n", "before": "#include \"google_apis/gaia/gaia_auth_consumer.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/bound_oauth_token.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/gaia_auth_fetcher.h": [
+      {"after": "#include \"net/traffic_annotation/network_traffic_annotation.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom.h\"\n"]}
+    ],
+    "gaia/gaia_auth_fetcher_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom.h\"\n"]}
+    ],
+    "gaia/gaia_auth_test_util.cc": [
+      {"after": "#include \"google_apis/gaia/gaia_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/gaia/list_accounts_response.pb.h\"\n", "#include \"google_apis/gaia/oauth2_mint_token_consent_result.pb.h\"\n"]},
+      {"after": "#include \"base/android/scoped_java_ref.h\"\n", "before": "#include \"google_apis/gaia/android_device_management_error_details.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/android/jni_headers/DeviceManagementErrorDetails_jni.h\"\n"]}
+    ],
+    "gaia/gaia_auth_util.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"google_apis/gaia/gaia_constants.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/bound_oauth_token.pb.h\"\n"]},
+      {"after": "#include \"google_apis/gaia/gaia_urls.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/list_accounts_response.pb.h\"\n", "#include \"google_apis/gaia/oauth2_mint_token_consent_result.pb.h\"\n"]}
+    ],
+    "gaia/gaia_auth_util_unittest.cc": [
+      {"after": "#include \"google_apis/gaia/gaia_id_literal.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/list_accounts_response.pb.h\"\n"]}
+    ],
+    "gaia/gaia_id.cc": [
+      {"after": "#include \"base/android/jni_string.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"google_apis/gaia/android/jni_headers/GaiaId_jni.h\"\n"]}
+    ],
+    "gaia/gaia_oauth_client.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/google_service_auth_error.cc": [
+      {"after": "#if BUILDFLAG(IS_ANDROID)\n", "before": "#include \"google_apis/gaia/android_device_management_error_details.h\"\n", "n": 1, "add": ["#include \"google_apis/gaia/android/jni_headers/GoogleServiceAuthError_jni.h\"\n"]}
+    ],
+    "gaia/oauth2_access_token_fetcher_impl.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_access_token_fetcher_impl_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_access_token_manager_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_api_call_flow.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_api_call_flow.h": [
+      {"after": "#include \"net/traffic_annotation/network_traffic_annotation.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "gaia/oauth2_api_call_flow_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_mint_token_flow.cc": [
+      {"after": "#include \"net/http/http_status_code.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gaia/oauth2_mint_token_flow.h": [
+      {"after": "#include \"net/cookies/canonical_cookie.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "gaia/oauth2_mint_token_flow_unittest.cc": [
+      {"after": "#include \"net/http/http_status_code.h\"\n", "before": "#include \"services/network/test/test_utils.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gcm/base/mcs_message_unittest.cc": [
+      {"after": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/base/mcs_util.h": [
+      {"after": "#include \"google_apis/gcm/base/gcm_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/base/socket_stream.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "#include \"google_apis/gcm/base/gcm_export.h\"\n", "n": 1, "add": ["#include \"google/protobuf/io/zero_copy_stream.h\"\n"]}
+    ],
+    "gcm/base/socket_stream_unittest.cc": [
+      {"after": "#include \"services/network/network_service.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/checkin_request.cc": [
+      {"after": "#include \"google_apis/gcm/monitoring/gcm_stats_recorder.h\"\n", "before": "#include \"net/base/load_flags.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/checkin.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gcm/engine/checkin_request.h": [
+      {"after": "#include \"google_apis/gcm/base/gcm_export.h\"\n", "before": "#include \"net/base/backoff_entry.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/android_checkin.pb.h\"\n", "#include \"google_apis/gcm/protocol/checkin.pb.h\"\n"]}
+    ],
+    "gcm/engine/checkin_request_unittest.cc": [
+      {"after": "#include \"google_apis/gcm/monitoring/fake_gcm_stats_recorder.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/checkin.pb.h\"\n"]}
+    ],
+    "gcm/engine/connection_event_tracker.h": [
+      {"after": "#include \"google_apis/gcm/base/gcm_export.h\"\n", "before": "#include \"net/base/net_errors.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/connection_event_tracker_unittest.cc": [
+      {"after": "\n", "before": "#include \"net/base/net_errors.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/connection_factory.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/connection_factory_impl.cc": [
+      {"after": "#include \"google_apis/gcm/monitoring/gcm_stats_recorder.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"net/traffic_annotation/network_traffic_annotation.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/tcp_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/connection_factory_impl.h": [
+      {"after": "#include \"google_apis/gcm/engine/connection_handler.h\"\n", "before": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/network_connection_tracker.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/connection_factory_impl_unittest.cc": [
+      {"after": "#include \"services/network/network_service.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/connection_handler_impl.cc": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "n": 1, "add": ["#include \"google/protobuf/io/coded_stream.h\"\n", "#include \"google/protobuf/io/zero_copy_stream_impl_lite.h\"\n"]},
+      {"after": "#include \"google_apis/gcm/base/socket_stream.h\"\n", "before": "#include \"net/base/net_errors.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/connection_handler_impl_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "n": 1, "add": ["#include \"google/protobuf/io/coded_stream.h\"\n", "#include \"google/protobuf/io/zero_copy_stream_impl_lite.h\"\n", "#include \"google/protobuf/wire_format_lite.h\"\n"]},
+      {"after": "#include \"google_apis/gcm/base/socket_stream.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"services/network/network_service.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/fake_connection_factory.cc": [
+      {"after": "#include \"google_apis/gcm/engine/fake_connection_handler.h\"\n", "before": "#include \"mojo/public/cpp/system/data_pipe.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/fake_mcs_server.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "n": 1, "add": ["#include \"google/protobuf/io/coded_stream.h\"\n", "#include \"google/protobuf/io/zero_copy_stream_impl_lite.h\"\n"]}
+    ],
+    "gcm/engine/fake_mcs_server.h": [
+      {"after": "#include \"base/threading/thread.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/gcm_request_test_base.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gcm/engine/gcm_store_impl.cc": [
+      {"after": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "before": "#include \"third_party/leveldatabase/env_chromium.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"third_party/leveldatabase/leveldb_chrome.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n", "#include \"third_party/leveldatabase/src/include/leveldb/write_batch.h\"\n"]}
+    ],
+    "gcm/engine/gcm_store_impl_unittest.cc": [
+      {"after": "#include \"google_apis/gcm/base/mcs_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"third_party/leveldatabase/env_chromium.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n"]}
+    ],
+    "gcm/engine/gservices_settings.h": [
+      {"after": "#include \"google_apis/gcm/engine/gcm_store.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/checkin.pb.h\"\n"]}
+    ],
+    "gcm/engine/heartbeat_manager.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"net/base/network_change_notifier.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/heartbeat_manager_unittest.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]}
+    ],
+    "gcm/engine/mcs_client_integration_unittest.cc": [
+      {"after": "#include \"google_apis/gcm/monitoring/fake_gcm_stats_recorder.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"google_apis/gcm/protocol/mcs.pb.h\"\n"]},
+      {"after": "#include \"services/network/network_service.h\"\n", "before": "#include \"services/network/test/fake_test_cert_verifier_params_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n"]}
+    ],
+    "gcm/engine/registration_request.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gcm/engine/unregistration_request.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "gcm/tools/mcs_probe.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_network_connection_tracker.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/proxy_resolving_socket.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]}
+    ],
+    "google_api_keys.cc": [
+      {"after": "#include \"base/version_info/channel.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"google_apis/api_key_cache.h\"\n", "before": "#include \"google_apis/default_api_keys.h\"\n", "n": 1, "add": ["#include \"google_apis/buildflags.h\"\n"]},
+      {"after": "#if defined(USE_OFFICIAL_GOOGLE_API_KEYS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"google_apis/internal/google_chrome_api_keys.h\"\n", "#include \"google_apis/internal/metrics_signing_key.h\"\n"]}
+    ],
+    "google_api_keys.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/buildflags.h\"\n"]}
+    ],
+    "google_api_keys_mac_unittest.mm": [
+      {"after": "#include \"base/test/scoped_feature_list.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "google_api_keys_unittest.cc": [
+      {"after": "#include \"base/version_info/channel.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#undef GOOGLE_APIS_INTERNAL_METRICS_SIGNING_KEY_H_\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/internal/google_chrome_api_keys.h\"\n", "#include \"google_apis/internal/metrics_signing_key.h\"\n"]},
+      {"after": "#undef GOOGLE_APIS_INTERNAL_METRICS_SIGNING_KEY_H_\n", "before": "\n", "n": 1, "add": ["#include \"google_apis/internal/google_chrome_api_keys.h\"\n", "#include \"google_apis/internal/metrics_signing_key.h\"\n"]}
+    ],
+    "people/people_api_requests.cc": [
+      {"after": "#include \"google_apis/people/people_api_response_types.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "tasks/tasks_api_requests.cc": [
+      {"after": "#include \"google_apis/tasks/tasks_api_url_generator_utils.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ]
+  }
+}

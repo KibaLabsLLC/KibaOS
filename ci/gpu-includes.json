@@ -1,0 +1,850 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "gpu",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "command_buffer/client/client_font_manager.h": [
+      {"after": "#include \"gpu/raster_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n"]}
+    ],
+    "command_buffer/client/client_shared_image.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/callback_helpers.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/wire/client/webgpu_cpp.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "command_buffer/client/client_shared_image.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"gpu/ipc/common/gpu_memory_buffer_handle_info.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/exported_shared_image.mojom-forward.h\"\n"]},
+      {"after": "#include \"gpu/ipc/common/gpu_memory_buffer_handle_info.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/client/client_shared_image_unittest.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"gpu/ipc/common/exported_shared_image_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/exported_shared_image.mojom.h\"\n"]}
+    ],
+    "command_buffer/client/dawn_client_serializer.cc": [
+      {"after": "#include \"gpu/command_buffer/client/webgpu_implementation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/client/gles2_implementation.cc": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/client/gles2_interface.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/client/internal/mappable_buffer_test_template.h": [
+      {"after": "#include \"ui/gfx/buffer_usage_util.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"ui/gfx/mojom/buffer_types.mojom.h\"\n"]}
+    ],
+    "command_buffer/client/raster_implementation.cc": [
+      {"after": "#include \"skia/ext/skia_utils_base.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "command_buffer/client/raster_implementation_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n"]}
+    ],
+    "command_buffer/client/raster_interface.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/client/shared_image_interface.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_client_interface.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/client/shared_image_pool.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_client_interface.mojom.h\"\n"]}
+    ],
+    "command_buffer/client/test_shared_image_interface.h": [
+      {"after": "#include \"gpu/ipc/client/shared_image_interface_proxy.h\"\n", "before": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_client_interface.mojom.h\"\n"]}
+    ],
+    "command_buffer/client/webgpu_implementation.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/client/webgpu_implementation.h": [
+      {"after": "#include \"gpu/command_buffer/client/webgpu_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/common/shared_image_info.h": [
+      {"after": "#include \"gpu/command_buffer/common/shared_image_usage.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/common/skia_utils.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ui/gl/trace_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkTraceMemoryDump.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "command_buffer/service/copy_shared_image_helper.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/planar_functions.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]}
+    ],
+    "command_buffer/service/copy_shared_image_helper.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n"]}
+    ],
+    "command_buffer/service/copy_shared_image_helper_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/convert.h\"\n", "#include \"third_party/libyuv/include/libyuv/scale.h\"\n", "#include \"third_party/libyuv/include/libyuv/scale_argb.h\"\n", "#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_caching_interface.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_disk_cache_type.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_context_provider.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "before": "#include \"ui/gl/gl_features.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp_print.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/dawn/DawnUtils.h\"\n"]},
+      {"after": "\n", "before": "#include \"ui/gl/direct_composition_support.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/native/D3D11Backend.h\"\n", "#include \"third_party/dawn/include/dawn/native/D3D12Backend.h\"\n"]},
+      {"after": "#if BUILDFLAG(DAWN_ENABLE_BACKEND_OPENGLES)\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/native/OpenGLBackend.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_context_provider.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/native/DawnNative.h\"\n", "#include \"third_party/skia/include/gpu/graphite/ContextOptions.h\"\n", "#include \"third_party/skia/include/gpu/graphite/dawn/DawnTypes.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_context_provider_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]}
+    ],
+    "command_buffer/service/dawn_platform.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gl/progress_reporter.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_platform_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_service_serializer.cc": [
+      {"after": "#include \"gpu/command_buffer/service/decoder_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipc/constants.mojom.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/service/dawn_wire_server.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/wire/WireServer.h\"\n"]}
+    ],
+    "command_buffer/service/drm_modifiers_filter_dawn.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_format_service_utils.h\"\n", "before": "#include \"ui/gfx/linux/drm_util_linux.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"\n", "#include \"third_party/libdrm/src/include/drm/drm_fourcc.h\"\n"]}
+    ],
+    "command_buffer/service/dxgi_shared_handle_manager.h": [
+      {"after": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/feature_info.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"gpu/command_buffer/service/gpu_switches.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/gl_utils.cc": [
+      {"after": "#if BUILDFLAG(IS_LINUX)\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"third_party/libdrm/src/include/drm/drm_fourcc.h\"\n"]}
+    ],
+    "command_buffer/service/gles2_cmd_decoder.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]},
+      {"after": "// Note: this undefs far and near so include this after other Windows headers.\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/src/image_util/loadimage.h\"\n"]}
+    ],
+    "command_buffer/service/gles2_cmd_decoder_passthrough.cc": [
+      {"after": "#include \"gpu/config/gpu_switches.h\"\n", "before": "#include \"ui/gl/gl_implementation.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "command_buffer/service/gles2_cmd_decoder_passthrough_doers.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n"]}
+    ],
+    "command_buffer/service/gpu_persistent_cache.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ipc/common/gpu_client_ids.h\"\n"]}
+    ],
+    "command_buffer/service/gpu_persistent_cache.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_disk_cache_type.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextOptions.h\"\n", "#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/gpu_state_tracer.cc": [
+      {"after": "#include \"context_state.h\"\n", "before": "#include \"ui/gfx/codec/png_codec.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/service/gpu_task_priority.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "command_buffer/service/gr_cache_controller_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n"]}
+    ],
+    "command_buffer/service/gr_shader_cache.cc": [
+      {"after": "#include \"skia/ext/skia_utils_base.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "command_buffer/service/gr_shader_cache.h": [
+      {"after": "#include \"gpu/raster_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrContextOptions.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_cache_controller.cc": [
+      {"after": "#include \"gpu/command_buffer/service/graphite_shared_context.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_image_provider.cc": [
+      {"after": "#include \"base/metrics/histogram_macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/Image.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_image_provider.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkTiledImageUtils.h\"\n", "#include \"third_party/skia/include/gpu/graphite/ImageProvider.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_precompile.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/PrecompileContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/precompile/PaintOptions.h\"\n", "#include \"third_party/skia/include/gpu/graphite/precompile/Precompile.h\"\n", "#include \"third_party/skia/include/gpu/graphite/precompile/PrecompileColorFilter.h\"\n", "#include \"third_party/skia/include/gpu/graphite/precompile/PrecompileShader.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_shared_context.cc": [
+      {"after": "#include \"gpu/command_buffer/common/shm_count.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/PrecompileContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recording.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_shared_context.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/GraphiteTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_shared_context_unittest.cc": [
+      {"after": "#include \"gpu/command_buffer/service/skia_utils.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/ContextOptions.h\"\n", "#include \"third_party/skia/include/gpu/graphite/PrecompileContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recording.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/dawn/DawnBackendContext.h\"\n"]}
+    ],
+    "command_buffer/service/graphite_utils.cc": [
+      {"after": "#include \"gpu/command_buffer/service/graphite_shared_context.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/GraphiteTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n"]}
+    ],
+    "command_buffer/service/memory_program_cache.cc": [
+      {"after": "#include \"gpu/command_buffer/common/shm_count.h\"\n", "before": "#include \"gpu/command_buffer/service/gl_utils.h\"\n", "n": 1, "add": ["#include \"gpu/command_buffer/service/disk_cache_proto.pb.h\"\n"]}
+    ],
+    "command_buffer/service/memory_tracking.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_peak_memory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "command_buffer/service/program_cache.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shader_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/src/common/angle_version_info.h\"\n"]}
+    ],
+    "command_buffer/service/program_manager.cc": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"ui/gl/gl_version_info.h\"\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "command_buffer/service/raster_decoder.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"skia/ext/legacy_display_globals.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrYUVABackendTextures.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n", "#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_LINUX)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/libdrm/src/include/drm/drm_fourcc.h\"\n"]}
+    ],
+    "command_buffer/service/raster_decoder_unittest.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gl/gl_mock.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/scheduler.cc": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/service/scheduler.h": [
+      {"after": "#include \"gpu/command_buffer/service/task_graph.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"\n"]}
+    ],
+    "command_buffer/service/service_font_manager.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n"]}
+    ],
+    "command_buffer/service/service_transfer_cache.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gl/trace_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n"]}
+    ],
+    "command_buffer/service/service_transfer_cache.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n"]}
+    ],
+    "command_buffer/service/service_transfer_cache_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n"]}
+    ],
+    "command_buffer/service/service_utils.cc": [
+      {"after": "#include \"gpu/config/gpu_switches.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shader_translator.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLSLANG/ShaderLang.h\"\n"]}
+    ],
+    "command_buffer/service/shader_translator_cache.h": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLSLANG/ShaderLang.h\"\n"]}
+    ],
+    "command_buffer/service/shared_context_state.cc": [
+      {"after": "#include \"gpu/ipc/common/gpu_client_ids.h\"\n", "before": "#include \"skia/ext/skia_trace_memory_dump_impl.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"skia/ext/skia_trace_memory_dump_impl.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/PrecompileContext.h\"\n"]}
+    ],
+    "command_buffer/service/shared_context_state.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_peak_memory.h\"\n", "before": "#include \"ui/gl/progress_reporter.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/ahardwarebuffer_image_backing_factory.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/android/android_surface_control_compat.h\"\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/planar_functions.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/size.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/ahardwarebuffer_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/angle_vulkan_image_backing.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/extension_set.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/angle_vulkan_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/compound_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_memory_image_backing_factory.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/compound_image_backing_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/copy_image_plane.cc": [
+      {"after": "#include \"base/numerics/checked_math.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/planar_functions.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/cpu_readback_upload_copy_strategy.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_memory_image_backing.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_backing.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "before": "#include \"ui/gfx/color_space_win.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_backing.h": [
+      {"after": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "before": "#include \"ui/gl/scoped_egl_image.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_backing_factory.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "before": "#include \"ui/gl/dc_surface_solid_color_pool.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_representation.h": [
+      {"after": "#include \"gpu/command_buffer/service/texture_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/d3d_image_utils.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]},
+      {"after": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_copy_strategy.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_format_service_utils.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_copy_strategy.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_fallback_image_representation.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_image_backing_factory.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dawn_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dcomp_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dcomp_surface_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_format_service_utils.h\"\n", "before": "#include \"ui/gfx/color_space_win.h\"\n", "n": 1, "add": ["#include \"third_party/angle/include/EGL/egl.h\"\n", "#include \"third_party/angle/include/EGL/eglext.h\"\n", "#include \"third_party/angle/include/EGL/eglext_angle.h\"\n", "#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dcomp_surface_image_backing.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_backing.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/rect.h\"\n", "before": "#include \"ui/gl/scoped_make_current.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dcomp_surface_image_representation.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_manager.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dcomp_surface_image_representation.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dxgi_swap_chain_image_backing.cc": [
+      {"after": "#include \"gpu/config/gpu_util.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dxgi_swap_chain_image_backing.h": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]},
+      {"after": "#include \"ui/gfx/gpu_fence.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/dxgi_swap_chain_image_representation.cc": [
+      {"after": "#include \"gpu/command_buffer/service/texture_manager.h\"\n", "before": "#include \"ui/gl/scoped_restore_texture.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/egl_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/texture_manager.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/egl_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/end_access_state.cc": [
+      {"after": "#include \"gpu/command_buffer/service/graphite_shared_context.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/end_access_state.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/BackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_backing.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/buffer_types.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_backing.h": [
+      {"after": "#include \"gpu/vulkan/vulkan_device_queue.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_backing_factory.cc": [
+      {"after": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/skia_span_util.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_dawn_representation.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_image.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/external_vk_image_skia_representation.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_common_image_backing_factory.cc": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorType.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_repack_utils.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/copy_image_plane.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_repack_utils_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_texture_holder.cc": [
+      {"after": "#include \"gpu/command_buffer/service/skia_utils.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_texture_holder_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_texture_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/skia_utils.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/size.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/gl_texture_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/iosurface_image_backing.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/iosurface_image_backing.mm": [
+      {"after": "#include \"gpu/command_buffer/service/skia_utils.h\"\n", "before": "#include \"ui/gfx/mac/mtl_shared_event_fence.h\"\n", "n": 1, "add": ["#include \"third_party/angle/include/EGL/eglext_angle.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/iosurface_image_backing_factory.mm": [
+      {"after": "#include \"ui/gfx/mac/io_surface.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/iosurface_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/mac/io_surface.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/mac/io_surface.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/ozone_image_backing.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#include \"ui/gfx/native_pixmap.h\"\n", "before": "#include \"ui/gl/scoped_make_current.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]},
+      {"after": "#include \"gpu/command_buffer/service/shared_image/skia_graphite_dawn_image_representation.h\"\n", "before": "#endif  // BUILDFLAG(USE_DAWN)\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/ozone_image_backing.h": [
+      {"after": "#include \"ui/gfx/native_pixmap.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/ozone_image_backing_factory.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/viz/common/resources/shared_image_format_utils.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]},
+      {"after": "#include \"ui/gfx/native_pixmap.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_backing.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_ycbcr_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_backing.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_backing_factory.h": [
+      {"after": "#include \"gpu/ipc/common/surface_handle.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_copy_manager_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/test/gl_surface_test_support.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_factory.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/viz/common/resources/shared_image_format_utils.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"ui/base/ozone_buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_factory.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_client_interface.mojom.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_format_service_utils.cc": [
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/dawn/DawnTypes.h\"\n"]},
+      {"after": "#include \"gpu/command_buffer/service/skia_utils.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_format_service_utils.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n", "#include \"third_party/dawn/include/dawn/webgpu.h\"\n", "#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/gpu/graphite/TextureInfo.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_manager.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_pool_service.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_client_interface.mojom.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_representation.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gl/gl_fence.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrYUVABackendTextures.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/YUVABackendTextures.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_representation.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_representation_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_test_base.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN) || BUILDFLAG(USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"          // nogncheck\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_image_test_base.h": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_memory_image_backing.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_memory_region_wrapper.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/shared_memory_image_backing_factory.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_memory_region_wrapper.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorType.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/skia_gl_image_representation.cc": [
+      {"after": "#include \"gpu/command_buffer/service/texture_manager.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/skia_graphite_dawn_image_representation.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/wrapped_graphite_texture_holder.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/skia_graphite_vk_android_image_representation.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/vk/VulkanGraphiteTypes.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/skia_vk_android_image_representation.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gl/gl_utils.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/skia_vk_ozone_image_representation.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/MutableTextureState.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanMutableTextureState.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/test_image_backing.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/test_utils.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/texture_holder_vk.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_image.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/texture_holder_vk.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/video_image_reader_image_backing.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_util.h\"\n", "before": "#include \"ui/gl/android/egl_fence_utils.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]},
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/dawn/DawnTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/vulkan_ozone_image_representation.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_graphite_texture_backing.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recording.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/gpu/graphite/TextureInfo.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_graphite_texture_backing.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/wrapped_graphite_texture_holder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_graphite_texture_holder.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_context_state.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/Context.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_graphite_texture_holder.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/graphite/BackendTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_sk_image_backing.cc": [
+      {"after": "#include \"gpu/ipc/common/gpu_client_ids.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/core/SkTextureCompressionType.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_sk_image_backing.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_backing.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_sk_image_backing_factory.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextureCompressionType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_sk_image_backing_factory.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image/wrapped_sk_image_backing_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/private/chromium/GrPromiseImageTexture.h\"\n"]}
+    ],
+    "command_buffer/service/shared_image_interface_in_process_base.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "command_buffer/service/shared_memory_region_wrapper.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "command_buffer/service/skia_readback_source.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "command_buffer/service/skia_readback_source.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n"]}
+    ],
+    "command_buffer/service/skia_utils.cc": [
+      {"after": "#include \"gpu/config/skia_limits.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextureCompressionType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextThreadSafeProxy.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/GraphiteTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]},
+      {"after": "#include \"gpu/vulkan/vulkan_image.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanTypes.h\"\n"]}
+    ],
+    "command_buffer/service/skia_utils.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "#include \"gpu/vulkan/vulkan_ycbcr_info.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]},
+      {"after": "#include \"gpu/vulkan/vulkan_ycbcr_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextOptions.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/ContextOptions.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_VULKAN)\n", "before": "namespace skgpu {\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/vk/GrVkTypes.h\"\n"]}
+    ],
+    "command_buffer/service/sync_point_manager.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "command_buffer/service/vulkan_context_provider.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "command_buffer/service/vulkan_in_process_context_provider.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"gpu/vulkan/vma_wrapper.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]},
+      {"after": "#include \"gpu/vulkan/vulkan_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/vk/GrVkDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/vk/VulkanGraphiteContext.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanBackendContext.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanExtensions.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanTypes.h\"\n"]}
+    ],
+    "command_buffer/service/vulkan_in_process_context_provider.h": [
+      {"after": "#include \"gpu/gpu_gles2_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrContextOptions.h\"\n"]}
+    ],
+    "command_buffer/service/webgpu_decoder_impl.cc": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"ui/gl/gl_context_egl.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/native/DawnNative.h\"\n", "#include \"third_party/dawn/include/dawn/native/OpenGLBackend.h\"\n", "#include \"third_party/dawn/include/dawn/platform/DawnPlatform.h\"\n", "#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"\n", "#include \"third_party/dawn/include/dawn/webgpu_cpp_print.h\"\n", "#include \"third_party/dawn/include/dawn/wire/WireServer.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSemaphore.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n"]}
+    ],
+    "command_buffer/tests/gl_helper_benchmark.cc": [
+      {"after": "#include \"components/viz/test/test_gpu_service_holder.h\"\n", "before": "#include \"gpu/command_buffer/client/gles2_implementation.h\"\n", "n": 1, "add": ["#include \"gpu/command_buffer/client/gl_helper.h\"\n", "#include \"gpu/command_buffer/client/gl_helper_scaling.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/codec/png_codec.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "command_buffer/tests/gl_helper_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"gpu/command_buffer/client/gl_helper.h\"\n"]},
+      {"after": "#include \"components/viz/test/test_gpu_service_holder.h\"\n", "before": "#include \"gpu/command_buffer/client/gles2_implementation.h\"\n", "n": 1, "add": ["#include \"gpu/command_buffer/client/gl_helper_scaling.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "command_buffer/tests/gl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "command_buffer/tests/lpm/gl_lpm_fuzzer.cc": [
+      {"after": "#include \"gpu/command_buffer/tests/gl_test_utils.h\"\n", "before": "#include \"gpu/command_buffer/tests/lpm/gl_lpm_shader_to_string.h\"\n", "n": 1, "add": ["#include \"gpu/command_buffer/tests/lpm/gl_lpm_fuzzer.pb.h\"\n"]}
+    ],
+    "command_buffer/tests/lpm/gl_lpm_shader_to_string.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gpu/command_buffer/tests/lpm/gl_lpm_fuzzer.pb.h\"\n"]}
+    ],
+    "config/gpu_blocklist.cc": [
+      {"after": "#include \"gpu/config/gpu_feature_type.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/config/software_rendering_list_autogen.h\"\n"]}
+    ],
+    "config/gpu_blocklist_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"gpu/config/gpu_feature_type.h\"\n", "n": 1, "add": ["#include \"gpu/config/gpu_driver_bug_list_autogen.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_info.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"gpu/config/software_rendering_list_autogen.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "config/gpu_control_list.cc": [
+      {"after": "#include \"gpu/config/gpu_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "config/gpu_driver_bug_list.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"gpu/config/gpu_driver_bug_workaround_type.h\"\n", "n": 1, "add": ["#include \"gpu/config/gpu_driver_bug_list_autogen.h\"\n"]}
+    ],
+    "config/gpu_driver_bug_workaround_type.h": [
+      {"after": "#include \"gpu/config/gpu_config_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/config/gpu_driver_bug_workaround_autogen.h\"\n"]}
+    ],
+    "config/gpu_info.cc": [
+      {"after": "#if BUILDFLAG(ENABLE_VULKAN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"gpu/ipc/common/vulkan_info.mojom.h\"\n"]}
+    ],
+    "config/gpu_info.h": [
+      {"after": "\n", "before": "#include \"base/containers/flat_map.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n"]}
+    ],
+    "config/gpu_info_collector.cc": [
+      {"after": "#include \"gpu/config/webgpu_blocklist_impl.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"  // nogncheck\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"ui/gl/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_DAWN)\n", "before": "#if BUILDFLAG(IS_WIN)\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"             // nogncheck\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"     // nogncheck\n", "#include \"third_party/dawn/include/dawn/native/OpenGLBackend.h\"  // nogncheck\n", "#include \"third_party/dawn/include/dawn/webgpu.h\"                // nogncheck\n", "#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"            // nogncheck\n"]},
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/native/D3DBackend.h\"  // nogncheck\n"]}
+    ],
+    "config/gpu_info_collector_android.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"\n"]}
+    ],
+    "config/gpu_info_collector_fuchsia.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"\n"]}
+    ],
+    "config/gpu_info_collector_gl_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "config/gpu_info_collector_ios.mm": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"\n"]}
+    ],
+    "config/gpu_info_collector_linux.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"gpu/config/gpu_info_collector.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_info_collector.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"\n"]}
+    ],
+    "config/gpu_info_collector_mac.mm": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"ui/gfx/extension_set.h\"\n", "n": 1, "add": ["#include \"third_party/angle/src/gpu_info_util/SystemInfo.h\"\n"]}
+    ],
+    "config/gpu_info_collector_win.cc": [
+      {"after": "#include \"base/win/scoped_com_initializer.h\"\n", "before": "#include \"gpu/config/gpu_finch_features.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_util.h\"\n", "before": "#include \"ui/gl/direct_composition_support.h\"\n", "n": 1, "add": ["#include \"third_party/microsoft_dxheaders/src/include/directx/d3d12.h\"\n", "#include \"third_party/microsoft_dxheaders/src/include/directx/dxcore.h\"\n", "#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "config/gpu_preferences.cc": [
+      {"after": "#include \"gpu/config/gpu_switches.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_preferences.mojom.h\"\n"]}
+    ],
+    "config/gpu_preferences_unittest.cc": [
+      {"after": "#include \"gpu/config/gpu_switches.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_preferences.mojom.h\"\n"]}
+    ],
+    "config/gpu_util.cc": [
+      {"after": "#include \"gpu/config/gpu_switches.h\"\n", "before": "#include \"ui/gfx/extension_set.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"services/webnn/public/mojom/features.mojom-features.h\"\n", "#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"ui/gfx/extension_set.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "config/webgpu_blocklist_impl.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"\n"]}
+    ],
+    "config/webgpu_blocklist_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu.h\"\n", "#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "ipc/client/command_buffer_proxy_impl.cc": [
+      {"after": "#include \"gpu/ipc/common/command_buffer_id.h\"\n", "before": "#include \"ipc/ipc_mojo_bootstrap.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n", "#include \"ipc/constants.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/system/platform_handle.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "ipc/client/command_buffer_proxy_impl.h": [
+      {"after": "#include \"gpu/ipc/client/gpu_ipc_client_export.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/client/command_buffer_proxy_impl_unittest.cc": [
+      {"after": "#include \"gpu/ipc/client/gpu_channel_host.h\"\n", "before": "#include \"gpu/ipc/common/mock_command_buffer.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/client/gpu_channel_host.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/sync_call_restrictions.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "ipc/client/gpu_channel_host.h": [
+      {"after": "#include \"gpu/ipc/client/shared_image_interface_proxy.h\"\n", "before": "#include \"ipc/ipc_listener.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/gl/gpu_client_type.mojom.h\"\n"]}
+    ],
+    "ipc/common/capabilities_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/capabilities.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/capabilities.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/command_buffer_mojom_traits.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/common/command_buffer_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/command_buffer.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/constants_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/constants.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/context_result_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/context_result.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/context_result.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/context_type_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/context_creation_attribs.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/context_type.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/device_perf_info_mojom_traits.h": [
+      {"after": "#include \"gpu/config/device_perf_info.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/device_perf_info.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/dxgi_helpers.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/planar_functions.h\"\n"]}
+    ],
+    "ipc/common/exported_shared_image_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/exported_shared_image.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/gpu_disk_cache_type_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_disk_cache_type.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_disk_cache_type.mojom.h\"\n"]}
+    ],
+    "ipc/common/gpu_feature_info_mojom_traits.h": [
+      {"after": "#include \"gpu/config/gpu_feature_info.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_feature_info.mojom.h\"\n"]}
+    ],
+    "ipc/common/gpu_info_mojom_traits.h": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_info.mojom.h\"\n"]}
+    ],
+    "ipc/common/gpu_peak_memory_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_peak_memory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_peak_memory.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/gpu_preferences_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_preferences.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/gpu_surface_lookup.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"ui/gl/surface_jni_headers/InputTransferToken_jni.h\"\n"]}
+    ],
+    "ipc/common/luid_mojom_traits.cc": [
+      {"after": "#include \"gpu/gpu_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/luid.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/luid_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/luid.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/mailbox_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "#include \"mojo/public/cpp/bindings/array_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/mailbox.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/memory_stats_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/memory_stats.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/memory_stats.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/mock_command_buffer.h": [
+      {"after": "\n", "before": "#include \"mojo/public/cpp/bindings/associated_receiver.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/common/mock_gpu_channel.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/common/mojom_traits_unittest.cc": [
+      {"after": "#include \"gpu/config/gpu_feature_type.h\"\n", "before": "#include \"gpu/ipc/common/gpu_feature_info_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_feature_info.mojom.h\"\n"]},
+      {"after": "#include \"gpu/ipc/common/gpu_feature_info_mojom_traits.h\"\n", "before": "#include \"gpu/ipc/common/shared_image_metadata_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_metadata.mojom.h\"\n"]},
+      {"after": "#include \"gpu/ipc/common/shared_image_metadata_mojom_traits.h\"\n", "before": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/traits_test_service.test-mojom.h\"\n"]}
+    ],
+    "ipc/common/scheduling_priority_mojom_traits.h": [
+      {"after": "#include \"gpu/command_buffer/common/scheduling_priority.h\"\n", "before": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/shared_image_capabilities_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "#include \"services/viz/public/cpp/compositing/shared_image_format_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_capabilities.mojom.h\"\n"]}
+    ],
+    "ipc/common/shared_image_metadata_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "#include \"services/viz/public/cpp/compositing/shared_image_format_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_metadata.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/shared_image_pool_id_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "#include \"mojo/public/cpp/base/unguessable_token_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/shared_image_pool_id.mojom.h\"\n"]}
+    ],
+    "ipc/common/surface_handle_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/surface_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/surface_handle.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/sync_token_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/sync_token.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/vulkan_info_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"gpu/ipc/common/vulkan_types_mojom_traits.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/vulkan_info.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/vulkan_types_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/vulkan_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/common/vulkan_types.mojom-shared.h\"\n"]}
+    ],
+    "ipc/common/vulkan_ycbcr_info_mojom_traits.h": [
+      {"after": "#include \"gpu/ipc/common/gpu_ipc_common_export.h\"\n", "before": "#include \"gpu/vulkan/vulkan_ycbcr_info.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/vulkan_ycbcr_info.mojom-shared.h\"\n"]}
+    ],
+    "ipc/in_process_command_buffer.cc": [
+      {"after": "#include \"ui/gfx/gpu_fence_handle.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "ipc/in_process_command_buffer.h": [
+      {"after": "#include \"gpu/config/gpu_preferences.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"ui/gfx/native_ui_types.h\"\n", "before": "#include \"ui/gl/gl_surface.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "ipc/service/command_buffer_stub.cc": [
+      {"after": "#include \"ipc/ipc_mojo_bootstrap.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "ipc/service/command_buffer_stub.h": [
+      {"after": "#include \"gpu/command_buffer/service/task_graph.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/service/dawn_texture_solid_color_pool.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/d3d_image_utils.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/microsoft_dxheaders/src/include/experimental-composition/experimental-dcomp.h\"\n"]}
+    ],
+    "ipc/service/dawn_texture_solid_color_pool.h": [
+      {"after": "#include \"gpu/ipc/service/gpu_ipc_service_export.h\"\n", "before": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "ipc/service/dawn_texture_solid_color_pool_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/win/d3d_shared_fence.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "ipc/service/dcomp_texture_win.cc": [
+      {"after": "#include \"gpu/command_buffer/service/shared_image/shared_image_representation.h\"\n", "before": "#include \"gpu/ipc/service/gpu_channel.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/service/dcomp_texture_win.h": [
+      {"after": "#include \"gpu/command_buffer/service/shared_context_state.h\"\n", "before": "#include \"gpu/ipc/service/command_buffer_stub.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel.cc": [
+      {"after": "#include \"gpu/ipc/common/command_buffer_id.h\"\n", "before": "#include \"gpu/ipc/service/gles2_command_buffer_stub.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"gpu/ipc/service/raster_command_buffer_stub.h\"\n", "before": "#include \"ipc/ipc_channel.h\"\n", "n": 1, "add": ["#include \"ipc/constants.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "#include \"ui/gl/gl_context.h\"\n", "n": 1, "add": ["#include \"ui/base/ozone_buildflags.h\"\n", "#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel.h": [
+      {"after": "#include \"gpu/command_buffer/service/isolation_key_provider.h\"\n", "before": "#include \"gpu/ipc/common/gpu_disk_cache_type.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/generic_pending_associated_receiver.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/gl/gpu_client_type.mojom.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel_manager.cc": [
+      {"after": "#include \"gpu/ipc/service/gpu_watchdog_thread.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel_manager.h": [
+      {"after": "#include \"gpu/ipc/service/gpu_ipc_service_export.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/gl/gpu_client_type.mojom.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel_manager_unittest.cc": [
+      {"after": "#include \"gpu/ipc/common/command_buffer_id.h\"\n", "before": "#include \"gpu/ipc/service/gpu_channel.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"gpu/ipc/service/gpu_channel_test_common.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"ipc/constants.mojom.h\"\n"]},
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel_test_common.h": [
+      {"after": "#include \"gpu/command_buffer/common/context_result.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/service/gpu_channel_unittest.cc": [
+      {"after": "#include \"gpu/ipc/common/command_buffer_id.h\"\n", "before": "#include \"gpu/ipc/service/gpu_channel_manager.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"gpu/ipc/service/shared_image_stub.h\"\n", "before": "#include \"ui/gfx/gpu_memory_buffer_handle.h\"\n", "n": 1, "add": ["#include \"ipc/constants.mojom.h\"\n"]}
+    ],
+    "ipc/service/gpu_init.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/crash/core/common/crash_key.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n", "#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"ui/gfx/switches.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_driver_bug_workarounds.h\"\n", "before": "#include \"ui/gl/dc_surface_solid_color_pool.h\"\n", "n": 1, "add": ["#include \"services/on_device_model/ml_internal_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_ML_INTERNAL)\n", "before": "#endif\n", "n": 1, "add": ["#include \"services/webnn/public/mojom/features.mojom-features.h\"  // nogncheck\n"]},
+      {"after": "#if BUILDFLAG(USE_DAWN) || BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"          // nogncheck\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]},
+      {"after": "#include \"gpu/command_buffer/service/dawn_context_provider.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"  // nogncheck\n"]}
+    ],
+    "ipc/service/gpu_init.h": [
+      {"after": "#include \"gpu/ipc/service/gpu_watchdog_thread.h\"\n", "before": "#include \"ui/gfx/gpu_extra_info.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n"]}
+    ],
+    "ipc/service/gpu_init_2.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/crash/core/common/crash_key.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]},
+      {"after": "#include \"ui/gfx/switches.h\"\n", "before": "#include \"ui/gl/gl_display.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_DAWN) || BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"          // nogncheck\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]},
+      {"after": "#include \"gpu/command_buffer/service/dawn_context_provider.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"  // nogncheck\n"]}
+    ],
+    "ipc/service/gpu_init_2.h": [
+      {"after": "#include \"gpu/ipc/service/gpu_watchdog_thread.h\"\n", "before": "#include \"ui/gfx/gpu_extra_info.h\"\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n"]}
+    ],
+    "ipc/service/gpu_init_ozone.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/viz/common/resources/shared_image_format.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/command_buffer/service/drm_modifiers_filter_dawn.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/webgpu_cpp.h\"  // nogncheck\n"]}
+    ],
+    "ipc/service/gpu_init_ozone.h": [
+      {"after": "#include \"base/memory/stack_allocated.h\"\n", "before": "\n", "n": 1, "add": ["#include \"gpu/vulkan/buildflags.h\"\n", "#include \"skia/buildflags.h\"\n"]}
+    ],
+    "ipc/service/gpu_init_win.cc": [
+      {"after": "#include \"gpu/config/gpu_info_collector.h\"\n", "before": "#include \"ui/gl/dc_surface_solid_color_pool.h\"\n", "n": 1, "add": ["#include \"services/on_device_model/ml_internal_buildflags.h\"\n", "#include \"skia/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_ML_INTERNAL)\n", "before": "#endif\n", "n": 1, "add": ["#include \"services/webnn/public/mojom/features.mojom-features.h\"  // nogncheck\n"]}
+    ],
+    "ipc/service/gpu_watchdog_thread.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"gpu/ipc/common/gpu_watchdog_timeout.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]}
+    ],
+    "ipc/service/image_transport_surface_mac.mm": [
+      {"after": "#include \"ui/gfx/native_ui_types.h\"\n", "before": "#include \"ui/gl/gl_surface_stub.h\"\n", "n": 1, "add": ["#include \"ui/gl/buildflags.h\"\n"]}
+    ],
+    "ipc/service/shared_image_stub.h": [
+      {"after": "#include \"gpu/ipc/common/command_buffer_id.h\"\n", "before": "#include \"gpu/ipc/service/gpu_ipc_service_export.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "ipc/service/shared_image_stub_mojolpm_fuzzer.cc": [
+      {"after": "#include \"gpu/command_buffer/common/mailbox.h\"\n", "before": "#include \"gpu/ipc/service/gpu_channel.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom-mojolpm.h\"\n", "#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gpu/ipc/service/shared_image_stub_mojolpm_fuzzer.pb.h\"\n"]}
+    ],
+    "ipc/service/x_util.h": [
+      {"after": "#include \"gpu/ipc/service/gpu_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/base/ozone_buildflags.h\"\n"]}
+    ],
+    "vulkan/skia_vk_memory_allocator_impl.h": [
+      {"after": "#include \"gpu/vulkan/vma_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/vk/VulkanMemoryAllocator.h\"\n", "#include \"third_party/skia/include/gpu/vk/VulkanTypes.h\"\n"]}
+    ],
+    "vulkan/vulkan_instance.h": [
+      {"after": "#include \"gpu/vulkan/vulkan_info.h\"\n", "before": "#include \"ui/gfx/extension_set.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/vk/VulkanPreferredFeatures.h\"\n"]}
+    ]
+  }
+}

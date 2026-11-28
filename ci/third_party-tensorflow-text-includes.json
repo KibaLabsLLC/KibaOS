@@ -1,0 +1,77 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/tensorflow-text",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "shims/icu4c/source/common/unicode/uchar.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uchar.h\"\n"]}
+    ],
+    "shims/icu4c/source/common/unicode/umachine.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/umachine.h\"\n"]}
+    ],
+    "shims/icu4c/source/common/unicode/utf8.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/utf8.h\"\n"]}
+    ],
+    "shims/tensorflow/core/lib/core/errors.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n"]}
+    ],
+    "shims/tensorflow/core/lib/core/status.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/darts_clone_trie_wrapper.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/disjoint_set_forest.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/core/platform/logging.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_bert_normalizer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/optimization.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"icu4c/source/common/unicode/utf8.h\"\n", "#include \"tensorflow/lite/kernels/shim/status_macros.h\"\n", "#include \"tensorflow_text/core/kernels/darts_clone_trie_wrapper.h\"\n", "#include \"tensorflow_text/core/kernels/fast_bert_normalizer_model_generated.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_bert_normalizer_kernel_template.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"tensorflow/lite/kernels/shim/op_kernel.h\"\n", "#include \"tensorflow/lite/kernels/shim/status_macros.h\"\n", "#include \"tensorflow_text/core/kernels/fast_bert_normalizer.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_bert_normalizer_tflite.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_text/core/kernels/fast_bert_normalizer_tflite.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/kernels/shim/tflite_op_shim.h\"\n", "#include \"tensorflow_text/core/kernels/fast_bert_normalizer_kernel_template.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_bert_normalizer_tflite.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/mutable_op_resolver.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/attributes.h\"\n", "#include \"absl/base/optimization.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/match.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"icu4c/source/common/unicode/uchar.h\"\n", "#include \"icu4c/source/common/unicode/utf8.h\"\n", "#include \"tensorflow/lite/kernels/shim/status_macros.h\"\n", "#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer_utils.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"tensorflow_text/core/kernels/darts_clone_trie_wrapper.h\"\n", "#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer_model_generated.h\"\n", "#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer_utils.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer_kernel_template.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"tensorflow/lite/kernels/shim/op_kernel.h\"\n", "#include \"tensorflow/lite/kernels/shim/status_macros.h\"\n", "#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer_tflite.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer_tflite.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/kernels/shim/tflite_op_shim.h\"\n", "#include \"tensorflow_text/core/kernels/fast_wordpiece_tokenizer_kernel_template.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer_tflite.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/mutable_op_resolver.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/fast_wordpiece_tokenizer_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"icu4c/source/common/unicode/uchar.h\"\n", "#include \"icu4c/source/common/unicode/umachine.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/mst_solver.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"tensorflow/core/lib/core/errors.h\"\n", "#include \"tensorflow/core/lib/core/status.h\"\n", "#include \"tensorflow_text/core/kernels/disjoint_set_forest.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/regex_split.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_text/core/kernels/regex_split.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/regex_split.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"re2/re2.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/wordpiece_tokenizer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_text/core/kernels/wordpiece_tokenizer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"icu4c/source/common/unicode/utf8.h\"\n"]}
+    ],
+    "src/tensorflow_text/core/kernels/wordpiece_tokenizer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ]
+  }
+}

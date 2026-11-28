@@ -1,0 +1,92 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libxml",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/HTMLparser.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/dict.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/html.h\"\n", "#include \"private/io.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/HTMLtree.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"private/buf.h\"\n", "#include \"private/html.h\"\n", "#include \"private/error.h\"\n", "#include \"private/html.h\"\n", "#include \"private/io.h\"\n", "#include \"private/save.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/SAX2.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"private/error.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/buf.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n"]}
+    ],
+    "src/dict.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/dict.h\"\n", "#include \"private/error.h\"\n", "#include \"private/globals.h\"\n", "#include \"private/threads.h\"\n"]}
+    ],
+    "src/encoding.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/memory.h\"\n"]}
+    ],
+    "src/entities.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/entities.h\"\n", "#include \"private/error.h\"\n", "#include \"private/io.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/error.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/error.h\"\n", "#include \"private/globals.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/string.h\"\n"]}
+    ],
+    "src/globals.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/dict.h\"\n", "#include \"private/error.h\"\n", "#include \"private/globals.h\"\n", "#include \"private/threads.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/hash.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/dict.h\"\n"]}
+    ],
+    "src/libxml.h": [
+      {"after": " */\n", "before": "#include <libxml/xmlversion.h>\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/lintmain.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/lint.h\"\n"]}
+    ],
+    "src/parser.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/dict.h\"\n", "#include \"private/entities.h\"\n", "#include \"private/error.h\"\n", "#include \"private/html.h\"\n", "#include \"private/io.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/parserInternals.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/globals.h\"\n", "#include \"private/io.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n"]}
+    ],
+    "src/pattern.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n"]}
+    ],
+    "src/shell.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/lint.h\"\n"]}
+    ],
+    "src/testdso.c": [
+      {"after": "#define IN_LIBXML\n", "before": "\n", "n": 1, "add": ["#include \"libxml/xmlexports.h\"\n"]}
+    ],
+    "src/threads.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/cata.h\"\n", "#include \"private/dict.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/globals.h\"\n", "#include \"private/io.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/threads.h\"\n", "#include \"private/xpath.h\"\n"]}
+    ],
+    "src/tree.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/entities.h\"\n", "#include \"private/error.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/io.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/uri.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/error.h\"\n", "#include \"private/memory.h\"\n"]}
+    ],
+    "src/valid.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/error.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/regexp.h\"\n", "#include \"private/save.h\"\n", "#include \"private/tree.h\"\n"]}
+    ],
+    "src/xmlIO.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/io.h\"\n"]}
+    ],
+    "src/xmlmemory.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/error.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/threads.h\"\n"]}
+    ],
+    "src/xmlreader.c": [
+      {"after": "\n", "before": "#ifdef LIBXML_XINCLUDE_ENABLED\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/error.h\"\n", "#include \"private/io.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/tree.h\"\n"]},
+      {"after": "#ifdef LIBXML_XINCLUDE_ENABLED\n", "before": "#endif\n", "n": 1, "add": ["#include \"private/xinclude.h\"\n"]}
+    ],
+    "src/xmlsave.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/html.h\"\n", "#include \"private/io.h\"\n", "#include \"private/save.h\"\n"]}
+    ],
+    "src/xmlstring.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/parser.h\"\n", "#include \"private/string.h\"\n"]}
+    ],
+    "src/xmlwriter.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/enc.h\"\n", "#include \"private/error.h\"\n", "#include \"private/save.h\"\n"]}
+    ],
+    "src/xpath.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"private/buf.h\"\n", "#include \"private/error.h\"\n", "#include \"private/memory.h\"\n", "#include \"private/parser.h\"\n", "#include \"private/xpath.h\"\n"]}
+    ]
+  }
+}

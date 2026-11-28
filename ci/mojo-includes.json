@@ -1,0 +1,548 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "mojo",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "core/channel.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/connection_params.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/channel_linux.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/embedder/features.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/embedder/embedder.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/channel.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/embedder/features.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/invitation_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/embedder/embedder.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n", "#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/ipcz_driver/envelope.h": [
+      {"after": "\n", "before": "#include \"mojo/core/ipcz_driver/object.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/ipcz_driver/mach_voucher_release_pool_mac.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "core/message_pipe_unittest.cc": [
+      {"after": "#include \"base/memory/ref_counted.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "core/message_unittest.cc": [
+      {"after": "#include \"base/rand_util.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "core/multiprocess_message_pipe_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/test/mojo_test_base.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "core/shared_buffer_unittest.cc": [
+      {"after": "#include \"base/memory/read_only_shared_memory_region.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "core/test/mojo_test_base.h": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "public/cpp/base/application_state_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/application_state.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/battery_power_status_traits.h": [
+      {"after": "#include \"base/power_monitor/power_observer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/battery_power_status.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/big_buffer.cc": [
+      {"after": "#include \"mojo/public/cpp/system/platform_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value.h\"\n"]}
+    ],
+    "public/cpp/base/big_buffer_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/system/buffer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/big_buffer.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/big_buffer_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/big_buffer.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/big_string_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/big_string.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/big_string_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/big_string.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/byte_size_mojom_traits.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/byte_size.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/byte_size_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/byte_size.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/byte_string_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/array_traits_span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/byte_string.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/byte_string_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/byte_string.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/empty_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/empty.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/file_error_mojom_traits.h": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file_error.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/file_info_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file_info.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/file_mojom_traits.h": [
+      {"after": "#include \"base/files/file.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/file_path_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file_path.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/file_path_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file_path.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/file_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/public/cpp/base/file_mojom_traits.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/fuchsia/fidl_interface_request_mojom_traits_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"mojo/public/cpp/base/fuchsia/test_interface_request_mojom_traits.h\"\n", "n": 1, "add": ["#include \"base/testfidl/cpp/fidl.h\"\n", "#include \"mojo/public/cpp/base/fuchsia/example.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/base/generic_pending_associated_receiver_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/generic_pending_associated_receiver.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/generic_pending_receiver_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/generic_pending_receiver.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/int128_mojom_traits.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/numeric/int128.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/int128.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/int128_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/int128.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/language_tag_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/language_tag.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/language_tag_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/language_tag.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/logfont_win_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/logfont_win.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/memory_allocator_dump_cross_process_uid_mojom_traits.h": [
+      {"after": "#include \"base/trace_event/memory_allocator_dump_guid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/memory_allocator_dump_cross_process_uid.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/memory_allocator_dump_cross_process_uid_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/memory_allocator_dump_cross_process_uid.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/memory_limit_mojom_traits.h": [
+      {"after": "#include \"base/memory_coordinator/memory_limit.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/memory_limit.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/memory_limit_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/memory_limit.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/memory_pressure_level_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/memory_pressure_level.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/message_pump_type_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/message_pump_type.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/process_id_mojom_traits.h": [
+      {"after": "#include \"base/process/process_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/process_id.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/process_id_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/process_id.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/process_priority_mojom_traits.h": [
+      {"after": "#include \"base/process/process.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/process_priority.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/proto_wrapper_mojom_traits.cc": [
+      {"after": "#include \"mojo/public/cpp/base/proto_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/proto_wrapper.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/proto_wrapper_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/base/proto_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/proto_wrapper.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/proto_wrapper_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/base/proto_wrapper_passkeys.h\"\n", "before": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/base/test.pb.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/proto_wrapper.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/read_only_buffer_mojom_traits.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/read_only_buffer.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/read_only_buffer_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/read_only_buffer.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/read_only_file_mojom_traits.h": [
+      {"after": "#include \"base/files/file.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/file.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/ref_counted_memory_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/ref_counted_memory.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/ref_counted_memory_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/ref_counted_memory.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/safe_base_name_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/safe_base_name.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/safe_base_name_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/safe_base_name.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/shared_memory_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/system/handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/shared_memory.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/shared_memory_unittest.cc": [
+      {"after": "\n", "before": "#include \"mojo/public/cpp/base/shared_memory_mojom_traits.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/shared_memory.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/string16_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/string16.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/string16_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/string16.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/text_direction_mojom_traits.h": [
+      {"after": "#include \"base/i18n/rtl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/text_direction.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/thread_type_mojom_traits.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/thread_type.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/time_mojom_traits.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/time.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/time_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/time.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/token_mojom_traits.h": [
+      {"after": "#include \"base/token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/token.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/token_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/token.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/unguessable_token_mojom_traits.h": [
+      {"after": "#include \"base/unguessable_token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/unguessable_token.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/unguessable_token_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/unguessable_token.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/uuid_mojom_traits.h": [
+      {"after": "#include \"base/uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/uuid.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/uuid_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/uuid.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/values_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/union_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/values.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/values_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/values.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/version_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/version.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/base/version_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/version.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/work_in_progress_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/work_in_progress.mojom.h\"\n"]}
+    ],
+    "public/cpp/base/wstring_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/wstring.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/bindings/binder_map.h": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"mojo/public/cpp/bindings/generic_pending_receiver.h\"\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]}
+    ],
+    "public/cpp/bindings/direct_receiver.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/ipcz_api.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "public/cpp/bindings/generic_pending_receiver.h": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/binding_state.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/task_runner_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/mojo_buildflags.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/connector.cc": [
+      {"after": "#include \"mojo/public/cpp/system/wait.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_mojo_event_info.pbzero.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/control_message_handler.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/message.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/interface_control_messages.mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/control_message_proxy.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/message.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/interface_control_messages.mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/interface_endpoint_client.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/thread_safe_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_mojo_event_info.pbzero.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/native_handle_type_converters.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/type_converter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/native_struct.mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/native_struct_serialization.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/serialization_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/native_struct.mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/pipe_control_message_handler.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pipe_control_message_handler_delegate.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/pipe_control_messages.mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/lib/pipe_control_message_proxy.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/message.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/pipe_control_messages.mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/message.h": [
+      {"after": "#include \"mojo/public/cpp/system/message.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"\n"]}
+    ],
+    "public/cpp/bindings/mojo_jni_bridge.cc": [
+      {"after": "// Generated by JNI Zero from MojoJniTransport.java.\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/jni_transport_jni/MojoJniTransport_jni.h\"\n"]}
+    ],
+    "public/cpp/bindings/struct_ptr.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/type_converter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/associated_interface_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/shared_associated_remote.h\"\n", "before": "#include \"mojo/public/cpp/bindings/unique_associated_receiver_set.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/associated_interface_unittest.test-mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/system/functions.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_associated_interfaces.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_sync_methods.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/bind_task_runner_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_associated_interfaces.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/binder_map_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/self_owned_receiver.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/binder_map_unittest.test-mojom-features.h\"\n", "#include \"mojo/public/cpp/bindings/tests/binder_map_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/bindings_perftest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/connection_group_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/connection_group_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/constant_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_constants.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/containers_of_nullable_types_mojom_traits.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/containers_of_nullable_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/containers_of_nullable_types_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/containers_of_nullable_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/data_view_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_data_view.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/default_construct_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/default_construct_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/direct_receiver_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/direct_receiver_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/e2e_perftest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/enum_default_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/enum_default_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/enum_headers_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/enum_headers_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/equals_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/extra_cpp_template_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/extra_cpp_template_unittest.test-mojom-extra_cpp_template_unittest.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/feature_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"mojo/public/cpp/system/functions.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/feature_unittest.test-mojom-features.h\"\n", "#include \"mojo/public/cpp/bindings/tests/feature_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/fixed_array_size_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/fixed_array_size_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/fixed_array_size_unittest_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/fixed_array_size_unittest.test-mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/flush_async_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/flush_async_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/handle_passing_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/sample_factory.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_import.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/hash_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/hash_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/idle_tracking_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/idle_tracking_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/interface_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/interface_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/map_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/mojo_jni_bridge_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/message_fragment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/jni.test-mojom-jni.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/jni.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom.h\"\n"]},
+      {"after": "// Must come after jni.test-mojom.h.\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/jni.test-mojom-params-data.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/native_struct_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/wait.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_native_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/new_endpoint_types_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/unique_receiver_set.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/new_endpoint_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/nullable_value_types_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/nullable_value_types_enums.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/nullable_value_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/nullable_value_types_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/nullable_value_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/pickle_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/variant_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_native_types.test-mojom-blink.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_native_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/receiver_callback_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_support.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/sample_interfaces.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/receiver_set_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/functions.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_associated_interfaces.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/receiver_unittest.cc": [
+      {"after": "#include \"base/threading/thread.h\"\n", "before": "#include \"mojo/core/test/mojo_test_base.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"mojo/public/cpp/system/functions.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/receiver_unittest.test-mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_interfaces.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_service.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/rect_blink_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/rect_blink.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom-blink.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/remote_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"mojo/public/cpp/bindings/unique_receiver_set.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/remote_unittest.test-mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/system/wait.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/math_calculator.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_interfaces.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_service.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/scoping.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/report_bad_message_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/functions.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_bad_messages.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/request_response_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/sample_import.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/sample_interfaces.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/result_response_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"result_response_unittest_mojom_traits.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/result_response.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/result_response_unittest_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/result_response.test-mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/sample_service_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/sample_service.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/serialization_death_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/serialization_death.test-mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/serialization_test_structs.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_unions.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/serialization_warning_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/serialization_test_structs.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_unions.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/service_factory_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/service_factory_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/shared_rect_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/shared_rect.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom-shared.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/struct_headers_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/struct_headers_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/struct_traits_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/wait.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/struct_with_traits.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_native_types.test-mojom-blink.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_native_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/struct_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_export2.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/struct_with_traits_impl_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/struct_with_traits_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/struct_with_traits.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/supports_urgent_attribute_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"mojo/public/cpp/bindings/urgent_message_scope.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/supports_urgent_attribute_unittest.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/sync_method_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/bindings_test_base.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/sync_method_unittest.test-mojom-shared-message-ids.h\"\n", "#include \"mojo/public/cpp/bindings/tests/sync_method_unittest.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_sync_methods.test-mojom.h\"\n"]},
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/sync_method_unittest.test-mojom-params-data.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/test_helpers_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/wait.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom-test-utils.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/ping_service.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/type_conversion_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/union_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "n": 1, "add": ["#include \"mojo/public/cpp/bindings/tests/union_unittest.test-mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_unions.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/validation_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/validation_errors_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/validation_test_associated_interfaces.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/validation_test_interfaces.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/wtf_hash_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/wtf_hash_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom-blink.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_wtf_types.test-mojom-blink.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/wtf_map_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/rect_blink.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom-blink.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_structs.test-mojom-blink.h\"\n"]}
+    ],
+    "public/cpp/bindings/tests/wtf_types_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/tests/variant_test_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/test_wtf_types.test-mojom-blink.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/test_wtf_types.test-mojom.h\"\n"]}
+    ],
+    "public/cpp/platform/platform_channel.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/core/embedder/features.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "public/cpp/platform/platform_channel_endpoint.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/public/cpp/platform/platform_handle.h\"\n", "n": 1, "add": ["#include \"mojo/buildflags.h\"\n"]}
+    ],
+    "public/cpp/system/simple_watcher.cc": [
+      {"after": "#include \"mojo/public/c/system/trap.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_mojo_event_info.pbzero.h\"\n"]}
+    ],
+    "public/cpp/system/tests/data_pipe_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/system/data_pipe.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "public/java/system/base_run_loop.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/system_impl_java_jni_headers/BaseRunLoop_jni.h\"\n"]}
+    ],
+    "public/java/system/core_impl.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/system_impl_java_jni_headers/CoreImpl_jni.h\"\n"]}
+    ],
+    "public/java/system/javatests/mojo_jni_bridge_test_util.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/mojo_jni_bridge.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/jni.test-mojom-jni.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/jni.test-mojom.h\"\n", "#include \"mojo/public/interfaces/bindings/tests/rect.test-mojom.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/mojo_javatests_jni/MojoJniBridgeTestUtil_jni.h\"\n"]}
+    ],
+    "public/java/system/javatests/mojo_test_rule.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/test_support_jni/MojoTestRule_jni.h\"\n"]}
+    ],
+    "public/java/system/javatests/nullable_value_types_test_util.cc": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/interfaces/bindings/tests/nullable_value_types.test-mojom.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/mojo_javatests_jni/NullableValueTypesTestUtil_jni.h\"\n"]}
+    ],
+    "public/java/system/javatests/validation_test_util.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/mojo_javatests_jni/ValidationTestUtil_jni.h\"\n"]}
+    ],
+    "public/java/system/watcher_impl.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/java/system/system_impl_java_jni_headers/WatcherImpl_jni.h\"\n"]}
+    ],
+    "public/rust/bindings/multiplex_router/cpp_interop/associated_endpoint_rust_adapter.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/message.h\"\n", "before": "#include \"mojo/public/rust/bindings/multiplex_router/cpp_interop/interface_endpoint_client_adapter.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/multiplex_router/cpp_interop/cxx.rs.h\"\n"]}
+    ],
+    "public/rust/bindings/multiplex_router/cpp_interop/interface_endpoint_client_adapter.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/lib/responder_thunk.h\"\n", "before": "#include \"mojo/public/rust/bindings/multiplex_router/cpp_interop/mojo_responder_wrapper.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/multiplex_router/cpp_interop/cxx.rs.h\"\n"]}
+    ],
+    "public/rust/bindings/multiplex_router/cpp_interop/rust_associated_group_controller.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/message.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/multiplex_router/cpp_interop/cxx.rs.h\"\n"]}
+    ],
+    "public/rust/bindings/test/cpp/add_seven_service.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/test/test_util/bindings_unittests.test-mojom.h\"\n"]}
+    ],
+    "public/rust/bindings/test/cpp/associated_services.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/self_owned_receiver.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/test/cxx.rs.h\"\n"]}
+    ],
+    "public/rust/bindings/test/cpp/cxx_shim.h": [
+      {"after": "#include \"mojo/public/rust/bindings/test/cpp/add_seven_service.h\"\n", "before": "#include \"mojo/public/rust/system/scoped_handle_interop.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/test/test_util/bindings_unittests.test-mojom.h\"\n"]}
+    ],
+    "public/rust/bindings/test/cpp/test_runners.cc": [
+      {"after": "#include \"mojo/public/rust/bindings/test/cpp/cxx_shim.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/rust/bindings/test/cxx.rs.h\"\n", "#include \"mojo/public/rust/bindings/test/test_util/bindings_unittests.test-mojom.h\"\n"]}
+    ],
+    "public/rust/system/test_util/cxx_shim.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/rust/system/test_util/test_util.rs.h\"\n"]}
+    ],
+    "public/rust/tests/interop_tests/interop_test.h": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/rust/mojom_value_parser/test_util/parser_unittests.test-mojom.h\"\n", "#include \"mojo/public/rust/tests/interop_tests/interop_test.test-mojom.h\"\n"]}
+    ],
+    "public/tools/fuzzers/fuzz_impl.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/fuzz.mojom.h\"\n"]}
+    ],
+    "public/tools/fuzzers/fuzz_impl.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/fuzz.mojom.h\"\n"]}
+    ],
+    "public/tools/fuzzers/mojo_fuzzer_message_dump.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "#include \"mojo/public/tools/fuzzers/fuzz_impl.h\"\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/fuzz.mojom.h\"\n"]}
+    ],
+    "public/tools/fuzzers/mojo_parse_message_proto_fuzzer.cc": [
+      {"after": "#include \"mojo/public/tools/fuzzers/fuzz_impl.h\"\n", "before": "#include \"mojo/public/tools/fuzzers/suppress_validation_error_logging.h\"\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/mojo_fuzzer.pb.h\"\n"]}
+    ],
+    "public/tools/fuzzers/mojolpm.h": [
+      {"after": "#include \"mojo/public/cpp/system/data_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/mojolpm.pb.h\"\n"]}
+    ],
+    "public/tools/fuzzers/mojolpm_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"mojo/public/tools/fuzzers/mojolpm_unittest.pb.h\"\n"]}
+    ]
+  }
+}

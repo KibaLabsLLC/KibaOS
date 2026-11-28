@@ -1,0 +1,238 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/sentencepiece",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/src/bpe_model.cc": [
+      {"after": "#include \"model_interface.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/base/attributes.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/random/random.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/bpe_model.h": [
+      {"after": "#include \"model_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/bpe_model_trainer.cc": [
+      {"after": "#include \"pretokenizer_for_training.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/flags/flag.h\"\n", "#include \"absl/hash/hash.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_replace.h\"\n", "#include \"absl/strings/string_view.h\"\n"]},
+      {"after": "#ifdef SPM_NLCODEC_BPE\n", "before": "ABSL_DECLARE_FLAG(bool, nlcodec_bpe);\n", "n": 1, "add": ["#include \"contrib/nlcodec/bpe_model_trainer_nlcodec.h\"\n"]}
+    ],
+    "src/src/bpe_model_trainer.h": [
+      {"after": "\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/container/btree_set.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/src/bpe_model_trainer_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n"]}
+    ],
+    "src/src/builder.cc": [
+      {"after": "#include \"filesystem.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_replace.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n"]},
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/builder.h": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/builder_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/char_model.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/char_model.h": [
+      {"after": "#include \"model_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/char_model_trainer.cc": [
+      {"after": "#include \"char_model.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/src/char_model_trainer.h": [
+      {"after": "\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/src/char_model_trainer_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n"]}
+    ],
+    "src/src/common.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/globals.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/compile_charsmap_main.cc": [
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/filesystem.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/filesystem.h": [
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/filesystem_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n"]}
+    ],
+    "src/src/init.cc": [
+      {"after": "#ifdef _USE_EXTERNAL_PROTOBUF\n", "before": "#else\n", "n": 1, "add": ["#include \"google/protobuf/message_lite.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/protobuf-lite/google/protobuf/message_lite.h\"\n"]}
+    ],
+    "src/src/invalid_model_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"absl/base/internal/endian.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n", "#include \"sentencepiece_model.pb.h\"\n"]}
+    ],
+    "src/src/model_factory.h": [
+      {"after": "#include \"model_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]}
+    ],
+    "src/src/model_interface.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/model_interface.h": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/model_interface_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/src/normalizer.cc": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/match.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/normalizer.h": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/normalizer_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/pretokenizer_for_training.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_replace.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/pretokenizer_for_training.h": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/pretokenizer_for_training_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/sentencepiece_processor.cc": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"unigram_model.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n", "#include \"absl/cleanup/cleanup.h\"\n", "#include \"absl/container/fixed_array.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/functional/function_ref.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_replace.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n", "#include \"absl/synchronization/blocking_counter.h\"\n", "#include \"absl/synchronization/mutex.h\"\n"]},
+      {"after": "#ifdef _USE_EXTERNAL_PROTOBUF\n", "before": "#else\n", "n": 1, "add": ["#include \"google/protobuf/arena.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/protobuf-lite/google/protobuf/arena.h\"\n"]}
+    ],
+    "src/src/sentencepiece_processor.h": [
+      {"after": "\n", "before": "namespace absl {\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/src/sentencepiece_processor_benchmarks_test.cc": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/log/check.h\"\n", "#include \"absl/log/flags.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/benchmark/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "src/src/sentencepiece_processor_parallel_test.cc": [
+      {"after": "#include \"filesystem.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n", "#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/log/check.h\"\n", "#include \"absl/log/log.h\"\n"]}
+    ],
+    "src/src/sentencepiece_processor_test.cc": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"sentencepiece_trainer.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n", "#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/strings/match.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/sentencepiece_trainer.cc": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"spec_parser.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n", "#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"spec_parser.h\"\n", "before": "#include \"trainer_factory.h\"\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n"]}
+    ],
+    "src/src/sentencepiece_trainer.h": [
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/src/sentencepiece_trainer_test.cc": [
+      {"after": "#include \"filesystem.h\"\n", "before": "#include \"testharness.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/spec_parser.h": [
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/status_builder.h\"\n", "#include \"absl/strings/ascii.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/spm_decode_main.cc": [
+      {"after": "#include \"init.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/strings/str_split.h\"\n"]}
+    ],
+    "src/src/spm_encode_main.cc": [
+      {"after": "#include \"init.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/flags/flag.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/spm_export_vocab_main.cc": [
+      {"after": "#include \"init.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n"]}
+    ],
+    "src/src/spm_normalize_main.cc": [
+      {"after": "#include \"normalizer.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece.pb.h\"\n", "#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_trainer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n"]}
+    ],
+    "src/src/spm_train_main.cc": [
+      {"after": "#include \"init.h\"\n", "before": "#include \"sentencepiece_trainer.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_trainer.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/strings/ascii.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/testharness.cc": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n"]}
+    ],
+    "src/src/testharness.h": [
+      {"after": "#include \"common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/flags/parse.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/trainer_factory.h": [
+      {"after": "\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]}
+    ],
+    "src/src/trainer_interface.cc": [
+      {"after": "#include \"sentencepiece_trainer.h\"\n", "before": "#include \"unicode_script.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/random/random.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/match.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/trainer_interface.h": [
+      {"after": "#include \"filesystem.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"sentencepiece_trainer.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/trainer_interface_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/unicode_script.cc": [
+      {"after": "\n", "before": "#include \"unicode_script_map.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/src/unicode_script_map.h": [
+      {"after": "#define UNICODE_SCRIPT_DATA_H_\n", "before": "namespace sentencepiece {\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/src/unicode_script_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/unigram_model.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/random/random.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/time/clock.h\"\n", "#include \"absl/time/time.h\"\n"]}
+    ],
+    "src/src/unigram_model.h": [
+      {"after": "#include \"model_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/darts_clone/darts.h\"\n"]}
+    ],
+    "src/src/unigram_model_test.cc": [
+      {"after": "\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/unigram_model_trainer.cc": [
+      {"after": "#include \"sentencepiece_trainer.h\"\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_replace.h\"\n", "#include \"absl/strings/str_split.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"third_party/esaxx/esa.hxx\"  // Suffix array library.\n"]}
+    ],
+    "src/src/unigram_model_trainer.h": [
+      {"after": "\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/unigram_model_trainer_test.cc": [
+      {"after": "#include \"filesystem.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]},
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n"]}
+    ],
+    "src/src/util.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/random/random.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/synchronization/blocking_counter.h\"\n", "#include \"absl/synchronization/mutex.h\"\n"]}
+    ],
+    "src/src/util.h": [
+      {"after": "#include \"common.h\"\n", "before": "#include \"sentencepiece_processor.h\"\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"sentencepiece_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/config.h\"\n", "#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/numeric/bits.h\"\n", "#include \"absl/random/random.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_builder.h\"\n", "#include \"absl/strings/ascii.h\"\n", "#include \"absl/strings/numbers.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n", "#include \"absl/synchronization/mutex.h\"\n"]}
+    ],
+    "src/src/util_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/time/clock.h\"\n", "#include \"absl/time/time.h\"\n"]}
+    ],
+    "src/src/word_model.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/word_model.h": [
+      {"after": "#include \"model_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/word_model_test.cc": [
+      {"after": "\n", "before": "#include \"testharness.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n"]}
+    ],
+    "src/src/word_model_trainer.cc": [
+      {"after": "\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/src/word_model_trainer.h": [
+      {"after": "\n", "before": "#include \"trainer_interface.h\"\n", "n": 1, "add": ["#include \"sentencepiece_model.pb.h\"\n", "#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/src/word_model_trainer_test.cc": [
+      {"after": "#include \"testharness.h\"\n", "before": "#include \"util.h\"\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n"]}
+    ],
+    "src/third_party/darts_clone/darts.h": [
+      {"after": "#if DARTS_DISABLE_EXCEPTIONS\n", "before": "#endif\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n"]}
+    ]
+  }
+}

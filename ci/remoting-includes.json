@@ -1,0 +1,1821 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "remoting",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "base/branding.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "base/certificate_helpers.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"net/cert/x509_certificate.h\"\n", "n": 1, "add": ["#include \"crypto/crypto_buildflags.h\"\n"]}
+    ],
+    "base/cloud_service_client.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/empty.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/network_traversal_service.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/remote_access_host.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/remote_access_service.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/session_authz_service.pb.h\"\n", "#include \"remoting/proto/google/remoting/cloud/v1/provisioning_service.pb.h\"\n"]}
+    ],
+    "base/cloud_session_authz_service_client_factory.cc": [
+      {"after": "#include \"remoting/base/session_policies.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/duration.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/session_authz_service.pb.h\"\n"]}
+    ],
+    "base/compound_buffer.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"google/protobuf/io/zero_copy_stream.h\"\n"]}
+    ],
+    "base/compute_engine_service_client.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "base/corp_logging_service_client.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/empty.pb.h\"\n"]}
+    ],
+    "base/corp_service_client.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_INTERNAL)\n", "before": "#endif\n", "n": 1, "add": ["#include \"remoting/internal/base/api_keys.h\"\n"]}
+    ],
+    "base/corp_service_client.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"remoting/base/internal_headers.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#include \"remoting/base/protobuf_http_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/empty.pb.h\"\n"]}
+    ],
+    "base/crash/crashpad_linux.cc": [
+      {"after": "#include \"remoting/base/username.h\"\n", "before": "#include \"third_party/crashpad/crashpad/client/crashpad_client.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]}
+    ],
+    "base/crash/crashpad_win.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"third_party/crashpad/crashpad/client/crashpad_client.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]}
+    ],
+    "base/directory_service_client.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/directory_messages.pb.h\"\n", "#include \"remoting/proto/remoting/v1/remote_support_host_messages.pb.h\"\n"]}
+    ],
+    "base/environment_details.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]}
+    ],
+    "base/errors.cc": [
+      {"after": "#include \"remoting/base/name_value_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/error_code.pb.h\"\n"]}
+    ],
+    "base/http_status.cc": [
+      {"after": "#include \"net/http/http_status_code.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n"]}
+    ],
+    "base/internal_headers.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_INTERNAL)\n", "before": "#else\n", "n": 1, "add": ["#include \"remoting/internal/base/api_keys.h\"\n", "#include \"remoting/internal/proto/helpers.h\"\n"]}
+    ],
+    "base/perfetto_trace_config.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/data_source_config.h\"\n", "#include \"third_party/perfetto/protos/perfetto/common/builtin_clock.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/track_event/track_event_config.gen.h\"\n"]}
+    ],
+    "base/perfetto_trace_config.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/trace_config.h\"\n"]}
+    ],
+    "base/perfetto_trace_config_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/data_source_config.h\"\n", "#include \"third_party/perfetto/protos/perfetto/common/builtin_clock.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/track_event/track_event_config.gen.h\"\n"]}
+    ],
+    "base/perfetto_trace_producer.cc": [
+      {"after": "#include \"base/tracing/perfetto_platform.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "base/perfetto_trace_producer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"third_party/webrtc_overrides/init_webrtc.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_category_registry.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/interned_data/interned_data.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace_packet.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_event.pbzero.h\"\n"]}
+    ],
+    "base/perfetto_tracing.cc": [
+      {"after": "#include \"base/tracing/perfetto_platform.h\"\n", "before": "#include \"third_party/webrtc_overrides/init_webrtc.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/process_descriptor.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/thread_descriptor.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_descriptor.gen.h\"\n"]}
+    ],
+    "base/perfetto_tracing_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"third_party/webrtc_overrides/init_webrtc.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/trace_config.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/track_event/track_event_config.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/interned_data/interned_data.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace_packet.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/process_descriptor.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/thread_descriptor.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_descriptor.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_event.pbzero.h\"\n"]}
+    ],
+    "base/protobuf_http_client_unittest.cc": [
+      {"after": "#include \"remoting/base/mock_oauth_token_getter.h\"\n", "before": "#include \"remoting/base/protobuf_http_request.h\"\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n", "#include \"remoting/base/protobuf_http_client_test_messages.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "base/protobuf_http_request.cc": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "#include \"remoting/base/protobuf_http_request_config.h\"\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n"]}
+    ],
+    "base/protobuf_http_request_base.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "base/protobuf_http_stream_parser.cc": [
+      {"after": "#include \"remoting/base/http_status.h\"\n", "before": "#include \"third_party/protobuf/src/google/protobuf/io/coded_stream.h\"\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n"]}
+    ],
+    "base/protobuf_http_stream_parser_unittest.cc": [
+      {"after": "#include \"remoting/base/http_status.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n", "#include \"remoting/base/protobuf_http_client_test_messages.pb.h\"\n"]}
+    ],
+    "base/protobuf_http_test_responder.cc": [
+      {"after": "#include \"remoting/base/http_status.h\"\n", "before": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/base/protobuf_http_client_messages.pb.h\"\n"]}
+    ],
+    "base/service_urls.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_INTERNAL)\n", "before": "#endif\n", "n": 1, "add": ["#include \"remoting/internal/base/service_urls.h\"\n"]}
+    ],
+    "base/ssl_private_key_wrapper.h": [
+      {"after": "#include \"net/ssl/ssl_private_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "base/url_loader_network_service_observer.h": [
+      {"after": "#include \"net/ssl/client_cert_store.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "base/url_loader_network_service_observer_unittest.cc": [
+      {"after": "#include \"net/test/test_data_directory.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "base/util.cc": [
+      {"after": "#include \"remoting/base/cpu_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "base/util_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "client/cli/logging_audio_stream_consumer.cc": [
+      {"after": "#include \"remoting/client/common/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "client/cli/logging_frame_consumer.cc": [
+      {"after": "#include \"remoting/client/common/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "client/common/remoting_client.cc": [
+      {"after": "#include \"remoting/client/common/logging.h\"\n", "before": "#include \"remoting/protocol/chromium_port_allocator_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/remoting/v1/host_info.pb.h\"\n", "#include \"remoting/proto/remoting/v1/remote_support_host_messages.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n"]}
+    ],
+    "codec/scoped_vpx_codec.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libvpx/source/libvpx/vpx/vpx_codec.h\"\n"]}
+    ],
+    "codec/utils.cc": [
+      {"after": "#include \"remoting/base/util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/convert_argb.h\"\n", "#include \"third_party/libyuv/include/libyuv/convert_from_argb.h\"\n", "#include \"third_party/webrtc/api/video/video_common.h\"\n"]}
+    ],
+    "codec/utils.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/video_common.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/utils_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/convert_argb.h\"\n", "#include \"third_party/libyuv/include/libyuv/convert_from_argb.h\"\n", "#include \"third_party/webrtc/api/video/video_common.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/video_encoder_active_map.cc": [
+      {"after": "#include \"base/containers/heap_array.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/video_encoder_active_map.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/video_encoder_active_map_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/encoded_image.h\"\n", "#include \"third_party/webrtc/api/video/video_codec_type.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_av1.cc": [
+      {"after": "#include \"remoting/codec/utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaom/source/libaom/aom/aom_image.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aomcx.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_av1.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaom/source/libaom/aom/aom_encoder.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aom_image.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aomcx.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_av1_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_benchmark.cc": [
+      {"after": "#include \"remoting/test/frame_generator/headless_frame_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/compare.h\"\n", "#include \"third_party/webrtc/api/environment/environment_factory.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video/encoded_image.h\"\n", "#include \"third_party/webrtc/api/video/video_frame.h\"\n", "#include \"third_party/webrtc/api/video/video_frame_buffer.h\"\n", "#include \"third_party/webrtc/api/video_codecs/builtin_video_decoder_factory.h\"\n", "#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_decoder.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_gpu.cc": [
+      {"after": "#include \"remoting/codec/utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_vpx.cc": [
+      {"after": "#include \"remoting/codec/utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libvpx/source/libvpx/vpx/vp8cx.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_encoder.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "codec/webrtc_video_encoder_vpx.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libvpx/source/libvpx/vpx/vp8cx.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_encoder.h\"\n"]}
+    ],
+    "host/action_message_handler.cc": [
+      {"after": "#include \"remoting/host/action_executor.h\"\n", "before": "#include \"remoting/protocol/message_serialization.h\"\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n"]}
+    ],
+    "host/action_message_handler.h": [
+      {"after": "#include \"base/containers/flat_set.h\"\n", "before": "#include \"remoting/protocol/named_message_pipe_handler.h\"\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n"]}
+    ],
+    "host/active_display_monitor.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/agent_integration_control_message_handler.cc": [
+      {"after": "#include \"remoting/host/agent_integration_configurator.h\"\n", "before": "#include \"remoting/protocol/message_serialization.h\"\n", "n": 1, "add": ["#include \"remoting/proto/agent_integration_control.pb.h\"\n"]}
+    ],
+    "host/agent_integration_control_message_handler_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/agent_integration_control.pb.h\"\n"]}
+    ],
+    "host/audio_capturer.cc": [
+      {"after": "#include \"base/notimplemented.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/audio_capturer_chromeos.cc": [
+      {"after": "#include \"remoting/host/chromeos/audio_helper_chromeos_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/audio_capturer_chromeos_unittest.cc": [
+      {"after": "#include \"remoting/host/chromeos/audio_helper_chromeos.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/audio_capturer_mac.cc": [
+      {"after": "#include \"remoting/host/mac/permission_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/audio_capturer_win.h": [
+      {"after": "#include \"remoting/host/win/audio_volume_filter_win.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/base/desktop_environment_options.h": [
+      {"after": "#include \"remoting/base/session_policies.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n"]}
+    ],
+    "host/base/screen_controls.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/base/screen_resolution.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/basic_desktop_environment.cc": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/basic_desktop_environment.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/certificate_broker_impl.h": [
+      {"after": "#include \"net/ssl/client_cert_store.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/certificate_broker_impl_unittest.cc": [
+      {"after": "#include \"net/test/test_data_directory.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/chromeos/ash_mojom_video_consumer.cc": [
+      {"after": "#include \"media/base/video_frame.h\"\n", "before": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "n": 1, "add": ["#include \"media/capture/mojom/video_capture_buffer.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/chromeos/skia_bitmap_desktop_frame.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/chromeos/ash_mojom_video_consumer.h": [
+      {"after": "#include \"components/viz/host/client_frame_sink_video_capturer.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "host/chromeos/ash_mojom_video_consumer_unittest.cc": [
+      {"after": "#include \"media/base/video_frame.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"media/capture/mojom/video_capture_buffer.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/chromeos/audio_helper_chromeos_impl.cc": [
+      {"after": "#include \"media/base/audio_parameters.h\"\n", "before": "\n", "n": 1, "add": ["#include \"media/mojo/mojom/audio_data.mojom.h\"\n", "#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/chromeos/audio_helper_chromeos_impl_unittest.cc": [
+      {"after": "#include \"media/base/audio_parameters.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/chromeos/browser_interop.cc": [
+      {"after": "#include \"base/task/thread_pool.h\"\n", "before": "#include \"content/public/browser/browser_context.h\"\n", "n": 1, "add": ["#include \"chrome/browser/browser_process.h\"\n", "#include \"chrome/browser/net/profile_network_context_service.h\"\n", "#include \"chrome/browser/net/profile_network_context_service_factory.h\"\n", "#include \"chrome/browser/profiles/profile.h\"\n"]}
+    ],
+    "host/chromeos/browser_interop_browsertest.cc": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"content/public/browser/browser_task_traits.h\"\n", "n": 1, "add": ["#include \"chrome/browser/profiles/profile.h\"\n", "#include \"chrome/test/base/in_process_browser_test.h\"\n"]},
+      {"after": "#include \"remoting/host/chromoting_host_context.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/chromeos/clipboard_aura.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/chromeos/clipboard_aura_unittest.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/chromeos/file_session_storage.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"remoting/base/async_file_util.h\"\n", "n": 1, "add": ["#include \"chrome/common/chrome_paths.h\"\n"]}
+    ],
+    "host/chromeos/frame_sink_desktop_capturer.cc": [
+      {"after": "#include \"remoting/host/chromeos/ash_proxy.h\"\n", "before": "#include \"ui/display/display.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/chromeos/frame_sink_desktop_capturer.h": [
+      {"after": "#include \"remoting/host/chromeos/ash_proxy.h\"\n", "before": "#include \"ui/aura/scoped_window_capture_request.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/chromeos/frame_sink_desktop_capturer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n"]}
+    ],
+    "host/chromeos/host_event_reporter_impl.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/protocol/transport.h\"\n", "n": 1, "add": ["#include \"chrome/browser/policy/messaging_layer/proto/synced/crd_event.pb.h\"\n", "#include \"components/reporting/proto/synced/record_constants.pb.h\"\n"]}
+    ],
+    "host/chromeos/host_event_reporter_impl.h": [
+      {"after": "\n", "before": "#include \"remoting/host/host_event_reporter.h\"\n", "n": 1, "add": ["#include \"chrome/browser/policy/messaging_layer/proto/synced/crd_event.pb.h\"\n", "#include \"components/reporting/proto/synced/record_constants.pb.h\"\n"]}
+    ],
+    "host/chromeos/host_event_reporter_impl_unittest.cc": [
+      {"after": "#include \"base/test/test_future.h\"\n", "before": "#include \"remoting/protocol/transport.h\"\n", "n": 1, "add": ["#include \"chrome/browser/policy/messaging_layer/proto/synced/crd_event.pb.h\"\n"]}
+    ],
+    "host/chromeos/message_box.cc": [
+      {"after": "#include \"ui/base/models/image_model.h\"\n", "before": "#include \"ui/gfx/native_ui_types.h\"\n", "n": 1, "add": ["#include \"ui/base/mojom/dialog_button.mojom.h\"\n", "#include \"ui/base/mojom/ui_base_types.mojom-shared.h\"\n"]}
+    ],
+    "host/chromeos/mouse_cursor_monitor_aura.cc": [
+      {"after": "#include \"remoting/host/chromeos/skia_bitmap_desktop_frame.h\"\n", "before": "#include \"ui/aura/client/cursor_shape_client.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]},
+      {"after": "#include \"ui/base/cursor/cursor.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"ui/base/cursor/mojom/cursor_type.mojom-shared.h\"\n"]}
+    ],
+    "host/chromeos/mouse_cursor_monitor_aura.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/chromeos/remote_support_host_ash.h": [
+      {"after": "#include \"remoting/host/it2me/it2me_native_messaging_host_ash.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_support.mojom-forward.h\"\n"]}
+    ],
+    "host/chromeos/remote_support_host_ash_unittest.cc": [
+      {"after": "#include \"remoting/host/it2me/it2me_host.h\"\n", "before": "#include \"remoting/host/policy_watcher.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_support.mojom.h\"\n"]}
+    ],
+    "host/chromeos/scoped_fake_ash_proxy.h": [
+      {"after": "#include \"remoting/host/chromeos/ash_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/compositing/frame_sink_video_capture.mojom.h\"\n"]}
+    ],
+    "host/chromeos/skia_bitmap_desktop_frame.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/chromoting_host.h": [
+      {"after": "#include \"remoting/host/host_status_observer.h\"\n", "before": "#include \"remoting/protocol/authenticator.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/chromoting_host_services_client.cc": [
+      {"after": "#include \"remoting/host/ipc_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/chromoting_host_services_client.h": [
+      {"after": "#include \"remoting/host/chromoting_host_services_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]}
+    ],
+    "host/chromoting_host_services_client_unittest.cc": [
+      {"after": "#include \"remoting/host/mojo_caller_security_checker.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/chromoting_host_services_server.cc": [
+      {"after": "#include \"remoting/host/mojo_caller_security_checker.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/chromoting_host_services_server.h": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/chromoting_host_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/host/peer_session_impl.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n"]}
+    ],
+    "host/client_session_control.h": [
+      {"after": "#include \"remoting/base/source_location.h\"\n", "before": "#include \"remoting/protocol/errors.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/client_session_events.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom-forward.h\"\n", "#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/clipboard_mac.mm": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/clipboard_win.cc": [
+      {"after": "#include \"remoting/base/util.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/clipboard_win_unittest.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/clipboard_x11.cc": [
+      {"after": "#include \"remoting/host/linux/x_server_clipboard.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/cloud_heartbeat_service_client.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_client.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/empty.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/remote_access_host.pb.h\"\n", "#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/remote_access_service.pb.h\"\n"]}
+    ],
+    "host/continue_window_chromeos.cc": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "#include \"remoting/host/chromeos/message_box.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/continue_window_linux.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"ui/base/glib/scoped_gsignal.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/continue_window_mac.mm": [
+      {"after": "#include \"base/strings/sys_string_conversions.h\"\n", "before": "#include \"ui/base/l10n/l10n_util_mac.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/corp_heartbeat_service_client.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_client.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/corp_heartbeat_service_client.h": [
+      {"after": "#include \"remoting/host/heartbeat_service_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/empty.pb.h\"\n"]}
+    ],
+    "host/create_desktop_interaction_strategy_factory.cc": [
+      {"after": "#include \"remoting/host/linux/portal_interaction_strategy.h\"\n", "before": "#endif  // BUILDFLAG(IS_LINUX)\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/cursor_visibility_notifier.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/daemon_process.h": [
+      {"after": "#include \"remoting/host/host_status_observer.h\"\n", "before": "#include \"remoting/host/worker_process_ipc_delegate.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/daemon_process_linux.cc": [
+      {"after": "#include \"remoting/host/linux/linux_process_launcher_delegate.h\"\n", "before": "#include \"remoting/host/pairing_registry_delegate_linux.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/daemon_process_win.cc": [
+      {"after": "#include \"remoting/host/ipc_constants.h\"\n", "before": "#include \"remoting/host/pairing_registry_delegate_win.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/desktop_display_info.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/protocol/coordinate_conversion.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/coordinate_conversion.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/desktop_display_info.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/desktop_display_info_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n"]}
+    ],
+    "host/desktop_environment.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/desktop_interaction_strategy.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer_differ_wrapper.h\"\n"]}
+    ],
+    "host/desktop_interaction_strategy.h": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "#include \"remoting/protocol/desktop_capturer.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/desktop_process.h": [
+      {"after": "#include \"remoting/host/desktop_session_agent.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/desktop_process_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/host/remote_open_url/fake_url_forwarder_configurator.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/desktop_resizer.h": [
+      {"after": "#include \"remoting/host/base/screen_resolution.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/desktop_resizer_chromeos.cc": [
+      {"after": "#include \"remoting/host/base/screen_resolution.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/desktop_session.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/desktop_session_agent.cc": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "#include \"remoting/host/remote_input_filter.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n", "#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/url_forwarder_control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/input_event_tracker.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/desktop_session_agent.h": [
+      {"after": "#include \"remoting/host/mojo_video_capturer_list.h\"\n", "before": "#include \"remoting/host/mojom/remoting_mojom_traits.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/security_key/security_key_auth_handler.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/url_forwarder_control.pb.h\"\n"]}
+    ],
+    "host/desktop_session_agent_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/host/remote_open_url/url_forwarder_configurator.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/desktop_session_proxy.cc": [
+      {"after": "#include \"remoting/host/ipc_video_frame_capturer.h\"\n", "before": "#include \"remoting/host/remote_open_url/remote_open_url_util.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_delegated_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/desktop_capturer_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/desktop_session_proxy.h": [
+      {"after": "#include \"remoting/host/file_transfer/ipc_file_operations.h\"\n", "before": "#include \"remoting/host/remote_open_url/url_forwarder_configurator.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/desktop_session_win.cc": [
+      {"after": "// MIDL-generated declarations and definitions.\n", "before": "#include \"remoting/host/win/host_service.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]},
+      {"after": "#include \"remoting/host/worker_process_launcher.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/desktop_session_win.h": [
+      {"after": "#include \"remoting/host/desktop_session.h\"\n", "before": "#include \"remoting/host/win/wts_terminal_observer.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/disconnect_window_linux.cc": [
+      {"after": "#include \"remoting/base/email_utils.h\"\n", "before": "#include \"remoting/host/client_session_control.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/disconnect_window_linux_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"remoting/host/client_session_control.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/disconnect_window_mac.h": [
+      {"after": "#include \"remoting/host/disconnect_window_base.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/disconnect_window_mac.mm": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/host/client_session_control.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/disconnect_window_win.cc": [
+      {"after": "#include \"remoting/host/win/host_window_win_util.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/fake_desktop_environment.cc": [
+      {"after": "#include \"remoting/host/remote_open_url/url_forwarder_configurator.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/fake_desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/fake_desktop_environment.h": [
+      {"after": "#include \"remoting/host/input_injector.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/input_stub.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/fake_mouse_cursor_monitor.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/file_transfer/buffered_file_writer.h": [
+      {"after": "#include \"remoting/host/file_transfer/file_operations.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/file_transfer.pb.h\"\n"]}
+    ],
+    "host/file_transfer/directory_helpers.cc": [
+      {"after": "// non-chromeos builds.\n", "before": "#endif\n", "n": 1, "add": ["#include \"chrome/common/chrome_paths.h\"  // nogncheck\n"]}
+    ],
+    "host/file_transfer/fake_file_operations.h": [
+      {"after": "#include \"remoting/host/file_transfer/file_operations.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/file_transfer.pb.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_chromeos.cc": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"remoting/host/chromeos/ash_proxy.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_linux.cc": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"ui/base/glib/scoped_gsignal.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_mac.mm": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"ui/base/l10n/l10n_util_mac.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_main_win.cc": [
+      {"after": "#include \"remoting/host/file_transfer/file_chooser.h\"\n", "before": "#include \"remoting/host/win/core_resource.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_win.h": [
+      {"after": "#include \"remoting/host/file_transfer/file_chooser.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/file_chooser_win_unittest.cc": [
+      {"after": "#include \"remoting/host/file_transfer/file_chooser_win.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/ipc_file_operations.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/associated_remote.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/ipc_file_operations.h": [
+      {"after": "#include \"remoting/host/file_transfer/file_operations.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/ipc_file_operations_unittest.cc": [
+      {"after": "#include \"remoting/host/file_transfer/test_byte_vector_utils.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/proto/file_transfer.pb.h\"\n"]}
+    ],
+    "host/file_transfer/session_file_operations_handler.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/associated_remote.h\"\n", "before": "#include \"remoting/protocol/file_transfer_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/file_transfer/session_file_operations_handler.h": [
+      {"after": "#include \"remoting/host/file_transfer/file_operations.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/ftl_echo_message_listener.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/signaling/signaling_address.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "host/ftl_echo_message_listener_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"remoting/signaling/mock_signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "host/ftl_host_change_notification_listener.cc": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"remoting/signaling/signaling_address.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "host/ftl_host_change_notification_listener_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"remoting/signaling/mock_signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "host/heartbeat_sender.h": [
+      {"after": "#include \"remoting/host/heartbeat_service_client.h\"\n", "before": "#include \"remoting/signaling/signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/directory_messages.pb.h\"\n"]}
+    ],
+    "host/host_attributes.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "host/host_event_logger_win.cc": [
+      {"after": "#include \"remoting/host/host_status_observer.h\"\n", "before": "#include \"remoting/host/win/windows_event_logger.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/remoting_host_messages.h\"\n"]}
+    ],
+    "host/host_main.cc": [
+      {"after": "#include \"mojo/core/embedder/scoped_ipc_support.h\"\n", "before": "#include \"remoting/base/crash/crash_reporting_crashpad.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#include \"remoting/host/chromoting_host_services_client.h\"\n", "before": "#endif  // !BUILDFLAG(IS_CHROMEOS)\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]}
+    ],
+    "host/host_mock_objects.cc": [
+      {"after": "#include \"remoting/host/input_injector.h\"\n", "before": "#include \"remoting/protocol/transport.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/host_mock_objects.h": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "#include \"remoting/host/peer_session.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remote_url_opener.mojom-forward.h\"\n", "#include \"remoting/host/mojom/webauthn_proxy.mojom-forward.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]},
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/host_power_save_blocker.cc": [
+      {"after": "#include \"remoting/host/host_status_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/wake_lock.mojom.h\"\n"]}
+    ],
+    "host/host_status_observer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/host_window_proxy.cc": [
+      {"after": "#include \"remoting/host/client_session_control.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_injector_chromeos.cc": [
+      {"after": "#include \"remoting/host/clipboard.h\"\n", "before": "#include \"ui/aura/client/cursor_client.h\"\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "host/input_injector_chromeos_unittest.cc": [
+      {"after": "#include \"chromeos/ash/components/test/ash_test_suite.h\"\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/input_injector_mac.cc": [
+      {"after": "#include \"remoting/host/clipboard.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mac/desktop_configuration.h\"\n"]}
+    ],
+    "host/input_injector_mac.h": [
+      {"after": "#include \"remoting/host/input_injector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_injector_mac_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "host/input_injector_metadata.h": [
+      {"after": "#if defined(WEBRTC_USE_PIPEWIRE)\n", "before": "#endif  // defined(WEBRTC_USE_PIPEWIRE)\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/xdg_session_details.h\"\n"]}
+    ],
+    "host/input_injector_win.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/input_monitor/local_hotkey_input_monitor_mac.mm": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/local_hotkey_input_monitor_x11.cc": [
+      {"after": "#include \"ui/gfx/x/keysyms/keysyms.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n"]}
+    ],
+    "host/input_monitor/local_hotkey_input_monitor_x11.h": [
+      {"after": "#include \"ui/gfx/x/event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n"]}
+    ],
+    "host/input_monitor/local_hotkey_input_monitor_x11_unittest.cc": [
+      {"after": "#include \"ui/gfx/x/keysyms/keysyms.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n", "#include \"ui/gfx/x/xtest.h\"\n"]}
+    ],
+    "host/input_monitor/local_input_monitor_chromeos_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/aura/env.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/local_input_monitor_x11_common.h": [
+      {"after": "#include \"ui/gfx/x/connection.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n"]}
+    ],
+    "host/input_monitor/local_keyboard_input_monitor_win.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/local_mouse_input_monitor_mac.mm": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/local_mouse_input_monitor_win.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/local_mouse_input_monitor_x11.cc": [
+      {"after": "#include \"remoting/host/input_monitor/local_input_monitor_x11_common.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/input_monitor/local_mouse_input_monitor_x11.h": [
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/input_monitor/local_mouse_input_monitor_x11_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n", "#include \"ui/gfx/x/xtest.h\"\n"]}
+    ],
+    "host/input_monitor/local_pointer_input_monitor_chromeos.cc": [
+      {"after": "#include \"remoting/host/chromeos/point_transformer.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/raw_input_handler.cc": [
+      {"after": "#include \"base/win/message_window.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/input_monitor/raw_input_handler.h": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/installer/mac/uninstaller/remoting_uninstaller_app.mm": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"remoting/host/installer/mac/uninstaller/remoting_uninstaller.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/installer/win/mini_installer/mini_installer.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"chrome/installer/util/delete_after_reboot_helper.h\"\n", "#include \"chrome/installer/util/lzma_util.h\"\n"]}
+    ],
+    "host/installer/win/setup/file_work_items.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n"]}
+    ],
+    "host/installer/win/setup/installer_constants.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "host/installer/win/setup/installer_constants.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n", "#include \"remoting/host/installer/win/setup/payload_files.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_util.cc": [
+      {"after": "#include \"base/win/win_util.h\"\n", "before": "#include \"remoting/host/win/security_descriptor.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n", "#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_util.h": [
+      {"after": "#include \"base/win/windows_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_util_unittest.cc": [
+      {"after": "#include \"base/win/scoped_localalloc.h\"\n", "before": "#include \"remoting/base/registry_test_helper_win.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n", "#include \"chrome/installer/util/work_item_list.h\"\n"]},
+      {"after": "#include \"remoting/base/registry_test_helper_win.h\"\n", "before": "#include \"remoting/host/win/security_descriptor.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_work_items.cc": [
+      {"after": "#include \"base/threading/scoped_blocking_call.h\"\n", "before": "#include \"remoting/base/registry_util_win.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n", "#include \"chrome/installer/util/work_item.h\"\n", "#include \"chrome/installer/util/work_item_list.h\"\n"]},
+      {"after": "#include \"remoting/base/registry_util_win.h\"\n", "before": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]},
+      {"after": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "before": "#include \"remoting/host/installer/win/setup/registry_util.h\"\n", "n": 1, "add": ["#include \"remoting/host/installer/win/setup/native_messaging_entries.h\"\n"]},
+      {"after": "#include \"remoting/host/installer/win/setup/registry_util.h\"\n", "before": "#include \"remoting/host/win/core_resource.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_work_items.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n", "#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/installer/win/setup/registry_work_items_unittest.cc": [
+      {"after": "#include \"base/win/win_util.h\"\n", "before": "#include \"remoting/base/registry_test_helper_win.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"remoting/base/registry_test_helper_win.h\"\n", "before": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "n": 1, "add": ["#include \"remoting/base/version.h\"\n"]},
+      {"after": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "before": "#include \"remoting/host/installer/win/setup/registry_util.h\"\n", "n": 1, "add": ["#include \"remoting/host/installer/win/setup/native_messaging_entries.h\"\n"]},
+      {"after": "#include \"remoting/host/installer/win/setup/registry_util.h\"\n", "before": "#include \"remoting/host/win/core_resource.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]}
+    ],
+    "host/installer/win/setup/service_work_items.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "#include \"remoting/host/installer/win/setup/service_util.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n"]}
+    ],
+    "host/installer/win/setup/setup_runner.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"remoting/host/installer/win/setup/installer_constants.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/installer/win/setup/setup_work_items.cc": [
+      {"after": "\n", "before": "#include \"remoting/host/installer/win/setup/file_work_items.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item.h\"\n", "#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/installer/win/setup/setup_work_items.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/installer/win/setup/setup_work_items_unittest.cc": [
+      {"after": "#include \"base/win/scoped_handle.h\"\n", "before": "#include \"remoting/host/installer/win/setup/file_util.h\"\n", "n": 1, "add": ["#include \"chrome/installer/util/work_item_list.h\"\n"]}
+    ],
+    "host/ipc_action_executor.h": [
+      {"after": "#include \"remoting/host/action_executor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n"]}
+    ],
+    "host/ipc_audio_capturer.cc": [
+      {"after": "#include \"remoting/host/desktop_session_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/ipc_desktop_environment.cc": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "#include \"remoting/host/remote_open_url/url_forwarder_configurator.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]},
+      {"after": "#include \"remoting/signaling/signaling_id_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/ipc_desktop_environment.h": [
+      {"after": "#include \"remoting/host/desktop_session_connector.h\"\n", "before": "#include \"remoting/protocol/desktop_capturer.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]},
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/ipc_desktop_environment_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/protocol/capability_names.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/url_forwarder_control.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/ipc_input_injector.h": [
+      {"after": "#include \"remoting/host/input_injector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/ipc_mouse_cursor_monitor.cc": [
+      {"after": "#include \"remoting/host/desktop_session_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/ipc_mouse_cursor_monitor.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/ipc_peer_session.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"remoting/host/peer_session.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom.h\"\n"]}
+    ],
+    "host/ipc_peer_session_unittest.cc": [
+      {"after": "#include \"remoting/host/base/desktop_environment_options.h\"\n", "before": "#include \"remoting/protocol/errors.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/peer_session.mojom.h\"\n", "#include \"remoting/host/mojom/webrtc_types.mojom.h\"\n"]}
+    ],
+    "host/ipc_video_frame_capturer.cc": [
+      {"after": "#include \"remoting/host/video_memory_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "host/ipc_video_frame_capturer.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"remoting/protocol/desktop_capturer.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/ipc_video_frame_capturer_unittest.cc": [
+      {"after": "#include \"remoting/host/desktop_session_proxy.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/it2me/it2me_confirmation_dialog_chromeos.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"components/session_manager/session_manager_types.h\"\n", "n": 1, "add": ["#include \"chromeos/ui/vector_icons/vector_icons.h\"\n"]},
+      {"after": "#include \"remoting/base/email_utils.h\"\n", "before": "#include \"remoting/host/chromeos/features.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/it2me/it2me_confirmation_dialog_chromeos_unittest.cc": [
+      {"after": "#include \"remoting/base/email_utils.h\"\n", "before": "#include \"remoting/host/chromeos/features.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/it2me/it2me_confirmation_dialog_linux.cc": [
+      {"after": "#include \"remoting/base/email_utils.h\"\n", "before": "#include \"ui/base/glib/scoped_gsignal.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/it2me/it2me_confirmation_dialog_mac.mm": [
+      {"after": "#include \"remoting/base/email_utils.h\"\n", "before": "#include \"ui/base/l10n/l10n_util.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/it2me/it2me_host.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/webrtc/thread_wrapper.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]},
+      {"after": "#include \"remoting/host/session_policies_from_dict.h\"\n", "before": "#include \"remoting/protocol/auth_util.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n"]}
+    ],
+    "host/it2me/it2me_host_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"net/base/network_change_notifier.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/it2me/it2me_native_messaging_host.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"net/base/url_util.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/it2me/it2me_native_messaging_host_ash.h": [
+      {"after": "#include \"remoting/host/chromeos/chromeos_enterprise_params.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_support.mojom.h\"\n"]}
+    ],
+    "host/it2me/it2me_native_messaging_host_unittest.cc": [
+      {"after": "#include \"components/policy/core/common/fake_async_policy_loader.h\"\n", "before": "#include \"remoting/base/auto_thread_task_runner.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/keyboard_layout_monitor_chromeos.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"ui/base/ime/ash/ime_keyboard.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/keyboard_layout_monitor_mac.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"ui/events/keycodes/dom/dom_code.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/keyboard_layout_monitor_win.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"ui/events/keycodes/dom/dom_code.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/desktop.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/scoped_thread_desktop.h\"\n"]}
+    ],
+    "host/legacy_interaction_strategy.cc": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]},
+      {"after": "#if defined(REMOTING_USE_X11)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/linux/x11/shared_x_display.h\"\n"]}
+    ],
+    "host/legacy_interaction_strategy.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/active_display_monitor_x11.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"ui/base/x/x11_display_util.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "#include \"ui/gfx/x/window_event_manager.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/audio_pipe_reader.h": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/linux/capture_stream.h": [
+      {"after": "#include \"base/observer_list_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/portal/pipewire_utils.h\"\n"]}
+    ],
+    "host/linux/capture_stream_manager.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/clipboard_gnome.cc": [
+      {"after": "#include \"remoting/host/linux/dbus_interfaces/org_gnome_Mutter_RemoteDesktop.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/linux/clipboard_portal.cc": [
+      {"after": "#include \"remoting/host/linux/portal_utils.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/linux/desktop_display_info_loader_x11.cc": [
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "#include \"ui/gfx/x/window_event_manager.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/desktop_display_info_loader_x11.h": [
+      {"after": "#include \"ui/gfx/x/event_observer.h\"\n", "before": "#include \"ui/gfx/x/window_event_manager.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/desktop_resizer_x11.cc": [
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "#include \"ui/gfx/x/x11_crtc_resizer.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/desktop_session_backend.h": [
+      {"after": "#include \"remoting/host/desktop_session.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-forward.h\"\n"]}
+    ],
+    "host/linux/desktop_session_factory_linux.cc": [
+      {"after": "#include \"remoting/host/linux/user_desktop_session_backend.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/desktop_session_factory_linux.h": [
+      {"after": "#include \"remoting/host/linux/session_routing_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-forward.h\"\n"]}
+    ],
+    "host/linux/desktop_session_linux.cc": [
+      {"after": "#include \"remoting/host/linux/user_session_eligibility.h\"\n", "before": "#include \"remoting/host/pam_utils.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/desktop_session_linux.h": [
+      {"after": "#include \"remoting/host/linux/login_session_manager.h\"\n", "before": "#include \"remoting/host/worker_process_ipc_delegate.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/ei_input_injector.cc": [
+      {"after": "#include \"remoting/host/linux/pipewire_capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/ei_input_injector.h": [
+      {"after": "#include \"remoting/host/linux/capture_stream_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/ei_keyboard_layout_monitor.h": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/linux/ei_keymap.cc": [
+      {"after": "#include \"remoting/host/linux/keyboard_layout_monitor_utils.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/linux/ei_keymap.h": [
+      {"after": "#include \"remoting/host/linux/fd_string_reader.h\"\n", "before": "#include \"ui/events/keycodes/scoped_xkb.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/libei/src/src/libei.h\"\n"]}
+    ],
+    "host/linux/ei_sender_session.cc": [
+      {"after": "#include \"remoting/host/linux/ei_keymap.h\"\n", "before": "#include \"ui/events/keycodes/dom/keycode_converter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"third_party/libei/src/src/libei.h\"\n"]}
+    ],
+    "host/linux/ei_sender_session.h": [
+      {"after": "#include \"remoting/host/base/pointer_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"third_party/libei/src/src/libei.h\"\n"]}
+    ],
+    "host/linux/fake_capture_stream.cc": [
+      {"after": "#include \"remoting/host/linux/capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/fake_capture_stream.h": [
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/gdm_managed_desktop_session_backend.cc": [
+      {"after": "#include \"remoting/host/linux/remote_display_session_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/gdm_managed_desktop_session_backend.h": [
+      {"after": "#include \"remoting/host/linux/remote_display_session_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-forward.h\"\n"]}
+    ],
+    "host/linux/gnome_action_executor.cc": [
+      {"after": "#include \"remoting/host/linux/dbus_interfaces/org_gnome_ScreenSaver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n"]}
+    ],
+    "host/linux/gnome_capture_stream_manager.cc": [
+      {"after": "#include \"remoting/host/linux/gnome_display_config_dbus_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/gnome_capture_stream_manager.h": [
+      {"after": "#include \"remoting/host/linux/pipewire_capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/gnome_desktop_resizer.cc": [
+      {"after": "#include \"remoting/host/linux/pipewire_capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/gnome_desktop_resizer.h": [
+      {"after": "#include \"remoting/host/linux/gnome_display_config_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/gnome_desktop_resizer_unittest.cc": [
+      {"after": "#include \"remoting/host/linux/test_util.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/gnome_display_config.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/gnome_display_config.h": [
+      {"after": "#include \"remoting/host/linux/scoped_glib.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/gnome_display_config_dbus_client.cc": [
+      {"after": "#include \"remoting/host/linux/dbus_interfaces/org_gnome_Mutter_DisplayConfig.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/gnome_display_config_dbus_client_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/gnome_display_config_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/gnome_interaction_strategy.cc": [
+      {"after": "#include \"remoting/protocol/desktop_capturer_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/gnome_interaction_strategy.h": [
+      {"after": "#include \"remoting/protocol/desktop_capturer_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/linux/gnome_remote_desktop_session.cc": [
+      {"after": "#include \"remoting/host/linux/systemd_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/linux/input_injector_x11.cc": [
+      {"after": "#include \"remoting/host/linux/x11_util.h\"\n", "before": "#include \"ui/events/keycodes/dom/dom_code.h\"\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/keysyms/keysyms.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xinput.h\"\n", "#include \"ui/gfx/x/xkb.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n", "#include \"ui/gfx/x/xtest.h\"\n"]}
+    ],
+    "host/linux/input_injector_x11.h": [
+      {"after": "#include \"remoting/host/linux/x11_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/linux/keyboard_layout_monitor_linux.cc": [
+      {"after": "#include \"remoting/host/linux/keyboard_layout_monitor_utils.h\"\n", "before": "#include \"ui/base/glib/scoped_gsignal.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "#include \"ui/gfx/x/xproto_types.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/xkb.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/linux/keyboard_layout_monitor_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/linux/linux_process_launcher_delegate.h": [
+      {"after": "#include \"ipc/ipc_listener.h\"\n", "before": "#include \"remoting/host/worker_process_launcher.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/login_session_server.h": [
+      {"after": "#include \"components/named_mojo_ipc_server/named_mojo_ipc_server.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/login_session.mojom.h\"\n"]}
+    ],
+    "host/linux/pipewire_audio_capturer.cc": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"remoting/base/logging.h\"\n", "n": 1, "add": ["#include \"library_loaders/remoting_libpipewire.h\"\n"]},
+      {"after": "#include \"remoting/host/linux/pipewire_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/linux/pipewire_audio_capturer_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/linux/pipewire_capture_stream.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_region.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/linux/pipewire_capture_stream.h": [
+      {"after": "#include \"remoting/host/linux/capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/linux/wayland/shared_screencast_stream.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/linux/pipewire_desktop_capturer.cc": [
+      {"after": "#include \"remoting/host/linux/pipewire_capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/pipewire_desktop_capturer.h": [
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "host/linux/pipewire_local_input_monitor.h": [
+      {"after": "#include \"remoting/host/linux/pipewire_mouse_cursor_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/pipewire_mouse_cursor_capturer.cc": [
+      {"after": "#include \"remoting/protocol/coordinate_conversion.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "host/linux/pipewire_mouse_cursor_capturer.h": [
+      {"after": "#include \"remoting/host/linux/capture_stream_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "host/linux/pipewire_mouse_cursor_capturer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/linux/pipewire_mouse_cursor_monitor.cc": [
+      {"after": "#include \"remoting/host/linux/pipewire_capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/linux/pipewire_utils.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"library_loaders/remoting_libpipewire.h\"\n"]}
+    ],
+    "host/linux/portal_capture_stream_manager.cc": [
+      {"after": "#include \"remoting/host/linux/scoped_portal_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/portal_capture_stream_manager.h": [
+      {"after": "#include \"remoting/host/linux/gvariant_ref.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/portal_desktop_resizer.cc": [
+      {"after": "#include \"remoting/host/linux/capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/portal_display_info_loader.cc": [
+      {"after": "#include \"remoting/host/linux/capture_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/portal_interaction_strategy.cc": [
+      {"after": "#include \"remoting/protocol/desktop_capturer_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/linux/portal_remote_desktop_session.cc": [
+      {"after": "#include \"remoting/host/polling_desktop_display_info_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/pulse_audio_capturer.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/linux/pulse_audio_capturer_unittest.cc": [
+      {"after": "#include \"base/test/test_future.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "host/linux/remote_session_info_main.cc": [
+      {"after": "#include \"remoting/host/ipc_constants.h\"\n", "before": "#include \"remoting/host/security_key/security_key_auth_handler_posix.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/login_session.mojom.h\"\n"]}
+    ],
+    "host/linux/scoped_portal_request.cc": [
+      {"after": "#include \"remoting/host/linux/portal_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/portal/scoped_glib.h\"\n"]}
+    ],
+    "host/linux/test_util.h": [
+      {"after": "#include \"remoting/host/linux/gnome_display_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/linux/user_desktop_session_backend.cc": [
+      {"after": "#include \"remoting/host/linux/user_session_eligibility.h\"\n", "before": "#include \"remoting/host/pam_utils.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/linux/user_desktop_session_backend.h": [
+      {"after": "#include \"remoting/host/linux/session_routing_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-forward.h\"\n"]}
+    ],
+    "host/linux/x11_display_util.h": [
+      {"after": "#include \"ui/gfx/geometry/vector2d.h\"\n", "before": "#include \"ui/gfx/x/randr_output_manager.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/x11_display_util_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/vector2d.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/x11_keyboard_impl.cc": [
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xkb.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n", "#include \"ui/gfx/x/xtest.h\"\n"]}
+    ],
+    "host/linux/x11_util.cc": [
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "#include \"ui/gfx/x/xproto_types.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n", "#include \"ui/gfx/x/xinput.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/xproto_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xtest.h\"\n"]}
+    ],
+    "host/linux/x11_util.h": [
+      {"after": "#include \"ui/gfx/x/connection.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/randr.h\"\n"]}
+    ],
+    "host/linux/x_server_clipboard.cc": [
+      {"after": "#include \"remoting/base/util.h\"\n", "before": "#include \"ui/gfx/x/future.h\"\n", "n": 1, "add": ["#include \"ui/gfx/x/extension_manager.h\"\n"]},
+      {"after": "#include \"ui/gfx/x/future.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/linux/x_server_clipboard.h": [
+      {"after": "#include \"ui/gfx/x/event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/x/xfixes.h\"\n", "#include \"ui/gfx/x/xproto.h\"\n"]}
+    ],
+    "host/mac/agent_process_broker.cc": [
+      {"after": "#include \"remoting/host/mojo_caller_security_checker.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/agent_process_broker.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/mac/agent_process_broker.h": [
+      {"after": "#include \"remoting/host/chromoting_host_services_server.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/agent_process_broker.mojom.h\"\n", "#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/mac/agent_process_broker_client.cc": [
+      {"after": "#include \"remoting/host/mac/agent_process_broker_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/agent_process_broker.mojom.h\"\n"]}
+    ],
+    "host/mac/agent_process_broker_client.h": [
+      {"after": "#include \"mojo/public/cpp/platform/named_platform_channel.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/agent_process_broker.mojom.h\"\n"]}
+    ],
+    "host/mac/agent_process_broker_unittest.cc": [
+      {"after": "#include \"remoting/host/mac/agent_process_broker_client.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/agent_process_broker.mojom.h\"\n", "#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/mac/constants_mac.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/mac/host_service_main.cc": [
+      {"after": "#include \"remoting/host/mac/constants_mac.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/mac/permission_checker.cc": [
+      {"after": "#include \"remoting/host/mac/permission_process_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/mac/permission_process_utils.cc": [
+      {"after": "#include \"remoting/host/mac/constants_mac.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/mac/permission_utils.mm": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"ui/base/cocoa/permissions_utils.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/mac/permission_wizard.mm": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"ui/base/cocoa/window_size_constants.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/mac/trust_util.cc": [
+      {"after": "#include \"base/strings/sys_string_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/version.h\"\n"]}
+    ],
+    "host/me2me_desktop_environment.cc": [
+      {"after": "#include \"remoting/protocol/capability_names.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/me2me_heartbeat_service_client.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_client.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/directory_messages.pb.h\"\n"]}
+    ],
+    "host/mojo_video_capturer.cc": [
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "host/mojo_video_capturer.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "host/mojo_video_capturer_list.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/mojom/remoting_mojom_traits.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"remoting/base/source_location.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "before": "#endif  // BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-shared.h\"\n"]}
+    ],
+    "host/mojom/remoting_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "#include \"remoting/base/errors.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#include \"remoting/base/source_location.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/common.mojom-shared.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]},
+      {"after": "#include \"remoting/host/base/screen_resolution.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom-shared.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom-shared.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom-shared.h\"\n", "#include \"remoting/host/mojom/webrtc_types.mojom-shared.h\"\n", "#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/file_transfer.pb.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/ip_endpoint_mojom_traits.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/p2p/base/port.h\"\n", "#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n", "#include \"third_party/webrtc/rtc_base/net_helper.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "host/mojom/remoting_mojom_traits_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"remoting/base/errors.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#include \"remoting/base/source_location.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/common.mojom.h\"\n", "#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/host/base/screen_resolution.h\"\n", "before": "#include \"remoting/protocol/transport.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom.h\"\n", "#include \"remoting/host/mojom/remoting_host.mojom.h\"\n", "#include \"remoting/host/mojom/webrtc_types.mojom.h\"\n", "#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/file_transfer.pb.h\"\n"]},
+      {"after": "#include \"remoting/signaling/jingle_data_structures.h\"\n", "before": "#endif  // BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "host/mouse_cursor_monitor_proxy.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/mouse_cursor_monitor_proxy.h": [
+      {"after": "#include \"base/threading/thread_checker.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/mouse_cursor_monitor_proxy_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/mouse_shape_pump.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "#include \"remoting/protocol/cursor_shape_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/mouse_shape_pump_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"remoting/proto/video.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/peer_connection_process.h": [
+      {"after": "#include \"remoting/host/base/desktop_environment_options.h\"\n", "before": "#include \"remoting/host/peer_session.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom.h\"\n"]}
+    ],
+    "host/peer_connection_process_handler.h": [
+      {"after": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "before": "#include \"remoting/host/worker_process_ipc_delegate.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/peer_session.mojom.h\"\n"]}
+    ],
+    "host/peer_session.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "#include \"remoting/base/source_location.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#include \"remoting/base/source_location.h\"\n", "before": "#include \"remoting/protocol/errors.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"remoting/host/mojom/peer_session.mojom.h\"\n"]}
+    ],
+    "host/peer_session_impl.cc": [
+      {"after": "#include \"remoting/host/keyboard_layout_monitor.h\"\n", "before": "#include \"remoting/host/mouse_shape_pump.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n", "#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/webrtc_video_stream.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/peer_session_impl.h": [
+      {"after": "#include \"remoting/host/input_pipeline.h\"\n", "before": "#include \"remoting/host/peer_session.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n", "#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/terminal_data_channel_manager.h\"\n", "before": "#include \"remoting/protocol/audio_sample_info.h\"\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/video_stream.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/peer_session_impl_unittest.cc": [
+      {"after": "\n", "before": "#include \"remoting/protocol/capability_names.h\"\n", "n": 1, "add": ["#include \"remoting/proto/agent_integration_control.pb.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/terminal.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/persistent_display_layout_manager.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/persistent_display_layout_manager.h": [
+      {"after": "#include \"remoting/host/desktop_resizer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "host/policy_watcher.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"components/policy/core/common/schema_registry.h\"\n", "before": "#include \"remoting/base/port_range.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/policy_watcher_unittest.cc": [
+      {"after": "#include \"components/policy/core/common/fake_async_policy_loader.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/privacy_overlay_mac.h": [
+      {"after": "#include \"remoting/host/disconnect_window_base.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/privacy_overlay_mac.mm": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/host/client_session_control.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/privacy_overlay_mac_unittest.mm": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/host/host_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]},
+      {"after": "#include \"testing/gtest_mac.h\"\n", "before": "#include \"ui/base/resource/resource_bundle.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/privacy_overlay_win.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/privacy_overlay_win_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/register_support_host_request_base_unittest.cc": [
+      {"after": "#include \"remoting/proto/remote_support_service.h\"\n", "before": "#include \"remoting/signaling/fake_signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/remote_support_host_messages.pb.h\"\n"]}
+    ],
+    "host/remote_client_cert_store.cc": [
+      {"after": "#include \"remoting/host/remote_ssl_private_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/remote_client_cert_store.h": [
+      {"after": "#include \"net/ssl/client_cert_store.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]}
+    ],
+    "host/remote_client_cert_store_unittest.cc": [
+      {"after": "#include \"net/test/test_data_directory.h\"\n", "before": "#include \"remoting/host/remote_ssl_private_key.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/remote_ssl_private_key.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/remote_input_filter.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/remote_input_filter.h": [
+      {"after": "#include \"remoting/protocol/input_stub.h\"\n", "before": "#include \"ui/events/event.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/remote_input_filter_unittest.cc": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "#include \"remoting/protocol/input_event_tracker.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_client.cc": [
+      {"after": "#include \"remoting/host/chromoting_host_services_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/chromoting_host_services.mojom.h\"\n", "#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_client.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_client_delegate_linux.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/host/host_setting_keys.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_client_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_message_handler.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "before": "#include \"remoting/protocol/named_message_pipe_handler.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n", "#include \"remoting/proto/remote_open_url.pb.h\"\n"]}
+    ],
+    "host/remote_open_url/remote_open_url_message_handler_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_url_opener.mojom.h\"\n", "#include \"remoting/proto/remote_open_url.pb.h\"\n"]}
+    ],
+    "host/remote_open_url/url_forwarder_configurator.h": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/url_forwarder_control.pb.h\"\n"]}
+    ],
+    "host/remote_open_url/url_forwarder_control_message_handler.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/url_forwarder_control.pb.h\"\n"]}
+    ],
+    "host/remote_ssl_private_key.h": [
+      {"after": "#include \"net/ssl/ssl_private_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/remote_ssl_private_key_unittest.cc": [
+      {"after": "#include \"net/base/net_errors.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_network_service_observer.mojom.h\"\n"]}
+    ],
+    "host/remoting_me2me_host.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/webrtc/thread_wrapper.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]},
+      {"after": "#include \"remoting/base/branding.h\"\n", "before": "#include \"remoting/base/cloud_session_authz_service_client_factory.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(REMOTING_MULTI_PROCESS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n", "#include \"remoting/host/mojom/peer_session.mojom.h\"\n"]},
+      {"after": "#endif\n", "before": "#include \"remoting/host/pairing_registry_delegate.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remoting_host.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/zombie_host_detector.h\"\n", "before": "#include \"remoting/protocol/authenticator.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/signaling/signaling_id_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/rtc_base/event_tracer.h\"\n"]}
+    ],
+    "host/remoting_register_support_host_request.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "#include \"remoting/signaling/signaling_address.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/chrome_os_enterprise_options.pb.h\"\n", "#include \"remoting/proto/remoting/v1/remote_support_host_messages.pb.h\"\n"]}
+    ],
+    "host/remoting_register_support_host_request_unittest.cc": [
+      {"after": "#include \"remoting/proto/remote_support_service.h\"\n", "before": "#include \"remoting/signaling/fake_signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/remote_support_host_messages.pb.h\"\n"]}
+    ],
+    "host/resizing_host_observer.cc": [
+      {"after": "#include \"remoting/host/desktop_resizer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "host/resizing_host_observer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/resources_unittest.cc": [
+      {"after": "\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/security_key/fake_security_key_ipc_client.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"remoting/host/security_key/security_key_ipc_client.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/security_key/security_key_auth_handler.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/security_key/security_key_auth_handler_mojo.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/host/security_key/security_key_ipc_constants.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/security_key/security_key_auth_handler_mojo.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "before": "#include \"remoting/host/security_key/security_key_auth_handler.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/security_key/security_key_data_channel_handler.cc": [
+      {"after": "#include \"remoting/host/security_key/security_key_auth_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/security_key.pb.h\"\n"]}
+    ],
+    "host/security_key/security_key_data_channel_handler_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/security_key.pb.h\"\n"]}
+    ],
+    "host/security_key/security_key_ipc_client.h": [
+      {"after": "#include \"remoting/host/chromoting_host_services_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/security_key/security_key_ipc_client_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/host/security_key/security_key_ipc_constants.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/remote_security_key.mojom.h\"\n"]}
+    ],
+    "host/session_policies_from_dict.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"remoting/base/port_range.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/session_policies_from_dict_unittest.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"remoting/base/session_policies.h\"\n", "n": 1, "add": ["#include \"components/policy/policy_constants.h\"\n"]}
+    ],
+    "host/setup/cloud_host_starter.cc": [
+      {"after": "#include \"remoting/host/setup/host_starter_base.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/google/remoting/cloud/v1/provisioning_service.pb.h\"\n"]}
+    ],
+    "host/setup/corp_host_starter.cc": [
+      {"after": "#include \"remoting/host/host_config.h\"\n", "before": "#include \"remoting/host/setup/host_starter.h\"\n", "n": 1, "add": ["#include \"remoting/host/setup/buildflags.h\"\n"]}
+    ],
+    "host/setup/daemon_controller_delegate_mac.mm": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"remoting/host/host_config.h\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]}
+    ],
+    "host/setup/oauth_host_starter.cc": [
+      {"after": "#include \"remoting/host/setup/host_starter_oauth_helper.h\"\n", "before": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/directory_messages.pb.h\"\n"]}
+    ],
+    "host/terminal_data_channel_manager.h": [
+      {"after": "#include \"remoting/host/terminal_error.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/terminal.pb.h\"\n"]}
+    ],
+    "host/terminal_data_channel_manager_unittest.cc": [
+      {"after": "#include \"remoting/host/terminal_session_manager.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/terminal.pb.h\"\n"]}
+    ],
+    "host/touch_injector_win.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/screen_capture_utils.h\"\n"]}
+    ],
+    "host/touch_injector_win_unittest.cc": [
+      {"after": "#include \"remoting/host/win/input_extra_info.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "host/video_memory_utils.h": [
+      {"after": "#include \"base/memory/shared_memory_mapping.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_message_handler.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/message_serialization.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remote_webauthn.pb.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_message_handler.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "before": "#include \"remoting/protocol/named_message_pipe_handler.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_message_handler_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]},
+      {"after": "#include \"remoting/host/webauthn/remote_webauthn_state_change_notifier.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remote_webauthn.pb.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_native_messaging_host.cc": [
+      {"after": "#include \"remoting/host/chromoting_host_services_client.h\"\n", "before": "#include \"remoting/host/native_messaging/native_messaging_constants.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_native_messaging_host.h": [
+      {"after": "#include \"remoting/host/chromoting_host_services_provider.h\"\n", "before": "#include \"remoting/host/native_messaging/log_message_handler.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]}
+    ],
+    "host/webauthn/remote_webauthn_native_messaging_host_unittest.cc": [
+      {"after": "#include \"remoting/host/host_mock_objects.h\"\n", "before": "#include \"remoting/host/native_messaging/log_message_handler.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/webauthn_proxy.mojom.h\"\n"]}
+    ],
+    "host/webrtc_mouse_cursor_monitor_adaptor.cc": [
+      {"after": "#include \"base/sequence_checker.h\"\n", "before": "#include \"remoting/protocol/coordinate_conversion.h\"\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/coordinate_conversion.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/webrtc_mouse_cursor_monitor_adaptor.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/webrtc_mouse_cursor_monitor_adaptor_unittest.cc": [
+      {"after": "#include \"remoting/host/desktop_display_info_monitor.h\"\n", "before": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/win/chromoting_module_unittest.cc": [
+      {"after": "#include \"remoting/base/auto_thread_task_runner.h\"\n", "before": "#include \"remoting/host/win/rdp_desktop_session.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]}
+    ],
+    "host/win/desktop_event_handler.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/win/desktop.h\"\n"]}
+    ],
+    "host/win/entry_point.cc": [
+      {"after": "\n", "before": "#include \"remoting/host/host_main.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "host/win/evaluate_d3d.cc": [
+      {"after": "#include \"remoting/host/win/evaluate_3d_display_mode.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/win/dxgi_duplicator_controller.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/screen_capturer_win_directx.h\"\n"]}
+    ],
+    "host/win/host_event_windows_event_logger.cc": [
+      {"after": "#include \"remoting/host/win/event_trace_data.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/win/remoting_host_messages.h\"\n"]}
+    ],
+    "host/win/mouse_cursor_monitor_win.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_options.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor_monitor.h\"\n"]}
+    ],
+    "host/win/mouse_cursor_monitor_win.h": [
+      {"after": "#include \"remoting/protocol/mouse_cursor_monitor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/win/mouse_cursor_monitor_win_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "host/win/rdp_client.cc": [
+      {"after": "#include \"remoting/host/win/rdp_client_window.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/win/rdp_client_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/win/rdp_client_window.h": [
+      {"after": "#include \"remoting/host/win/com_imported_mstscax.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/win/rdp_desktop_session.cc": [
+      {"after": "#include \"remoting/host/win/chromoting_module.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "host/win/rdp_desktop_session.h": [
+      {"after": "// chromoting_lib.h contains MIDL-generated declarations.\n", "before": "#include \"remoting/host/win/rdp_client.h\"\n", "n": 1, "add": ["#include \"remoting/host/win/chromoting_lib.h\"\n"]}
+    ],
+    "host/win/session_action_executor.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/action.pb.h\"\n"]}
+    ],
+    "host/win/session_input_injector.cc": [
+      {"after": "#include \"remoting/host/sas_injector.h\"\n", "before": "#include \"ui/events/keycodes/dom/dom_code.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/desktop.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/win/scoped_thread_desktop.h\"\n"]}
+    ],
+    "host/win/unprivileged_process_delegate.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/scoped_interface_endpoint_handle.h\"\n", "before": "#include \"remoting/host/win/security_descriptor.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/win/windows_event_logger.cc": [
+      {"after": "#include \"base/strings/utf_string_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/host/win/remoting_host_messages.h\"\n"]}
+    ],
+    "host/win/wts_session_process_delegate.cc": [
+      {"after": "#include \"remoting/host/ipc_constants.h\"\n", "before": "#include \"remoting/host/win/io_completion_port_drainer.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/worker_process_launcher_unittest.cc": [
+      {"after": "#include \"remoting/host/base/host_exit_codes.h\"\n", "before": "#include \"remoting/host/worker_process_ipc_delegate.h\"\n", "n": 1, "add": ["#include \"remoting/host/mojom/desktop_session.mojom.h\"\n"]}
+    ],
+    "host/xsession_chooser_linux.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/host/xsession_chooser_ui.inc\"\n", "n": 1, "add": ["#include \"remoting/base/string_resources.h\"\n"]},
+      {"after": "#include \"remoting/host/xsession_chooser_ui.inc\"\n", "before": "#include \"ui/base/glib/scoped_gobject.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/i18n/unicode/coll.h\"\n"]}
+    ],
+    "proto/internal_stubs.h": [
+      {"after": "\n", "before": "#include \"remoting/proto/logging_service.h\"\n", "n": 1, "add": ["#include \"remoting/proto/do_nothing.pb.h\"\n"]}
+    ],
+    "protocol/chromium_socket_factory.cc": [
+      {"after": "#include \"remoting/protocol/stream_packet_socket.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/units/timestamp.h\"\n", "#include \"third_party/webrtc/rtc_base/async_dns_resolver.h\"\n", "#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n", "#include \"third_party/webrtc/rtc_base/net_helpers.h\"\n", "#include \"third_party/webrtc/rtc_base/network/received_packet.h\"\n", "#include \"third_party/webrtc/rtc_base/socket.h\"\n", "#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "protocol/chromium_socket_factory.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/api/packet_socket_factory.h\"\n"]}
+    ],
+    "protocol/chromium_socket_factory_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"third_party/webrtc_overrides/environment.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n", "#include \"third_party/webrtc/rtc_base/network/received_packet.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n", "#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "protocol/client_control_dispatcher.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/client_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/client_event_dispatcher.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/client_video_stats_dispatcher.cc": [
+      {"after": "#include \"remoting/base/compound_buffer.h\"\n", "before": "#include \"remoting/protocol/frame_stats.h\"\n", "n": 1, "add": ["#include \"remoting/proto/video_stats.pb.h\"\n"]}
+    ],
+    "protocol/client_video_stats_dispatcher.h": [
+      {"after": "#include \"remoting/protocol/channel_dispatcher_base.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/clipboard_echo_filter.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/clipboard_echo_filter_unittest.cc": [
+      {"after": "\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/clipboard_filter.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/clipboard_filter_unittest.cc": [
+      {"after": "\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/clipboard_thread_proxy.cc": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/clipboard_thread_proxy_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/connection_to_client.h": [
+      {"after": "#include \"remoting/protocol/transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "protocol/connection_unittest.cc": [
+      {"after": "#include \"remoting/base/ipc_fifo_buffer.h\"\n", "before": "#include \"remoting/protocol/audio_source.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n", "#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/api/video_codecs/builtin_video_decoder_factory.h\"\n", "#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_decoder.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_decoder_factory.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/coordinate_conversion.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/coordinate_conversion_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/coordinate_converter.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/coordinate_converter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/coordinate_converter_unittest.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/data_channel_manager_unittest.cc": [
+      {"after": "#include \"remoting/base/compound_buffer.h\"\n", "before": "#include \"remoting/protocol/fake_message_pipe.h\"\n", "n": 1, "add": ["#include \"remoting/proto/test_data_channel_manager.pb.h\"\n"]}
+    ],
+    "protocol/desktop_capturer.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "protocol/desktop_capturer_proxy.cc": [
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "protocol/desktop_capturer_proxy.h": [
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "protocol/desktop_capturer_wrapper.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_frame_scheduler_constant_rate.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "protocol/desktop_capturer_wrapper.h": [
+      {"after": "#include \"remoting/protocol/webrtc_frame_scheduler_constant_rate.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_memory.h\"\n"]}
+    ],
+    "protocol/fake_connection_to_client.cc": [
+      {"after": "#include \"remoting/protocol/session.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "protocol/fake_desktop_capturer.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/fake_desktop_capturer.h": [
+      {"after": "#include \"remoting/protocol/desktop_capturer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/screen_capture_frame_queue.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "protocol/fake_video_renderer.cc": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/video.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/fake_webrtc_audio_classes.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/file_transfer_helpers.h": [
+      {"after": "#include \"remoting/base/result.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/file_transfer.pb.h\"\n"]}
+    ],
+    "protocol/fractional_input_filter.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/fractional_input_filter.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"remoting/protocol/coordinate_converter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]},
+      {"after": "#include \"remoting/protocol/input_filter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/frame_stats.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/video_stats.pb.h\"\n", "#include \"third_party/webrtc/api/video/video_codec_type.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "protocol/frame_stats_unittest.cc": [
+      {"after": "#include \"remoting/protocol/frame_stats.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/video_stats.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/video_codec_type.h\"\n"]}
+    ],
+    "protocol/host_control_dispatcher.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/protocol/clipboard_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n", "#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/host_event_dispatcher.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/input_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/host_event_dispatcher_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/protocol/channel_dispatcher_base.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n", "#include \"remoting/proto/internal.pb.h\"\n"]}
+    ],
+    "protocol/host_video_stats_dispatcher.cc": [
+      {"after": "#include \"remoting/base/constants.h\"\n", "before": "#include \"remoting/protocol/frame_stats.h\"\n", "n": 1, "add": ["#include \"remoting/proto/video_stats.pb.h\"\n"]}
+    ],
+    "protocol/ice_config.cc": [
+      {"after": "#include \"net/base/url_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/network_traversal_messages.pb.h\"\n"]}
+    ],
+    "protocol/ice_config.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "protocol/ice_config_fetcher_cloud.cc": [
+      {"after": "#include \"remoting/base/instance_identity_token_getter.h\"\n", "before": "#include \"remoting/protocol/ice_config.h\"\n", "n": 1, "add": ["#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/network_traversal_service.pb.h\"\n"]}
+    ],
+    "protocol/ice_config_fetcher_cloud_unittest.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_test_responder.h\"\n", "before": "#include \"remoting/protocol/ice_config.h\"\n", "n": 1, "add": ["#include \"remoting/proto/google/internal/remoting/cloud/v1alpha/network_traversal_service.pb.h\"\n"]}
+    ],
+    "protocol/ice_config_fetcher_default.cc": [
+      {"after": "#include \"remoting/base/service_urls.h\"\n", "before": "#include \"remoting/protocol/ice_config.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/network_traversal_messages.pb.h\"\n"]}
+    ],
+    "protocol/ice_config_fetcher_default_unittest.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_test_responder.h\"\n", "before": "#include \"remoting/protocol/ice_config.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/network_traversal_messages.pb.h\"\n"]}
+    ],
+    "protocol/ice_config_unittest.cc": [
+      {"after": "#include \"base/memory/ptr_util.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/remoting/v1/network_traversal_messages.pb.h\"\n"]}
+    ],
+    "protocol/input_event_tracker.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/input_event_tracker.h": [
+      {"after": "#include \"remoting/protocol/input_stub.h\"\n", "before": "#include \"ui/events/keycodes/dom/dom_code.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/input_event_tracker_unittest.cc": [
+      {"after": "\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/input_filter_unittest.cc": [
+      {"after": "\n", "before": "#include \"remoting/protocol/protocol_mock_objects.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/jingle_session.cc": [
+      {"after": "#include \"remoting/signaling/jingle_message_xml_converter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n"]}
+    ],
+    "protocol/jingle_session_manager.cc": [
+      {"after": "#include \"remoting/signaling/signal_strategy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "protocol/mouse_cursor_monitor.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/coordinates.pb.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/mouse_cursor.h\"\n"]}
+    ],
+    "protocol/observing_input_filter.h": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "#include \"remoting/protocol/input_filter.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/port_allocator.h": [
+      {"after": "#include \"remoting/protocol/transport_context.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/p2p/client/basic_port_allocator.h\"\n"]}
+    ],
+    "protocol/port_allocator_factory.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n"]}
+    ],
+    "protocol/port_allocator_factory.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n"]}
+    ],
+    "protocol/protocol_mock_objects.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"remoting/protocol/session_plugin.h\"\n", "n": 1, "add": ["#include \"remoting/proto/video.pb.h\"\n"]}
+    ],
+    "protocol/sdp_message.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/media/base/media_constants.h\"\n"]}
+    ],
+    "protocol/sdp_message_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n"]}
+    ],
+    "protocol/spake2_authenticator.cc": [
+      {"after": "#include \"remoting/protocol/authenticator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/curve25519.h\"\n"]}
+    ],
+    "protocol/spake2_authenticator.h": [
+      {"after": "#include \"remoting/protocol/authenticator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/base.h\"\n"]}
+    ],
+    "protocol/stream_packet_processor.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n"]}
+    ],
+    "protocol/stream_packet_socket.cc": [
+      {"after": "#include \"remoting/protocol/stun_tcp_packet_processor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "protocol/stream_packet_socket.h": [
+      {"after": "#include \"base/sequence_checker.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/packet_socket_factory.h\"\n", "#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n"]}
+    ],
+    "protocol/stream_packet_socket_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n"]}
+    ],
+    "protocol/stun_tcp_packet_processor.cc": [
+      {"after": "#include \"net/base/io_buffer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "protocol/test_event_matchers.h": [
+      {"after": "\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]}
+    ],
+    "protocol/transport_context.cc": [
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "protocol/transport_context.h": [
+      {"after": "#include \"remoting/protocol/transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n"]}
+    ],
+    "protocol/video_channel_state_observer.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/video_encoder.h\"\n"]}
+    ],
+    "protocol/video_stream.h": [
+      {"after": "#include \"remoting/protocol/input_event_timestamps.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "protocol/video_stream_event_router.h": [
+      {"after": "#include \"remoting/protocol/video_channel_state_observer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_fifo_sink_adapter.h": [
+      {"after": "#include \"remoting/protocol/audio_sample_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_fifo_sink_adapter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_counted_object.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_module.cc": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_module.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/audio_device/include/audio_device.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_sink_adapter.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"remoting/protocol/audio_stub.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_sink_adapter.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_source_adapter.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"remoting/protocol/audio_source.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_source_adapter.h": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_source_adapter_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"remoting/protocol/fake_audio_source.h\"\n", "n": 1, "add": ["#include \"remoting/proto/audio.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_count.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_counted_object.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_stream.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_count.h\"\n"]}
+    ],
+    "protocol/webrtc_audio_stream.h": [
+      {"after": "#include \"remoting/protocol/audio_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/webrtc_connection_to_client.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_stream.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/sctp_transport_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_connection_to_client.h": [
+      {"after": "#include \"remoting/protocol/webrtc_transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/webrtc_connection_to_host.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_renderer_adapter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/video_decoder_factory.h\"\n"]}
+    ],
+    "protocol/webrtc_connection_to_host.h": [
+      {"after": "#include \"remoting/protocol/webrtc_transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/video_decoder_factory.h\"\n"]}
+    ],
+    "protocol/webrtc_data_stream_adapter.cc": [
+      {"after": "#include \"remoting/protocol/message_serialization.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/data_channel_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_data_stream_adapter.h": [
+      {"after": "#include \"remoting/protocol/message_pipe.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_count.h\"\n"]}
+    ],
+    "protocol/webrtc_frame_scheduler_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/webrtc_transport.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_audio_module.h\"\n", "before": "#include \"third_party/webrtc_overrides/environment.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/audio/builtin_audio_processing_builder.h\"\n", "#include \"third_party/webrtc/api/audio_codecs/audio_decoder_factory_template.h\"\n", "#include \"third_party/webrtc/api/audio_codecs/audio_encoder_factory_template.h\"\n", "#include \"third_party/webrtc/api/audio_codecs/opus/audio_decoder_opus.h\"\n", "#include \"third_party/webrtc/api/audio_codecs/opus/audio_encoder_opus.h\"\n", "#include \"third_party/webrtc/api/create_modular_peer_connection_factory.h\"\n", "#include \"third_party/webrtc/api/enable_media.h\"\n", "#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/rtc_event_log/rtc_event_log_factory.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video_codecs/builtin_video_decoder_factory.h\"\n"]}
+    ],
+    "protocol/webrtc_transport.h": [
+      {"after": "#include \"remoting/signaling/signal_strategy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_decoder_factory.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_encoder_factory.h\"\n"]}
+    ],
+    "protocol/webrtc_transport_unittest.cc": [
+      {"after": "#include \"remoting/base/compound_buffer.h\"\n", "before": "#include \"remoting/protocol/fake_authenticator.h\"\n", "n": 1, "add": ["#include \"remoting/proto/event.pb.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/webrtc_video_encoder_factory.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_encoder_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/video_codec.h\"\n"]}
+    ],
+    "protocol/webrtc_video_encoder_factory.h": [
+      {"after": "#include \"remoting/protocol/video_stream_event_router.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_encoder_factory.h\"\n", "#include \"third_party/webrtc/modules/video_coding/include/video_codec_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_video_encoder_wrapper.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_frame_adapter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video_codecs/av1_profile.h\"\n", "#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/api/video_codecs/vp9_profile.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/video_coding/include/video_codec_interface.h\"\n", "#include \"third_party/webrtc/modules/video_coding/include/video_error_codes.h\"\n"]}
+    ],
+    "protocol/webrtc_video_encoder_wrapper.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/video_codec_type.h\"\n", "#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/api/video_codecs/video_encoder.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capture_types.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "protocol/webrtc_video_encoder_wrapper_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/i420_buffer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/video_coding/include/video_codec_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_video_frame_adapter.cc": [
+      {"after": "#include \"base/notimplemented.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_counted_object.h\"\n"]}
+    ],
+    "protocol/webrtc_video_frame_adapter.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video/video_frame.h\"\n", "#include \"third_party/webrtc/api/video/video_frame_buffer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/webrtc_video_frame_adapter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_counted_object.h\"\n"]}
+    ],
+    "protocol/webrtc_video_renderer_adapter.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_transport.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video/video_common.h\"\n", "#include \"third_party/webrtc/api/video/video_frame_buffer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "protocol/webrtc_video_renderer_adapter.h": [
+      {"after": "#include \"remoting/protocol/video_stats_stub.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video/video_sink_interface.h\"\n"]}
+    ],
+    "protocol/webrtc_video_renderer_adapter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv/convert_argb.h\"\n", "#include \"third_party/webrtc/api/make_ref_counted.h\"\n", "#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/test/mock_media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/test/mock_video_track.h\"\n", "#include \"third_party/webrtc/api/video/i420_buffer.h\"\n", "#include \"third_party/webrtc/api/video/i444_buffer.h\"\n", "#include \"third_party/webrtc/api/video/video_common.h\"\n", "#include \"third_party/webrtc/api/video/video_frame.h\"\n", "#include \"third_party/webrtc/api/video/video_frame_buffer.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "protocol/webrtc_video_stream.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_track_source.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/notifier.h\"\n", "#include \"third_party/webrtc/api/peer_connection_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n"]}
+    ],
+    "protocol/webrtc_video_stream.h": [
+      {"after": "#include \"remoting/protocol/webrtc_video_track_source.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/rtp_transceiver_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/api/video_codecs/sdp_video_format.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "protocol/webrtc_video_track_source.cc": [
+      {"after": "#include \"remoting/protocol/webrtc_video_frame_adapter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/video/video_frame.h\"\n"]}
+    ],
+    "protocol/webrtc_video_track_source.h": [
+      {"after": "#include \"remoting/codec/webrtc_video_encoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/media_stream_interface.h\"\n", "#include \"third_party/webrtc/api/notifier.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "protocol/webrtc_video_track_source_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n", "#include \"third_party/webrtc/rtc_base/ref_counted_object.h\"\n"]}
+    ],
+    "signaling/corp_messaging_client_unittest.cc": [
+      {"after": "#include \"base/test/test_future.h\"\n", "before": "#include \"remoting/base/certificate_helpers.h\"\n", "n": 1, "add": ["#include \"remoting/base/buildflags.h\"\n"]}
+    ],
+    "signaling/fake_ftl_signal_strategy.cc": [
+      {"after": "#include \"base/strings/string_number_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n"]}
+    ],
+    "signaling/ftl_device_id_provider.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_device_id_provider_unittest.cc": [
+      {"after": "#include \"base/uuid.h\"\n", "before": "#include \"remoting/signaling/ftl_client_uuid_device_id_provider.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_message_channel_strategy.cc": [
+      {"after": "#include \"remoting/base/scoped_protobuf_http_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_message_channel_strategy_unittest.cc": [
+      {"after": "#include \"remoting/base/scoped_protobuf_http_request.h\"\n", "before": "#include \"remoting/signaling/ftl_services_context.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_messaging_client.h": [
+      {"after": "#include \"remoting/base/protobuf_http_request_config.h\"\n", "before": "#include \"remoting/signaling/message_tracker.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_messaging_client_unittest.cc": [
+      {"after": "#include \"remoting/base/scoped_protobuf_http_request.h\"\n", "before": "#include \"remoting/signaling/ftl_message_channel_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_registration_manager.cc": [
+      {"after": "#include \"remoting/base/protobuf_http_request_config.h\"\n", "before": "#include \"remoting/signaling/ftl_device_id_provider.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_registration_manager_unittest.cc": [
+      {"after": "#include \"remoting/base/http_status.h\"\n", "before": "#include \"remoting/signaling/ftl_client_uuid_device_id_provider.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_services_context.h": [
+      {"after": "#include \"net/base/backoff_entry.h\"\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_services_context_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n"]}
+    ],
+    "signaling/ftl_signal_strategy.cc": [
+      {"after": "#include \"remoting/base/oauth_token_getter.h\"\n", "before": "#include \"remoting/signaling/ftl_device_id_provider.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n"]}
+    ],
+    "signaling/ftl_signal_strategy_unittest.cc": [
+      {"after": "#include \"remoting/base/oauth_token_getter.h\"\n", "before": "#include \"remoting/signaling/content_description.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n", "#include \"remoting/proto/ftl/v1/ftl_messages.pb.h\"\n", "#include \"remoting/proto/ftl/v1/xmpp.pb.h\"\n"]}
+    ],
+    "signaling/jingle_data_structures.h": [
+      {"after": "#include \"remoting/base/errors.h\"\n", "before": "#include \"remoting/signaling/signaling_address.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/xmpp.pb.h\"\n"]},
+      {"after": "#include \"remoting/signaling/signaling_address.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n"]}
+    ],
+    "signaling/jingle_message_proto_converter.cc": [
+      {"after": "#include \"remoting/signaling/signaling_id_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/jsep.h\"\n"]}
+    ],
+    "signaling/jingle_message_proto_converter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/xmpp.pb.h\"\n"]}
+    ],
+    "signaling/jingle_message_proto_converter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/api/jsep.h\"\n"]}
+    ],
+    "signaling/jingle_message_xml_converter.cc": [
+      {"after": "#include \"third_party/libjingle_xmpp/xmllite/xmlelement.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/jsep.h\"\n"]}
+    ],
+    "signaling/jingle_message_xml_converter_unittest.cc": [
+      {"after": "#include \"third_party/libjingle_xmpp/xmllite/xmlelement.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n"]}
+    ],
+    "signaling/mock_signal_strategy.h": [
+      {"after": "\n", "before": "#include \"remoting/signaling/ftl_signal_strategy.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n"]}
+    ],
+    "signaling/signal_strategy.cc": [
+      {"after": "#include \"remoting/base/logging.h\"\n", "before": "#include \"remoting/proto/messaging_service.h\"\n", "n": 1, "add": ["#include \"remoting/proto/ftl/v1/chromoting_message.pb.h\"\n"]}
+    ],
+    "test/cyclic_frame_generator.h": [
+      {"after": "#include \"remoting/protocol/input_event_timestamps.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "test/fake_network_dispatcher.h": [
+      {"after": "#include \"base/synchronization/lock.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/ip_address.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "test/fake_network_manager.cc": [
+      {"after": "#include \"components/webrtc/net_address_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "test/fake_network_manager.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/network.h\"\n"]}
+    ],
+    "test/fake_port_allocator.cc": [
+      {"after": "#include \"remoting/test/fake_socket_factory.h\"\n", "before": "#include \"third_party/webrtc_overrides/environment.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/client/basic_port_allocator.h\"\n"]}
+    ],
+    "test/fake_port_allocator.h": [
+      {"after": "#include \"remoting/protocol/port_allocator_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/client/basic_port_allocator.h\"\n"]}
+    ],
+    "test/fake_socket_factory.cc": [
+      {"after": "#include \"remoting/base/leaky_bucket.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/units/timestamp.h\"\n", "#include \"third_party/webrtc/rtc_base/async_packet_socket.h\"\n", "#include \"third_party/webrtc/rtc_base/network/received_packet.h\"\n", "#include \"third_party/webrtc/rtc_base/socket.h\"\n", "#include \"third_party/webrtc/rtc_base/time_utils.h\"\n"]}
+    ],
+    "test/fake_socket_factory.h": [
+      {"after": "#include \"remoting/test/fake_network_dispatcher.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/api/packet_socket_factory.h\"\n"]}
+    ],
+    "test/frame_generator/differ_frame_generator.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/differ_block.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/shared_desktop_frame.h\"\n"]}
+    ],
+    "test/frame_generator/file_frame_generator.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "#include \"ui/gfx/codec/png_codec.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "test/frame_generator/file_frame_generator.h": [
+      {"after": "#include \"remoting/test/frame_generator/frame_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "test/frame_generator/frame_generator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "test/frame_generator/headless_frame_generator.cc": [
+      {"after": "#include \"remoting/test/frame_generator/file_frame_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ],
+    "test/frame_generator/headless_frame_generator.h": [
+      {"after": "#include \"remoting/test/frame_generator/frame_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "test/remote_connection_observer.h": [
+      {"after": "\n", "before": "#include \"remoting/protocol/connection_to_host.h\"\n", "n": 1, "add": ["#include \"remoting/proto/control.pb.h\"\n"]}
+    ],
+    "test/scroll_frame_generator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"remoting/test/frame_generator_util.h\"\n", "#include \"third_party/webrtc/modules/desktop_capture/desktop_geometry.h\"\n"]}
+    ],
+    "test/scroll_frame_generator.h": [
+      {"after": "#include \"remoting/protocol/input_event_timestamps.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_capturer.h\"\n"]}
+    ],
+    "test/video_frame_writer.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "#include \"ui/gfx/codec/png_codec.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/modules/desktop_capture/desktop_frame.h\"\n"]}
+    ]
+  }
+}

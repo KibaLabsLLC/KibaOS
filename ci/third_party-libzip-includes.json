@@ -1,0 +1,66 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libzip",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/lib/compat.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/ossfuzz/zip_read_fuzzer_common.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/add_from_filep.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/can_clone_file.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/regress/programs/fopen_unchanged.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/fread.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifndef HAVE_GETOPT\n", "before": "#endif\n", "n": 1, "add": ["#include \"getopt.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/fseek.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/hole.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifndef HAVE_GETOPT\n", "before": "#endif\n", "n": 1, "add": ["#include \"getopt.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/source_hole.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/tryopen.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifndef HAVE_GETOPT\n", "before": "#endif\n", "n": 1, "add": ["#include \"getopt.h\"\n"]},
+      {"after": "\n", "before": "#define TRYOPEN_USAGE                  \\\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/regress/programs/zip_nonrandom.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"zipint.h\"\n"]}
+    ],
+    "src/regress/programs/ziptool_regress.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"zipint.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"ziptool.c\"\n"]}
+    ],
+    "src/src/diff_output.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"compat.h\"\n"]}
+    ],
+    "src/src/zipcmp.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"zip.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"compat.h\"\n"]}
+    ],
+    "src/src/zipmerge.c": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"zip.h\"\n"]}
+    ],
+    "src/src/ziptool.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"compat.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zip.h\"\n"]}
+    ]
+  }
+}

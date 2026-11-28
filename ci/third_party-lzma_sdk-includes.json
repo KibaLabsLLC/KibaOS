@@ -1,0 +1,16 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/lzma_sdk",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/C/7zCrc.c": [
+      {"after": "#ifdef Z7_CRC_HW_USE\n", "before": "#endif\n", "n": 1, "add": ["#include \"7zCrcEmu.h\"\n"]}
+    ],
+    "src/C/XzDec.c": [
+      {"after": "#ifdef USE_SUBBLOCK\n", "before": "#endif\n", "n": 1, "add": ["#include \"Bcj3Dec.c\"\n", "#include \"SbDec.h\"\n"]}
+    ],
+    "src/C/XzEnc.c": [
+      {"after": "#ifdef USE_SUBBLOCK\n", "before": "#endif\n", "n": 1, "add": ["#include \"Bcj3Enc.c\"\n", "#include \"SbFind.c\"\n", "#include \"SbEnc.c\"\n"]}
+    ]
+  }
+}

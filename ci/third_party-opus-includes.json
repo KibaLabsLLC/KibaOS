@@ -1,0 +1,768 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/opus",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/celt/arch.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]},
+      {"after": "#elif defined (BFIN_ASM)\n", "before": "#elif defined (TI_C5X_ASM)\n", "n": 1, "add": ["#include \"fixed_bfin.h\"\n"]}
+    ],
+    "src/celt/arm/celt_neon_intr.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/arm/fft_arm.h": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"kiss_fft.h\"\n"]}
+    ],
+    "src/celt/arm/mathops_arm.h": [
+      {"after": "#include \"armcpu.h\"\n", "before": "\n", "n": 1, "add": ["#include \"cpu_support.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/arm/mdct_arm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"mdct.h\"\n"]}
+    ],
+    "src/celt/arm/pitch_neon_intr.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <arm_neon.h>\n", "before": "\n", "n": 1, "add": ["#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/bands.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/celt.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/celt.h": [
+      {"after": "\n", "before": "#include \"entenc.h\"\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n", "#include \"opus_custom.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"lpcnet.h\"\n"]}
+    ],
+    "src/celt/celt_decoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"lpcnet.h\"\n", "#include \"lpcnet_private.h\"\n"]}
+    ],
+    "src/celt/celt_encoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/celt_lpc.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/cpu_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/cwrs.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/ecintrin.h": [
+      {"after": "/*Some common macros for potential platform-specific optimization.*/\n", "before": "#include <math.h>\n", "n": 1, "add": ["#include \"opus_types.h\"\n"]},
+      {"after": "#elif defined(ENABLE_TI_DSPLIB)\n", "before": "# define EC_CLZ0    (31)\n", "n": 1, "add": ["# include \"dsplib.h\"\n"]}
+    ],
+    "src/celt/entcode.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/entcode.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/entdec.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/entenc.c": [
+      {"after": "#if defined(HAVE_CONFIG_H)\n", "before": "#endif\n", "n": 1, "add": ["# include \"config.h\"\n"]}
+    ],
+    "src/celt/fixed_c5x.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dsplib.h\"\n"]}
+    ],
+    "src/celt/fixed_c6x.h": [
+      {"after": "#if 0\n", "before": "\n", "n": 1, "add": ["#include \"dsplib.h\"\n"]}
+    ],
+    "src/celt/fixed_debug.h": [
+      {"after": "#include <stdio.h>\n", "before": "\n", "n": 1, "add": ["#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/kiss_fft.c": [
+      {"after": "#  ifdef HAVE_CONFIG_H\n", "before": "#  endif\n", "n": 1, "add": ["#    include \"config.h\"\n"]}
+    ],
+    "src/celt/laplace.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/mathops.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/mdct.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/mdct.h": [
+      {"after": "\n", "before": "#include \"kiss_fft.h\"\n", "n": 1, "add": ["#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/mips/celt_mipsr1.h": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include <math.h>\n", "n": 1, "add": ["#include \"os_support.h\"\n", "#include \"mdct.h\"\n"]},
+      {"after": "#include <math.h>\n", "before": "#include <stdarg.h>\n", "n": 1, "add": ["#include \"celt.h\"\n", "#include \"pitch.h\"\n", "#include \"bands.h\"\n", "#include \"modes.h\"\n", "#include \"entcode.h\"\n", "#include \"quant_bands.h\"\n", "#include \"rate.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"float_cast.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "\n", "n": 1, "add": ["#include \"celt_lpc.h\"\n", "#include \"vq.h\"\n"]}
+    ],
+    "src/celt/mips/mdct_mipsr1.h": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include <math.h>\n", "n": 1, "add": ["#include \"mdct.h\"\n", "#include \"kiss_fft.h\"\n", "#include \"_kiss_fft_guts.h\"\n"]},
+      {"after": "#include <math.h>\n", "before": "\n", "n": 1, "add": ["#include \"os_support.h\"\n", "#include \"mathops.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/celt/modes.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/modes.h": [
+      {"after": "\n", "before": "#include \"celt.h\"\n", "n": 1, "add": ["#include \"opus_types.h\"\n"]}
+    ],
+    "src/celt/os_support.h": [
+      {"after": "#ifdef CUSTOM_SUPPORT\n", "before": "#endif\n", "n": 1, "add": ["#  include \"custom_support.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/pitch.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/quant_bands.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/rate.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/stack_alloc.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/celt/vq.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"pitch.h\"\n", "before": "\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n"]},
+      {"after": "#ifdef ENABLE_QEXT\n", "before": "\n", "n": 1, "add": ["#include \"macros.h\"\n"]}
+    ],
+    "src/celt/x86/celt_lpc_sse.h": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/x86/celt_lpc_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <smmintrin.h>\n", "before": "#include \"x86cpu.h\"\n", "n": 1, "add": ["#include \"celt_lpc.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/x86/pitch_avx.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"x86cpu.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/x86/pitch_sse.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"macros.h\"\n", "#include \"celt_lpc.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"pitch.h\"\n"]},
+      {"after": "#include <xmmintrin.h>\n", "before": "\n", "n": 1, "add": ["#include \"arch.h\"\n"]}
+    ],
+    "src/celt/x86/pitch_sse.h": [
+      {"after": "#if defined(HAVE_CONFIG_H)\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/celt/x86/pitch_sse2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"macros.h\"\n", "#include \"celt_lpc.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/x86/pitch_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"macros.h\"\n", "#include \"celt_lpc.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/x86/vq_sse2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <emmintrin.h>\n", "before": "#include \"x86cpu.h\"\n", "n": 1, "add": ["#include \"celt_lpc.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"mathops.h\"\n", "#include \"vq.h\"\n"]}
+    ],
+    "src/celt/x86/x86_celt_map.c": [
+      {"after": "#if defined(HAVE_CONFIG_H)\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"pitch_sse.h\"\n", "n": 1, "add": ["#include \"x86/x86cpu.h\"\n", "#include \"celt_lpc.h\"\n", "#include \"pitch.h\"\n"]},
+      {"after": "#include \"pitch_sse.h\"\n", "before": "\n", "n": 1, "add": ["#include \"vq.h\"\n"]}
+    ],
+    "src/celt/x86/x86cpu.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"x86cpu.h\"\n", "n": 1, "add": ["#include \"cpu_support.h\"\n", "#include \"macros.h\"\n", "#include \"main.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/celt/x86/x86cpu.h": [
+      {"after": "# if defined(OPUS_X86_MAY_HAVE_SSE2)\n", "before": "\n", "n": 1, "add": ["#  include \"opus_defines.h\"\n"]}
+    ],
+    "src/silk/A2NLSF.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/API.h": [
+      {"after": "#include \"errors.h\"\n", "before": "\n", "n": 1, "add": ["#include \"entenc.h\"\n", "#include \"entdec.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"lpcnet_private.h\"\n"]}
+    ],
+    "src/silk/CNG.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/HP_variable_cutoff.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifdef FIXED_POINT\n", "before": "#else\n", "n": 1, "add": ["#include \"main_FIX.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"main_FLP.h\"\n"]}
+    ],
+    "src/silk/LPC_analysis_filter.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"SigProc_FIX.h\"\n", "before": "\n", "n": 1, "add": ["#include \"celt_lpc.h\"\n"]}
+    ],
+    "src/silk/LPC_fit.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/LPC_inv_pred_gain.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/LP_variable_cutoff.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF2A.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_VQ.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_VQ_weights_laroia.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_decode.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_del_dec_quant.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_encode.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/NLSF_stabilize.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NLSF_unpack.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/NSQ.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "#include \"NSQ.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/NSQ_del_dec.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "#include \"NSQ.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/PLC.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "#include \"PLC.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"lpcnet.h\"\n"]}
+    ],
+    "src/silk/SigProc_FIX.h": [
+      {"after": "#include \"macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"cpu_support.h\"\n"]},
+      {"after": "#ifdef OPUS_XTENSA_LX7\n", "before": "#endif\n", "n": 1, "add": ["#include \"xtensa/SigProc_FIX_lx7.h\"\n"]}
+    ],
+    "src/silk/VAD.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/VQ_WMat_EC.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/ana_filt_bank_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/arm/LPC_inv_pred_gain_arm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["# include \"celt/arm/armcpu.h\"\n"]}
+    ],
+    "src/silk/arm/LPC_inv_pred_gain_neon_intr.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <arm_neon.h>\n", "before": "\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n", "#include \"define.h\"\n"]}
+    ],
+    "src/silk/arm/NSQ_del_dec_arm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"celt/arm/armcpu.h\"\n"]}
+    ],
+    "src/silk/arm/NSQ_del_dec_neon_intr.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 2, "add": ["#include \"main.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"os_support.h\"\n"]}
+    ],
+    "src/silk/arm/NSQ_neon.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <arm_neon.h>\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"NSQ.h\"\n", "#include \"celt/cpu_support.h\"\n", "#include \"celt/arm/armcpu.h\"\n"]}
+    ],
+    "src/silk/arm/NSQ_neon.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"cpu_support.h\"\n", "#include \"SigProc_FIX.h\"\n"]}
+    ],
+    "src/silk/arm/biquad_alt_arm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["# include \"celt/arm/armcpu.h\"\n"]}
+    ],
+    "src/silk/arm/biquad_alt_neon_intr.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "# include <string.h>\n", "before": "#endif\n", "n": 1, "add": ["# include \"stack_alloc.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 2, "add": ["#include \"SigProc_FIX.h\"\n"]}
+    ],
+    "src/silk/biquad_alt.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/bwexpander.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/bwexpander_32.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/check_control_input.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/code_signs.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/control_SNR.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/control_audio_bandwidth.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/control_codec.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifdef FIXED_POINT\n", "before": "#define silk_encoder_state_Fxx      silk_encoder_state_FIX\n", "n": 1, "add": ["#include \"main_FIX.h\"\n"]},
+      {"after": "#else\n", "before": "#define silk_encoder_state_Fxx      silk_encoder_state_FLP\n", "n": 1, "add": ["#include \"main_FLP.h\"\n"]},
+      {"after": "#endif\n", "before": "#include \"tuning_parameters.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/debug.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/dec_API.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n", "#include \"os_support.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE\n", "before": "#ifdef ENABLE_OSCE_BWE\n", "n": 1, "add": ["#include \"osce.h\"\n", "#include \"osce_structs.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE_BWE\n", "before": "#endif\n", "n": 1, "add": ["#include \"osce_features.h\"\n"]}
+    ],
+    "src/silk/decode_core.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/decode_frame.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "#include \"PLC.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE\n", "before": "#endif\n", "n": 1, "add": ["#include \"osce.h\"\n"]}
+    ],
+    "src/silk/decode_indices.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/decode_parameters.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/decode_pitch.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/decode_pulses.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/decoder_set_fs.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/enc_API.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"typedef.h\"\n", "before": "#include \"structs.h\"\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#ifdef FIXED_POINT\n", "before": "#else\n", "n": 1, "add": ["#include \"main_FIX.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"main_FLP.h\"\n"]},
+      {"after": "#ifdef ENABLE_DRED\n", "before": "#endif\n", "n": 1, "add": ["#include \"dred_encoder.h\"\n"]}
+    ],
+    "src/silk/encode_indices.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/encode_pulses.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/fixed/arm/warped_autocorrelation_FIX_arm.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["# include \"celt/arm/armcpu.h\"\n"]}
+    ],
+    "src/silk/fixed/main_FIX.h": [
+      {"after": "\n", "before": "#include \"structs_FIX.h\"\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n"]},
+      {"after": "#include \"structs_FIX.h\"\n", "before": "\n", "n": 1, "add": ["#include \"control.h\"\n", "#include \"main.h\"\n", "#include \"PLC.h\"\n", "#include \"debug.h\"\n", "#include \"entenc.h\"\n"]},
+      {"after": "   || defined(OPUS_ARM_MAY_HAVE_NEON_INTR))\n", "before": "#endif\n", "n": 1, "add": ["#include \"fixed/arm/warped_autocorrelation_FIX_arm.h\"\n"]}
+    ],
+    "src/silk/fixed/structs_FIX.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"typedef.h\"\n", "#include \"main.h\"\n", "#include \"structs.h\"\n"]}
+    ],
+    "src/silk/float/LPC_analysis_filter_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/LPC_inv_pred_gain_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"SigProc_FLP.h\"\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n"]},
+      {"after": "#include \"SigProc_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"define.h\"\n"]}
+    ],
+    "src/silk/float/LTP_analysis_filter_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/LTP_scale_ctrl_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/SigProc_FLP.h": [
+      {"after": "\n", "before": "#include <math.h>\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n", "#include \"float_cast.h\"\n", "#include \"main.h\"\n"]}
+    ],
+    "src/silk/float/apply_sine_window_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/autocorrelation_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"SigProc_FLP.h\"\n", "n": 1, "add": ["#include \"typedef.h\"\n"]}
+    ],
+    "src/silk/float/burg_modified_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"SigProc_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n", "#include \"define.h\"\n"]}
+    ],
+    "src/silk/float/bwexpander_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/corrMatrix_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/encode_frame_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/float/energy_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/find_LPC_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"main_FLP.h\"\n", "n": 1, "add": ["#include \"define.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n"]}
+    ],
+    "src/silk/float/find_LTP_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n"]}
+    ],
+    "src/silk/float/find_pitch_lags_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n"]}
+    ],
+    "src/silk/float/find_pred_coefs_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/inner_product_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/k2a_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/main_FLP.h": [
+      {"after": "#include \"SigProc_FLP.h\"\n", "before": "#include \"structs_FLP.h\"\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n"]},
+      {"after": "#include \"structs_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"define.h\"\n", "#include \"debug.h\"\n", "#include \"entenc.h\"\n"]}
+    ],
+    "src/silk/float/noise_shape_analysis_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n"]}
+    ],
+    "src/silk/float/pitch_analysis_core_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"SigProc_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"SigProc_FIX.h\"\n", "#include \"pitch_est_defines.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/silk/float/process_gains_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main_FLP.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tuning_parameters.h\"\n"]}
+    ],
+    "src/silk/float/regularize_correlations_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/residual_energy_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/scale_copy_vector_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/scale_vector_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/schur_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/sort_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"SigProc_FLP.h\"\n", "n": 1, "add": ["#include \"typedef.h\"\n"]}
+    ],
+    "src/silk/float/structs_FLP.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"typedef.h\"\n", "#include \"main.h\"\n", "#include \"structs.h\"\n"]}
+    ],
+    "src/silk/float/warped_autocorrelation_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/wrappers_FLP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/float/x86/inner_product_FLP_avx2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include <immintrin.h>\n", "n": 1, "add": ["#include \"SigProc_FLP.h\"\n"]}
+    ],
+    "src/silk/gain_quant.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/init_decoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE\n", "before": "#endif\n", "n": 1, "add": ["#include \"osce.h\"\n"]}
+    ],
+    "src/silk/init_encoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#ifdef FIXED_POINT\n", "before": "#else\n", "n": 1, "add": ["#include \"main_FIX.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"main_FLP.h\"\n"]},
+      {"after": "#include \"tuning_parameters.h\"\n", "before": "\n", "n": 1, "add": ["#include \"cpu_support.h\"\n"]},
+      {"after": "#ifdef ENABLE_DRED\n", "before": "#endif\n", "n": 1, "add": ["#include \"dred_encoder.h\"\n"]}
+    ],
+    "src/silk/inner_prod_aligned.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/interpolate.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/lin2log.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/log2lin.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/macros.h": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n", "#include \"arch.h\"\n"]},
+      {"after": "\n", "before": "#ifndef OVERRIDE_silk_CLZ16\n", "n": 1, "add": ["#include \"ecintrin.h\"\n"]},
+      {"after": "#ifdef OPUS_XTENSA_LX7\n", "before": "#endif\n", "n": 1, "add": ["#include \"xtensa/macros_lx7.h\"\n"]}
+    ],
+    "src/silk/main.h": [
+      {"after": "#include \"debug.h\"\n", "before": "\n", "n": 1, "add": ["#include \"entenc.h\"\n", "#include \"entdec.h\"\n"]}
+    ],
+    "src/silk/mips/NSQ_mips.h": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"macros.h\"\n"]}
+    ],
+    "src/silk/pitch_est_tables.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/process_NLSFs.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/quant_LTP_gains.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/resampler.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/resampler_down2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/resampler_down2_3.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"resampler_private.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/resampler_private_AR2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/resampler_private_IIR_FIR.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"resampler_private.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/resampler_private_down_FIR.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"resampler_private.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/resampler_private_up2_HQ.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/resampler_rom.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/shell_coder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/sigm_Q15.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/sort.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/stereo_LR_to_MS.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include \"main.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/stereo_MS_to_LR.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/stereo_decode_pred.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/stereo_encode_pred.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/stereo_find_predictor.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/stereo_quant_pred.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/structs.h": [
+      {"after": "#include \"define.h\"\n", "before": "\n", "n": 1, "add": ["#include \"entenc.h\"\n", "#include \"entdec.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"lpcnet.h\"\n", "#include \"lpcnet_private.h\"\n"]},
+      {"after": "#ifdef ENABLE_DRED\n", "before": "#endif\n", "n": 1, "add": ["#include \"dred_encoder.h\"\n", "#include \"dred_decoder.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE\n", "before": "#endif\n", "n": 1, "add": ["#include \"osce_config.h\"\n", "#include \"osce_structs.h\"\n"]}
+    ],
+    "src/silk/sum_sqr_shift.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/table_LSF_cos.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_LTP.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_NLSF_CB_NB_MB.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_NLSF_CB_WB.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_gain.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_other.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_pitch_lag.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/tables_pulses_per_block.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/silk/typedef.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n"]}
+    ],
+    "src/silk/x86/NSQ_del_dec_avx2.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include <immintrin.h>\n", "n": 1, "add": ["#include \"opus_defines.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"NSQ.h\"\n", "#include \"celt/x86/x86cpu.h\"\n"]}
+    ],
+    "src/silk/x86/NSQ_del_dec_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <smmintrin.h>\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"celt/x86/x86cpu.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/x86/NSQ_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <smmintrin.h>\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"celt/x86/x86cpu.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/x86/SigProc_FIX_sse.h": [
+      {"after": "# ifdef HAVE_CONFIG_H\n", "before": "# endif\n", "n": 1, "add": ["#  include \"config.h\"\n"]}
+    ],
+    "src/silk/x86/VAD_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/silk/x86/VQ_WMat_EC_sse4_1.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <smmintrin.h>\n", "before": "\n", "n": 1, "add": ["#include \"main.h\"\n", "#include \"celt/x86/x86cpu.h\"\n"]}
+    ],
+    "src/silk/x86/main_sse.h": [
+      {"after": "# ifdef HAVE_CONFIG_H\n", "before": "# endif\n", "n": 1, "add": ["#  include \"config.h\"\n"]}
+    ],
+    "src/silk/x86/x86_silk_map.c": [
+      {"after": "#if defined(HAVE_CONFIG_H)\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#ifndef FIXED_POINT\n", "n": 1, "add": ["#include \"celt/x86/x86cpu.h\"\n", "#include \"structs.h\"\n", "#include \"SigProc_FIX.h\"\n"]},
+      {"after": "#ifndef FIXED_POINT\n", "before": "#endif\n", "n": 1, "add": ["#include \"SigProc_FLP.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 2, "add": ["#include \"pitch.h\"\n", "#include \"main.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fixed/main_FIX.h\"\n"]}
+    ],
+    "src/src/analysis.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"analysis.h\"\n", "n": 1, "add": ["#include \"mathops.h\"\n", "#include \"kiss_fft.h\"\n", "#include \"celt.h\"\n", "#include \"modes.h\"\n", "#include \"arch.h\"\n", "#include \"quant_bands.h\"\n"]},
+      {"after": "#include \"mlp.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n", "#include \"float_cast.h\"\n"]}
+    ],
+    "src/src/analysis.h": [
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"celt.h\"\n"]}
+    ],
+    "src/src/extensions.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n", "#include \"arch.h\"\n", "#include \"os_support.h\"\n"]}
+    ],
+    "src/src/mapping_matrix.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"arch.h\"\n", "#include \"float_cast.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include \"mapping_matrix.h\"\n", "n": 1, "add": ["#include \"opus_defines.h\"\n"]}
+    ],
+    "src/src/mapping_matrix.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_projection.h\"\n"]}
+    ],
+    "src/src/mlp.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <math.h>\n", "before": "#include \"mlp.h\"\n", "n": 1, "add": ["#include \"opus_types.h\"\n", "#include \"opus_defines.h\"\n", "#include \"arch.h\"\n"]}
+    ],
+    "src/src/mlp.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"opus_types.h\"\n"]}
+    ],
+    "src/src/mlp_data.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]}
+    ],
+    "src/src/opus.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus.h\"\n", "#include \"mathops.h\"\n"]}
+    ],
+    "src/src/opus_decoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["# include \"config.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"celt.h\"\n", "#include \"opus.h\"\n", "#include \"entdec.h\"\n", "#include \"modes.h\"\n", "#include \"API.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"float_cast.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "\n", "n": 1, "add": ["#include \"os_support.h\"\n", "#include \"structs.h\"\n", "#include \"define.h\"\n", "#include \"mathops.h\"\n", "#include \"cpu_support.h\"\n"]},
+      {"after": "#ifdef ENABLE_DEEP_PLC\n", "before": "#endif\n", "n": 1, "add": ["#include \"dred_rdovae_dec_data.h\"\n", "#include \"dred_rdovae_dec.h\"\n"]},
+      {"after": "#ifdef ENABLE_OSCE\n", "before": "#endif\n", "n": 1, "add": ["#include \"osce.h\"\n"]}
+    ],
+    "src/src/opus_demo.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <string.h>\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus.h\"\n", "#include \"debug.h\"\n", "#include \"opus_types.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#ifdef ENABLE_LOSSGEN\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n"]},
+      {"after": "#ifdef ENABLE_LOSSGEN\n", "before": "#endif\n", "n": 1, "add": ["#include \"lossgen.h\"\n"]}
+    ],
+    "src/src/opus_encoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"celt.h\"\n", "#include \"entenc.h\"\n", "#include \"modes.h\"\n", "#include \"API.h\"\n", "#include \"stack_alloc.h\"\n", "#include \"float_cast.h\"\n", "#include \"opus.h\"\n", "#include \"arch.h\"\n", "#include \"pitch.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include \"analysis.h\"\n", "n": 1, "add": ["#include \"os_support.h\"\n", "#include \"cpu_support.h\"\n"]},
+      {"after": "#include \"analysis.h\"\n", "before": "\n", "n": 1, "add": ["#include \"mathops.h\"\n", "#include \"tuning_parameters.h\"\n"]},
+      {"after": "#ifdef ENABLE_DRED\n", "before": "#endif\n", "n": 1, "add": ["#include \"dred_coding.h\"\n"]},
+      {"after": "#ifdef FIXED_POINT\n", "before": "#else\n", "n": 1, "add": ["#include \"fixed/structs_FIX.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"float/structs_FLP.h\"\n"]}
+    ],
+    "src/src/opus_multistream.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n", "#include \"opus.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include <stdarg.h>\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "\n", "n": 1, "add": ["#include \"float_cast.h\"\n", "#include \"os_support.h\"\n"]}
+    ],
+    "src/src/opus_multistream_decoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n", "#include \"opus.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include <stdarg.h>\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "\n", "n": 1, "add": ["#include \"float_cast.h\"\n", "#include \"os_support.h\"\n"]}
+    ],
+    "src/src/opus_multistream_encoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n", "#include \"opus.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include <stdarg.h>\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]},
+      {"after": "#include <stdarg.h>\n", "before": "\n", "n": 1, "add": ["#include \"float_cast.h\"\n", "#include \"os_support.h\"\n", "#include \"mathops.h\"\n", "#include \"mdct.h\"\n", "#include \"modes.h\"\n", "#include \"bands.h\"\n", "#include \"quant_bands.h\"\n", "#include \"pitch.h\"\n"]}
+    ],
+    "src/src/opus_private.h": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"arch.h\"\n", "#include \"opus.h\"\n", "#include \"celt.h\"\n"]}
+    ],
+    "src/src/opus_projection_decoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"mathops.h\"\n", "#include \"os_support.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include \"mapping_matrix.h\"\n", "n": 1, "add": ["#include \"opus_defines.h\"\n", "#include \"opus_projection.h\"\n", "#include \"opus_multistream.h\"\n"]},
+      {"after": "#include \"mapping_matrix.h\"\n", "before": "\n", "n": 1, "add": ["#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/src/opus_projection_encoder.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"mathops.h\"\n", "#include \"os_support.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "#include \"mapping_matrix.h\"\n", "n": 1, "add": ["#include \"opus_defines.h\"\n", "#include \"opus_projection.h\"\n", "#include \"opus_multistream.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/src/repacketizer.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "\n", "before": "#include \"opus_private.h\"\n", "n": 1, "add": ["#include \"opus.h\"\n"]},
+      {"after": "#include \"opus_private.h\"\n", "before": "\n", "n": 1, "add": ["#include \"os_support.h\"\n", "#include \"stack_alloc.h\"\n"]}
+    ],
+    "src/tests/opus_encode_regressions.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <string.h>\n", "before": "#include \"test_opus_common.h\"\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n", "#include \"opus_projection.h\"\n", "#include \"opus.h\"\n"]}
+    ],
+    "src/tests/test_opus_api.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <string.h>\n", "before": "#include \"test_opus_common.h\"\n", "n": 1, "add": ["#include \"arch.h\"\n", "#include \"opus_multistream.h\"\n", "#include \"opus.h\"\n"]},
+      {"after": "#define MALLOC_FAIL\n", "before": "#include <malloc.h>\n", "n": 1, "add": ["#include \"os_support.h\"\n"]}
+    ],
+    "src/tests/test_opus_decode.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#endif\n", "before": "#include \"test_opus_common.h\"\n", "n": 1, "add": ["#include \"opus.h\"\n"]}
+    ],
+    "src/tests/test_opus_encode.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#endif\n", "before": "#include \"../src/opus_private.h\"\n", "n": 1, "add": ["#include \"opus_multistream.h\"\n", "#include \"opus.h\"\n"]}
+    ],
+    "src/tests/test_opus_padding.c": [
+      {"after": "#ifdef HAVE_CONFIG_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"config.h\"\n"]},
+      {"after": "#include <string.h>\n", "before": "#include \"test_opus_common.h\"\n", "n": 1, "add": ["#include \"opus.h\"\n"]}
+    ]
+  }
+}

@@ -1,0 +1,770 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "cc",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "animation/keyframe_model.cc": [
+      {"after": "#include \"cc/trees/target_property.h\"\n", "before": "#include \"ui/gfx/animation/keyframe/animation_curve.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "base/devtools_instrumentation.h": [
+      {"after": "#include \"cc/base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "base/math_util.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"ui/gfx/geometry/linear_gradient.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n"]}
+    ],
+    "base/math_util.h": [
+      {"after": "#include \"cc/base/base_export.h\"\n", "before": "#include \"ui/gfx/geometry/box_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n"]}
+    ],
+    "base/region.h": [
+      {"after": "#include \"cc/base/base_export.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRegion.h\"\n"]}
+    ],
+    "base/rtree_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "benchmarks/rasterize_and_record_benchmark_impl.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "debug/debug_colors.h": [
+      {"after": "#include \"cc/debug/debug_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "debug/picture_debug_util.cc": [
+      {"after": "#include \"skia/ext/codec_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "input/android/offset_tag_android.cc": [
+      {"after": "#include \"base/token.h\"\n", "before": "#include \"cc/input/browser_controls_offset_tag_modifications.h\"\n", "n": 1, "add": ["#include \"cc/cc_jni_headers/BrowserControlsOffsetTagModifications_jni.h\"\n", "#include \"cc/cc_jni_headers/BrowserControlsOffsetTags_jni.h\"\n", "#include \"cc/cc_jni_headers/OffsetTag_jni.h\"\n"]}
+    ],
+    "layers/heads_up_display_layer.h": [
+      {"after": "#include \"cc/layers/layer.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "layers/heads_up_display_layer_impl.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "layers/heads_up_display_layer_impl.h": [
+      {"after": "#include \"cc/trees/raster_capabilities.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "layers/layer.cc": [
+      {"after": "#include \"components/viz/common/view_transition_element_resource_id.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageFilter.h\"\n"]}
+    ],
+    "layers/layer.h": [
+      {"after": "#include \"components/viz/common/view_transition_element_resource_id.h\"\n", "before": "#include \"ui/gfx/geometry/linear_gradient.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/layer_impl.cc": [
+      {"after": "#include \"components/viz/common/traced_value.h\"\n", "before": "#include \"ui/gfx/geometry/point_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "layers/layer_impl.h": [
+      {"after": "#include \"cc/layers/touch_action_region.h\"\n", "before": "#include \"cc/paint/element_id.h\"\n", "n": 1, "add": ["#include \"cc/mojom/layer_type.mojom.h\"\n"]},
+      {"after": "#include \"components/viz/common/surfaces/tracked_element_rects.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/layer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/animation/keyframe/keyframed_animation_curve.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/mirror_layer_impl.cc": [
+      {"after": "#include \"components/viz/common/quads/solid_color_draw_quad.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/nine_patch_layer_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/nine_patch_layer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/nine_patch_thumb_scrollbar_layer.cc": [
+      {"after": "#include \"skia/ext/platform_canvas.h\"\n", "before": "#include \"ui/gfx/geometry/size_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "layers/painted_scrollbar_layer.cc": [
+      {"after": "#include \"cc/trees/layer_tree_host.h\"\n", "before": "#include \"ui/gfx/geometry/transform_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/painted_scrollbar_layer_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/mask_filter_info.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/picture_layer.cc": [
+      {"after": "#include \"cc/trees/transform_node.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n"]}
+    ],
+    "layers/picture_layer_impl_unittest.cc": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"base/test/scoped_feature_list.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]}
+    ],
+    "layers/picture_layer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "layers/recording_source.h": [
+      {"after": "#include \"cc/paint/directly_composited_image_info.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/recording_source_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "layers/render_surface_impl.cc": [
+      {"after": "#include \"components/viz/common/quads/tile_draw_quad.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageFilter.h\"\n"]}
+    ],
+    "layers/solid_color_layer.cc": [
+      {"after": "#include \"cc/layers/solid_color_layer_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n"]}
+    ],
+    "layers/surface_layer.cc": [
+      {"after": "#include \"cc/trees/layer_tree_host.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "layers/surface_layer.h": [
+      {"after": "#include \"components/viz/common/surfaces/surface_range.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "layers/surface_layer_impl.cc": [
+      {"after": "#include \"components/viz/common/quads/surface_draw_quad.h\"\n", "before": "#include \"ui/gfx/geometry/vector2d_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "layers/tile_display_layer_impl.h": [
+      {"after": "#include \"cc/layers/tile_based_layer_impl.h\"\n", "before": "#include \"cc/tiles/tile_draw_info.h\"\n", "n": 1, "add": ["#include \"cc/mojom/missing_tile_reason.mojom.h\"\n"]}
+    ],
+    "layers/ui_resource_layer.h": [
+      {"after": "#include \"cc/resources/ui_resource_client.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/ui_resource_layer_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "layers/ui_resource_layer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "metrics/compositor_frame_reporter.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"cc/base/features.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]},
+      {"after": "#include \"services/tracing/public/cpp/perfetto/macros.h\"\n", "before": "#include \"ui/events/types/event_type.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_frame_reporter.pbzero.h\"\n"]}
+    ],
+    "metrics/event_latency_tracing_recorder.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"cc/base/features.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "metrics/frame_sequence_metrics.cc": [
+      {"after": "#include \"components/viz/common/frame_sinks/begin_frame_args.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "metrics/frame_sequence_metrics.h": [
+      {"after": "#include \"components/viz/common/frame_sinks/begin_frame_args.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "metrics/predictor_jank_tracker.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "metrics/scroll_jank_v4_frame_stage_calculator.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"cc/base/features.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "metrics/scroll_jank_v4_processor.cc": [
+      {"after": "#include \"base/trace_event/trace_id_helper.h\"\n", "before": "#include \"cc/base/features.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "metrics/scroll_jank_v4_tracing_recorder.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"cc/metrics/scroll_jank_v4_frame.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "mojo_embedder/async_layer_tree_frame_sink.cc": [
+      {"after": "#include \"components/viz/common/quads/compositor_frame.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/thread.mojom.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "mojo_embedder/async_layer_tree_frame_sink.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "mojo_embedder/async_layer_tree_frame_sink_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/layer_context.mojom.h\"\n"]}
+    ],
+    "mojo_embedder/viz_layer_context.cc": [
+      {"after": "#include \"gpu/command_buffer/client/shared_image_interface.h\"\n", "before": "#include \"ui/gfx/animation/keyframe/animation_curve.h\"\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/layer.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/layer_context.mojom.h\"\n"]}
+    ],
+    "mojo_embedder/viz_layer_context.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/associated_remote.h\"\n", "before": "#include \"ui/latency/latency_info.h\"\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/animation.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/layer_context.mojom.h\"\n"]}
+    ],
+    "mojom/browser_controls_animation_params_mojom_traits.h": [
+      {"after": "#include \"cc/input/browser_controls_animation_params.h\"\n", "before": "#include \"mojo/public/cpp/base/time_mojom_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_animation_params.mojom-shared.h\"\n"]}
+    ],
+    "mojom/browser_controls_animation_params_mojom_traits_unittest.cc": [
+      {"after": "#include \"cc/input/browser_controls_animation_params.h\"\n", "before": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_animation_params.mojom.h\"\n"]}
+    ],
+    "mojom/browser_controls_offset_tag_modifications_mojom_traits.h": [
+      {"after": "#include \"cc/input/browser_controls_offset_tag_modifications.h\"\n", "before": "#include \"services/viz/public/cpp/compositing/offset_tag_mojom_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_offset_tag_modifications.mojom-shared.h\"\n"]}
+    ],
+    "mojom/browser_controls_params_mojom_traits.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"cc/trees/browser_controls_params.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_params.mojom-shared.h\"\n"]}
+    ],
+    "mojom/browser_controls_snap_hint_mojom_traits.h": [
+      {"after": "#include \"cc/input/browser_controls_snap_hint.h\"\n", "before": "#include \"mojo/public/cpp/bindings/enum_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_snap_hint.mojom-shared.h\"\n"]}
+    ],
+    "mojom/browser_controls_snap_hint_mojom_traits_unittest.cc": [
+      {"after": "#include \"cc/input/browser_controls_snap_hint.h\"\n", "before": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_snap_hint.mojom.h\"\n"]}
+    ],
+    "mojom/browser_controls_state_mojom_traits.h": [
+      {"after": "#include \"cc/input/browser_controls_state.h\"\n", "before": "#include \"mojo/public/cpp/bindings/enum_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/browser_controls_state.mojom-shared.h\"\n"]}
+    ],
+    "mojom/element_id_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"cc/paint/element_id.h\"\n", "n": 1, "add": ["#include \"cc/mojom/element_id.mojom-shared.h\"\n"]}
+    ],
+    "mojom/hit_test_opaqueness_mojom_traits.h": [
+      {"after": "#include \"cc/input/hit_test_opaqueness.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/hit_test_opaqueness.mojom-shared.h\"\n"]}
+    ],
+    "mojom/layer_selection_bound_mojom_traits.h": [
+      {"after": "#include \"cc/input/layer_selection_bound.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/layer_selection_bound.mojom.h\"\n"]}
+    ],
+    "mojom/layer_tree_debug_state_mojom_traits.h": [
+      {"after": "#include \"cc/debug/layer_tree_debug_state.h\"\n", "before": "\n", "n": 1, "add": ["#include \"cc/mojom/layer_tree_debug_state.mojom.h\"\n"]}
+    ],
+    "mojom/overscroll_behavior_mojom_traits.h": [
+      {"after": "#include \"cc/input/overscroll_behavior.h\"\n", "before": "\n", "n": 1, "add": ["#include \"cc/mojom/overscroll_behavior.mojom-shared.h\"\n"]}
+    ],
+    "mojom/paint_flags_mojom_traits.h": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"cc/paint/paint_flags.h\"\n", "n": 1, "add": ["#include \"cc/mojom/paint_flags.mojom-shared.h\"\n"]}
+    ],
+    "mojom/render_frame_metadata_mojom_traits.cc": [
+      {"after": "#include \"services/viz/public/cpp/compositing/vertical_scroll_direction_mojom_traits.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "mojom/render_frame_metadata_mojom_traits.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"cc/trees/render_frame_metadata.h\"\n", "n": 1, "add": ["#include \"cc/mojom/render_frame_metadata.mojom-shared.h\"\n"]},
+      {"after": "#include \"skia/public/mojom/skcolor4f_mojom_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "mojom/render_surface_reason_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"cc/trees/effect_node.h\"\n", "n": 1, "add": ["#include \"cc/mojom/render_surface_reason.mojom-shared.h\"\n"]}
+    ],
+    "mojom/scrollbar_animator_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"cc/trees/layer_tree_settings.h\"\n", "n": 1, "add": ["#include \"cc/mojom/scrollbar_animator.mojom-shared.h\"\n"]}
+    ],
+    "mojom/synced_scroll_offset_mojom_traits.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"cc/mojom/synced_scroll_offset.mojom.h\"\n"]}
+    ],
+    "mojom/synced_scroll_offset_mojom_traits.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"cc/trees/property_tree.h\"\n", "n": 1, "add": ["#include \"cc/mojom/synced_scroll_offset.mojom-shared.h\"\n"]}
+    ],
+    "mojom/touch_action_mojom_traits.h": [
+      {"after": "#include \"cc/input/touch_action.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"cc/mojom/touch_action.mojom-shared.h\"\n"]}
+    ],
+    "mojom/ui_resource_id_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"cc/resources/ui_resource_client.h\"\n", "n": 1, "add": ["#include \"cc/mojom/ui_resource_id.mojom-shared.h\"\n"]}
+    ],
+    "paint/color_filter.cc": [
+      {"after": "#include \"cc/paint/paint_op_writer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkColorTable.h\"\n", "#include \"third_party/skia/include/effects/SkHighContrastFilter.h\"\n", "#include \"third_party/skia/include/effects/SkLumaColorFilter.h\"\n"]}
+    ],
+    "paint/color_filter.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/decoded_draw_image.h": [
+      {"after": "#include \"gpu/command_buffer/common/mailbox.h\"\n", "before": "#include \"ui/gfx/hdr_metadata.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "paint/deferred_value_map.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "paint/deferred_values.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "paint/discardable_image_map.cc": [
+      {"after": "#include \"cc/paint/skottie_wrapper.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]}
+    ],
+    "paint/discardable_image_map.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/discardable_image_map_unittest.cc": [
+      {"after": "#include \"cc/test/test_paint_worklet_input.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkClipOp.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageGenerator.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n"]}
+    ],
+    "paint/display_item_list.cc": [
+      {"after": "#include \"cc/paint/solid_color_analyzer.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n"]}
+    ],
+    "paint/display_item_list_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "paint/draw_image.h": [
+      {"after": "#include \"cc/paint/target_color_params.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/draw_looper.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlurTypes.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkMaskFilter.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n"]}
+    ],
+    "paint/draw_looper.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPoint.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/filter_operation.h": [
+      {"after": "#include \"cc/paint/paint_filter.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n"]}
+    ],
+    "paint/gpu_raster_pixeltest.cc": [
+      {"after": "#include \"components/viz/service/gl/gpu_service_impl.h\"\n", "before": "#include \"components/viz/test/paths.h\"\n", "n": 1, "add": ["#include \"components/viz/test/buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"skia/ext/font_utils.h\"\n", "n": 1, "add": ["#include \"ipc/common/gpu_client_ids.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkGraphics.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Context.h\"\n", "#include \"third_party/skia/include/gpu/graphite/GraphiteTypes.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Surface.h\"\n", "#include \"third_party/skia/include/private/SkHdrMetadata.h\"\n"]}
+    ],
+    "paint/image_transfer_cache_entry.cc": [
+      {"after": "#include \"cc/paint/paint_op_writer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRecorder.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrYUVABackendTextures.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Image.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n"]}
+    ],
+    "paint/image_transfer_cache_entry.h": [
+      {"after": "#include \"cc/paint/transfer_cache_entry.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/private/SkGainmapInfo.h\"\n"]}
+    ],
+    "paint/image_transfer_cache_entry_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h\"\n"]}
+    ],
+    "paint/paint_cache.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/effects/SkRuntimeEffect.h\"\n"]}
+    ],
+    "paint/paint_canvas.h": [
+      {"after": "#include \"cc/paint/skottie_text_property_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/paint_color.h": [
+      {"after": "#include \"cc/paint/deferred_property_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "paint/paint_filter.cc": [
+      {"after": "#include \"cc/paint/scoped_raster_flags.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkShader.h\"\n", "#include \"third_party/skia/include/core/SkString.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n", "#include \"third_party/skia/include/effects/SkImageFilters.h\"\n", "#include \"third_party/skia/include/effects/SkPerlinNoiseShader.h\"\n", "#include \"third_party/skia/include/effects/SkRuntimeEffect.h\"\n"]}
+    ],
+    "paint/paint_filter.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImageFilter.h\"\n", "#include \"third_party/skia/include/core/SkPoint3.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n", "#include \"third_party/skia/include/effects/SkImageFilters.h\"\n"]}
+    ],
+    "paint/paint_filter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/effects/SkLumaColorFilter.h\"\n"]}
+    ],
+    "paint/paint_flags.cc": [
+      {"after": "#include \"cc/paint/paint_shader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkPathEffect.h\"\n", "#include \"third_party/skia/include/core/SkPathUtils.h\"\n"]}
+    ],
+    "paint/paint_flags.h": [
+      {"after": "#include \"cc/paint/path_effect.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n"]}
+    ],
+    "paint/paint_image.cc": [
+      {"after": "#include \"cc/paint/texture_backing.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrBackendSurface.h\"\n", "#include \"third_party/skia/include/private/SkGainmapInfo.h\"\n"]}
+    ],
+    "paint/paint_image.h": [
+      {"after": "#include \"gpu/command_buffer/common/mailbox.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/private/SkGainmapInfo.h\"\n"]}
+    ],
+    "paint/paint_image_builder.h": [
+      {"after": "#include \"cc/paint/texture_backing.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "paint/paint_image_generator.cc": [
+      {"after": "#include \"base/atomic_sequence_num.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "paint/paint_image_generator.h": [
+      {"after": "#include \"cc/paint/paint_image.h\"\n", "before": "#include \"ui/gfx/hdr_metadata.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n"]}
+    ],
+    "paint/paint_image_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "paint/paint_op.cc": [
+      {"after": "#include \"skia/ext/draw_gainmap_image.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAnnotation.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTiledImageUtils.h\"\n", "#include \"third_party/skia/include/core/SkVertices.h\"\n", "#include \"third_party/skia/include/docs/SkPDFDocument.h\"\n", "#include \"third_party/skia/include/effects/SkImageFilters.h\"\n", "#include \"third_party/skia/include/private/chromium/Slug.h\"\n", "#include \"third_party/skia/src/core/SkCanvasPriv.h\"\n"]}
+    ],
+    "paint/paint_op.h": [
+      {"after": "#include \"cc/paint/skottie_wrapper.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathTypes.h\"\n", "#include \"third_party/skia/include/core/SkPoint.h\"\n", "#include \"third_party/skia/include/core/SkRRect.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n"]}
+    ],
+    "paint/paint_op_buffer.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrRecordingContext.h\"\n", "#include \"third_party/skia/include/gpu/graphite/Recorder.h\"\n", "#include \"third_party/skia/include/private/chromium/Slug.h\"\n"]}
+    ],
+    "paint/paint_op_buffer.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/paint_op_buffer_serializer.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]}
+    ],
+    "paint/paint_op_buffer_serializer.h": [
+      {"after": "#include \"cc/paint/paint_op_buffer.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n"]}
+    ],
+    "paint/paint_op_buffer_unittest.cc": [
+      {"after": "#include \"gpu/command_buffer/common/mailbox.h\"\n", "before": "#include \"skia/ext/font_utils.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/test/geometry_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkBlurTypes.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkClipOp.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkPoint.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n", "#include \"third_party/skia/include/effects/SkColorMatrixFilter.h\"\n", "#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n"]}
+    ],
+    "paint/paint_op_helper_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n", "#include \"third_party/skia/include/effects/SkLumaColorFilter.h\"\n", "#include \"third_party/skia/include/private/chromium/Slug.h\"\n"]}
+    ],
+    "paint/paint_op_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlurTypes.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n"]}
+    ],
+    "paint/paint_op_raster_fuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/libfuzzer_exports.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h\"\n"]}
+    ],
+    "paint/paint_op_reader.cc": [
+      {"after": "#include \"components/crash/core/common/crash_key.h\"\n", "before": "#include \"ui/gfx/hdr_metadata.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkRRect.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/effects/SkHighContrastFilter.h\"\n", "#include \"third_party/skia/include/private/SkGainmapInfo.h\"\n", "#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n", "#include \"third_party/skia/include/private/chromium/Slug.h\"\n"]},
+      {"after": "#include \"ui/gfx/hdr_metadata.h\"\n", "before": "#include \"ui/gfx/mojom/hdr_metadata_mojom_traits.h\"\n", "n": 1, "add": ["#include \"ui/gfx/mojom/hdr_metadata.mojom.h\"\n"]}
+    ],
+    "paint/paint_op_reader.h": [
+      {"after": "#include \"cc/paint/transfer_cache_deserialize_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPathTypes.h\"\n", "#include \"third_party/skia/include/effects/SkGradient.h\"\n"]}
+    ],
+    "paint/paint_op_writer.cc": [
+      {"after": "#include \"skia/ext/skia_utils_base.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/effects/SkHighContrastFilter.h\"\n", "#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n", "#include \"third_party/skia/include/private/chromium/SkImageChromium.h\"\n", "#include \"third_party/skia/include/private/chromium/Slug.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/gfx/mojom/hdr_metadata.mojom.h\"\n"]}
+    ],
+    "paint/paint_op_writer.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPathTypes.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAInfo.h\"\n", "#include \"third_party/skia/include/effects/SkGradient.h\"\n"]}
+    ],
+    "paint/paint_record.cc": [
+      {"after": "#include \"cc/paint/raster_inducing_values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n"]}
+    ],
+    "paint/paint_record.h": [
+      {"after": "#include \"cc/paint/paint_op_buffer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPicture.h\"\n"]}
+    ],
+    "paint/paint_shader.cc": [
+      {"after": "#include \"cc/paint/raster_inducing_values.h\"\n", "before": "#include \"ui/gfx/geometry/clamp_float_geometry.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/effects/SkGradient.h\"\n", "#include \"third_party/skia/include/effects/SkRuntimeEffect.h\"\n"]}
+    ],
+    "paint/paint_shader.h": [
+      {"after": "#include \"cc/paint/paint_record.h\"\n", "before": "#include \"ui/gfx/geometry/size_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/effects/SkGradient.h\"\n", "#include \"third_party/skia/include/effects/SkRuntimeEffect.h\"\n"]}
+    ],
+    "paint/paint_shader_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkShader.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n"]}
+    ],
+    "paint/path_effect.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPathEffect.h\"\n", "#include \"third_party/skia/include/effects/SkCornerPathEffect.h\"\n", "#include \"third_party/skia/include/effects/SkDashPathEffect.h\"\n"]}
+    ],
+    "paint/path_effect.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/record_paint_canvas.cc": [
+      {"after": "#include \"cc/paint/skottie_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAnnotation.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/utils/SkNWayCanvas.h\"\n"]}
+    ],
+    "paint/record_paint_canvas.h": [
+      {"after": "#include \"cc/paint/skottie_color_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]}
+    ],
+    "paint/render_surface_filters.cc": [
+      {"after": "#include \"cc/paint/paint_filter.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n"]}
+    ],
+    "paint/render_surface_filters.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/scoped_raster_flags_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkMatrix.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkTileMode.h\"\n"]}
+    ],
+    "paint/skia_paint_canvas.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAnnotation.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPoint.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/docs/SkPDFDocument.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrRecordingContext.h\"\n", "#include \"third_party/skia/src/core/SkCanvasPriv.h\"\n"]}
+    ],
+    "paint/skia_paint_canvas.h": [
+      {"after": "#include \"cc/paint/skottie_color_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n"]}
+    ],
+    "paint/skia_paint_image_generator.h": [
+      {"after": "#include \"cc/paint/paint_image.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageGenerator.h\"\n"]}
+    ],
+    "paint/skottie_color_map.h": [
+      {"after": "#include \"cc/paint/skottie_resource_metadata.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "paint/skottie_mru_resource_provider.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "paint/skottie_mru_resource_provider.h": [
+      {"after": "#include \"cc/paint/skottie_wrapper.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/modules/skresources/include/SkResources.h\"\n"]}
+    ],
+    "paint/skottie_mru_resource_provider_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/modules/skresources/include/SkResources.h\"\n"]}
+    ],
+    "paint/skottie_transfer_cache_entry_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "paint/skottie_wrapper.h": [
+      {"after": "#include \"cc/paint/skottie_transform_property_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n"]}
+    ],
+    "paint/skottie_wrapper_impl.cc": [
+      {"after": "#include \"skia/ext/font_utils.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/modules/skottie/include/Skottie.h\"\n", "#include \"third_party/skia/modules/skottie/include/SkottieProperty.h\"\n", "#include \"third_party/skia/modules/skresources/include/SkResources.h\"\n"]}
+    ],
+    "paint/skottie_wrapper_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "paint/solid_color_analyzer.cc": [
+      {"after": "#include \"cc/paint/paint_op_buffer_iterator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkTypes.h\"\n", "#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]}
+    ],
+    "paint/solid_color_analyzer.h": [
+      {"after": "#include \"cc/paint/paint_flags.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "paint/solid_color_analyzer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPathBuilder.h\"\n"]}
+    ],
+    "paint/texture_backing.h": [
+      {"after": "#include \"cc/paint/paint_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "paint/transfer_cache_fuzzer.cc": [
+      {"after": "#include \"components/viz/test/test_context_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "paint/transfer_cache_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gl/gl_implementation.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "raster/gpu_raster_buffer_provider.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "raster/one_copy_raster_buffer_provider.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"cc/base/features.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n"]}
+    ],
+    "raster/playback_image_provider_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h\"\n"]}
+    ],
+    "raster/raster_buffer_provider.cc": [
+      {"after": "#include \"skia/ext/legacy_display_globals.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n"]}
+    ],
+    "raster/raster_query_queue.h": [
+      {"after": "#include \"cc/cc_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLES2/gl2.h\"\n"]}
+    ],
+    "raster/raster_source.cc": [
+      {"after": "#include \"components/viz/common/traced_value.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n"]}
+    ],
+    "raster/raster_source.h": [
+      {"after": "#include \"gpu/command_buffer/client/raster_interface.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPicture.h\"\n"]}
+    ],
+    "raster/raster_source_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPixelRef.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkScalar.h\"\n", "#include \"third_party/skia/include/core/SkShader.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n"]}
+    ],
+    "raster/staging_buffer_pool.cc": [
+      {"after": "#include \"gpu/command_buffer/client/shared_image_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLES2/gl2.h\"\n", "#include \"third_party/angle/include/GLES2/gl2ext.h\"\n"]}
+    ],
+    "resources/resource_pool.h": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "resources/ui_resource_bitmap.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkMallocPixelRef.h\"\n", "#include \"third_party/skia/include/core/SkPixelRef.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrRecordingContext.h\"\n"]}
+    ],
+    "resources/ui_resource_bitmap.h": [
+      {"after": "#include \"cc/cc_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPixelRef.h\"\n"]}
+    ],
+    "resources/ui_resource_manager.cc": [
+      {"after": "#include \"cc/resources/scoped_ui_resource.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "scheduler/begin_frame_tracker.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "scheduler/scheduler.cc": [
+      {"after": "#include \"services/tracing/public/cpp/perfetto/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_compositor_scheduler_state.pbzero.h\"\n"]}
+    ],
+    "scheduler/scheduler_state_machine.cc": [
+      {"after": "#include \"components/viz/common/frame_sinks/begin_frame_args.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "scheduler/scheduler_state_machine.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"cc/cc_export.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "slim/filter.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkTileMode.h\"\n"]}
+    ],
+    "slim/frame_sink.h": [
+      {"after": "#include \"components/viz/common/gpu/raster_context_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "slim/frame_sink_impl.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "slim/frame_sink_impl.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "slim/layer.h": [
+      {"after": "#include \"components/viz/common/quads/offset_tag.h\"\n", "before": "#include \"ui/gfx/geometry/linear_gradient.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "slim/layer_tree.h": [
+      {"after": "#include \"components/viz/common/surfaces/local_surface_id.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "slim/layer_tree_impl.cc": [
+      {"after": "#include \"components/viz/common/resources/resource_id.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "slim/layer_tree_impl.h": [
+      {"after": "#include \"components/viz/common/surfaces/surface_range.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "slim/slim_layer_tree_compositor_frame_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "slim/slim_layer_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n"]}
+    ],
+    "slim/test_frame_sink_impl.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/layer_context.mojom.h\"\n"]}
+    ],
+    "slim/ui_resource_layer.h": [
+      {"after": "#include \"cc/slim/layer.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "test/animation_test_common.h": [
+      {"after": "#include \"cc/paint/filter_operations.h\"\n", "before": "#include \"ui/gfx/animation/keyframe/animation_curve.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/fake_content_layer_client.cc": [
+      {"after": "#include \"skia/ext/font_utils.h\"\n", "before": "#include \"ui/gfx/geometry/rect_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n"]}
+    ],
+    "test/fake_content_layer_client.h": [
+      {"after": "#include \"cc/paint/skottie_wrapper.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "test/fake_layer_tree_frame_sink.cc": [
+      {"after": "#include \"gpu/ipc/client/gpu_channel_host.h\"\n", "before": "#include \"gpu/ipc/common/mock_gpu_channel.h\"\n", "n": 1, "add": ["#include \"gpu/ipc/common/gpu_channel.mojom.h\"\n"]}
+    ],
+    "test/fake_paint_image_generator.h": [
+      {"after": "#include \"cc/paint/paint_image_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n"]}
+    ],
+    "test/fake_raster_source.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n"]}
+    ],
+    "test/fake_recording_source.h": [
+      {"after": "#include \"cc/trees/layer_tree_settings.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "test/fake_scrollbar.h": [
+      {"after": "#include \"cc/input/scrollbar.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/layer_tree_pixel_test.cc": [
+      {"after": "#include \"components/viz/test/test_in_process_context_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]}
+    ],
+    "test/layer_tree_pixel_test.h": [
+      {"after": "#include \"cc/trees/transform_node.h\"\n", "before": "#include \"ui/gl/gl_implementation.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "test/layer_tree_test.cc": [
+      {"after": "\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n", "#include \"base/clang_profiling_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]}
+    ],
+    "test/lottie_test_data.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/pixel_comparator.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "test/pixel_test.cc": [
+      {"after": "#include \"gpu/config/gpu_finch_features.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"skia/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(SKIA_USE_DAWN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/dawn/include/dawn/dawn_proc.h\"\n", "#include \"third_party/dawn/include/dawn/native/DawnNative.h\"  // nogncheck\n"]}
+    ],
+    "test/pixel_test_utils.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/codec/png_codec.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "test/render_pass_test_utils.cc": [
+      {"after": "#include \"gpu/command_buffer/common/sync_token.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImageFilter.h\"\n"]}
+    ],
+    "test/render_pass_test_utils.h": [
+      {"after": "#include \"components/viz/common/quads/solid_color_draw_quad.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/skia_common.cc": [
+      {"after": "#include \"cc/test/fake_paint_image_generator.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageGenerator.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/SkImageGanesh.h\"\n"]}
+    ],
+    "test/skia_common.h": [
+      {"after": "#include \"cc/paint/paint_image_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "test/solid_color_content_layer_client.h": [
+      {"after": "#include \"cc/layers/content_layer_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/test_layer_tree_frame_sink.cc": [
+      {"after": "#include \"gpu/ipc/client/client_shared_image_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "test/test_layer_tree_frame_sink.h": [
+      {"after": "#include \"components/viz/test/test_shared_image_interface_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "test/test_options_provider.cc": [
+      {"after": "#include \"cc/paint/paint_op_writer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "test/test_options_provider.h": [
+      {"after": "#include \"cc/test/transfer_cache_test_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/private/chromium/SkChromeRemoteGlyphCache.h\"\n"]}
+    ],
+    "test/test_skcanvas.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/gl/GrGLInterface.h\"\n"]}
+    ],
+    "test/test_skcanvas.h": [
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n", "#include \"third_party/skia/include/utils/SkNoDrawCanvas.h\"\n"]}
+    ],
+    "test/transfer_cache_test_helper.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h\"\n"]}
+    ],
+    "test/transfer_cache_test_helper.h": [
+      {"after": "#include \"cc/paint/transfer_cache_serialize_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "tiles/checker_image_tracker.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "tiles/checker_image_tracker.h": [
+      {"after": "#include \"cc/tiles/image_controller.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "tiles/gpu_image_decode_cache.cc": [
+      {"after": "#include \"gpu/config/gpu_info.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n"]}
+    ],
+    "tiles/gpu_image_decode_cache_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/gpu/GpuTypes.h\"\n"]}
+    ],
+    "tiles/gpu_image_decode_cache_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorFilter.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageGenerator.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkYUVAPixmaps.h\"\n", "#include \"third_party/skia/include/effects/SkHighContrastFilter.h\"\n"]}
+    ],
+    "tiles/mipmap_util.h": [
+      {"after": "#include \"cc/cc_export.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "tiles/raster_dark_mode_filter.h": [
+      {"after": "#include \"cc/cc_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache.cc": [
+      {"after": "#include \"cc/tiles/mipmap_util.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImageInfo.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkM44.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache_unittest_combinations.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache_utils.cc": [
+      {"after": "#include \"skia/ext/geometry.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorSpace.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "tiles/software_image_decode_cache_utils.h": [
+      {"after": "#include \"cc/tiles/image_decode_cache_utils.h\"\n", "before": "#include \"ui/gfx/color_space.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]}
+    ],
+    "tiles/tile.cc": [
+      {"after": "#include \"components/viz/common/traced_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "tiles/tile_draw_info.h": [
+      {"after": "#include \"components/viz/common/resources/platform_color.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "tiles/tile_manager.cc": [
+      {"after": "#include \"components/viz/common/traced_value.h\"\n", "before": "#include \"ui/gfx/geometry/axis_transform2d.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "tiles/tile_manager_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageGenerator.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "tiles/tile_priority.h": [
+      {"after": "#include \"base/trace_event/traced_value.h\"\n", "before": "#include \"cc/cc_export.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "trees/client_layer_tree_host_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/events/types/scroll_input_type.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkMallocPixelRef.h\"\n"]}
+    ],
+    "trees/commit_state.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "#include \"ui/gfx/delegated_ink_metadata.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "trees/effect_node.h": [
+      {"after": "#include \"components/viz/common/view_transition_element_resource_id.h\"\n", "before": "#include \"ui/gfx/geometry/mask_filter_info.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n"]}
+    ],
+    "trees/frame_data.cc": [
+      {"after": "#include \"cc/base/histograms.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_latency_info.pbzero.h\"\n"]}
+    ],
+    "trees/hit_test_data_builder.cc": [
+      {"after": "#include \"components/viz/common/surfaces/surface_id.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkScalar.h\"\n"]}
+    ],
+    "trees/hit_test_data_builder_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/linear_gradient.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n"]}
+    ],
+    "trees/latency_info_swap_promise.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"services/tracing/public/cpp/perfetto/macros.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "trees/layer_tree_host.cc": [
+      {"after": "#include \"base/trace_event/traced_value.h\"\n", "before": "#include \"base/types/optional_ref.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]},
+      {"after": "#include \"services/tracing/public/cpp/perfetto/macros.h\"\n", "before": "#include \"ui/gfx/geometry/size_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "trees/layer_tree_host_impl.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"cc/base/devtools_instrumentation.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"gpu/ipc/client/client_shared_image_interface.h\"\n", "before": "#include \"ui/gfx/display_color_spaces.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_latency_info.pbzero.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "trees/layer_tree_host_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/base/ui_base_features.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n", "#include \"third_party/skia/include/core/SkMallocPixelRef.h\"\n"]}
+    ],
+    "trees/layer_tree_host_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLES2/gl2.h\"\n"]}
+    ],
+    "trees/layer_tree_host_pixeltest_blending.cc": [
+      {"after": "#include \"cc/test/test_layer_tree_frame_sink.h\"\n", "before": "\n", "n": 1, "add": ["#include \"components/viz/test/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "trees/layer_tree_host_pixeltest_masks.cc": [
+      {"after": "#include \"cc/test/test_layer_tree_frame_sink.h\"\n", "before": "\n", "n": 1, "add": ["#include \"components/viz/test/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "trees/layer_tree_host_pixeltest_readback.cc": [
+      {"after": "#include \"components/viz/common/frame_sinks/copy_output_result.h\"\n", "before": "#include \"components/viz/test/paths.h\"\n", "n": 1, "add": ["#include \"components/viz/test/buildflags.h\"\n"]}
+    ],
+    "trees/layer_tree_host_pixeltest_tiles.cc": [
+      {"after": "#include \"components/viz/common/frame_sinks/copy_output_request.h\"\n", "before": "#include \"gpu/command_buffer/client/raster_interface.h\"\n", "n": 1, "add": ["#include \"components/viz/test/buildflags.h\"\n"]}
+    ],
+    "trees/layer_tree_host_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest-spi.h\"\n", "before": "#include \"ui/gfx/animation/keyframe/timing_function.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/gpu/ganesh/GrDirectContext.h\"\n"]}
+    ],
+    "trees/layer_tree_host_unittest_capture_content.cc": [
+      {"after": "#include \"skia/ext/font_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n"]}
+    ],
+    "trees/layer_tree_host_unittest_picture.cc": [
+      {"after": "\n", "before": "#include \"base/functional/bind.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]}
+    ],
+    "trees/layer_tree_host_unittest_proxy.cc": [
+      {"after": "#include \"cc/trees/single_thread_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "    !PA_BUILDFLAG(MEMORY_TOOL_REPLACES_ALLOCATOR)\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC) &&\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "trees/layer_tree_impl.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "#include \"ui/gfx/geometry/point_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "trees/layer_tree_settings.cc": [
+      {"after": "#include \"components/viz/common/resources/platform_color.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/angle/include/GLES2/gl2.h\"\n"]}
+    ],
+    "trees/layer_tree_settings.h": [
+      {"after": "#include \"components/viz/common/display/renderer_settings.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "trees/property_tree_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/linear_gradient.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBlendMode.h\"\n"]}
+    ],
+    "trees/proxy_main.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "trees/render_frame_metadata.h": [
+      {"after": "#include \"components/viz/common/vertical_scroll_direction.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "trees/single_thread_proxy.cc": [
+      {"after": "#include \"base/types/optional_ref.h\"\n", "before": "#include \"cc/base/completion_event.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"components/viz/common/gpu/raster_context_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ]
+  }
+}

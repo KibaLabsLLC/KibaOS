@@ -1,0 +1,520 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/ipcz",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/api.cc": [
+      {"after": "#include \"ipcz/driver_object.h\"\n", "before": "#include \"ipcz/node.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/api.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/api_test.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"reference_drivers/single_process_reference_driver_base.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/box_test.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"test/multinode_test.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/connect_test.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ipcz/node_messages.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/fuzzer/driver.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fuzzer/driver.h\"\n"]},
+      {"after": "#include \"base/no_destructor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"fuzzer/fuzzer.h\"\n", "#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/fuzzer/driver.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/fuzzer/fuzzer.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"fuzzer/driver.h\"\n", "#include \"fuzzer/fuzzer.h\"\n", "#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/fuzzer/fuzzer.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/fuzzer/ipcz_fuzzer.cc": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"fuzzer/fuzzer.h\"\n", "#include \"fuzzer/ipcz_fuzzer_testcase.h\"\n"]}
+    ],
+    "src/fuzzer/ipcz_fuzzer_testcase.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fuzzer/ipcz_fuzzer_testcase.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"api.h\"\n", "#include \"fuzzer/driver.h\"\n", "#include \"fuzzer/fuzzer.h\"\n", "#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/api_context.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/api_context.h\"\n"]}
+    ],
+    "src/ipcz/api_object.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n"]}
+    ],
+    "src/ipcz/api_object.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/application_object.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/application_object.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/node_link.h\"\n"]}
+    ],
+    "src/ipcz/application_object.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/parcel_wrapper.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/block_allocator.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator.h\"\n", "#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/block_allocator.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/block_allocator_pool.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/block_allocator_pool.h\"\n"]}
+    ],
+    "src/ipcz/block_allocator_pool.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator.h\"\n", "#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/fragment.h\"\n"]}
+    ],
+    "src/ipcz/block_allocator_test.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator.h\"\n"]}
+    ],
+    "src/ipcz/box.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/box.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/box.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"ipcz/application_object.h\"\n", "#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/parcel_wrapper.h\"\n"]}
+    ],
+    "src/ipcz/buffer_id.h": [
+      {"after": "#include \"base/types/strong_alias.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n"]}
+    ],
+    "src/ipcz/buffer_pool.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/buffer_pool.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator_pool.h\"\n", "#include \"ipcz/metrics.h\"\n"]}
+    ],
+    "src/ipcz/buffer_pool.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator.h\"\n", "#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/fragment.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n"]}
+    ],
+    "src/ipcz/buffer_pool_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/buffer_pool.h\"\n"]},
+      {"after": "#include \"base/test/metrics/histogram_tester.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/block_allocator.h\"\n", "#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_memory.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/driver_memory.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_memory_mapping.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_memory_mapping.h\"\n"]}
+    ],
+    "src/ipcz/driver_memory_mapping.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/driver_memory_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"test/mock_driver.h\"\n", "#include \"test/multinode_test.h\"\n", "#include \"test/test.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_object.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/driver_object.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_object_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"test/mock_driver.h\"\n", "#include \"test/test.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_transport.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/message.h\"\n", "#include \"ipcz/node.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_transport.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/driver_transport_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n"]},
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/test_messages.h\"\n", "#include \"test/mock_driver.h\"\n", "#include \"test/test_transport_listener.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/features.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/features.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/message.h\"\n"]}
+    ],
+    "src/ipcz/features.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/fragment.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/fragment.h\"\n"]},
+      {"after": "#include \"base/numerics/clamped_math.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n"]}
+    ],
+    "src/ipcz/fragment.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n"]}
+    ],
+    "src/ipcz/fragment_descriptor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/fragment_ref.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/fragment_ref.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/fragment.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/ref_counted_fragment.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/fragment_ref.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/fragment.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n", "#include \"ipcz/ref_counted_fragment.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/fragment_test.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/fragment.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]}
+    ],
+    "src/ipcz/handle_type.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/link_side.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n"]}
+    ],
+    "src/ipcz/link_type.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_type.h\"\n"]}
+    ],
+    "src/ipcz/local_router_link.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/local_router_link.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/router_link_state.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/local_router_link.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/router_link.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/message.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/message.h\"\n"]}
+    ],
+    "src/ipcz/message.h": [
+      {"after": "#include \"base/numerics/checked_math.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/sequence_number.h\"\n"]}
+    ],
+    "src/ipcz/message_test.cc": [
+      {"after": "#include \"base/numerics/byte_conversions.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/message.h\"\n", "#include \"ipcz/message_test_types.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/test_messages.h\"\n", "#include \"test/mock_driver.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/metrics.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/metrics.h\"\n"]}
+    ],
+    "src/ipcz/node.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_connector.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/router.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/node_type.h\"\n"]}
+    ],
+    "src/ipcz/node_connector.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_connector.h\"\n"]},
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_connector.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_connector_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_connector.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n", "#include \"test/test.h\"\n", "#include \"test/test_transport_listener.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_link.h\"\n"]},
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/box.h\"\n", "#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/message.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_connector.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/parcel.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/router_link.h\"\n", "#include \"ipcz/router_link_state.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link_memory.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_link_memory.h\"\n"]},
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/metrics.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link_memory.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/thread_annotations.h\"\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/buffer_pool.h\"\n", "#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_memory_mapping.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n", "#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/ref_counted_fragment.h\"\n", "#include \"ipcz/router_link_state.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link_memory_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_link_memory.h\"\n"]},
+      {"after": "#include \"base/test/metrics/histogram_tester.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/metrics.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/parcel.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n", "#include \"test/mock_driver.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_link_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_link.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/parcel.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/sublink_id.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/node_messages.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_messages.h\"\n"]}
+    ],
+    "src/ipcz/node_messages.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/message.h\"\n"]},
+      {"after": "// Headers for included types.\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/buffer_id.h\"\n", "#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/fragment_descriptor.h\"\n", "#include \"ipcz/handle_type.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/node_type.h\"\n", "#include \"ipcz/router_descriptor.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]}
+    ],
+    "src/ipcz/node_name.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node_name.h\"\n"]}
+    ],
+    "src/ipcz/node_name.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/ipcz/node_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/node.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/parcel.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/parcel.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n"]}
+    ],
+    "src/ipcz/parcel.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"ipcz/fragment.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/message.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/sequence_number.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/parcel_queue.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/parcel.h\"\n", "#include \"ipcz/sequenced_queue.h\"\n"]}
+    ],
+    "src/ipcz/parcel_wrapper.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/parcel_wrapper.h\"\n"]},
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/parcel_wrapper.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/parcel.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/pending_transaction_set.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/pending_transaction_set.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/parcel.h\"\n"]}
+    ],
+    "src/ipcz/pending_transaction_set.h": [
+      {"after": "#include \"base/containers/unique_ptr_adapters.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/parcel.h\"\n"]}
+    ],
+    "src/ipcz/ref_counted_fragment.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ref_counted_fragment.h\"\n"]}
+    ],
+    "src/ipcz/ref_counted_fragment.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/ref_counted_fragment_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ref_counted_fragment.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/fragment.h\"\n", "#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/remote_router_link.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/application_object.h\"\n", "#include \"ipcz/box.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_link_memory.h\"\n", "#include \"ipcz/node_messages.h\"\n", "#include \"ipcz/parcel.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n"]}
+    ],
+    "src/ipcz/remote_router_link.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/router_link.h\"\n", "#include \"ipcz/router_link_state.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/route_edge.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/route_edge.h\"\n"]},
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/router.h\"\n", "#include \"ipcz/router_link.h\"\n"]}
+    ],
+    "src/ipcz/route_edge.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/router_link.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/route_edge_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/route_edge.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/local_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/sequence_number.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/router.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/local_router_link.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/parcel_wrapper.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/trap_event_dispatcher.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/multi_mutex_lock.h\"\n"]}
+    ],
+    "src/ipcz/router.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/thread_annotations.h\"\n", "n": 1, "add": ["#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/parcel_queue.h\"\n", "#include \"ipcz/pending_transaction_set.h\"\n", "#include \"ipcz/route_edge.h\"\n", "#include \"ipcz/router_descriptor.h\"\n", "#include \"ipcz/router_link.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n", "#include \"ipcz/trap_set.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/router_descriptor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/fragment_descriptor.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n"]}
+    ],
+    "src/ipcz/router_link.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/fragment_ref.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/router_link_state.h\"\n", "#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sublink_id.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/router_link_state.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/router_link_state.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n"]}
+    ],
+    "src/ipcz/router_link_state.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/ref_counted_fragment.h\"\n"]}
+    ],
+    "src/ipcz/router_link_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/router_link.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_memory.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/features.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/link_side.h\"\n", "#include \"ipcz/link_type.h\"\n", "#include \"ipcz/local_router_link.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/node_link.h\"\n", "#include \"ipcz/node_name.h\"\n", "#include \"ipcz/remote_router_link.h\"\n", "#include \"ipcz/router.h\"\n", "#include \"ipcz/router_link_state.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/sequenced_queue.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/sequence_number.h\"\n"]}
+    ],
+    "src/ipcz/sequenced_queue_test.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"ipcz/sequence_number.h\"\n", "#include \"ipcz/sequenced_queue.h\"\n"]}
+    ],
+    "src/ipcz/sublink_id.h": [
+      {"after": "#include \"base/types/strong_alias.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/link_side.h\"\n"]}
+    ],
+    "src/ipcz/test_messages.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/test_messages.h\"\n"]}
+    ],
+    "src/ipcz/test_messages.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/message.h\"\n"]},
+      {"after": "// Headers for included types.\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/message_test_types.h\"\n"]}
+    ],
+    "src/ipcz/trap_event_dispatcher.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/trap_event_dispatcher.h\"\n"]}
+    ],
+    "src/ipcz/trap_event_dispatcher.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/trap_set.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/trap_set.h\"\n"]},
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/api_context.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/trap_event_dispatcher.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/ipcz/trap_set.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/parcel_queue.h\"\n"]}
+    ],
+    "src/merge_portals_test.cc": [
+      {"after": "\n", "before": "#include \"test/multinode_test.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/parcel_test.cc": [
+      {"after": "\n", "before": "#include \"test/multinode_test.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/reference_drivers/async_reference_driver.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/async_reference_driver.h\"\n"]},
+      {"after": "#include \"base/no_destructor.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/object.h\"\n", "#include \"reference_drivers/single_process_reference_driver_base.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/async_reference_driver.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/reference_drivers/file_descriptor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n"]}
+    ],
+    "src/reference_drivers/memfd_memory.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/memfd_memory.h\"\n"]}
+    ],
+    "src/reference_drivers/memfd_memory.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n"]}
+    ],
+    "src/reference_drivers/memfd_memory_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/memfd_memory.h\"\n"]}
+    ],
+    "src/reference_drivers/multiprocess_reference_driver.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/multiprocess_reference_driver.h\"\n"]},
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/memfd_memory.h\"\n", "#include \"reference_drivers/object.h\"\n", "#include \"reference_drivers/random.h\"\n", "#include \"reference_drivers/socket_transport.h\"\n", "#include \"reference_drivers/wrapped_file_descriptor.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/multiprocess_reference_driver.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/socket_transport.h\"\n"]}
+    ],
+    "src/reference_drivers/multiprocess_reference_driver_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/multiprocess_reference_driver.h\"\n"]},
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/wrapped_file_descriptor.h\"\n"]}
+    ],
+    "src/reference_drivers/object.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/object.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/reference_drivers/object.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/random.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/random.h\"\n"]}
+    ],
+    "src/reference_drivers/single_process_reference_driver_base.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/object.h\"\n", "#include \"reference_drivers/random.h\"\n", "#include \"reference_drivers/single_process_reference_driver_base.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/single_process_reference_driver_base.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/reference_drivers/socket_transport.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/handle_eintr.h\"\n", "#include \"reference_drivers/socket_transport.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/socket_transport.h": [
+      {"after": "\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/socket_transport_test.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/memfd_memory.h\"\n", "#include \"reference_drivers/socket_transport.h\"\n"]}
+    ],
+    "src/reference_drivers/sync_reference_driver.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/sync_reference_driver.h\"\n"]},
+      {"after": "#include \"base/no_destructor.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/synchronization/mutex.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/object.h\"\n", "#include \"reference_drivers/random.h\"\n", "#include \"reference_drivers/single_process_reference_driver_base.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/sync_reference_driver.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/reference_drivers/sync_reference_driver_test.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/api_object.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n"]}
+    ],
+    "src/reference_drivers/wrapped_file_descriptor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/wrapped_file_descriptor.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/reference_drivers/wrapped_file_descriptor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/object.h\"\n"]}
+    ],
+    "src/remote_portal_test.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"test/multinode_test.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/test/mock_driver.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"test/mock_driver.h\"\n"]}
+    ],
+    "src/test/mock_driver.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/test/multinode_test.cc": [
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"test/multinode_test.h\"\n"]},
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"reference_drivers/async_reference_driver.h\"\n", "#include \"reference_drivers/sync_reference_driver.h\"\n", "#include \"test_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_IPCZ_MULTIPROCESS_TESTS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n", "#include \"reference_drivers/multiprocess_reference_driver.h\"\n", "#include \"reference_drivers/socket_transport.h\"\n", "#include \"test/test_child_launcher.h\"\n"]}
+    ],
+    "src/test/multinode_test.h": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n", "#include \"test/test_base.h\"\n", "#include \"test_buildflags.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/types/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/test/test.h": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"test/test_base.h\"\n"]}
+    ],
+    "src/test/test_base.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"test/test_base.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"api.h\"\n", "#include \"ipcz/ipcz.h\"\n", "#include \"ipcz/node.h\"\n", "#include \"ipcz/router.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/notification.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/test/test_base.h": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/test/test_child_launcher.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"test/test_child_launcher.h\"\n"]},
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/macros.h\"\n", "n": 1, "add": ["#include \"reference_drivers/handle_eintr.h\"\n", "#include \"test/multinode_test.h\"\n"]}
+    ],
+    "src/test/test_child_launcher.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"reference_drivers/file_descriptor.h\"\n"]}
+    ],
+    "src/test/test_transport_listener.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"test/test_transport_listener.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"ipcz/driver_object.h\"\n", "#include \"ipcz/driver_transport.h\"\n", "#include \"ipcz/message.h\"\n", "#include \"ipcz/node.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/synchronization/notification.h\"\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/test/test_transport_listener.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"ipcz/driver_transport.h\"\n", "#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/trap_test.cc": [
+      {"after": "\n", "before": "#include \"reference_drivers/sync_reference_driver.h\"\n", "n": 1, "add": ["#include \"ipcz/ipcz.h\"\n"]}
+    ],
+    "src/util/ref_counted.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ],
+    "src/util/ref_counted_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"util/ref_counted.h\"\n"]}
+    ]
+  }
+}

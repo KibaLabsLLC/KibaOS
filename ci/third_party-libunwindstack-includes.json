@@ -1,0 +1,170 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libunwindstack",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "art/src/libartbase/base/data_hash.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/globals.h\"\n", "#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libartbase/base/globals.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libartbase/base/hash_set.h": [
+      {"after": "\n", "before": "#include \"bit_utils.h\"\n", "n": 1, "add": ["#include \"base/data_hash.h\"\n"]}
+    ],
+    "art/src/libartbase/base/hiddenapi_flags.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/logging.h\"\n", "#include \"base/bit_utils.h\"\n", "#include \"base/dumpable.h\"\n", "#include \"base/macros.h\"\n", "#include \"base/hiddenapi_stubs.h\"\n"]}
+    ],
+    "art/src/libartbase/base/logging.h": [
+      {"after": "\n", "before": "#include \"macros.h\"\n", "n": 1, "add": ["#include \"android-base/logging.h\"\n"]}
+    ],
+    "art/src/libartbase/base/macros.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/macros.h\"\n", "#include \"android-base/thread_annotations.h\"\n"]}
+    ],
+    "art/src/libartbase/base/mem_map.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n", "#include \"android-base/unique_fd.h\"\n"]}
+    ],
+    "art/src/libartbase/base/mem_map.h": [
+      {"after": "\n", "before": "#include \"bit_utils.h\"\n", "n": 1, "add": ["#include \"android-base/thread_annotations.h\"\n"]}
+    ],
+    "art/src/libartbase/base/stl_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/iteration_range.h\"\n"]}
+    ],
+    "art/src/libartbase/base/unix_file/fd_file.cc": [
+      {"after": "#include <algorithm>\n", "before": "#include \"base/stl_util.h\"\n", "n": 1, "add": ["#include \"base/globals.h\"\n"]}
+    ],
+    "art/src/libartbase/base/unix_file/fd_file.h": [
+      {"after": "\n", "before": "#include \"random_access_file.h\"\n", "n": 1, "add": ["#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/class_accessor-inl.h": [
+      {"after": "\n", "before": "#include \"class_iterator.h\"\n", "n": 1, "add": ["#include \"base/hiddenapi_flags.h\"\n", "#include \"base/leb128.h\"\n", "#include \"base/utils.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/class_accessor.h": [
+      {"after": "#include \"code_item_accessors.h\"\n", "before": "#include \"dex_file_types.h\"\n", "n": 1, "add": ["#include \"dex/dex_file.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/code_item_accessors-inl.h": [
+      {"after": "\n", "before": "#include \"compact_dex_file.h\"\n", "n": 1, "add": ["#include \"base/iteration_range.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/compact_dex_file.cc": [
+      {"after": "\n", "before": "#include \"code_item_accessors-inl.h\"\n", "n": 1, "add": ["#include \"base/leb128.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/compact_dex_file.h": [
+      {"after": "\n", "before": "#include \"dex_file.h\"\n", "n": 1, "add": ["#include \"base/casts.h\"\n", "#include \"dex/compact_offset_table.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/compact_dex_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/bit_utils.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/compact_offset_table.cc": [
+      {"after": "#include \"compact_dex_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/leb128.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/descriptors_names.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n", "#include \"android-base/strings.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/macros.h\"\n", "#include \"dex/utf-inl.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/descriptors_names.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dex/primitive.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file-inl.h": [
+      {"after": "\n", "before": "#include \"class_iterator.h\"\n", "n": 1, "add": ["#include \"base/casts.h\"\n", "#include \"base/iteration_range.h\"\n", "#include \"base/leb128.h\"\n", "#include \"base/utils.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file.cc": [
+      {"after": "\n", "before": "#include \"base/stl_util.h\"\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n", "#include \"base/enums.h\"\n", "#include \"base/hiddenapi_domain.h\"\n", "#include \"base/leb128.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file.h": [
+      {"after": "\n", "before": "#include \"dex_file_structs.h\"\n", "n": 1, "add": ["#include \"base/array_ref.h\"\n", "#include \"base/globals.h\"\n", "#include \"base/macros.h\"\n", "#include \"base/mman.h\"  // For the PROT_* and MAP_* constants.\n", "#include \"base/value_object.h\"\n"]},
+      {"after": "#include \"dex_file_types.h\"\n", "before": "#include \"modifiers.h\"\n", "n": 1, "add": ["#include \"jni.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file_loader.cc": [
+      {"after": "\n", "before": "#include \"base/stl_util.h\"\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n", "#include \"base/bit_utils.h\"\n", "#include \"base/file_magic.h\"\n", "#include \"base/mem_map.h\"\n", "#include \"base/os.h\"\n"]},
+      {"after": "#include \"base/stl_util.h\"\n", "before": "#include \"compact_dex_file.h\"\n", "n": 1, "add": ["#include \"base/unix_file/fd_file.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file_loader.h": [
+      {"after": "\n", "before": "#include \"dex_file.h\"\n", "n": 1, "add": ["#include \"base/os.h\"\n", "#include \"base/unix_file/fd_file.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file_tracking_registrar.cc": [
+      {"after": "#endif\n", "before": "\n", "n": 1, "add": ["#include \"base/memory_tool.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_file_verifier.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/logging.h\"\n", "#include \"android-base/macros.h\"\n", "#include \"android-base/stringprintf.h\"\n"]},
+      {"after": "\n", "before": "#include \"class_accessor-inl.h\"\n", "n": 1, "add": ["#include \"base/hash_map.h\"\n", "#include \"base/leb128.h\"\n", "#include \"base/safe_map.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_instruction.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_instruction.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/globals.h\"\n", "#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/dex_instruction_iterator.h": [
+      {"after": "\n", "before": "#include \"dex_instruction.h\"\n", "n": 1, "add": ["#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/method_reference.h": [
+      {"after": "#include <string>\n", "before": "\n", "n": 1, "add": ["#include \"dex/dex_file.h\"\n", "#include \"dex/dex_file_reference.h\"\n", "#include \"dex/proto_reference.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/primitive.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dex/primitive.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/primitive.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/proto_reference.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dex/dex_file-inl.h\"\n", "#include \"dex/dex_file_reference.h\"\n", "#include \"dex/dex_file_types.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/signature.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/string_view_cpp20.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/signature.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/value_object.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/standard_dex_file.cc": [
+      {"after": "\n", "before": "#include \"code_item_accessors-inl.h\"\n", "n": 1, "add": ["#include \"base/casts.h\"\n", "#include \"base/leb128.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/type_lookup_table.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/bit_utils.h\"\n", "#include \"base/leb128.h\"\n", "#include \"dex/dex_file-inl.h\"\n", "#include \"dex/utf-inl.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/type_lookup_table.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dex/dex_file_types.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/utf.cc": [
+      {"after": "\n", "before": "#include \"utf-inl.h\"\n", "n": 1, "add": ["#include \"base/casts.h\"\n"]}
+    ],
+    "art/src/libdexfile/dex/utf.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/macros.h\"\n"]}
+    ],
+    "art/src/libdexfile/external/dex_file_ext.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"art_api/dex_file_external.h\"\n"]}
+    ],
+    "art/src/libdexfile/external/dex_file_supp.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"art_api/dex_file_support.h\"\n"]}
+    ],
+    "art/src/libdexfile/external/include/art_api/dex_file_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"art_api/dex_file_external.h\"\n"]}
+    ],
+    "libbase/src/file.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/file.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/logging.h\"  // and must be after windows.h for ERROR\n", "#include \"android-base/macros.h\"   // For TEMP_FAILURE_RETRY on Darwin.\n", "#include \"android-base/unique_fd.h\"\n", "#include \"android-base/utf8.h\"\n"]}
+    ],
+    "libbase/src/include/android-base/errno_restorer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"errno.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/macros.h\"\n"]}
+    ],
+    "libbase/src/include/android-base/file.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/macros.h\"\n", "#include \"android-base/off64_t.h\"\n", "#include \"android-base/unique_fd.h\"\n"]}
+    ],
+    "libbase/src/include/android-base/logging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/errno_restorer.h\"\n", "#include \"android-base/macros.h\"\n"]}
+    ],
+    "libbase/src/include/android-base/mapped_file.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/macros.h\"\n", "#include \"android-base/off64_t.h\"\n", "#include \"android-base/unique_fd.h\"\n"]}
+    ],
+    "libbase/src/stringprintf.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n"]}
+    ],
+    "libbase/src/strings.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/strings.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"android-base/stringprintf.h\"\n"]}
+    ],
+    "unwinding/src/libunwindstack/GlobalDebugImpl.h": [
+      {"after": "#include \"Check.h\"\n", "before": "#include \"MemoryCache.h\"\n", "n": 1, "add": ["#include \"GlobalDebugInterface.h\"\n"]}
+    ]
+  }
+}

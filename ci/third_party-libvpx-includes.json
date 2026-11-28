@@ -1,0 +1,316 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libvpx",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "source/config/ios/arm-neon/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm-neon/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm-neon/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv7-linux-gcc --disable-runtime-cpu-detect --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/ios/arm-neon/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm-neon/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv8-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/ios/arm64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/ios/arm64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon-highbd/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon-highbd/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon-highbd/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv7-linux-gcc --disable-runtime-cpu-detect --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon-highbd/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon-highbd/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv7-linux-gcc --disable-runtime-cpu-detect --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-highbd/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-highbd/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-highbd/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv8-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm64-highbd/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-highbd/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=armv8-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/generic/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]}
+    ],
+    "source/config/linux/generic/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=generic-gnu --enable-vp9-highbitdepth --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/generic/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]}
+    ],
+    "source/config/linux/ia32/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/ia32/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/ia32/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/ia32/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/ia32/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/loongarch/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/loongarch.h\"\n"]}
+    ],
+    "source/config/linux/loongarch/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/loongarch.h\"\n"]}
+    ],
+    "source/config/linux/loongarch/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=loongarch64-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/loongarch/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/loongarch.h\"\n"]}
+    ],
+    "source/config/linux/loongarch/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/loongarch.h\"\n"]}
+    ],
+    "source/config/linux/mips64el/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]}
+    ],
+    "source/config/linux/mips64el/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=mips64-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/mips64el/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]}
+    ],
+    "source/config/linux/mipsel/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]}
+    ],
+    "source/config/linux/mipsel/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=mips32-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/mipsel/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]}
+    ],
+    "source/config/linux/ppc64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/ppc.h\"\n"]}
+    ],
+    "source/config/linux/ppc64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/ppc.h\"\n"]}
+    ],
+    "source/config/linux/ppc64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=ppc64le-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/ppc64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/ppc.h\"\n"]}
+    ],
+    "source/config/linux/ppc64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/ppc.h\"\n"]}
+    ],
+    "source/config/linux/x64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86_64-linux-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/linux/x64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/ia32/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/ia32/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/ia32/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86-darwin9-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/mac/ia32/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/ia32/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/x64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/x64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/x64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86_64-darwin9-gcc --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/mac/x64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/mac/x64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/arm64-highbd/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/arm64-highbd/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/arm64-highbd/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=arm64-win64-vs15 --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-vp9-highbitdepth --disable-sve --disable-sve2\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/win/arm64-highbd/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/arm64-highbd/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/ia32/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/ia32/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/ia32/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86-win32-vs14 --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/win/ia32/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/ia32/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/vp8_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/vp9_rtcd.h": [
+      {"after": "\n", "before": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vp9/common/vp9_common.h\"\n", "#include \"vp9/common/vp9_enums.h\"\n", "#include \"vp9/common/vp9_filter.h\"\n"]},
+      {"after": "#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"vp9/encoder/vp9_temporal_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/vpx_config.c": [
+      {"after": "/* be found in the AUTHORS file in the root of the source tree. */\n", "before": "static const char* const cfg = \"--target=x86_64-win64-vs14 --enable-external-build --enable-postproc --enable-multi-res-encoding --enable-temporal-denoising --enable-vp9-temporal-denoising --disable-vp9-postproc --size-limit=16384x16384 --enable-realtime-only --disable-install-docs --disable-libyuv --enable-unit-tests --enable-pic --as=yasm --disable-avx512 --enable-vp9-highbitdepth\";\n", "n": 1, "add": ["#include \"vpx/vpx_codec.h\"\n"]}
+    ],
+    "source/config/win/x64/vpx_dsp_rtcd.h": [
+      {"after": "\n", "before": "#if CONFIG_VP9_ENCODER\n", "n": 1, "add": ["#include \"vpx/vpx_integer.h\"\n", "#include \"vpx_dsp/vpx_dsp_common.h\"\n", "#include \"vpx_dsp/vpx_filter.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/vpx_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"vpx_ports/x86.h\"\n"]}
+    ],
+    "tests/fuzzer/vp8_encoder_fuzz_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vp8cx.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_codec.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_encoder.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_image.h\"\n"]}
+    ],
+    "tests/fuzzer/vp9_encoder_fuzz_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vp8cx.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_codec.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_encoder.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_image.h\"\n"]}
+    ],
+    "tests/pgo/decode_encode_profile_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libvpx/source/libvpx/test/codec_factory.h\"\n", "#include \"third_party/libvpx/source/libvpx/test/i420_video_source.h\"\n", "#include \"third_party/libvpx/source/libvpx/test/util.h\"\n", "#include \"third_party/libvpx/source/libvpx/test/webm_video_source.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx/vpx_codec.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx_ports/vpx_timer.h\"\n", "#include \"third_party/libvpx/source/libvpx/vpx_util/vpx_pthread.h\"\n"]}
+    ]
+  }
+}

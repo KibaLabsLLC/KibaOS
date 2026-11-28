@@ -1,0 +1,77 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "url",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "android/gurl_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/GURL_jni.h\"\n"]}
+    ],
+    "android/gurl_android.h": [
+      {"after": "#include \"url/gurl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/GURL_shared_jni.h\"\n"]}
+    ],
+    "android/gurl_java_test_helper.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/j_test_jni_headers/GURLJavaTestHelper_jni.h\"\n"]}
+    ],
+    "android/origin_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/Origin_jni.h\"\n"]}
+    ],
+    "android/origin_java_test_helper.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/j_test_jni_headers/OriginJavaTestHelper_jni.h\"\n"]}
+    ],
+    "android/parsed_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/Parsed_jni.h\"\n"]}
+    ],
+    "android/parsed_android.h": [
+      {"after": "#include \"url/third_party/mozilla/url_parse.h\"\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/Parsed_shared_jni.h\"\n"]}
+    ],
+    "gurl.h": [
+      {"after": "#include \"base/trace_event/base_tracing_forward.h\"\n", "before": "#include \"url/third_party/mozilla/url_parse.h\"\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "mojom/origin_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/optional_as_pointer.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"url/mojom/origin.mojom-shared.h\"\n"]}
+    ],
+    "mojom/scheme_host_port_mojom_traits.cc": [
+      {"after": "\n", "before": "#include \"url/scheme_host_port.h\"\n", "n": 1, "add": ["#include \"url/mojom/scheme_host_port.mojom-shared.h\"\n"]}
+    ],
+    "mojom/scheme_host_port_mojom_traits.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"url/scheme_host_port.h\"\n", "n": 1, "add": ["#include \"url/mojom/scheme_host_port.mojom-shared.h\"\n"]}
+    ],
+    "mojom/scheme_host_port_mojom_traits_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"url/scheme_host_port.h\"\n", "n": 1, "add": ["#include \"url/mojom/scheme_host_port.mojom.h\"\n"]}
+    ],
+    "mojom/url_gurl_mojom_traits.h": [
+      {"after": "#include \"url/gurl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"url/mojom/url.mojom-shared.h\"\n"]}
+    ],
+    "mojom/url_gurl_mojom_traits_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"url/url_util.h\"\n", "n": 1, "add": ["#include \"url/mojom/origin.mojom.h\"\n", "#include \"url/mojom/url_test.mojom.h\"\n"]}
+    ],
+    "origin.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "#include \"url/scheme_host_port.h\"\n", "n": 1, "add": ["#include \"build/robolectric_buildflags.h\"\n", "#include \"net/base/cronet_buildflags.h\"\n", "#include \"third_party/crubit/support/annotations.h\"\n"]},
+      {"after": "#include \"base/android/jni_android.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"url/url_jni_headers/Origin_shared_jni.h\"\n"]}
+    ],
+    "scheme_host_port.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "scheme_host_port_perftest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "third_party/mozilla/url_parse.h": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "url_canon_icu.cc": [
+      {"after": "#include \"base/strings/span_printf.h\"\n", "before": "#include \"url/url_canon_internal.h\"  // for _itoa_s\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ucnv.h\"\n", "#include \"third_party/icu/source/common/unicode/ucnv_cb.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n"]}
+    ],
+    "url_canon_icu_test_helpers.h": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"url/url_canon.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ucnv.h\"\n"]}
+    ],
+    "url_canon_icu_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"url/url_canon.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ucnv.h\"\n"]}
+    ],
+    "url_idna_icu.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"url/url_canon_icu.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uidna.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n"]}
+    ],
+    "url_idna_icu_alternatives_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"url/url_jni_headers/IDNStringUtil_jni.h\"\n"]}
+    ]
+  }
+}

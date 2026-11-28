@@ -72,8 +72,9 @@ if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
 fi
 
 # The import behind that tree also took its include lines -- every
-# `#include "absl/..."` line from abseil-cpp, every quoted include from
-# protobuf, and every quoted include from base/ and build/ -- so the headers it
+# quoted `#include "..."` line from the directories it hit -- abseil-cpp,
+# protobuf, zlib, base/, build/ and the rest of the tree from ui/ and
+# components/ to blink -- so the headers it
 # kept include nothing and the first abseil TU fails on ABSL_NAMESPACE_BEGIN
 # while the first protobuf TU fails on `absl`. Every manifest beside the tool
 # is applied. Restore them as the owner too, so this build fails on its own

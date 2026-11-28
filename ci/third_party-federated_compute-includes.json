@@ -1,0 +1,169 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/federated_compute",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "chromium/fcp/client/attestation/attestation_transparency_verifier.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fcp/client/attestation/attestation_transparency_verifier.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/algorithm/container.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/time/clock.h\"\n", "#include \"absl/time/time.h\"\n", "#include \"fcp/confidentialcompute/payload_transparency/payload_transparency.h\"\n", "#include \"fcp/protos/confidentialcompute/key.pb.h\"\n", "#include \"fcp/protos/confidentialcompute/payload_transparency.pb.h\"\n", "#include \"fcp/protos/confidentialcompute/signed_endorsements.pb.h\"\n", "#include \"google/protobuf/repeated_ptr_field.h\"\n"]}
+    ],
+    "chromium/fcp/client/attestation/attestation_transparency_verifier.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"fcp/client/attestation/attestation_verifier.h\"\n", "#include \"fcp/protos/confidentialcompute/access_policy_endorsement_options.pb.h\"\n", "#include \"fcp/protos/confidentialcompute/payload_transparency.pb.h\"\n"]}
+    ],
+    "chromium/fcp/client/cache/file_backed_resource_cache.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/time/clock_interface.h\"\n", "#include \"fcp/client/cache/resource_cache.h\"\n", "#include \"fcp/client/log_manager.h\"\n"]}
+    ],
+    "chromium/fcp/client/secagg_runner.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fcp/client/secagg_runner.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "chromium/fcp/confidentialcompute/cose.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fcp/confidentialcompute/cose.h\"\n"]},
+      {"after": "\n", "before": "#include \"base/containers/span.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/time/time.h\"\n"]}
+    ],
+    "chromium/fcp/confidentialcompute/cose_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fcp/confidentialcompute/cose.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/escaping.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/time/time.h\"\n", "#include \"fcp/testing/testing.h\"\n", "#include \"gmock/gmock.h\"\n", "#include \"google/protobuf/struct.pb.h\"\n", "#include \"gtest/gtest.h\"\n"]}
+    ],
+    "chromium/fcp/testing/testing.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"fcp/testing/testing.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "chromium/fcp/testing/testing.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/crc32.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/crc32.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/crc32.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/crc32_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/crc32.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/file-storage.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/file-storage.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/file-storage.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/file-storage_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/file-storage.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n", "#include \"protostore/testing-matchers.h\"\n", "#include \"protostore/testfile-fixture.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/proto-data-store.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"google/protobuf/stubs/status_macros.h\"\n", "#include \"protostore/crc32.h\"\n", "#include \"protostore/file-storage.h\"\n", "#include \"protostore/status-macros.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/proto-data-store_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/proto-data-store.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"google/protobuf/message.h\"\n", "#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n", "#include \"protostore/file-storage.h\"\n", "#include \"protostore/testing-matchers.h\"\n", "#include \"protostore/testfile-fixture.h\"\n", "#include \"protostore/test.pb.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/status-macros.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/testfile-fixture.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"protostore/file-storage.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n"]}
+    ],
+    "third_party/protodatastore-cpp/src/protostore/testing-matchers.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"google/protobuf/message.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gmock/gmock.h\"\n", "#include \"gtest/gtest.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/base_name.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/base_name.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/base_name.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/monitoring.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/base_name.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/attributes.h\"\n", "#include \"absl/base/optimization.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/platform.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/platform.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/cord.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/strings/strip.h\"\n", "#include \"google/protobuf/message.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/base/platform.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/cord.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"google/protobuf/message.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/agg_vector.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/agg_vector_iterator.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/agg_vector_iterator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/datatype.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/datatype.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/datatype.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/input_tensor_list.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/input_tensor_list.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/input_tensor_list.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/mutable_vector_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/scalar_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"google/protobuf/io/coded_stream.h\"\n", "#include \"google/protobuf/io/zero_copy_stream_impl_lite.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/datatype.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/vector_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/agg_vector.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/datatype.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/scalar_data.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/vector_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/inlined_vector.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_slice_data.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_slice_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_slice_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/types/span.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_spec.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_spec.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.pb.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/tensor_spec.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/base/monitoring.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_shape.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/core/vector_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor_data.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/protocol/checkpoint_builder.h": [
+      {"after": "#include <string>\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/cord.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/protocol/federated_compute_checkpoint_builder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/protocol/federated_compute_checkpoint_builder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/cord.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"google/protobuf/io/coded_stream.h\"\n", "#include \"google/protobuf/io/zero_copy_stream_impl_lite.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/core/tensor.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/protocol/checkpoint_builder.h\"\n", "#include \"tensorflow_federated/cc/core/impl/aggregation/protocol/checkpoint_header.h\"\n"]}
+    ],
+    "third_party/tensorflow-federated/src/tensorflow_federated/cc/core/impl/aggregation/protocol/federated_compute_checkpoint_builder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow_federated/cc/core/impl/aggregation/protocol/checkpoint_builder.h\"\n"]}
+    ]
+  }
+}

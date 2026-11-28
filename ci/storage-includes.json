@@ -1,0 +1,265 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "storage",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "browser/blob/blob_builder_from_stream.h": [
+      {"after": "#include \"storage/browser/blob/shareable_blob_data_item.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_registry.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_data_builder.h": [
+      {"after": "#include \"components/file_access/scoped_file_access_delegate.h\"\n", "before": "#include \"storage/browser/blob/blob_data_item.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_data_item.h": [
+      {"after": "#include \"components/file_access/scoped_file_access_delegate.h\"\n", "before": "#include \"net/base/io_buffer.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_handle.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_impl.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/data_pipe_getter.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_reader.cc": [
+      {"after": "#include \"third_party/blink/public/common/blob/blob_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "browser/blob/blob_registry_impl.cc": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/serialized_blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_registry_impl.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/self_owned_associated_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_registry.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_registry_impl_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/serialized_blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_storage_context.cc": [
+      {"after": "#include \"third_party/blink/public/common/blob/blob_utils.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_storage_context.h": [
+      {"after": "#include \"base/trace_event/memory_dump_provider.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n"]},
+      {"after": "#include \"storage/browser/blob/blob_storage_registry.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_storage_context_mojo_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"mojo/public/cpp/base/big_buffer.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/blob/blob_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_transport_strategy.cc": [
+      {"after": "#include \"storage/browser/blob/blob_data_builder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_transport_strategy.h": [
+      {"after": "#include \"storage/browser/blob/blob_memory_controller.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_registry.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_transport_strategy_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_loader.cc": [
+      {"after": "#include \"services/network/public/cpp/resource_request.h\"\n", "before": "#include \"storage/browser/blob/blob_data_handle.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_loader.h": [
+      {"after": "#include \"services/network/public/cpp/resource_request.h\"\n", "before": "#include \"storage/browser/blob/mojo_blob_reader.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_loader_factory.cc": [
+      {"after": "#include \"services/network/public/cpp/resource_request.h\"\n", "before": "#include \"storage/browser/blob/blob_url_registry.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_loader_factory.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_registry.cc": [
+      {"after": "#include \"storage/browser/blob/blob_url_utils.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/devtools/inspector_issue.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_registry.h": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom.h\"\n", "#include \"third_party/blink/public/mojom/devtools/inspector_issue.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_store_impl.cc": [
+      {"after": "#include \"third_party/blink/public/common/blob/blob_url.h\"\n", "before": "#include \"url/url_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/devtools/inspector_issue.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_store_impl.h": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom.h\"\n", "#include \"third_party/blink/public/mojom/devtools/inspector_issue.mojom.h\"\n"]}
+    ],
+    "browser/blob/blob_url_store_impl_unittest.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "#include \"storage/browser/blob/blob_data_builder.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]}
+    ],
+    "browser/blob/mojo_blob_reader.cc": [
+      {"after": "#include \"third_party/blink/public/common/blob/blob_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "browser/blob/write_blob_to_file.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"storage/browser/blob/blob_data_handle.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n"]}
+    ],
+    "browser/file_system/async_file_util.h": [
+      {"after": "#include \"base/functional/callback_forward.h\"\n", "before": "#include \"storage/browser/file_system/file_system_operation.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/async_file_util_adapter.cc": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"storage/browser/blob/scoped_file.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/copy_or_move_operation_delegate_unittest.cc": [
+      {"after": "#include \"components/file_access/file_access_copy_or_move_delegate_factory.h\"\n", "before": "#include \"storage/browser/file_system/copy_or_move_file_validator.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/dragged_file_util_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"storage/browser/file_system/file_system_context.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_context.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_client_callback_wrapper.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "#include \"third_party/leveldatabase/leveldb_chrome.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_context.h": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_error_or.h\"\n", "before": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"storage/common/file_system/file_system_types.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/file_system/file_system_operation.h": [
+      {"after": "#include \"base/types/pass_key.h\"\n", "before": "#include \"storage/browser/blob/blob_reader.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_operation_impl.h": [
+      {"after": "#include \"storage/browser/file_system/file_writer_delegate.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_operation_impl_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"storage/browser/blob/scoped_file.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_operation_runner.h": [
+      {"after": "#include \"base/types/pass_key.h\"\n", "before": "#include \"storage/browser/blob/blob_data_handle.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_quota_client.cc": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_quota_client.h": [
+      {"after": "#include \"base/thread_annotations.h\"\n", "before": "#include \"storage/browser/file_system/file_system_quota_util.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/file_system/file_system_quota_client_unittest.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "#include \"storage/browser/file_system/file_system_context.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/native_file_util.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"storage/browser/file_system/file_system_operation_context.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif  // BUILDFLAG(IS_WIN)\n", "n": 1, "add": ["#include \"windows.h\"\n"]}
+    ],
+    "browser/file_system/native_file_util_unittest.cc": [
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif  // BUILDFLAG(IS_WIN)\n", "n": 1, "add": ["#include \"windows.h\"\n"]}
+    ],
+    "browser/file_system/obfuscated_file_util_memory_delegate.cc": [
+      {"after": "#include \"net/base/net_errors.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "browser/file_system/obfuscated_file_util_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"net/base/features.h\"\n", "n": 1, "add": ["#include \"components/services/filesystem/public/mojom/types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/quota/quota_backend_impl.h": [
+      {"after": "#include \"storage/browser/file_system/sandbox_file_system_backend_delegate.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/sandbox_directory_database.cc": [
+      {"after": "#include \"third_party/leveldatabase/leveldb_chrome.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n", "#include \"third_party/leveldatabase/src/include/leveldb/write_batch.h\"\n"]}
+    ],
+    "browser/file_system/sandbox_directory_database_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n"]}
+    ],
+    "browser/file_system/sandbox_file_stream_writer.h": [
+      {"after": "#include \"storage/common/file_system/file_system_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/file_system/sandbox_origin_database.cc": [
+      {"after": "#include \"third_party/leveldatabase/env_chromium.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n", "#include \"third_party/leveldatabase/src/include/leveldb/write_batch.h\"\n"]}
+    ],
+    "browser/file_system/sandbox_origin_database_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/db/filename.h\"\n", "#include \"third_party/leveldatabase/src/include/leveldb/db.h\"\n"]}
+    ],
+    "browser/quota/client_usage_tracker.h": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "#include \"storage/browser/quota/quota_callbacks.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"storage/browser/quota/special_storage_policy.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_callbacks.h": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-forward.h\"\n"]}
+    ],
+    "browser/quota/quota_database.cc": [
+      {"after": "#include \"storage/browser/quota/quota_features.h\"\n", "before": "#include \"storage/browser/quota/special_storage_policy.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_internals.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_database.h": [
+      {"after": "#include \"sql/transaction.h\"\n", "before": "#include \"storage/browser/quota/storage_directory.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_internals.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/quota/quota_database_migrations.cc": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/buckets/bucket_manager_host.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_database_unittest.cc": [
+      {"after": "#include \"storage/browser/quota/quota_features.h\"\n", "before": "#include \"storage/browser/quota/storage_directory_util.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_internals.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/quota/quota_manager_impl.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/constants.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"storage/browser/quota/quota_macros.h\"\n", "before": "#include \"storage/browser/quota/quota_manager_proxy.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_manager_observer.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/storage_key/storage_key.mojom.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "browser/quota/quota_manager_impl.h": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_error_or.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"storage/browser/quota/quota_database.h\"\n", "before": "#include \"storage/browser/quota/quota_settings.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_internals.mojom.h\"\n", "#include \"storage/browser/quota/quota_manager_observer.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/quota/quota_manager_proxy.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/constants.h\"\n", "before": "#include \"mojo/public/cpp/bindings/callback_helpers.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_manager_proxy.h": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_error_or.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom-forward.h\"\n"]},
+      {"after": "#include \"storage/browser/quota/quota_manager_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_manager_unittest.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/constants.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"storage/browser/quota/quota_database.h\"\n", "before": "#include \"storage/browser/quota/quota_manager_impl.h\"\n", "n": 1, "add": ["#include \"storage/browser/quota/quota_internals.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/buckets/bucket_manager_host.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/quota/quota_temporary_storage_evictor.cc": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/quota/quota_temporary_storage_evictor.h": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/quota/storage_directory_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom-shared.h\"\n"]}
+    ],
+    "browser/quota/storage_policy_observer.h": [
+      {"after": "#include \"base/threading/sequence_bound.h\"\n", "before": "#include \"storage/browser/quota/special_storage_policy.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/storage_policy_update.mojom.h\"\n"]}
+    ],
+    "browser/quota/usage_tracker.h": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "#include \"storage/browser/quota/quota_callbacks.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/quota/usage_tracker_unittest.cc": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_error_or.h\"\n", "before": "#include \"storage/browser/quota/quota_client_type.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/test/async_file_test_helper.h": [
+      {"after": "#include \"storage/common/file_system/file_system_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/test/blob_test_utils.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/blob_storage_context.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/test/fake_blob.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n"]}
+    ],
+    "browser/test/fake_progress_client.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_registry.mojom.h\"\n"]}
+    ],
+    "browser/test/mock_bytes_provider.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_registry.mojom.h\"\n", "#include \"third_party/blink/public/mojom/blob/data_element.mojom.h\"\n"]}
+    ],
+    "browser/test/mock_quota_client.h": [
+      {"after": "#include \"components/services/storage/public/cpp/buckets/bucket_locator.h\"\n", "before": "#include \"storage/browser/quota/quota_client_type.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/test/mock_quota_manager.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"storage/browser/quota/quota_client_type.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/test/mock_quota_manager_proxy.cc": [
+      {"after": "#include \"base/test/bind.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/test/mock_quota_manager_proxy.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"storage/browser/quota/quota_client_type.h\"\n", "n": 1, "add": ["#include \"components/services/storage/public/mojom/quota_client.mojom.h\"\n"]}
+    ],
+    "browser/test/quota_manager_proxy_sync.h": [
+      {"after": "#include \"components/services/storage/public/cpp/quota_error_or.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "browser/test/sandbox_database_test_helper.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/leveldatabase/src/db/filename.h\"\n"]}
+    ],
+    "common/file_system/file_system_util.h": [
+      {"after": "#include \"storage/common/file_system/file_system_types.h\"\n", "before": "#include \"third_party/blink/public/platform/web_file_system_type.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/quota/quota_types.mojom.h\"\n"]}
+    ],
+    "common/quota/padding_key.cc": [
+      {"after": "#include \"net/http/http_request_headers.h\"\n", "before": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-shared.h\"\n"]}
+    ],
+    "common/quota/padding_key.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-shared.h\"\n"]}
+    ]
+  }
+}

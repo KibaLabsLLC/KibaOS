@@ -31,10 +31,11 @@ if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
   }
 fi
 
-# The import behind the tree also took its include lines: every `#include
-# "absl/..."` line from abseil-cpp, every quoted include from protobuf, and
-# every quoted include from base/ and build/ -- the Rust allocator's
-# buildflags.h among them, without which its translation unit does not compile.
+# The import behind the tree also took its include lines: every quoted
+# `#include "..."` line from the directories it hit -- abseil-cpp, protobuf,
+# zlib, base/, build/ and the rest of the tree from ui/ and components/ to
+# blink -- the Rust allocator's buildflags.h among them, without which its
+# translation unit does not compile.
 # The headers it kept include nothing, so the first abseil TU fails on
 # ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`. Every
 # *-includes.json manifest beside the tool is applied. Restore them before the

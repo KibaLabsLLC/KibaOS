@@ -1,0 +1,115 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/webrtc_overrides",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "coalesced_tasks.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/any_invocable.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "environment.cc": [
+      {"after": "\n", "before": "#include \"third_party/webrtc_overrides/field_trial.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/api/environment/environment_factory.h\"\n"]}
+    ],
+    "environment.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/environment/environment.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "field_trial.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/field_trials_view.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "init_webrtc.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/cpu_info.h\"\n", "#include \"third_party/webrtc/rtc_base/event_tracer.h\"\n", "#include \"third_party/webrtc/rtc_base/trace_event.h\"\n"]}
+    ],
+    "init_webrtc.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n", "#include \"third_party/webrtc/rtc_base/trace_categories.h\"\n"]}
+    ],
+    "low_precision_timer.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "metronome_source.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"third_party/webrtc_overrides/timer_based_tick_provider.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/metronome/metronome.h\"\n"]}
+    ],
+    "metronome_source.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/any_invocable.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/metronome/metronome.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/bridge_ice_controller.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/algorithm/container.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/rtc_error.h\"\n", "#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_agent_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_switch_reason.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_transport_internal.h\"\n", "#include \"third_party/webrtc/p2p/base/transport_description.h\"\n"]}
+    ],
+    "p2p/base/bridge_ice_controller.h": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/rtc_error.h\"\n", "#include \"third_party/webrtc/p2p/base/active_ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_agent_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_switch_reason.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_transport_internal.h\"\n", "#include \"third_party/webrtc/p2p/base/transport_description.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/bridge_ice_transport_factory.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/bridge_ice_controller.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/ice_transport_interface.h\"\n", "#include \"third_party/webrtc/api/make_ref_counted.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/p2p/base/active_ice_controller_factory_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/active_ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/basic_ice_controller.h\"\n", "#include \"third_party/webrtc/p2p/base/default_ice_transport_factory.h\"\n", "#include \"third_party/webrtc/p2p/base/p2p_transport_channel.h\"\n"]}
+    ],
+    "p2p/base/bridge_ice_transport_factory.h": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/ice_transport_interface.h\"\n", "#include \"third_party/webrtc/api/scoped_refptr.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/fake_connection_factory.cc": [
+      {"after": "#include \"base/synchronization/waitable_event.h\"\n", "before": "#include \"third_party/webrtc_overrides/environment.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/api/task_queue/task_queue_base.h\"\n", "#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/p2p/base/p2p_constants.h\"\n", "#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n", "#include \"third_party/webrtc/p2p/base/port_interface.h\"\n", "#include \"third_party/webrtc/p2p/test/fake_port_allocator.h\"\n", "#include \"third_party/webrtc/rtc_base/net_helper.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "p2p/base/fake_connection_factory.h": [
+      {"after": "#include \"base/synchronization/waitable_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/api/task_queue/task_queue_base.h\"\n", "#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/p2p/base/port_allocator.h\"\n", "#include \"third_party/webrtc/p2p/base/port_interface.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_factory.h\"\n"]}
+    ],
+    "p2p/base/ice_connection.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/rtc_base/strings/string_builder.h\"\n"]}
+    ],
+    "p2p/base/ice_connection.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/candidate.h\"\n", "#include \"third_party/webrtc/api/units/timestamp.h\"\n", "#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/ice_interaction_interface.h": [
+      {"after": "\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/rtc_error.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/ice_ping_proposal.cc": [
+      {"after": "\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_proposal.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/rtc_base/strings/string_builder.h\"\n"]}
+    ],
+    "p2p/base/ice_ping_proposal.h": [
+      {"after": "\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/ice_prune_proposal.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/rtc_base/strings/string_builder.h\"\n"]}
+    ],
+    "p2p/base/ice_prune_proposal.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "p2p/base/ice_switch_proposal.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/connection.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_switch_reason.h\"\n", "#include \"third_party/webrtc/rtc_base/strings/string_builder.h\"\n"]}
+    ],
+    "p2p/base/ice_switch_proposal.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/webrtc_overrides/p2p/base/ice_connection.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/p2p/base/ice_controller_interface.h\"\n", "#include \"third_party/webrtc/p2p/base/ice_switch_reason.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "rtc_base/checks_overrides.cc": [
+      {"after": "#include \"base/logging/log_severity.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/checks.h\"\n"]}
+    ],
+    "rtc_base/diagnostic_logging.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/strings/str_cat.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "rtc_base/event.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/units/time_delta.h\"\n"]}
+    ],
+    "rtc_base/event.h": [
+      {"after": "#include \"base/threading/thread_restrictions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/units/time_delta.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "rtc_base/fake_socket_factory.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/ip_address.h\"\n", "#include \"third_party/webrtc/rtc_base/socket.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n"]}
+    ],
+    "rtc_base/fake_socket_factory.h": [
+      {"after": "#include \"base/notimplemented.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/socket.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_address.h\"\n", "#include \"third_party/webrtc/rtc_base/socket_factory.h\"\n"]}
+    ],
+    "rtc_base/system_time.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system_time.h\"\n"]}
+    ],
+    "task_queue_factory.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/any_invocable.h\"\n", "before": "#include \"third_party/webrtc_overrides/api/location.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/api/task_queue/task_queue_base.h\"\n", "#include \"third_party/webrtc/api/task_queue/task_queue_factory.h\"\n", "#include \"third_party/webrtc/api/units/time_delta.h\"\n"]}
+    ],
+    "task_queue_factory.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/task_queue/task_queue_base.h\"\n", "#include \"third_party/webrtc/api/task_queue/task_queue_factory.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "test/metronome_like_task_queue_test.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/any_invocable.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/units/time_delta.h\"\n"]}
+    ],
+    "test/metronome_like_task_queue_test.h": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/webrtc/api/task_queue/task_queue_base.h\"\n", "#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ],
+    "timer_based_tick_provider.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/webrtc_overrides/metronome_source.h\"\n", "n": 1, "add": ["#include \"third_party/webrtc/rtc_base/system/rtc_export.h\"\n"]}
+    ]
+  }
+}

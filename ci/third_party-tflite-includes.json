@@ -1,0 +1,1156 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/tflite",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "shims/create_op_resolver_empty.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/core/create_op_resolver.h\"\n", "#include \"tensorflow/lite/mutable_op_resolver.h\"\n"]}
+    ],
+    "shims/minimal_logging_chromium.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tensorflow/lite/minimal_logging.h\"\n"]}
+    ],
+    "shims/tensorflow/lite/delegates/xnnpack/weight_cache_schema_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"tflite/delegates/xnnpack/weight_cache_schema_generated.h\"\n"]}
+    ],
+    "shims/tensorflow/lite/types/fp16.h": [
+      {"after": "\n", "before": "", "n": 1, "add": ["#include \"third_party/fp16/src/include/fp16.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/allocation.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/allocation.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/common/tfl_pass_config.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/common/tfl_pass_config.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/converter_flags.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter_flags.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/core/model_builder_base.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/core/model_builder_base.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/experimental/google/tooling/tools/namespace_heuristics.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/litert/vendors/cc/namespace_heuristics.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/flatbuffer_export.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/flatbuffer_export.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/flatbuffer_import.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/flatbuffer_import.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/metrics/converter_error_data.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/metrics/converter_error_data.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/model_flags.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/model_flags.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/python/tf_tfl_flatbuffer_helpers.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/python/tf_tfl_flatbuffer_helpers.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/quantization/common/quantization_lib/quantization_config.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/quantization/common/quantization_lib/quantization_config.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/schema/mutable/schema_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/schema/mutable/schema_generated.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/schema/schema_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"tflite/converter/schema/schema_generated.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/schema/schema_utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/schema/schema_utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/stablehlo/transforms/stablehlo_passes.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/stablehlo/transforms/stablehlo_passes.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/tf_to_tfl_flatbuffer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/tf_to_tfl_flatbuffer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/tools/optimize/reduced_precision_metadata.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/tools/optimize/reduced_precision_metadata.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/transforms/optimize_pass.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/transforms/optimize_pass.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/transforms/passes.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/converter/transforms/passes.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/lite/types.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/types.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/compiler/mlir/quantization/stablehlo/quantization_config.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/tflite/src/tensorflow/compiler/mlir/quantization/stablehlo/quantization_config.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/c/delegate_plugin.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/c/delegate_plugin.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/configuration_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/configuration_generated.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/delegate_plugin_converter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/delegate_plugin_converter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/delegate_registry.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/delegate_registry.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/flatbuffer_to_proto.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/flatbuffer_to_proto.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/acceleration/configuration/proto_to_flatbuffer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/acceleration/configuration/proto_to_flatbuffer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/allocation.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/allocation.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/builtin_op_data.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/builtin_op_data.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/builtin_ops.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/builtin_ops.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/c/builtin_op_data.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/c/builtin_op_data.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/c/c_api.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/c/c_api.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/c/c_api_opaque.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/c/c_api_opaque.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/c/c_api_types.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/c/c_api_types.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/c/common.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/c/common.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/context.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/context.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/context_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/context_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/api/error_reporter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/api/error_reporter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/api/op_resolver.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/api/op_resolver.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/api/profiler.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/api/profiler.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/c/builtin_op_data.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/c/builtin_op_data.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/c/c_api.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/c/c_api.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/c/c_api_opaque.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/c/c_api_opaque.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/c/c_api_types.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/c/c_api_types.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/c/common.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/c/common.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/create_op_resolver.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/create_op_resolver.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/interpreter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/interpreter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/interpreter_builder.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/interpreter_builder.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/kernels/register.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/kernels/register.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/model_builder.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/model_builder.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/signature_runner.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/signature_runner.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/core/subgraph.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/core/subgraph.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/api.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/api.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/api.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/api.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/buffer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/buffer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/cl_command_queue.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/cl_command_queue.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/cl_context.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/cl_context.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/cl_device.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/cl_device.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/cl_memory.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/cl_memory.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/gl_interop.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/gl_interop.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/opencl_wrapper.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/opencl_wrapper.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/tensor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/tensor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/cl/util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/cl/util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/access_type.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/access_type.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/custom_parsers.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/custom_parsers.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/custom_transformations.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/custom_transformations.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/data_type.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/data_type.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/google/keep_if_max_2d_pt2.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/google/keep_if_max_2d_pt2.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/gpu_info.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/gpu_info.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/mediapipe/landmarks_to_transform_matrix.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/mediapipe/landmarks_to_transform_matrix.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/mediapipe/transform_landmarks.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/mediapipe/transform_landmarks.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/mediapipe/transform_tensor_bilinear.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/mediapipe/transform_tensor_bilinear.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/memory_management.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/memory_management.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/memory_management/types.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/memory_management/types.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/model.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/model.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/model_builder.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/model_builder.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/model_builder_helper.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/model_builder_helper.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/model_hints.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/model_hints.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/model_transformer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/model_transformer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/object_reader.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/object_reader.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/operation_parser.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/operation_parser.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/operations.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/operations.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/precision.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/precision.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/selectors/subgraph.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/selectors/subgraph.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/shape.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/shape.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/status.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/status.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/arguments.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/arguments.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/gpu_object_desc.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/gpu_object_desc.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/gpu_operation.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/gpu_operation.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/profiling_info.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/profiling_info.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/tensor_desc.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/tensor_desc.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/task/work_group_picking.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/task/work_group_picking.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/tasks/mediapipe/landmarks_to_transform_matrix.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/tasks/mediapipe/landmarks_to_transform_matrix.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/tasks/mediapipe/transform_landmarks.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/tasks/mediapipe/transform_landmarks.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/tasks/mediapipe/transform_tensor_bilinear.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/tasks/mediapipe/transform_tensor_bilinear.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/tensor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/tensor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/transformations/add_bias.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/transformations/add_bias.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/transformations/global_pooling_to_reduce_op.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/transformations/global_pooling_to_reduce_op.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/types.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/types.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/unimplemented_operation_parser.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/unimplemented_operation_parser.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/common/util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/common/util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/delegate_options.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/delegate_options.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/api2.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/api2.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/command_queue.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/command_queue.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/converters/util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/converters/util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/egl_environment.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/egl_environment.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_buffer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_buffer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_call.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_call.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_program.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_program.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_shader.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_shader.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_texture.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_texture.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/gl_texture_helper.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/gl_texture_helper.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/kernels/custom_registry.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/kernels/custom_registry.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/kernels/mediapipe/landmarks_to_transform_matrix.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/kernels/mediapipe/landmarks_to_transform_matrix.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/kernels/mediapipe/transform_landmarks.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/kernels/mediapipe/transform_landmarks.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/kernels/mediapipe/transform_tensor_bilinear.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/kernels/mediapipe/transform_tensor_bilinear.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/node_shader.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/node_shader.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/portable_gl31.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/portable_gl31.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/request_gpu_info.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/request_gpu_info.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl/variable.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl/variable.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/gl_delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/gl_delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/metal/buffer_convert.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/metal/buffer_convert.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/metal_delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/metal_delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/gpu/metal_delegate_internal.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/gpu/metal_delegate_internal.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/interpreter_utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/interpreter_utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/nnapi/nnapi_delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/nnapi/nnapi_delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/serialization.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/serialization.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/utils/simple_opaque_delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/utils/simple_opaque_delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/xnnpack/weight_cache.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/xnnpack/weight_cache.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/delegates/xnnpack/xnnpack_delegate.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/error_reporter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/error_reporter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/experimental/genai/genai_ops.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/experimental/genai/genai_ops.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/interpreter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/interpreter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/interpreter_builder.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/interpreter_builder.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/interpreter_options.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/interpreter_options.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/builtin_op_kernels.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/builtin_op_kernels.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/common.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/common.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/compatibility.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/compatibility.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/optimized/optimized_ops.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/optimized/optimized_ops.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/portable_tensor_utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/portable_tensor_utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/quantization_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/quantization_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/add.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/add.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/add_n.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/add_n.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/arg_min_max.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/arg_min_max.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/batch_matmul.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/batch_matmul.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/batch_to_space_nd.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/batch_to_space_nd.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/binary_function.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/binary_function.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/broadcast_args.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/broadcast_args.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/broadcast_loop.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/broadcast_loop.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/broadcast_to.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/broadcast_to.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/cast.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/cast.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/ceil.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/ceil.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/comparisons.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/comparisons.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/concatenation.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/concatenation.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/conv.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/conv.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/conv3d.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/conv3d.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/conv3d_transpose.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/conv3d_transpose.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/cumsum.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/cumsum.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/densify.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/densify.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/depth_to_space.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/depth_to_space.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/depthwiseconv_float.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/depthwiseconv_float.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/depthwiseconv_uint8.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/depthwiseconv_uint8.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/dequantize.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/dequantize.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/div.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/div.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/elu.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/elu.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/exp.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/exp.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/fill.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/fill.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/floor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/floor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/floor_div.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/floor_div.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/floor_mod.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/floor_mod.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/fully_connected.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/fully_connected.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/gather.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/gather.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/gelu.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/gelu.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/hard_swish.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/hard_swish.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/add.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/add.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/conv.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/conv.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/depthwise_conv.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/depthwise_conv.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/dequantize.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/dequantize.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/fully_connected.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/fully_connected.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/l2normalization.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/l2normalization.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/log_softmax.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/log_softmax.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/logistic.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/logistic.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/lut.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/lut.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/mean.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/mean.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/mul.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/mul.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/pooling.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/pooling.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/tanh.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/tanh.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/integer_ops/transpose_conv.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/integer_ops/transpose_conv.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/l2normalization.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/l2normalization.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/leaky_relu.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/leaky_relu.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/legacy_reference_ops.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/legacy_reference_ops.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/log_softmax.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/log_softmax.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/logistic.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/logistic.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/lstm_cell.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/lstm_cell.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/maximum_minimum.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/maximum_minimum.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/mul.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/mul.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/neg.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/neg.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/non_max_suppression.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/non_max_suppression.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/pad.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/pad.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/pooling.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/pooling.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/portable_tensor_utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/portable_tensor_utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/portable_tensor_utils_impl.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/portable_tensor_utils_impl.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/prelu.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/prelu.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/process_broadcast_shapes.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/process_broadcast_shapes.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/quantize.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/quantize.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/reduce.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/reduce.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/reference_ops.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/reference_ops.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/requantize.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/requantize.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/resize_bilinear.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/resize_bilinear.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/resize_nearest_neighbor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/resize_nearest_neighbor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/reverse.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/reverse.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/round.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/round.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/select.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/select.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/slice.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/slice.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/softmax.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/softmax.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/space_to_batch_nd.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/space_to_batch_nd.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/space_to_depth.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/space_to_depth.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/sparse_ops/fully_connected.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/sparse_ops/fully_connected.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/strided_slice.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/strided_slice.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/string_comparisons.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/string_comparisons.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/sub.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/sub.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/svdf.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/svdf.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/tanh.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/tanh.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/transpose.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/transpose.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/reference/transpose_conv.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/reference/transpose_conv.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/runtime_shape.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/runtime_shape.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/tensor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/tensor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/tensor_ctypes.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/tensor_ctypes.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/internal/types.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/internal/types.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/kernel_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/kernel_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/lstm_shared.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/lstm_shared.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/op_macros.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/op_macros.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/padding.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/padding.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/register.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/register.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/register_ref.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/register_ref.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/kernels/test_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/kernels/test_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/logger.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/logger.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/minimal_logging.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/minimal_logging.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/model.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/model.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/model_builder.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/model_builder.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/mutable_op_resolver.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/mutable_op_resolver.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/op_resolver.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/op_resolver.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/optional_debug_tools.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/optional_debug_tools.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/portable_type_to_tflitetype.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/portable_type_to_tflitetype.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/buffered_profiler.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/buffered_profiler.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/memory_info.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/memory_info.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/memory_latency_logger.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/memory_latency_logger.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/memory_usage_monitor.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/memory_usage_monitor.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/model_runtime_info.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/model_runtime_info.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/profile_buffer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/profile_buffer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/profile_summarizer.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/profile_summarizer.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/proto/model_runtime_info.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/proto/model_runtime_info.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/profiling/time.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/profiling/time.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/schema/mutable/schema_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/schema/mutable/schema_generated.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/schema/schema_generated.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"tflite/converter/schema/schema_generated.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/signature_runner.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/signature_runner.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/stateful_error_reporter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/stateful_error_reporter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/stderr_reporter.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/stderr_reporter.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/string_type.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/string_type.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/string_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/string_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/test_util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/test_util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/testing/matchers.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/testing/matchers.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/testing/util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/testing/util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tflite_with_xnnpack_optional.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tflite_with_xnnpack_optional.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/benchmark/benchmark_model.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/benchmark/benchmark_model.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/benchmark/benchmark_params.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/benchmark/benchmark_params.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/benchmark/proto/benchmark_result.pb.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/benchmark/proto/benchmark_result.pb.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/command_line_flags.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/command_line_flags.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/delegates/delegate_provider.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/delegates/delegate_provider.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/logging.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/logging.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/model_loader.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/model_loader.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/strip_buffers/stripping_lib.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/strip_buffers/stripping_lib.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/tool_params.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/tool_params.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/utils.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/utils.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/verifier.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/verifier.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/versioning/gpu_compatibility.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/versioning/gpu_compatibility.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/tools/versioning/op_signature.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/tools/versioning/op_signature.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/type_to_tflitetype.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/type_to_tflitetype.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/types/half.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/types/half.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/util.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/util.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/lite/version.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"third_party/litert/src/tflite/version.h\"\n"]}
+    ],
+    "shims/third_party/tflite/src/tensorflow/tsl/platform/fingerprint.h": [
+      {"after": "#include \"build/buildflag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/tflite/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(USE_LITERT_TFLITE)\n", "before": "#else\n", "n": 1, "add": ["#include \"tsl/platform/fingerprint.h\"\n"]}
+    ]
+  }
+}

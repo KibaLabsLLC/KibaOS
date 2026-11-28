@@ -1,0 +1,111 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "headless",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "app/headless_shell.cc": [
+      {"after": "#include \"base/version_info/version_info.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "lib/browser/headless_bluetooth_delegate_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/bluetooth/web_bluetooth_device_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/bluetooth/web_bluetooth.mojom.h\"\n"]}
+    ],
+    "lib/browser/headless_browser_impl.cc": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"components/embedder_support/user_agent_utils.h\"\n", "n": 1, "add": ["#include \"build/config/linux/dbus/buildflags.h\"\n"]}
+    ],
+    "lib/browser/headless_browser_main_parts_posix.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"content/public/browser/browser_task_traits.h\"\n", "n": 1, "add": ["#include \"build/config/linux/dbus/buildflags.h\"\n"]}
+    ],
+    "lib/browser/headless_client_hints_controller_delegate.cc": [
+      {"after": "#include \"services/network/public/cpp/is_potentially_trustworthy.h\"\n", "before": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_client_hints_types.mojom.h\"\n"]}
+    ],
+    "lib/browser/headless_content_browser_client.cc": [
+      {"after": "#include \"net/ssl/ssl_private_key.h\"\n", "before": "#include \"sandbox/policy/switches.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "lib/browser/headless_content_browser_client.h": [
+      {"after": "#include \"services/network/network_service.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/badging/badging.mojom.h\"\n", "#include \"third_party/blink/public/mojom/persistent_renderer_prefs.mojom.h\"\n"]}
+    ],
+    "lib/browser/headless_request_context_manager.cc": [
+      {"after": "#include \"net/proxy_resolution/proxy_config_service.h\"\n", "before": "#include \"services/network/network_service.h\"\n", "n": 1, "add": ["#include \"services/cert_verifier/public/mojom/cert_verifier_service_factory.mojom.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/features.h\"\n", "before": "#include \"services/network/url_request_context_builder_mojo.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"services/network/public/mojom/network_service.mojom.h\"\n"]},
+      {"after": "#include \"services/network/url_request_context_builder_mojo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/proxy_resolver/public/mojom/proxy_resolver.mojom.h\"\n"]}
+    ],
+    "lib/browser/headless_request_context_manager.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "#include \"services/network/public/cpp/cookie_encryption_provider_impl.h\"\n", "n": 1, "add": ["#include \"services/cert_verifier/public/mojom/cert_verifier_service_factory.mojom-forward.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/cookie_encryption_provider_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "lib/browser/headless_screen.h": [
+      {"after": "#include \"ui/display/headless/headless_screen_manager.h\"\n", "before": "#include \"ui/display/screen_base.h\"\n", "n": 1, "add": ["#include \"ui/display/mojom/screen_orientation.mojom-shared.h\"\n"]}
+    ],
+    "lib/browser/headless_screen_orientation_delegate.cc": [
+      {"after": "#include \"headless/lib/browser/headless_screen.h\"\n", "before": "#include \"ui/display/screen.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/screen_orientation_lock_types.mojom.h\"\n", "#include \"ui/display/mojom/screen_orientation.mojom-shared.h\"\n"]}
+    ],
+    "lib/browser/headless_web_contents_impl.cc": [
+      {"after": "#include \"headless/public/switches.h\"\n", "before": "#include \"third_party/blink/public/common/peerconnection/webrtc_ip_handling_policy.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/renderer_preferences/renderer_preferences.h\"\n", "before": "#include \"ui/base/ui_base_features.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/window_features/window_features.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/base/mojom/window_open_disposition.mojom-shared.h\"\n"]}
+    ],
+    "lib/browser/protocol/browser_handler.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"headless/lib/browser/protocol/domain_handler.h\"\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/browser.h\"\n"]}
+    ],
+    "lib/browser/protocol/domain_handler.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/protocol.h\"\n"]}
+    ],
+    "lib/browser/protocol/emulation_handler.cc": [
+      {"after": "#include \"ui/display/headless/headless_screen_util.h\"\n", "before": "#include \"ui/display/screen.h\"\n", "n": 1, "add": ["#include \"ui/display/mojom/screen_orientation.mojom-shared.h\"\n"]}
+    ],
+    "lib/browser/protocol/emulation_handler.h": [
+      {"after": "#include \"headless/lib/browser/protocol/domain_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/emulation.h\"\n"]}
+    ],
+    "lib/browser/protocol/headless_devtools_session.h": [
+      {"after": "#include \"content/public/browser/devtools_manager_delegate.h\"\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/protocol.h\"\n"]}
+    ],
+    "lib/browser/protocol/headless_handler.cc": [
+      {"after": "#include \"headless/lib/browser/headless_web_contents_impl.h\"  // nogncheck http://crbug.com/1227378\n", "before": "#include \"ui/base/resource/resource_bundle.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "lib/browser/protocol/headless_handler.h": [
+      {"after": "#include \"headless/lib/browser/protocol/domain_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/headless_experimental.h\"\n"]}
+    ],
+    "lib/browser/protocol/page_handler.cc": [
+      {"after": "#include \"components/optimization_guide/content/browser/page_content_proto_provider.h\"\n", "before": "#include \"content/public/browser/web_contents.h\"\n", "n": 1, "add": ["#include \"components/optimization_guide/proto/features/common_quality_data.pb.h\"\n"]},
+      {"after": "#include \"content/public/browser/web_contents.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/content_extraction/ai_page_content.mojom.h\"\n"]}
+    ],
+    "lib/browser/protocol/page_handler.h": [
+      {"after": "#include \"headless/lib/browser/protocol/domain_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/page.h\"\n", "#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "lib/browser/protocol/target_handler.h": [
+      {"after": "#include \"headless/lib/browser/protocol/domain_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"headless/lib/browser/protocol/target.h\"\n"]}
+    ],
+    "lib/headless_content_main_delegate.cc": [
+      {"after": "#if defined(HEADLESS_USE_EMBEDDED_RESOURCES)\n", "before": "#endif\n", "n": 1, "add": ["#include \"headless/embedded_resource_pack_data.h\"     // nogncheck\n", "#include \"headless/embedded_resource_pack_strings.h\"  // nogncheck\n"]},
+      {"after": "#if !BUILDFLAG(IS_MAC) && !BUILDFLAG(IS_ANDROID)\n", "before": "#endif\n", "n": 1, "add": ["#include \"v8/include/v8-wasm-trap-handler-posix.h\"\n"]}
+    ],
+    "lib/renderer/headless_content_renderer_client.cc": [
+      {"after": "#include \"media/base/video_codecs.h\"\n", "before": "#include \"third_party/blink/public/platform/url_loader_throttle_provider.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "lib/utility/headless_content_utility_client.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/service_factory.h\"\n", "before": "#include \"services/proxy_resolver/proxy_resolver_factory_impl.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"services/proxy_resolver/proxy_resolver_factory_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/proxy_resolver/public/mojom/proxy_resolver.mojom.h\"\n"]},
+      {"after": "#include \"components/services/print_compositor/print_compositor_impl.h\"\n", "before": "#include \"content/public/utility/utility_thread.h\"\n", "n": 1, "add": ["#include \"components/services/print_compositor/public/mojom/print_compositor.mojom.h\"\n"]}
+    ],
+    "test/headless_browser_browsertest.cc": [
+      {"after": "#include \"third_party/blink/public/common/permissions/permission_utils.h\"\n", "before": "#include \"ui/base/clipboard/clipboard.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/user_activation_notification_type.mojom.h\"\n", "#include \"third_party/blink/public/resources/grit/blink_resources.h\"\n", "#include \"third_party/blink/public/strings/grit/blink_strings.h\"\n"]}
+    ],
+    "test/headless_browser_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"tools/v8_context_snapshot/buildflags.h\"\n"]}
+    ],
+    "test/headless_command_browsertest.cc": [
+      {"after": "#include \"net/test/embedded_test_server/embedded_test_server.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/display/display_switches.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/headless_printtopdf_browsertest.cc": [
+      {"after": "#include \"pdf/pdf.h\"\n", "before": "#include \"printing/pdf_render_settings.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "test/headless_protocol_browsertest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"components/headless/test/shared_test_util.h\"\n", "n": 1, "add": ["#include \"build/config/linux/dbus/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"third_party/blink/public/common/permissions/permission_utils.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/common/features_generated.h\"\n"]}
+    ],
+    "test/headless_web_contents_browsertest.cc": [
+      {"after": "#include \"components/optimization_guide/core/optimization_guide_features.h\"\n", "before": "#include \"components/viz/common/switches.h\"\n", "n": 1, "add": ["#include \"components/optimization_guide/proto/features/common_quality_data.pb.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/switches.h\"\n", "before": "#include \"ui/base/page_transition_types.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ]
+  }
+}

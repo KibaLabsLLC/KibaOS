@@ -1,0 +1,78 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/private_membership",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/internal/aes_ctr_256_with_fixed_iv.h": [
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include <openssl/evp.h>\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/aes_ctr_256_with_fixed_iv_test.cc": [
+      {"after": "#include <gtest/gtest.h>\n", "before": "#include <openssl/rand.h>\n", "n": 1, "add": ["#include \"absl/memory/memory.h\"\n"]}
+    ],
+    "src/internal/crypto_utils.h": [
+      {"after": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/ec_commutative_cipher.h\"\n", "before": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include \"third_party/shell-encryption/src/statusor.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/crypto_utils_test.cc": [
+      {"after": "#include \"third_party/private_membership/src/internal/aes_ctr_256_with_fixed_iv.h\"\n", "before": "#include <gmock/gmock.h>\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]}
+    ],
+    "src/internal/encrypted_bucket_id.cc": [
+      {"after": "#include \"third_party/private_membership/src/internal/utils.h\"\n", "before": "#include \"third_party/shell-encryption/src/status_macros.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/encrypted_bucket_id.h": [
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include \"third_party/shell-encryption/src/statusor.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n", "#include \"absl/hash/hash.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/encrypted_bucket_id_test.cc": [
+      {"after": "\n", "before": "#include \"third_party/private_membership/src/internal/rlwe_id_utils.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]}
+    ],
+    "src/internal/hashed_bucket_id.cc": [
+      {"after": "\n", "before": "#include \"third_party/private_membership/src/internal/rlwe_id_utils.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/src/internal/utils.h\"\n", "before": "#include \"third_party/shell-encryption/src/status_macros.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/hashed_bucket_id.h": [
+      {"after": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/ec_commutative_cipher.h\"\n", "before": "#include \"third_party/shell-encryption/src/statusor.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n", "#include \"absl/hash/hash.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/hashed_bucket_id_test.cc": [
+      {"after": "\n", "before": "#include <gmock/gmock.h>\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n", "#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]}
+    ],
+    "src/internal/id_utils.h": [
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/oprf_utils.h": [
+      {"after": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/ec_commutative_cipher.h\"\n", "before": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]}
+    ],
+    "src/internal/rlwe_id_utils.cc": [
+      {"after": "#include \"third_party/private_membership/src/internal/crypto_utils.h\"\n", "before": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "before": "#include \"third_party/shell-encryption/src/status_macros.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/internal/rlwe_id_utils.h": [
+      {"after": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/ec_commutative_cipher.h\"\n", "before": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include \"third_party/shell-encryption/src/statusor.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]}
+    ],
+    "src/internal/rlwe_id_utils_test.cc": [
+      {"after": "#include <gtest/gtest.h>\n", "before": "#include \"third_party/shell-encryption/src/testing/protobuf_matchers.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/internal/rlwe_params.cc": [
+      {"after": "\n", "before": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]}
+    ],
+    "src/internal/rlwe_params.h": [
+      {"after": "\n", "before": "#include \"third_party/shell-encryption/src/context.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]}
+    ],
+    "src/internal/utils.h": [
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include \"third_party/shell-encryption/src/statusor.h\"\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/private_membership_rlwe_client.cc": [
+      {"after": "#include \"third_party/private_membership/src/internal/crypto_utils.h\"\n", "before": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n", "#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/src/internal/utils.h\"\n", "before": "#include \"third_party/shell-encryption/src/polynomial.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/private_membership_rlwe_client.h": [
+      {"after": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/ec_commutative_cipher.h\"\n", "before": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/base/private_membership_export.h\"\n", "before": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "n": 1, "add": ["#include \"third_party/private_membership/src/private_membership_rlwe.pb.h\"\n"]},
+      {"after": "#include \"third_party/private_membership/src/internal/constants.h\"\n", "before": "#include \"third_party/shell-encryption/src/montgomery.h\"\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/private_membership_rlwe_client_regression_test.cc": [
+      {"after": "#include \"third_party/private_membership/src/private_membership_rlwe_client.h\"\n", "before": "#include <gmock/gmock.h>\n", "n": 1, "add": ["#include \"third_party/private_membership/src/internal/testing/regression_test_data/regression_test_data.pb.h\"\n"]},
+      {"after": "#include <gtest/gtest.h>\n", "before": "#include \"third_party/private-join-and-compute/src/private_join_and_compute/crypto/context.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ]
+  }
+}

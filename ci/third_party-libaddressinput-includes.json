@@ -1,0 +1,69 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libaddressinput",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "chromium/addressinput_util.cc": [
+      {"after": "#include \"base/stl_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_data.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_metadata.h\"\n"]}
+    ],
+    "chromium/addressinput_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_field.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_problem.h\"\n"]}
+    ],
+    "chromium/addressinput_util_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_data.h\"\n"]}
+    ],
+    "chromium/canonicalize_string.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/util/canonicalize_string.h\"\n"]},
+      {"after": "#include \"base/check_op.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/errorcode.h\"\n", "#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n", "#include \"third_party/icu/source/i18n/unicode/coll.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/util/scoped_ptr.h\"\n"]}
+    ],
+    "chromium/chrome_address_validator.cc": [
+      {"after": "#include \"third_party/libaddressinput/chromium/addressinput_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_data.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_normalizer.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/source.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/storage.h\"\n", "#include \"third_party/libaddressinput/src/cpp/src/rule.h\"\n"]}
+    ],
+    "chromium/chrome_address_validator.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_field.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_validator.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/callback.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/preload_supplier.h\"\n"]}
+    ],
+    "chromium/chrome_address_validator_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_data.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_problem.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_ui.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/null_storage.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/source.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/storage.h\"\n", "#include \"third_party/libaddressinput/src/cpp/test/testdata_source.h\"\n"]}
+    ],
+    "chromium/chrome_metadata_source.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/source.h\"\n"]}
+    ],
+    "chromium/chrome_rule_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/rule.h\"\n"]}
+    ],
+    "chromium/chrome_storage_impl.h": [
+      {"after": "#include \"components/prefs/pref_store.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/storage.h\"\n"]}
+    ],
+    "chromium/chrome_storage_impl_unittest.cc": [
+      {"after": "#include \"third_party/libaddressinput/chromium/storage_test_runner.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/callback.h\"\n"]}
+    ],
+    "chromium/fallback_data_store_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/util/json.h\"\n", "#include \"third_party/libaddressinput/src/cpp/src/validating_util.h\"\n"]}
+    ],
+    "chromium/json.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/util/json.h\"\n"]}
+    ],
+    "chromium/storage_test_runner.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/callback.h\"\n"]}
+    ],
+    "chromium/storage_test_runner.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/storage.h\"\n"]}
+    ],
+    "chromium/string_compare.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/util/string_compare.h\"\n"]},
+      {"after": "#include \"base/lazy_instance.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/coll.h\"\n"]}
+    ],
+    "chromium/string_compare_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/util/string_compare.h\"\n"]}
+    ],
+    "fuzz/address_formatter_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_data.h\"\n", "#include \"third_party/libaddressinput/src/cpp/include/libaddressinput/address_formatter.h\"\n"]}
+    ],
+    "fuzz/parse_address_fields_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/address_field_util.h\"\n"]}
+    ],
+    "fuzz/parse_format_rule_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libaddressinput/src/cpp/src/address_field_util.h\"\n", "#include \"third_party/libaddressinput/src/cpp/src/format_element.h\"\n"]}
+    ]
+  }
+}

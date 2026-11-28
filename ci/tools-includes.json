@@ -1,0 +1,493 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "tools",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "android/devil_util/zst_compressor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/zstd/src/lib/zstd.h\"\n"]}
+    ],
+    "android/devil_util/zst_decompressor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/zstd/src/lib/zstd.h\"\n"]}
+    ],
+    "android/io_benchmark/compression_benchmark.cc": [
+      {"after": "#include \"third_party/brotli/src/c/include/brotli/encode.h\"\n", "before": "#include \"third_party/zlib/google/compression_utils.h\"\n", "n": 1, "add": ["#include \"third_party/snappy/src/snappy.h\"\n"]},
+      {"after": "#include \"third_party/zlib/google/compression_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/zstd/src/lib/zstd.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/caspian_web.cc": [
+      {"after": "\n", "before": "#include \"tools/binary_size/libsupersize/viewer/caspian/diff.h\"\n", "n": 1, "add": ["#include \"third_party/jsoncpp/src/include/json/json.h\"\n", "#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/file_format.cc": [
+      {"after": "\n", "before": "#include \"third_party/zlib/google/compression_utils_portable.h\"\n", "n": 1, "add": ["#include \"third_party/jsoncpp/src/include/json/json.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/file_format_test.cc": [
+      {"after": "#include \"third_party/zlib/google/compression_utils_portable.h\"\n", "before": "#include \"tools/binary_size/libsupersize/viewer/caspian/model.h\"\n", "n": 1, "add": ["#include \"third_party/zstd/src/lib/zstd.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/file_format_v2.cc": [
+      {"after": "\n", "before": "#include \"tools/binary_size/libsupersize/viewer/caspian/file_format.h\"\n", "n": 1, "add": ["#include \"third_party/jsoncpp/src/include/json/json.h\"\n", "#include \"third_party/zstd/src/lib/zstd.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/function_signature_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/lens.cc": [
+      {"after": "\n", "before": "#include \"tools/binary_size/libsupersize/viewer/caspian/model.h\"\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "binary_size/libsupersize/viewer/caspian/model.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "#include \"tools/binary_size/libsupersize/viewer/caspian/grouped_path.h\"\n", "n": 1, "add": ["#include \"third_party/jsoncpp/src/include/json/json.h\"\n"]}
+    ],
+    "clang/ast_rewriter/ASTRewriter.cpp": [
+      {"after": "#include \"OutputHelper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/ast_rewriter/OutputHelper.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Tooling/Core/Replacement.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/StringSet.h\"\n"]}
+    ],
+    "clang/base_bind_rewriters/BaseBindRewriters.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/ParentMap.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Analysis/CFG.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/BadPatternFinder.cpp": [
+      {"after": "#include \"DiagnosticsReporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/BlinkGCPlugin.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/BlinkGCPluginConsumer.cpp": [
+      {"after": "#include \"RecordInfo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/RecursiveASTVisitor.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"clang/Sema/Sema.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/BlinkGCPluginConsumer.h": [
+      {"after": "#include \"DiagnosticsReporter.h\"\n", "before": "#include \"tools/clang/plugins/FilteredASTConsumer.h\"\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Lex/Pragma.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/BlinkGCPluginOptions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/SourceLocation.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CheckDispatchVisitor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/RecursiveASTVisitor.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CheckFieldsVisitor.cpp": [
+      {"after": "#include \"RecordInfo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"llvm/Support/ErrorHandling.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CheckFinalizerVisitor.h": [
+      {"after": "#include \"RecordInfo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/RecursiveASTVisitor.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CheckForbiddenFieldsVisitor.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/ADT/STLExtras.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CheckTraceVisitor.h": [
+      {"after": "#include \"RecordInfo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/RecursiveASTVisitor.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/CollectVisitor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/RecursiveASTVisitor.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/Config.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/Config.h": [
+      {"after": "#include \"RecordInfo.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/Attr.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/DiagnosticsReporter.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/Support/ErrorHandling.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/DiagnosticsReporter.h": [
+      {"after": "#include \"Config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/JsonWriter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/RecordInfo.cpp": [
+      {"after": "#include \"Config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/Sema/Sema.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/RecordInfo.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/CXXInheritance.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/tests/custom_dir/heap_object.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"heap/stubs.h\"\n"]}
+    ],
+    "clang/blink_gc_plugin/tests/ignored_dir/heap_object.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"heap/stubs.h\"\n"]}
+    ],
+    "clang/empty_string/EmptyStringConverter.cpp": [
+      {"after": "#include <memory>\n", "before": "\n", "n": 1, "add": ["#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n"]}
+    ],
+    "clang/iterator_checker/IteratorChecker.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/Expr.h\"\n", "#include \"clang/AST/OperationKinds.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/Analysis/FlowSensitive/AdornedCFG.h\"\n", "#include \"clang/Analysis/FlowSensitive/DataflowAnalysis.h\"\n", "#include \"clang/Analysis/FlowSensitive/DataflowLattice.h\"\n", "#include \"clang/Analysis/FlowSensitive/Models/ChromiumCheckModel.h\"\n", "#include \"clang/Analysis/FlowSensitive/NoopLattice.h\"\n", "#include \"clang/Analysis/FlowSensitive/Value.h\"\n", "#include \"clang/Analysis/FlowSensitive/WatchedLiteralsSolver.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n", "#include \"clang/Tooling/Transformer/Stencil.h\"\n", "#include \"llvm/ADT/DenseMap.h\"\n", "#include \"llvm/ADT/DenseSet.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n"]}
+    ],
+    "clang/pass_to_move/PassToMove.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/plugins/BlinkDataMemberTypeChecker.cpp": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Attr.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/DeclTemplate.h\"\n", "#include \"clang/AST/Type.h\"\n", "#include \"clang/Basic/Diagnostic.h\"\n"]}
+    ],
+    "clang/plugins/BlinkDataMemberTypeChecker.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/DeclCXX.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"llvm/ADT/StringSet.h\"\n", "#include \"llvm/Support/Regex.h\"\n"]}
+    ],
+    "clang/plugins/CheckIPCVisitor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/RecursiveASTVisitor.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"llvm/ADT/StringSet.h\"\n"]}
+    ],
+    "clang/plugins/CheckLayoutObjectMethodsVisitor.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n"]}
+    ],
+    "clang/plugins/CheckLayoutObjectMethodsVisitor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/plugins/ChromeClassTester.cpp": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/Basic/FileManager.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n"]}
+    ],
+    "clang/plugins/ChromeClassTester.h": [
+      {"after": "#include \"Options.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/plugins/DiagnosticConsumer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/Diagnostic.h\"\n"]}
+    ],
+    "clang/plugins/FilteredASTConsumer.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/DeclCXX.h\"\n", "#include \"clang/Basic/LLVM.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Lex/MacroInfo.h\"\n", "#include \"clang/Lex/PPCallbacks.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"llvm/ADT/DenseMap.h\"\n"]}
+    ],
+    "clang/plugins/FilteredASTConsumer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/DeclGroup.h\"\n"]}
+    ],
+    "clang/plugins/FindBadConstructsAction.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n"]}
+    ],
+    "clang/plugins/FindBadConstructsAction.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Frontend/FrontendAction.h\"\n"]}
+    ],
+    "clang/plugins/FindBadConstructsConsumer.cpp": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Attr.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Sema/Sema.h\"\n", "#include \"llvm/ADT/StringExtras.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/plugins/FindBadConstructsConsumer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/Attr.h\"\n", "#include \"clang/AST/CXXInheritance.h\"\n", "#include \"clang/AST/RecursiveASTVisitor.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n"]}
+    ],
+    "clang/plugins/StackAllocatedChecker.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Attr.h\"\n", "#include \"clang/AST/DeclCXX.h\"\n", "#include \"clang/AST/DeclTemplate.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/plugins/StrictDepsPlugin.cpp": [
+      {"after": "#include \"DiagnosticConsumer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Basic/DiagnosticLex.h\"\n", "#include \"clang/Basic/FileEntry.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendAction.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n", "#include \"clang/Lex/HeaderSearch.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"llvm/ADT/SmallString.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/ErrorHandling.h\"\n", "#include \"llvm/Support/FileSystem.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/MemoryBuffer.h\"\n", "#include \"llvm/Support/Path.h\"\n", "#include \"llvm/Support/Program.h\"\n", "#include \"llvm/Support/SaveAndRestore.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/plugins/SuppressibleDiagnosticBuilder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n"]}
+    ],
+    "clang/plugins/UnsafeBuffersPlugin.cpp": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/Basic/DiagnosticSema.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendAction.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n", "#include \"clang/Lex/Pragma.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"llvm/ADT/StringMap.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/MemoryBuffer.h\"\n"]}
+    ],
+    "clang/plugins/Util.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Decl.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/Casting.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/plugins/Util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/DeclBase.h\"\n", "#include \"clang/AST/Stmt.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Lex/HeaderSearchOptions.h\"\n"]}
+    ],
+    "clang/plugins/tests/strict_deps_test.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"strict_deps_test.h\"\n"]},
+      {"after": "\n", "before": "", "n": 1, "add": ["#include \"direct.h\"    // OK (in deps)\n", "#include \"impl_dep.h\"  // OK (in implementation deps)\n", "#include \"indirect.h\"  // Simulate transitive dep on module defining indirect.h\n", "#include \"missing_dep.h\"        // Missing dep on module defining missing_dep.h.\n", "#include \"undeclared_header.h\"  // Simulate header file missing from BUILD.gn.\n"]}
+    ],
+    "clang/plugins/tests/third_party/blink/renderer/discouraged_type.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/public.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/FindBadRawPtrPatterns.cpp": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/AST.h\"\n", "#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/AST/Attr.h\"\n", "#include \"clang/AST/CXXInheritance.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/FindBadRawPtrPatterns.h": [
+      {"after": "#include \"PluginConfig.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/PluginConfig.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/Support/YAMLTraits.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/RawPtrCastingUnsafeChecker.h": [
+      {"after": "#include \"TypePredicateUtil.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Type.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/RawPtrHelpers.cpp": [
+      {"after": "#include \"StackAllocatedChecker.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"llvm/Support/LineIterator.h\"\n", "#include \"llvm/Support/MemoryBuffer.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/RawPtrHelpers.h": [
+      {"after": "#include \"Util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"llvm/ADT/StringMap.h\"\n", "#include \"llvm/ADT/StringSet.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/RawPtrPlugin.cpp": [
+      {"after": "#include \"FindBadRawPtrPatterns.h\"\n", "before": "#include \"tools/clang/plugins/FilteredASTConsumer.h\"\n", "n": 1, "add": ["#include \"clang/AST/ASTConsumer.h\"\n", "#include \"clang/Frontend/FrontendPluginRegistry.h\"\n", "#include \"llvm/Support/TimeProfiler.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/RawPtrPlugin.h": [
+      {"after": "#include \"PluginConfig.h\"\n", "before": "\n", "n": 1, "add": ["#include \"clang/Frontend/FrontendAction.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/StackAllocatedChecker.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Attr.h\"\n", "#include \"clang/AST/DeclCXX.h\"\n", "#include \"clang/AST/DeclTemplate.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/SuppressibleDiagnosticBuilder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/TypePredicateUtil.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/Type.h\"\n", "#include \"llvm/ADT/ScopeExit.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/Util.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/Decl.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/Casting.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/Util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/DeclBase.h\"\n", "#include \"clang/AST/Stmt.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Lex/HeaderSearchOptions.h\"\n"]}
+    ],
+    "clang/raw_ptr_plugin/tests/third_party/blink/renderer/discouraged_type.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/public.h\"\n"]}
+    ],
+    "clang/rewrite_autofill_form_data/FieldToFunction.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Core/Replacement.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/SmallVector.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/rewrite_autofill_personal_data_manager/ForwardCalls.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/ExprCXX.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Core/Replacement.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/SmallVector.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/rewrite_autofill_personal_data_manager/tests/forward-calls-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"some/file.h\"\n"]}
+    ],
+    "clang/rewrite_raw_ptr_fields/RewriteRawPtrFields.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"RawPtrManualPathsToIgnore.h\"\n", "#include \"SeparateRepositoryPaths.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/TypeLoc.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/CharInfo.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Lex/MacroArgs.h\"\n", "#include \"clang/Lex/PPCallbacks.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/StringExtras.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/ErrorOr.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/Path.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/rewrite_templated_container_fields/RewriteTemplatedPtrFields.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"RawPtrManualPathsToIgnore.h\"\n", "#include \"SeparateRepositoryPaths.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/CharInfo.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Lex/MacroArgs.h\"\n", "#include \"clang/Lex/PPCallbacks.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/StringExtras.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/ErrorOr.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/LineIterator.h\"\n", "#include \"llvm/Support/MemoryBuffer.h\"\n", "#include \"llvm/Support/Path.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/rewrite_to_chrome_style/EditTracker.cpp": [
+      {"after": "#include <stdio.h>\n", "before": "\n", "n": 1, "add": ["#include \"llvm/Support/Path.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]}
+    ],
+    "clang/rewrite_to_chrome_style/EditTracker.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"llvm/ADT/StringMap.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/ADT/StringSet.h\"\n"]}
+    ],
+    "clang/rewrite_to_chrome_style/RewriteToChromeStyle.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/NestedNameSpecifier.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Basic/CharInfo.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Lex/MacroArgs.h\"\n", "#include \"clang/Lex/PPCallbacks.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/ErrorOr.h\"\n", "#include \"llvm/Support/LineIterator.h\"\n", "#include \"llvm/Support/MemoryBuffer.h\"\n", "#include \"llvm/Support/Path.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/rewrite_to_chrome_style/tests/gmock-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gmock/gmock.h\"\n"]}
+    ],
+    "clang/rewrite_to_chrome_style/tests/gmock-original.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"gmock/gmock.h\"\n"]}
+    ],
+    "clang/spanify/Spanifier.cpp": [
+      {"after": "\n", "before": "#include \"SpanifyManualPathsToIgnore.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"SeparateRepositoryPaths.h\"\n"]},
+      {"after": "#include \"chrome_project.h\"\n", "before": "#include \"dawn_project.h\"\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/IgnoreExpr.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Rewrite/Core/Rewriter.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n"]},
+      {"after": "#include \"dawn_project.h\"\n", "before": "#include \"partition_alloc_project.h\"\n", "n": 1, "add": ["#include \"llvm/ADT/STLExtras.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/spanify/angle_project.h": [
+      {"after": "\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"Util.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n"]}
+    ],
+    "clang/spanify/chrome_project.h": [
+      {"after": "\n", "before": "#include \"SpanifyManualPathsToIgnore.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"SeparateRepositoryPaths.h\"\n"]},
+      {"after": "#include \"SpanifyManualPathsToIgnore.h\"\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"clang/AST/Decl.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n"]}
+    ],
+    "clang/spanify/dawn_project.h": [
+      {"after": "\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"Util.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/DeclBase.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/Casting.h\"\n"]}
+    ],
+    "clang/spanify/partition_alloc_project.h": [
+      {"after": "\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"Util.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/AST/DeclBase.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/Casting.h\"\n"]}
+    ],
+    "clang/spanify/project.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/Basic/SourceLocation.h\"\n", "#include \"llvm/ADT/SmallString.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n", "#include \"llvm/Support/FileSystem.h\"\n", "#include \"llvm/Support/Path.h\"\n"]}
+    ],
+    "clang/spanify/skia_project.h": [
+      {"after": "\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n"]}
+    ],
+    "clang/spanify/tests/angle/basics-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common/span.h\"\n", "#include \"common/unsafe_buffers.h\"\n"]}
+    ],
+    "clang/spanify/tests/angle/complex-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/angle/increments-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/angle/relative-include-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"relative_include_helper.h\"\n", "#include \"third_party/relative_include_vendored.h\"\n"]}
+    ],
+    "clang/spanify/tests/angle/relative-include-original.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"relative_include_helper.h\"\n", "#include \"third_party/relative_include_vendored.h\"\n"]}
+    ],
+    "clang/spanify/tests/dawn/basics-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"src/utils/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/dawn/class-inheritance-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"src/utils/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/dawn/deref-expr-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"src/utils/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/partition_alloc/basics-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/partition_alloc/include_directories-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n", "#include \"partition_alloc/partition_alloc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "clang/spanify/tests/partition_alloc/ns-prefix-removal_nested-ns-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/partition_alloc/ns-prefix-removal_shadowing-ns-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/containers/span.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/basics-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/checked-cast-unavailable-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n", "#include \"include/private/SkTo.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/class-inheritance-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/deref-expr-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/post-increment-span-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/span-helpers-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/struct-overlap-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/skia/template-array-param-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkSpan.h\"\n"]}
+    ],
+    "clang/spanify/tests/webrtc/safe-conversions-expected.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"rtc_base/numerics/safe_conversions.h\"\n"]}
+    ],
+    "clang/spanify/webrtc_project.h": [
+      {"after": "\n", "before": "#include \"project.h\"\n", "n": 1, "add": ["#include \"RawPtrHelpers.h\"\n", "#include \"clang/AST/Decl.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"llvm/ADT/StringRef.h\"\n"]}
+    ],
+    "clang/stack_maps/IdentifySafepoints/IdentifySafepoints.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/IR/Function.h\"\n", "#include \"llvm/IR/InstIterator.h\"\n", "#include \"llvm/IR/Instructions.h\"\n", "#include \"llvm/Pass.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/IR/LegacyPassManager.h\"\n", "#include \"llvm/Transforms/IPO/PassManagerBuilder.h\"\n"]}
+    ],
+    "clang/stack_maps/RegisterGcFunctions/RegisterGcFunctions.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/IR/Function.h\"\n", "#include \"llvm/IR/InstIterator.h\"\n", "#include \"llvm/IR/Instructions.h\"\n", "#include \"llvm/Pass.h\"\n", "#include \"llvm/Support/raw_ostream.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/ADT/DepthFirstIterator.h\"\n", "#include \"llvm/Analysis/CallGraph.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"llvm/IR/LegacyPassManager.h\"\n", "#include \"llvm/Transforms/IPO/PassManagerBuilder.h\"\n"]}
+    ],
+    "clang/stack_maps/gc/gc_api.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"objects.h\"\n"]}
+    ],
+    "clang/stack_maps/tests/relocate_across_fns.cpp": [
+      {"after": "#include <assert.h>\n", "before": "\n", "n": 1, "add": ["#include \"objects.h\"\n", "#include \"tests.h\"\n"]}
+    ],
+    "clang/stack_maps/tests/relocate_single_fn.cpp": [
+      {"after": "#include <assert.h>\n", "before": "\n", "n": 1, "add": ["#include \"objects.h\"\n", "#include \"tests.h\"\n"]}
+    ],
+    "clang/string_piece_rewriters/StringPieceRewriters.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/AST/ASTContext.h\"\n", "#include \"clang/AST/ParentMap.h\"\n", "#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/ASTMatchers/ASTMatchersMacros.h\"\n", "#include \"clang/Analysis/CFG.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/Lexer.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Refactoring/AtomicChange.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"clang/Tooling/Transformer/RewriteRule.h\"\n", "#include \"clang/Tooling/Transformer/SourceCodeBuilders.h\"\n", "#include \"clang/Tooling/Transformer/Stencil.h\"\n", "#include \"clang/Tooling/Transformer/Transformer.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/TargetSelect.h\"\n"]}
+    ],
+    "clang/trace_annotator/TraceAnnotator.cpp": [
+      {"after": "#include <vector>\n", "before": "\n", "n": 1, "add": ["#include \"clang/ASTMatchers/ASTMatchFinder.h\"\n", "#include \"clang/ASTMatchers/ASTMatchers.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/FormatVariadic.h\"\n"]}
+    ],
+    "clang/translation_unit/TranslationUnitGenerator.cpp": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"clang/Basic/Diagnostic.h\"\n", "#include \"clang/Basic/FileManager.h\"\n", "#include \"clang/Basic/SourceManager.h\"\n", "#include \"clang/Frontend/CompilerInstance.h\"\n", "#include \"clang/Frontend/FrontendActions.h\"\n", "#include \"clang/Lex/HeaderSearchOptions.h\"\n", "#include \"clang/Lex/PPCallbacks.h\"\n", "#include \"clang/Lex/Preprocessor.h\"\n", "#include \"clang/Tooling/CommonOptionsParser.h\"\n", "#include \"clang/Tooling/CompilationDatabase.h\"\n", "#include \"clang/Tooling/Refactoring.h\"\n", "#include \"clang/Tooling/Tooling.h\"\n", "#include \"llvm/ADT/SmallVector.h\"\n", "#include \"llvm/Support/CommandLine.h\"\n", "#include \"llvm/Support/FileSystem.h\"\n", "#include \"llvm/Support/Path.h\"\n"]}
+    ],
+    "code_cache_generator/code_cache_generator.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_bundled_code_cache_generator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/v8_context_snapshot/buildflags.h\"\n", "#include \"v8/include/v8.h\"\n"]}
+    ],
+    "imagediff/image_diff.cc": [
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"windows.h\"\n"]}
+    ],
+    "json_schema_compiler/test/additional_properties_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/additional_properties.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/any_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/any.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/arrays_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/arrays.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/enums.h\"\n"]}
+    ],
+    "json_schema_compiler/test/callbacks_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/callbacks.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/choices_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/choices.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/crossref_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/crossref.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/simple_api.h\"\n"]}
+    ],
+    "json_schema_compiler/test/enums_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/enums.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/error_generation_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/error_generation.h\"\n"]},
+      {"after": "#include \"base/strings/utf_string_conversions.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/features_generation_unittest.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"extensions/common/extensions_client.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"extensions/common/features/simple_feature.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"extensions/common/mojom/context_type.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/features_compiler_test.h\"\n"]}
+    ],
+    "json_schema_compiler/test/functions_as_parameters_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/functions_as_parameters.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/functions_on_types_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/functions_on_types.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/generated_schemas_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/generated_schemas.h\"\n"]},
+      {"after": "#include \"base/json/json_reader.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/idl_schemas_unittest.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"tools/json_schema_compiler/test/test_util.h\"\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/idl_basics.h\"\n", "#include \"tools/json_schema_compiler/test/idl_object_types.h\"\n", "#include \"tools/json_schema_compiler/test/idl_properties.h\"\n"]}
+    ],
+    "json_schema_compiler/test/ignore_additional_properties_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/ignore_additional_properties.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/objects_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/objects.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/objects_movable.h\"\n", "#include \"tools/json_schema_compiler/test/objects_movable_json.h\"\n"]}
+    ],
+    "json_schema_compiler/test/returns_async_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/returns_async.h\"\n"]},
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/simple_api_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/simple_api.h\"\n"]},
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"tools/json_schema_compiler/test/enums.h\"\n"]}
+    ],
+    "json_schema_compiler/test/test_util.cc": [
+      {"after": "#include \"base/json/json_reader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "json_schema_compiler/test/test_util.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"extensions/buildflags/buildflags.h\"\n"]}
+    ],
+    "memory/partition_allocator/inspect_utils_linux.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "memory/partition_allocator/inspect_utils_mac.cc": [
+      {"after": "#include \"base/memory/page_size.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "memory/partition_allocator/pa_buckets_inspect.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"tools/memory/partition_allocator/inspect_utils.h\"\n", "n": 1, "add": ["#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"    // nogncheck\n"]}
+    ],
+    "memory/partition_allocator/pa_dump_heap.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"tools/memory/partition_allocator/inspect_utils.h\"\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/internal/partition_page_internal.h\"  // nogncheck\n", "#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"    // nogncheck\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"third_party/snappy/src/snappy.h\"\n"]}
+    ],
+    "memory/partition_allocator/pa_tcache_inspect.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"tools/memory/partition_allocator/inspect_utils.h\"\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"\n", "#include \"partition_alloc/internal/partition_root_internal.h\"  // nogncheck\n", "#include \"partition_alloc/internal/thread_cache_internal.h\"    // nogncheck\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n"]}
+    ],
+    "memory/partition_allocator/palloc_viewer/palloc-viewer-gui.cc": [
+      {"after": "#include <imgui.h>\n", "before": "\n", "n": 1, "add": ["#include \"ProggyTiny.ttf.h\"\n", "#include \"imgui_impl_opengl2.h\"\n", "#include \"imgui_impl_sdl.h\"\n", "#include \"implot.h\"\n"]}
+    ],
+    "memory/simulator/contiguous_memory_holder.cc": [
+      {"after": "#include \"base/memory/page_size.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]}
+    ],
+    "traffic_annotation/scripts/test_data/valid_file.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dummy_classes.h\"\n"]}
+    ],
+    "v8_context_snapshot/v8_context_snapshot_generator.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_v8_context_snapshot.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "variations/unittest_data/expected_output.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"test_output.h\"\n"]}
+    ],
+    "variations/unittest_data/expected_output.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"components/variations/proto/study.pb.h\"\n"]}
+    ],
+    "win/chromeexts/commands/gwp_asan_command.h": [
+      {"after": "\n", "before": "#include \"third_party/crashpad/crashpad/util/file/file_reader.h\"\n", "n": 1, "add": ["#include \"components/gwp_asan/crash_handler/crash.pb.h\"\n"]}
+    ]
+  }
+}

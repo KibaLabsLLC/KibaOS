@@ -1,0 +1,134 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libaom",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "fuzz/av1_encoder_fuzz_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aom_codec.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aom_encoder.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aom_image.h\"\n", "#include \"third_party/libaom/source/libaom/aom/aomcx.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DCMAKE_TOOLCHAIN_FILE=\\\"../source/libaom/cmake/toolchains/armv7-linux-gcc.cmake\\\" -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_RUNTIME_CPU_DETECT=0 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/config/aom_scale_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm-neon/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-cpu-detect/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DCMAKE_TOOLCHAIN_FILE=\\\"../source/libaom/cmake/toolchains/arm64-linux-clang.cmake\\\" -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/linux/arm64-cpu-detect/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-cpu-detect/config/aom_scale_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/arm64-cpu-detect/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/linux/generic/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DAOM_TARGET_CPU=generic -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/linux/generic/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]}
+    ],
+    "source/config/linux/generic/config/aom_scale_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config/aom_config.h\"\n"]}
+    ],
+    "source/config/linux/generic/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]}
+    ],
+    "source/config/linux/ia32/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DCMAKE_TOOLCHAIN_FILE=\\\"../source/libaom/cmake/toolchains/i686-linux-gcc.cmake\\\" -DAOM_RTCD_FLAGS=--require-mmx;--require-sse;--require-sse2;--require-sse3 -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_PIC=1 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/linux/ia32/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/ia32/config/aom_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/ia32/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DAOM_TARGET_CPU=x86_64 -DAOM_RTCD_FLAGS=--require-mmx;--require-sse;--require-sse2;--require-sse3 -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/linux/x64/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/config/aom_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/linux/x64/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/arm64-cpu-detect/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DCMAKE_TOOLCHAIN_FILE=\\\"../source/libaom/cmake/toolchains/arm64-linux-clang.cmake\\\" -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384 -DENABLE_SVE=0 -DENABLE_SVE2=0\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/win/arm64-cpu-detect/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/arm64-cpu-detect/config/aom_scale_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/arm64-cpu-detect/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 2, "add": ["#include \"config/aom_config.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/arm.h\"\n"]}
+    ],
+    "source/config/win/ia32/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DCMAKE_TOOLCHAIN_FILE=\\\"../source/libaom/cmake/toolchains/i686-linux-gcc.cmake\\\" -DAOM_RTCD_FLAGS=--require-mmx;--require-sse;--require-sse2;--require-sse3 -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_PIC=1 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/win/ia32/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/ia32/config/aom_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/ia32/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/config/aom_config.c": [
+      {"after": " */\n", "before": "static const char* const cfg = \"cmake ../source/libaom -G \\\"Unix Makefiles\\\" -DAOM_TARGET_CPU=x86_64 -DAOM_RTCD_FLAGS=--require-mmx;--require-sse;--require-sse2;--require-sse3 -DCONFIG_AV1_DECODER=0 -DCONFIG_AV1_ENCODER=1 -DCONFIG_AV1_HIGHBITDEPTH=0 -DCONFIG_AV1_TEMPORAL_DENOISING=0 -DCONFIG_QUANT_MATRIX=0 -DCONFIG_REALTIME_ONLY=1 -DCONFIG_DENOISE=0 -DCONFIG_SIZE_LIMIT=1 -DDECODE_HEIGHT_LIMIT=16384 -DDECODE_WIDTH_LIMIT=16384\";\n", "n": 1, "add": ["#include \"aom/aom_codec.h\"\n"]}
+    ],
+    "source/config/win/x64/config/aom_dsp_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/aom_dsp_common.h\"\n", "#include \"av1/common/blockd.h\"\n", "#include \"av1/common/enums.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/config/aom_scale_rtcd.h": [
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/config/win/x64/config/av1_rtcd.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"aom/aom_integer.h\"\n", "#include \"aom_dsp/odintrin.h\"\n", "#include \"aom_dsp/txfm_common.h\"\n", "#include \"av1/common/av1_txfm.h\"\n", "#include \"av1/common/common.h\"\n", "#include \"av1/common/convolve.h\"\n", "#include \"av1/common/enums.h\"\n", "#include \"av1/common/filter.h\"\n", "#include \"av1/common/quant_common.h\"\n", "#include \"av1/common/restoration.h\"\n"]},
+      {"after": "#ifdef RTCD_C\n", "before": "static void setup_rtcd_internal(void)\n", "n": 1, "add": ["#include \"aom_ports/x86.h\"\n"]}
+    ],
+    "source/gen_src/usage_exit.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common/tools_common.h\"\n"]}
+    ]
+  }
+}

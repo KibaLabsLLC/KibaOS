@@ -1,0 +1,191 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "testing",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "android/native_test/main_runner.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"testing/android/native_test/native_main_runner_jni/MainRunner_jni.h\"\n"]}
+    ],
+    "android/native_test/native_browser_test_support.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"testing/android/native_test/native_browser_test_jni/NativeBrowserTest_jni.h\"\n"]}
+    ],
+    "android/native_test/native_test_launcher.cc": [
+      {"after": "#include \"base/base_switches.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]},
+      {"after": "#include \"base/threading/thread_restrictions.h\"\n", "before": "#include \"testing/android/native_test/main_runner.h\"\n", "n": 1, "add": ["#include \"gtest/gtest.h\"\n"]},
+      {"after": "#include \"testing/android/native_test/main_runner.h\"\n", "before": "#include \"testing/android/native_test/native_test_util.h\"\n", "n": 1, "add": ["#include \"testing/android/native_test/native_test_jni/NativeTest_jni.h\"\n"]}
+    ],
+    "data_driven_testing/data_driven_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "gmock/include/gmock/gmock-actions.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googlemock/include/gmock/gmock-actions.h\"\n"]}
+    ],
+    "gmock/include/gmock/gmock-matchers.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googlemock/include/gmock/gmock-matchers.h\"\n"]}
+    ],
+    "gmock/include/gmock/gmock.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googlemock/include/gmock/gmock.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest-death-test.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest-death-test.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest-message.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest-message.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest-param-test.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest-param-test.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest-spi.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest-spi.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest/include/gtest/gtest_prod.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/gtest_prod.h\"  // IWYU pragma: export\n"]}
+    ],
+    "gtest_mac.h": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/internal/gtest-port.h\"\n"]}
+    ],
+    "gtest_mac.mm": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/internal/gtest-port.h\"\n", "#include \"third_party/googletest/src/googletest/include/gtest/internal/gtest-string.h\"\n"]}
+    ],
+    "gtest_mac_unittest.mm": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/googletest/src/googletest/include/gtest/internal/gtest-port.h\"\n"]}
+    ],
+    "libfuzzer/confirm_fuzztest_init.cc": [
+      {"after": "#include \"testing/libfuzzer/fuzztest_init_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/init_fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/flatbuffers_verifier_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/flatbuffers/src/tests/monster_test_generated.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/javascript_parser_proto_fuzzer.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/libfuzzer/fuzzers/javascript_parser_proto_to_string.h\"\n", "n": 1, "add": ["#include \"javascript_parser.pb.h\"  // from out/gen\n"]},
+      {"after": "#include \"testing/libfuzzer/libfuzzer_exports.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n", "#include \"v8/include/libplatform/libplatform.h\"\n", "#include \"v8/include/v8.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/javascript_parser_proto_to_string.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"javascript_parser.pb.h\"  // from out/gen\n"]}
+    ],
+    "libfuzzer/fuzzers/libsrtp_fuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/libfuzzer_base_wrappers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libsrtp/include/srtp.h\"\n", "#include \"third_party/libsrtp/include/srtp_priv.h\"\n", "#include \"third_party/libsrtp/test/rtp.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/libxml_xml_read_memory_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"libxml/parser.h\"\n", "#include \"libxml/xmlsave.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/libyuv_scale_fuzzer.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/libyuv_scale_fuzzer_libfuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/fuzzers/libyuv_scale_fuzzer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libyuv/include/libyuv.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/libyuv_scale_fuzztest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/domain.h\"\n", "#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/libyuv/include/libyuv.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/mach/mach_message_converter.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/fuzzers/mach/mach_message.pb.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/paint_vector_icon_fuzztest.cc": [
+      {"after": "#include \"skia/ext/switches.h\"\n", "before": "#include \"ui/gfx/canvas.h\"\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/skia_image_filter_proto_fuzzer.cc": [
+      {"after": "#include \"base/test/test_discardable_memory_allocator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageFilter.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/skia_path_common.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/skia_path_common.h": [
+      {"after": "#include \"base/containers/span_reader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/skia_path_fuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/libfuzzer_base_wrappers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/core/SkPathUtils.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/skia_pathop_fuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/fuzzers/skia_path_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPath.h\"\n", "#include \"third_party/skia/include/pathops/SkPathOps.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/snappy_compress_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/snappy/src/snappy.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/snappy_uncompress_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/snappy/src/snappy-sinksource.h\"\n", "#include \"third_party/snappy/src/snappy.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/string_compare_fuzztest_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/string_compare_proto_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/string_compare.pb.h\"\n", "#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/string_compare_seeded_fuzztest_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/template_url_parser_fuzzer.cc": [
+      {"after": "#include \"components/search_engines/template_url.h\"\n", "before": "#include \"mojo/core/embedder/embedder.h\"\n", "n": 1, "add": ["#include \"libxml/parser.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/tint_wgsl_fuzzer.cc": [
+      {"after": "\n", "before": "#include \"tint_wgsl_fuzzer_grammar.h\"\n", "n": 1, "add": ["#include \"third_party/dawn/src/tint/lang/wgsl/reader/reader.h\"\n", "#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/tint_wgsl_fuzzer_grammar.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/internal/domains/in_grammar_impl.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/url_parse_proto_fuzzer.cc": [
+      {"after": "// function.\n", "before": "// Header information about the Protocol Buffer Url class.\n", "n": 1, "add": ["#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n"]},
+      {"after": "// Header information about the Protocol Buffer Url class.\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/url.pb.h\"\n"]}
+    ],
+    "libfuzzer/fuzzers/v8_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]},
+      {"after": "#include \"testing/libfuzzer/libfuzzer_exports.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/libplatform/libplatform.h\"\n"]}
+    ],
+    "libfuzzer/fuzztest_wrapper.cpp": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/buildflags.h\"\n"]}
+    ],
+    "libfuzzer/proto/json_proto_converter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/json.pb.h\"\n"]}
+    ],
+    "libfuzzer/proto/lpm_interface.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"  // IWYU pragma: export\n"]}
+    ],
+    "libfuzzer/proto/skia_image_filter_proto_converter.cc": [
+      {"after": "#include \"third_party/protobuf/src/google/protobuf/repeated_field.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkPoint.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n"]}
+    ],
+    "libfuzzer/proto/skia_image_filter_proto_converter.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/skia_image_filter.pb.h\"\n", "#include \"third_party/skia/include/core/SkPoint.h\"\n"]}
+    ],
+    "libfuzzer/proto/url_proto_converter.cc": [
+      {"after": "#include \"base/strings/string_number_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/url.pb.h\"\n"]}
+    ],
+    "libfuzzer/proto/url_proto_converter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/url.pb.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzz_target.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/buildflags.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzzer_launcher_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/buildflags.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzzer_smoke_test.cc": [
+      {"after": "#include \"base/process/process_iterator.h\"\n", "before": "#include \"base/test/spin_wait.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"testing/libfuzzer/tests/fuzz_target.h\"\n", "n": 1, "add": ["#include \"testing/libfuzzer/buildflags.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzztest_cq_smoke_test.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzztest_crashing_fuzzer.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzztest_proto_crashing_fuzzer.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/string_compare_fuzzable.pb.h\"\n", "#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzztest_proto_stub_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/proto/string_compare_fuzzable.pb.h\"\n", "#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/tests/fuzztest_stub_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "libfuzzer/tests/lpm_stub_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/tests/lpm_test_fuzzable.pb.h\"\n", "#include \"third_party/libprotobuf-mutator/src/src/libfuzzer/libfuzzer_macro.h\"\n"]}
+    ],
+    "libfuzzer/tests/stacktrace_test.cc": [
+      {"after": "#include \"base/process/launch.h\"\n", "before": "#include \"base/scoped_environment_variable_override.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"testing/libfuzzer/buildflags.h\"\n", "#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ]
+  }
+}

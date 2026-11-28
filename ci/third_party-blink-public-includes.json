@@ -1,0 +1,706 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/blink/public",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "common/associated_interfaces/associated_interface_provider.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/associated_interfaces/associated_interfaces.mojom.h\"\n"]}
+    ],
+    "common/bluetooth/web_bluetooth_device_id_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/bluetooth/web_bluetooth_device_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/bluetooth/web_bluetooth.mojom-shared.h\"\n"]}
+    ],
+    "common/client_hints/client_hints.h": [
+      {"after": "#include \"base/containers/flat_map.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom.h\"\n", "#include \"services/network/public/mojom/web_client_hints_types.mojom-shared.h\"\n"]}
+    ],
+    "common/client_hints/enabled_client_hints.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_client_hints_types.mojom-shared.h\"\n"]}
+    ],
+    "common/context_menu_data/context_menu_data.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/context_menu_data/menu_item_info.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/annotation/annotation.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/context_menu/context_menu.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/forms/form_control_type.mojom-shared.h\"\n", "#include \"ui/base/mojom/menu_source_type.mojom-shared.h\"\n"]}
+    ],
+    "common/context_menu_data/context_menu_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/dom/dom_node_id.h\"\n", "before": "#include \"url/mojom/url_gurl_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/context_menu/context_menu.mojom.h\"\n", "#include \"third_party/blink/public/mojom/forms/form_control_type.mojom-shared.h\"\n", "#include \"ui/base/mojom/menu_source_type.mojom-forward.h\"\n"]}
+    ],
+    "common/context_menu_data/untrustworthy_context_menu_params.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/annotation/annotation.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/context_menu/context_menu.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/forms/form_control_type.mojom-shared.h\"\n", "#include \"ui/base/mojom/menu_source_type.mojom-forward.h\"\n"]}
+    ],
+    "common/dom/dom_node_id_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/dom/dom_node_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/dom/dom_node_id.mojom-data-view.h\"\n"]}
+    ],
+    "common/features.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/common/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/common/features_generated.h\"\n"]}
+    ],
+    "common/fenced_frame/fenced_frame_utils.h": [
+      {"after": "#include \"services/network/public/cpp/web_sandbox_flags.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n"]}
+    ],
+    "common/fenced_frame/redacted_fenced_frame_config.h": [
+      {"after": "#include \"services/network/public/cpp/permissions_policy/permissions_policy_declaration.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fenced_frame/fenced_frame_config.mojom-forward.h\"\n"]}
+    ],
+    "common/fenced_frame/redacted_fenced_frame_config_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/fenced_frame/redacted_fenced_frame_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fenced_frame/fenced_frame_config.mojom.h\"\n"]}
+    ],
+    "common/fetch/fetch_api_request_body_mojom_traits.h": [
+      {"after": "#include \"services/network/public/cpp/resource_request_body.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n"]}
+    ],
+    "common/fetch/fetch_api_request_headers_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/fetch/fetch_api_request_headers_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n"]}
+    ],
+    "common/fingerprinting_protection/noise_token_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/fingerprinting_protection/noise_token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fingerprinting_protection/noise_token.mojom-shared.h\"\n"]}
+    ],
+    "common/font_unique_name_lookup/font_table_matcher.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/common/font_unique_name_lookup/font_unique_name_table.pb.h\"\n"]}
+    ],
+    "common/font_unique_name_lookup/font_table_persistence.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/common/font_unique_name_lookup/font_unique_name_table.pb.h\"\n"]}
+    ],
+    "common/frame/fenced_frame_sandbox_flags.h": [
+      {"after": "#include \"services/network/public/cpp/web_sandbox_flags.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/frame_ad_evidence.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/ad_tagging/ad_evidence.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/frame_ad_evidence_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/frame/frame_ad_evidence.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/ad_tagging/ad_evidence.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/frame_owner_element_type_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/frame/frame_owner_element_type.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/frame.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/frame_policy.h": [
+      {"after": "#include \"services/network/public/cpp/permissions_policy/permissions_policy_declaration.h\"\n", "before": "#include \"third_party/blink/public/common/permissions_policy/document_policy_features.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/permissions_policy/document_policy_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/deferred_fetch_policy.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/frame_visual_properties_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/frame/frame_visual_properties.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/frame_visual_properties.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/user_activation_state.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/user_activation_notification_type.mojom-forward.h\"\n"]}
+    ],
+    "common/frame/view_transition_state.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/view_transition_state.mojom-shared.h\"\n"]}
+    ],
+    "common/frame/view_transition_state_mojom_traits.h": [
+      {"after": "#include \"base/containers/flat_map.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/view_transition_element_resource_id.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/frame/view_transition_state.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/view_transition_state.mojom-shared.h\"\n"]}
+    ],
+    "common/indexeddb/indexed_db_default_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/indexeddb/indexeddb_metadata.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/indexeddb/indexeddb.mojom-forward.h\"\n"]}
+    ],
+    "common/indexeddb/indexeddb_key.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/indexeddb/indexeddb.mojom-shared.h\"\n"]}
+    ],
+    "common/indexeddb/indexeddb_key_path.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/indexeddb/indexeddb.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_coalesced_input_event_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/input/web_input_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/input_handler.mojom.h\"\n"]}
+    ],
+    "common/input/web_gesture_device.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/gesture_event.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_gesture_event.h": [
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "#include \"ui/events/event_constants.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/gesture_event.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_input_event.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/events/event_latency_metadata.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/input_event.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_mouse_event.h": [
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/base/mojom/menu_source_type.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_pointer_properties.h": [
+      {"after": "#include \"third_party/blink/public/common/input/pointer_id.h\"\n", "before": "#include \"ui/events/event_constants.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/input_event.mojom-shared.h\"\n"]}
+    ],
+    "common/input/web_touch_point.h": [
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/touch_event.mojom-shared.h\"\n"]}
+    ],
+    "common/link_to_text/link_to_text_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/link_to_text/link_to_text.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/javascript_framework_detection.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/javascript_framework_detection.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/mime_sniffing_throttle.h": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "common/loader/mime_sniffing_url_loader.h": [
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader_factory.mojom-forward.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]}
+    ],
+    "common/loader/network_utils.h": [
+      {"after": "#include \"net/http/http_response_headers.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-forward.h\"\n"]}
+    ],
+    "common/loader/record_load_histograms.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/referrer_utils.h": [
+      {"after": "#include \"net/url_request/referrer_policy.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/resource_type_util.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/resource_load_info.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/throttling_url_loader.h": [
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/accept_ch_frame_observer.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader.mojom.h\"\n", "#include \"services/network/public/mojom/url_loader_factory.mojom-forward.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n", "#include \"services/network/public/mojom/web_client_hints_types.mojom.h\"\n"]}
+    ],
+    "common/loader/url_loader_factory_bundle.h": [
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/local_resource_loader_config.mojom.h\"\n"]}
+    ],
+    "common/loader/url_loader_factory_bundle_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/loader/url_loader_factory_bundle.h\"\n", "before": "#include \"url/mojom/origin_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/local_resource_loader_config.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/loader/url_loader_factory_bundle.mojom-shared.h\"\n"]}
+    ],
+    "common/loader/url_loader_throttle.h": [
+      {"after": "#include \"net/base/request_priority.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom-forward.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n", "#include \"services/network/public/mojom/web_client_hints_types.mojom.h\"\n"]}
+    ],
+    "common/loader/worker_main_script_load_parameters.h": [
+      {"after": "#include \"net/url_request/redirect_info.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "common/logging/logging_utils.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/devtools/console_message.mojom-forward.h\"\n"]}
+    ],
+    "common/manifest/manifest.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/screen_orientation_lock_types.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/safe_url_pattern.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/manifest/display_mode.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest_launch_handler.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest_migration_behavior.mojom-shared.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "common/manifest/manifest_icon_selector.h": [
+      {"after": "#include \"third_party/blink/public/common/manifest/manifest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/manifest/manifest.mojom-shared.h\"\n"]}
+    ],
+    "common/manifest/manifest_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/safe_url_pattern.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/manifest/display_mode.mojom.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest.mojom.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "common/manifest/manifest_util.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/screen_orientation_lock_types.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/manifest/manifest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/manifest/display_mode.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/manifest/manifest_launch_handler.mojom.h\"\n"]}
+    ],
+    "common/mediastream/media_devices.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/media_devices.mojom-shared.h\"\n"]}
+    ],
+    "common/mediastream/media_devices_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"media/capture/video/video_capture_device_descriptor.h\"\n", "n": 1, "add": ["#include \"media/capture/mojom/video_capture_types.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/mediastream/media_devices.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/media_devices.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/mediastream/media_devices.mojom.h\"\n"]}
+    ],
+    "common/mediastream/media_stream_controls.h": [
+      {"after": "#include \"third_party/blink/public/common/mediastream/media_stream_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/display_media_preferences.mojom-shared.h\"\n"]}
+    ],
+    "common/mediastream/media_stream_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/mediastream/media_stream_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/display_media_preferences.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/mediastream/media_stream.mojom-forward.h\"\n"]}
+    ],
+    "common/mediastream/media_stream_request.h": [
+      {"after": "#include \"media/capture/video/video_capture_device_descriptor.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"media/mojo/mojom/display_media_information.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/display/types/display_constants.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/media_stream.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/mediastream/media_stream.mojom-shared.h\"\n"]}
+    ],
+    "common/messaging/accelerated_image_info.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n"]}
+    ],
+    "common/messaging/accelerated_static_bitmap_image_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/messaging/accelerated_image_info.h\"\n", "before": "#include \"ui/gfx/geometry/skia_conversions.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/messaging/static_bitmap_image.mojom.h\"\n", "#include \"third_party/skia/include/core/SkColorSpace.h\"\n"]}
+    ],
+    "common/messaging/cloneable_message.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/serialized_blob.mojom.h\"\n", "#include \"third_party/blink/public/mojom/file_system_access/file_system_access_transfer_token.mojom.h\"\n"]}
+    ],
+    "common/messaging/cloneable_message_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/messaging/cloneable_message.h\"\n", "before": "#include \"url/mojom/origin_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/messaging/cloneable_message.mojom.h\"\n"]}
+    ],
+    "common/messaging/message_port_descriptor_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/messaging/message_port_descriptor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/messaging/message_port_descriptor.mojom-shared.h\"\n"]}
+    ],
+    "common/messaging/task_attribution_id_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/scheduler/task_attribution_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/messaging/task_attribution_id.mojom.h\"\n"]}
+    ],
+    "common/messaging/transferable_message.h": [
+      {"after": "#include \"third_party/blink/public/common/scheduler/task_attribution_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/array_buffer/array_buffer_contents.mojom.h\"\n", "#include \"third_party/blink/public/mojom/messaging/delegated_capability.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/messaging/static_bitmap_image.mojom.h\"\n", "#include \"third_party/blink/public/mojom/messaging/task_attribution_id.mojom.h\"\n", "#include \"third_party/blink/public/mojom/messaging/user_activation_snapshot.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "common/messaging/transferable_message_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/scheduler/task_attribution_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/messaging/transferable_message.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "common/navigation/navigation_params.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/navigation/renderer_content_settings.mojom.h\"\n"]}
+    ],
+    "common/navigation/navigation_params_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/clone_traits.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n", "#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/navigation/prefetched_signed_exchange_info.mojom.h\"\n"]}
+    ],
+    "common/navigation/navigation_policy_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/navigation/navigation_policy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/navigation_policy.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/navigation/navigation_policy.mojom.h\"\n"]}
+    ],
+    "common/navigation/prefetched_signed_exchange_info_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/prefetched_signed_exchange_info.mojom-shared.h\"\n"]}
+    ],
+    "common/notifications/notification_resources.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "common/notifications/platform_notification_data.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/notifications/notification.mojom-forward.h\"\n"]}
+    ],
+    "common/origin_trials/origin_trials.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/origin_trials/origin_trial_feature.mojom-forward.h\"\n"]}
+    ],
+    "common/origin_trials/origin_trials_settings_provider.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/origin_trials/origin_trials_settings.mojom.h\"\n"]}
+    ],
+    "common/origin_trials/trial_token_validator.h": [
+      {"after": "#include \"third_party/blink/public/common/origin_trials/trial_token.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/origin_trials/origin_trial_feature.mojom-forward.h\"\n"]}
+    ],
+    "common/page/color_provider_color_maps_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/page/color_provider_color_maps.h\"\n", "before": "#include \"ui/color/color_provider_utils.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/page/page.mojom.h\"\n"]}
+    ],
+    "common/page/drag_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/page/drag_operation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/drag/drag.mojom-data-view.h\"\n"]}
+    ],
+    "common/page/record_content_to_visible_time_request_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/page/content_to_visible_time_request.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/widget/record_content_to_visible_time_request.mojom-shared.h\"\n"]}
+    ],
+    "common/page/source_effect_allowed_mojom_util.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/drag/drag.mojom-shared.h\"\n"]}
+    ],
+    "common/page_state/page_state.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"\n"]}
+    ],
+    "common/page_state/page_state_serialization.h": [
+      {"after": "#include \"services/network/public/cpp/resource_request_body.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom.h\"\n", "#include \"third_party/blink/public/mojom/page_state/page_state.mojom.h\"\n"]}
+    ],
+    "common/peerconnection/webrtc_ip_handling_policy.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom-shared.h\"\n"]}
+    ],
+    "common/peerconnection/webrtc_ip_handling_url_entry.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom-shared.h\"\n"]}
+    ],
+    "common/peerconnection/webrtc_ip_handling_url_entry_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/peerconnection/webrtc_ip_handling_url_entry.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_url_entry.mojom-shared.h\"\n"]}
+    ],
+    "common/permissions/permission_utils.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/permissions/permission.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/permissions/permission_status.mojom-shared.h\"\n"]}
+    ],
+    "common/permissions_policy/document_policy.h": [
+      {"after": "#include \"third_party/blink/public/common/permissions_policy/policy_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/permissions_policy/document_policy_feature.mojom.h\"\n", "#include \"third_party/blink/public/mojom/permissions_policy/policy_value.mojom.h\"\n"]}
+    ],
+    "common/permissions_policy/document_policy_enum_values.h": [
+      {"after": "#include \"third_party/blink/public/common/permissions_policy/js_profiling_mode.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/permissions_policy/document_policy_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/permissions_policy/document_policy_features.h": [
+      {"after": "#include \"third_party/blink/public/common/permissions_policy/policy_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/permissions_policy/document_policy_feature.mojom.h\"\n"]}
+    ],
+    "common/permissions_policy/policy_helper_public.h": [
+      {"after": "#include \"base/containers/flat_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/permissions_policy/policy_value.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/permissions_policy/policy_value.mojom-shared.h\"\n"]}
+    ],
+    "common/renderer_preferences/renderer_preferences.h": [
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "before": "#include \"ui/gfx/font_render_params.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom.h\"\n"]}
+    ],
+    "common/renderer_preferences/renderer_preferences_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_mojom_traits.h\"\n", "before": "#include \"ui/gfx/mojom/font_render_params_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom.h\"\n", "#include \"third_party/blink/public/mojom/renderer_preferences.mojom-shared.h\"\n"]}
+    ],
+    "common/safe_url_pattern_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/safe_url_pattern.h\"\n", "before": "#include \"third_party/liburlpattern/part.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/safe_url_pattern.mojom.h\"\n"]}
+    ],
+    "common/scheduler/web_scheduler_tracked_feature.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/scheduler/web_scheduler_tracked_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/security/address_space_feature.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/ip_address_space.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/security_context/insecure_request_policy.h": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/security_context/insecure_request_policy.mojom-shared.h\"\n"]}
+    ],
+    "common/service_worker/service_worker_embedded_worker_status_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/service_worker/embedded_worker_status.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_embedded_worker_status.mojom-shared.h\"\n"]}
+    ],
+    "common/service_worker/service_worker_loader_helpers.h": [
+      {"after": "#include \"net/url_request/redirect_info.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom.h\"\n", "#include \"third_party/blink/public/mojom/fetch/fetch_api_response.mojom.h\"\n"]}
+    ],
+    "common/service_worker/service_worker_router_rule_mojom_traits.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/service_worker/service_worker_router_rule.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_router_rule.mojom-shared.h\"\n"]}
+    ],
+    "common/service_worker/service_worker_type_converters.h": [
+      {"after": "#include \"third_party/blink/public/common/service_worker/service_worker_status_code.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_event_status.mojom.h\"\n"]}
+    ],
+    "common/storage_key/storage_key.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"url/origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/storage_key/ancestor_chain_bit.mojom.h\"\n"]}
+    ],
+    "common/storage_key/storage_key_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/storage_key/ancestor_chain_bit.mojom.h\"\n", "#include \"third_party/blink/public/mojom/storage_key/storage_key.mojom.h\"\n"]}
+    ],
+    "common/storage_key/storage_key_proto_converter.cc": [
+      {"after": "#include \"net/base/schemeful_site.h\"\n", "before": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/common/storage_key/proto/storage_key.pb.h\"\n"]}
+    ],
+    "common/storage_key/storage_key_proto_converter.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/storage_key/storage_key.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/common/storage_key/proto/storage_key.pb.h\"\n"]}
+    ],
+    "common/tokens/tokens_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/tokens/tokens.mojom-shared.h\"\n"]}
+    ],
+    "common/tracing_support.h": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "common/use_counter/use_counter_feature.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/use_counter/use_counter_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/use_counter/use_counter_feature_tracker.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/common_export.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/use_counter/use_counter_feature.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/use_counter/metrics/css_property_id.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/webdx_feature.mojom-shared.h\"\n"]}
+    ],
+    "common/use_counter/webdx_feature_maps.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/use_counter/metrics/css_property_id.mojom.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/webdx_feature.mojom.h\"\n"]}
+    ],
+    "common/user_agent/user_agent_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/user_agent/user_agent_metadata.mojom-shared.h\"\n"]}
+    ],
+    "common/web_preferences/web_preferences.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/css/preferred_color_scheme.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/css/preferred_contrast.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/v8_cache_options.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/webpreferences/web_preferences.mojom-shared.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "common/web_preferences/web_preferences_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/web_preferences/web_preferences.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webpreferences/web_preferences.mojom.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "common/webid/federated_auth_request_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/webid/login_status_options.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webid/federated_request.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/webid/federated_request.mojom.h\"\n"]}
+    ],
+    "common/webrtc/rtc_logging_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webrtc/rtc_logging.mojom-shared.h\"\n"]}
+    ],
+    "common/widget/device_emulation_params.h": [
+      {"after": "\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/device_posture/device_posture_provider.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/widget/device_emulation_params.mojom-shared.h\"\n", "#include \"ui/display/mojom/screen_orientation.mojom.h\"\n"]}
+    ],
+    "common/widget/device_emulation_params_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/widget/device_emulation_params.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/widget/device_emulation_params.mojom-shared.h\"\n"]}
+    ],
+    "common/widget/visual_properties.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "#include \"ui/display/screen_infos.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/manifest/application_context.mojom.h\"\n", "#include \"third_party/blink/public/mojom/manifest/display_mode.mojom.h\"\n", "#include \"ui/base/mojom/window_show_state.mojom-shared.h\"\n"]}
+    ],
+    "common/widget/visual_properties_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/widget/visual_properties.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/widget/visual_properties.mojom-shared.h\"\n", "#include \"ui/base/mojom/window_show_state.mojom-forward.h\"\n"]}
+    ],
+    "mojom/authenticator_mojom_traits.h": [
+      {"after": "#include \"third_party/blink/public/common/common_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webauthn/authenticator.mojom-shared.h\"\n"]}
+    ],
+    "platform/browser_interface_broker_proxy.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/generic_pending_receiver.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n"]}
+    ],
+    "platform/child_url_loader_factory_bundle.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/self_owned_receiver.h\"\n", "before": "#include \"third_party/blink/public/common/associated_interfaces/associated_interface_provider.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/loader/url_loader_factory_bundle.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/fetch_later.mojom.h\"\n", "#include \"third_party/blink/public/mojom/loader/local_resource_loader_config.mojom.h\"\n", "#include \"third_party/blink/public/mojom/loader/transferrable_url_loader.mojom.h\"\n"]}
+    ],
+    "platform/mac/web_sandbox_support.h": [
+      {"after": "#include \"third_party/blink/public/common/sandbox_support/sandbox_support_mac.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/color_scheme.mojom-shared.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "platform/media/web_media_player_builder.h": [
+      {"after": "#include \"media/base/routing_token_callback.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"media/mojo/mojom/media_metrics_provider.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/mediastream/web_media_stream_track.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"media/mojo/mojom/display_media_information.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/mediastream/web_platform_media_stream_source.h": [
+      {"after": "#include \"third_party/blink/public/common/mediastream/media_stream_request.h\"\n", "before": "#include \"third_party/blink/public/platform/modules/mediastream/web_media_stream_source.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/media_stream.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_error.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_string.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_error_type.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_fetch_context.h": [
+      {"after": "#include \"services/network/public/cpp/shared_url_loader_factory.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/renderer_preference_watcher.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/subresource_loader_updater.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_network_provider.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/controller_service_worker_mode.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_fetch_handler_bypass_option.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_fetch_handler_type.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_object_info.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_object.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_state.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_provider.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/modules/service_worker/web_service_worker_registration_object_info.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_registration.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_provider_client.h": [
+      {"after": "#include \"third_party/blink/public/common/messaging/transferable_message.h\"\n", "before": "#include \"third_party/blink/public/platform/modules/service_worker/web_service_worker_object_info.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_provider_context.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/controller_service_worker_mode.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_container.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_fetch_handler_bypass_option.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_fetch_handler_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_provider.mojom-shared.h\"\n"]}
+    ],
+    "platform/modules/service_worker/web_service_worker_registration_object_info.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_registration.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_registration_options.mojom-shared.h\"\n"]}
+    ],
+    "platform/platform.h": [
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "before": "#include \"third_party/blink/public/platform/audio/web_audio_device_source_type.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/cpu_performance.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/peerconnection/webrtc_ip_handling_policy.mojom-forward.h\"\n"]},
+      {"after": "#include \"ui/gl/angle_implementation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "platform/resource_load_info_notifier_wrapper.h": [
+      {"after": "#include \"net/base/request_priority.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/loader/resource_load_info.mojom.h\"\n"]}
+    ],
+    "platform/scheduler/web_agent_group_scheduler.h": [
+      {"after": "#include \"ipc/urgent_message_observer.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-forward.h\"\n"]}
+    ],
+    "platform/tracked_child_url_loader_factory_bundle.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "#include \"third_party/blink/public/platform/child_url_loader_factory_bundle.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/local_resource_loader_config.mojom.h\"\n"]}
+    ],
+    "platform/weak_wrapper_resource_load_info_notifier.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/loader/resource_load_info.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/loader/resource_load_info_notifier.mojom.h\"\n"]}
+    ],
+    "platform/web_archive_info.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/blink/public/platform/web_url.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/mhtml_load_result.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_blob_info.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_content_security_policy_struct.h": [
+      {"after": "#include \"services/network/public/cpp/integrity_metadata.h\"\n", "before": "#include \"third_party/blink/public/platform/web_string.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/content_security_policy.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_dedicated_or_shared_worker_global_scope_context.h": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/resource_load_info_notifier.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/renderer_preference_watcher.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/subresource_loader_updater.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_dedicated_worker.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/back_forward_cache_controller.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/reporting_observer.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/dedicated_worker_host.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_dedicated_worker_host_factory_client.h": [
+      {"after": "#include \"base/unguessable_token.h\"\n", "before": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n", "#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/back_forward_cache_controller.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/lifecycle.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_document_subresource_filter.h": [
+      {"after": "#include \"components/subresource_filter/core/common/scoped_rule.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_drag_data.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/file_system_access/file_system_access_data_transfer_token.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_fetch_client_settings_object.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/loader/fetch_client_settings_object.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/security_context/insecure_request_policy.h\"\n", "before": "#include \"third_party/blink/renderer/platform/loader/fetch/fetch_client_settings_object_snapshot.h\"  // nogncheck\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/security_context/insecure_request_policy.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_font_render_style.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_string.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkFontStyle.h\"\n", "#include \"third_party/skia/include/core/SkFontTypes.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "platform/web_graphics_context_3d_provider.h": [
+      {"after": "#include \"components/viz/common/resources/shared_image_format.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColorType.h\"\n"]}
+    ],
+    "platform/web_http_body.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/blink/public/common/loader/http_body_element_type.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/data_pipe_getter.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/loader/http_body_element_type.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_image_generator.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "platform/web_isolated_world_info.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_string.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "platform/web_navigation_body_loader.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom-forward.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-forward.h\"\n"]}
+    ],
+    "platform/web_policy_container.h": [
+      {"after": "#include \"services/network/public/cpp/integrity_policy.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/cross_origin_embedder_policy.mojom-shared.h\"\n", "#include \"services/network/public/mojom/ip_address_space.mojom-shared.h\"\n", "#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n", "#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/policy_container.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_runtime_features.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/platform/web_runtime_features_base.h\"\n"]}
+    ],
+    "platform/web_text_input_info.h": [
+      {"after": "#include \"ui/base/ime/ime_text_span.h\"\n", "before": "#include \"ui/base/ime/text_input_action.h\"\n", "n": 1, "add": ["#include \"ui/base/ime/mojom/virtual_keyboard_types.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_theme_engine.h": [
+      {"after": "#include \"third_party/blink/public/common/css/forced_colors.h\"\n", "before": "#include \"ui/gfx/color_palette.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/css/preferred_contrast.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/frame/color_scheme.mojom-forward.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "platform/web_url_error.h": [
+      {"after": "#include \"services/network/public/cpp/cors/cors_error_status.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/blocked_by_response_reason.mojom-shared.h\"\n", "#include \"services/network/public/mojom/cors.mojom-shared.h\"\n", "#include \"services/network/public/mojom/trust_tokens.mojom-shared.h\"\n"]}
+    ],
+    "platform/web_url_request_util.h": [
+      {"after": "#include \"net/http/http_request_headers.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/fetch_api.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/loader/mixed_content.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/loader/resource_load_info.mojom-forward.h\"\n"]}
+    ],
+    "platform/web_v8_value_converter.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "platform/web_worker_fetch_context.h": [
+      {"after": "#include \"base/task/single_thread_task_runner.h\"\n", "before": "#include \"third_party/blink/public/common/loader/url_loader_throttle.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/renderer_preferences/renderer_preferences.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/controller_service_worker_mode.mojom-shared.h\"\n"]}
+    ],
+    "web/blink.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_string.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-isolate.h\"\n"]}
+    ],
+    "web/modules/canvas/canvas_test_utils.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/modules/mediastream/media_stream_video_source.h": [
+      {"after": "#include \"media/base/capture_version.h\"\n", "before": "#include \"media/capture/video_capture_types.h\"\n", "n": 1, "add": ["#include \"media/capture/mojom/video_capture_types.mojom-shared.h\"\n"]},
+      {"after": "#include \"media/capture/video_capture_types.h\"\n", "before": "#include \"third_party/blink/public/platform/media/video_capture.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/mediastream/media_devices.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/mediastream/media_stream.mojom-shared.h\"\n"]}
+    ],
+    "web/modules/mediastream/web_media_player_ms.h": [
+      {"after": "#include \"media/gfx/paint_canvas_video_renderer.h\"\n", "before": "#include \"media/video/gpu_video_accelerator_factories.h\"\n", "n": 1, "add": ["#include \"media/mojo/mojom/media_types.mojom-shared.h\"\n"]}
+    ],
+    "web/modules/service_worker/web_service_worker_context_client.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/devtools/console_message.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/devtools/devtools_agent.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_event_status.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/platform/web_url.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/modules/service_worker/web_service_worker_context_proxy.h": [
+      {"after": "#include \"mojo/public/cpp/system/data_pipe.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/controller_service_worker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_fetch_handler_type.mojom-shared.h\"\n"]}
+    ],
+    "web/web_agent_cluster_key.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_security_origin.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/agent_cluster_key.mojom-shared.h\"\n"]}
+    ],
+    "web/web_array_buffer_converter.h": [
+      {"after": "#include \"third_party/blink/public/web/web_array_buffer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_associated_url_loader_options.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/cors.mojom-shared.h\"\n"]}
+    ],
+    "web/web_autofill_client.h": [
+      {"after": "#include \"base/functional/function_ref.h\"\n", "before": "#include \"third_party/blink/public/web/web_element.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/forms/form_control_type.mojom-shared.h\"\n"]}
+    ],
+    "web/web_ax_object.h": [
+      {"after": "#include \"third_party/blink/public/web/web_ax_enums.h\"\n", "before": "#include \"ui/accessibility/ax_event_intent.h\"\n", "n": 1, "add": ["#include \"ui/accessibility/ax_enums.mojom-shared.h\"\n"]}
+    ],
+    "web/web_blob.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/blob/serialized_blob.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/platform/web_url.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_console_message.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/devtools/console_message.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_node.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_crypto_normalize.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_crypto_algorithm.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_document.h": [
+      {"after": "#include \"services/metrics/public/cpp/ukm_source_id.h\"\n", "before": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n", "#include \"services/network/public/mojom/restricted_cookie_manager.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_script_tool_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "web/web_document_loader.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/ip_address_space.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/loader/code_cache.mojom-shared.h\"\n"]}
+    ],
+    "web/web_dom_activity_logger.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_url.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_dom_file_system.h": [
+      {"after": "#include \"third_party/blink/public/web/web_frame.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_dom_media_stream_track.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_private_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_element.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/scroll_direction.mojom-shared.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/vector2d_f.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_embedded_worker.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/cache_storage/cache_storage.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/reporting_observer.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/service_worker/service_worker_installed_scripts_manager.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/worker_content_settings_proxy.mojom-shared.h\"\n"]}
+    ],
+    "web/web_embedded_worker_start_data.h": [
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "before": "#include \"third_party/blink/public/platform/web_fetch_client_settings_object.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/service_worker/service_worker_registration.mojom-shared.h\"\n"]}
+    ],
+    "web/web_form_control_element.h": [
+      {"after": "#include \"base/i18n/rtl.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/forms/form_control_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_form_element.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "web/web_frame.h": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/frame.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/frame_replication_state.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/frame/tree_scope_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/security_context/insecure_request_policy.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_node.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_frame_owner_properties.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_string.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/css/preferred_color_scheme.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/color_scheme.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/frame_owner_properties.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/scroll/scrollbar_mode.mojom-shared.h\"\n"]}
+    ],
+    "web/web_frame_widget.h": [
+      {"after": "#include \"third_party/blink/public/common/page/drag_operation.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/page/widget.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_widget.h\"\n", "before": "#include \"ui/gfx/ca_layer_result.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/base/dragdrop/mojom/drag_drop_types.mojom-shared.h\"\n"]}
+    ],
+    "web/web_history_item.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/navigation_api_history_entry_arrays.mojom-forward.h\"\n"]}
+    ],
+    "web/web_image.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "web/web_image_replacement.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/image_replacement/image_replacement.mojom-shared.h\"\n"]}
+    ],
+    "web/web_input_method_controller.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_text_input_info.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/input_handler.mojom-forward.h\"\n"]}
+    ],
+    "web/web_local_frame.h": [
+      {"after": "#include \"components/viz/common/surfaces/frame_sink_id.h\"\n", "before": "#include \"third_party/blink/public/common/context_menu_data/untrustworthy_context_menu_params.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/permissions_policy/permissions_policy_feature.mojom-shared.h\"\n", "#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/back_forward_cache_not_restored_reasons.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/commit_result/commit_result.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/context_menu/context_menu.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/devtools/devtools_agent.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/devtools/inspector_issue.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/dom_storage/storage_area.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/lifecycle.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/media_player_action.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/user_activation_notification_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/lcp_critical_path_predictor/lcp_critical_path_predictor.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/navigation/renderer_content_settings.mojom.h\"\n", "#include \"third_party/blink/public/mojom/page/widget.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/script/script_evaluation_params.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/selection_menu/selection_menu_behavior.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/use_counter/metrics/web_feature.mojom-shared.h\"\n"]},
+      {"after": "#include \"ui/base/ime/ime_text_span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_local_frame_client.h": [
+      {"after": "#include \"media/base/speech_recognition_client.h\"\n", "before": "#include \"services/metrics/public/cpp/ukm_source_id.h\"\n", "n": 1, "add": ["#include \"media/mojo/mojom/audio_processing.mojom-shared.h\"\n"]},
+      {"after": "#include \"services/network/public/cpp/permissions_policy/permissions_policy_declaration.h\"\n", "before": "#include \"third_party/blink/public/common/dom_storage/session_storage_namespace_id.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/web_sandbox_flags.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "before": "#include \"third_party/blink/public/platform/child_url_loader_factory_bundle.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/blocked_navigation_types.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/triggering_event_info.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/user_activation_update_types.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/loader/same_document_navigation_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/media/renderer_audio_input_stream_factory.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/scroll/scroll_enums.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_navigation_type.h\"\n", "before": "#include \"ui/accessibility/ax_event.h\"\n", "n": 1, "add": ["#include \"ui/accessibility/ax_enums.mojom-shared.h\"\n"]},
+      {"after": "#include \"ui/events/types/scroll_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "web/web_message_port_converter.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_navigation_params.h": [
+      {"after": "#include \"services/network/public/cpp/permissions_policy/permissions_policy_declaration.h\"\n", "before": "#include \"third_party/blink/public/common/fenced_frame/redacted_fenced_frame_config.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/link_header.mojom-shared.h\"\n", "#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n", "#include \"services/network/public/mojom/url_loader_factory.mojom-shared.h\"\n", "#include \"services/network/public/mojom/url_response_head.mojom-shared.h\"\n", "#include \"services/network/public/mojom/web_client_hints_types.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/blob/blob_url_store.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/policy_container.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/frame/triggering_event_info.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/navigation/renderer_content_settings.mojom.h\"\n", "#include \"third_party/blink/public/mojom/runtime_feature_state/runtime_feature.mojom-shared.h\"\n"]}
+    ],
+    "web/web_navigation_timings.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/navigation_params.mojom-shared.h\"\n"]}
+    ],
+    "web/web_node.h": [
+      {"after": "#include \"third_party/blink/public/web/web_dom_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/cppgc/source-location.h\"\n", "#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_performance_metrics_for_reporting.h": [
+      {"after": "#include \"third_party/blink/public/common/performance/largest_contentful_paint_type.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/navigation/navigation_type_for_navigation_api.mojom-shared.h\"\n"]}
+    ],
+    "web/web_plugin.h": [
+      {"after": "#include \"third_party/blink/public/common/page/drag_operation.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/annotation/annotation.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/input/focus_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_input_method_controller.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "web/web_plugin_container.h": [
+      {"after": "#include \"ui/gfx/geometry/rect.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_print_params.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/web/web_print_page_description.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-shared.h\"\n"]}
+    ],
+    "web/web_print_preset_options.h": [
+      {"after": "\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-shared.h\"\n"]}
+    ],
+    "web/web_remote_frame.h": [
+      {"after": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/frame.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/frame_replication_state.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/frame/user_activation_notification_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/user_activation_update_types.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/security_context/insecure_request_policy.mojom-shared.h\"\n"]}
+    ],
+    "web/web_render_theme.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "web/web_security_policy.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/cors_origin_pattern.mojom-shared.h\"\n", "#include \"services/network/public/mojom/referrer_policy.mojom-shared.h\"\n"]}
+    ],
+    "web/web_serialized_script_value.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_private_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_settings.h": [
+      {"after": "#include \"third_party/blink/public/common/web_preferences/web_preferences.h\"\n", "before": "#include \"third_party/blink/public/platform/generic_font_family.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/v8_cache_options.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/webpreferences/web_preferences.mojom-forward.h\"\n"]}
+    ],
+    "web/web_shared_worker.h": [
+      {"after": "#include \"services/network/public/cpp/permissions_policy/permissions_policy_features_bitset.h\"\n", "before": "#include \"third_party/blink/public/common/tokens/tokens.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/content_security_policy.mojom-shared.h\"\n", "#include \"services/network/public/mojom/fetch_api.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/user_agent/user_agent_metadata.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/frame/policy_container.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/frame/reporting_observer.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/script/script_type.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/security_context/outside_context_csp_violation_reporter.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/shared_worker_host.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/worker/worker_content_settings_proxy.mojom-shared.h\"\n"]}
+    ],
+    "web/web_testing_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "web/web_url_pattern_to_safe_url_pattern.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-local-handle.h\"\n"]}
+    ],
+    "web/web_v8_context_snapshot.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-snapshot.h\"\n"]}
+    ],
+    "web/web_v8_features.h": [
+      {"after": "#include \"base/process/process.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/browser_interface_broker.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "web/web_view.h": [
+      {"after": "#include \"third_party/blink/public/common/web_preferences/web_preferences.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/frame/frame.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/page/page.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/page/page_visibility_state.mojom-shared.h\"\n", "#include \"third_party/blink/public/mojom/page/prerender_page_param.mojom-forward.h\"\n", "#include \"third_party/blink/public/mojom/renderer_preference_watcher.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/platform/web_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/display/mojom/screen_orientation.mojom-shared.h\"\n"]}
+    ],
+    "web/web_view_observer.h": [
+      {"after": "#include \"base/observer_list_types.h\"\n", "before": "#include \"third_party/blink/public/platform/web_common.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/page/page_visibility_state.mojom-shared.h\"\n"]}
+    ],
+    "web/web_widget.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/common/metrics/document_update_reason.h\"\n", "n": 1, "add": ["#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/metrics/document_update_reason.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/widget/platform_widget.mojom-shared.h\"\n"]}
+    ],
+    "web/web_window_features.h": [
+      {"after": "\n", "before": "#include \"third_party/blink/public/platform/web_string.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/window_features/window_features.mojom-shared.h\"\n"]}
+    ],
+    "web/win/web_font_rendering.h": [
+      {"after": "#include \"third_party/blink/public/platform/web_string.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ]
+  }
+}

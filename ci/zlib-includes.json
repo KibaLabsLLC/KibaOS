@@ -1,0 +1,102 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/zlib",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "contrib/bench/zlib_bench.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/ioapi.h": [
+      {"after": "#include <stdlib.h>\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]},
+      {"after": "#ifdef HAVE_MINIZIP64_CONF_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"mz64conf.h\"\n"]}
+    ],
+    "contrib/minizip/iowin32.c": [
+      {"after": "\n", "before": "#include \"ioapi.h\"\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/mztools.c": [
+      {"after": "#include <string.h>\n", "before": "#include \"unzip.h\"\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/mztools.h": [
+      {"after": "#ifndef _ZLIB_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/unzip.c": [
+      {"after": "#endif\n", "before": "#include \"unzip.h\"\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/unzip.h": [
+      {"after": "#ifndef _ZLIB_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"zlib.h\"\n"]},
+      {"after": "#ifdef HAVE_BZIP2\n", "before": "#endif\n", "n": 1, "add": ["#include \"bzlib.h\"\n"]}
+    ],
+    "contrib/minizip/zip.c": [
+      {"after": "#endif\n", "before": "#include \"zip.h\"\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/minizip/zip.h": [
+      {"after": "#ifndef _ZLIB_H\n", "before": "#endif\n", "n": 1, "add": ["#include \"zlib.h\"\n"]},
+      {"after": "#ifdef HAVE_BZIP2\n", "before": "#endif\n", "n": 1, "add": ["#include \"bzlib.h\"\n"]}
+    ],
+    "contrib/optimizations/chunkcopy.h": [
+      {"after": "#include <stdint.h>\n", "before": "\n", "n": 1, "add": ["#include \"zutil.h\"\n"]}
+    ],
+    "contrib/optimizations/inffast_chunk.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zutil.h\"\n", "#include \"inftrees.h\"\n", "#include \"inflate.h\"\n", "#include \"contrib/optimizations/inffast_chunk.h\"\n", "#include \"contrib/optimizations/chunkcopy.h\"\n"]}
+    ],
+    "contrib/optimizations/inffast_chunk.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"inffast.h\"\n"]}
+    ],
+    "contrib/optimizations/inflate.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zutil.h\"\n", "#include \"inftrees.h\"\n", "#include \"inflate.h\"\n", "#include \"contrib/optimizations/inffast_chunk.h\"\n", "#include \"contrib/optimizations/chunkcopy.h\"\n"]},
+      {"after": "#else /* !BUILDFIXED */\n", "before": "#endif /* BUILDFIXED */\n", "n": 1, "add": ["#   include \"inffixed.h\"\n"]}
+    ],
+    "contrib/qat/deflate_qat.cpp": [
+      {"after": "#include \"deflate_qat.h\"\n", "before": "\n", "n": 1, "add": ["#include \"deflate.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"session.hpp\"\n", "#include \"qat_instance.hpp\"\n", "#include \"qat_buffer_list.hpp\"\n", "#include \"qat.hpp\"\n"]}
+    ],
+    "contrib/qat/deflate_qat.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"deflate.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/compress_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/deflate_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/deflate_set_dictionary_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/inflate_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/inflate_with_header_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/minizip_unzip_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"unzip.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/streaming_inflate_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/fuzzers/uncompress_fuzzer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "contrib/tests/infcover.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]},
+      {"after": "#define ZLIB_INTERNAL\n", "before": "\n", "n": 1, "add": ["#include \"inftrees.h\"\n", "#include \"inflate.h\"\n"]},
+      {"after": "/* XXX: hacking C assert and plugging into GTest. */\n", "before": "#if defined(assert)\n", "n": 1, "add": ["#include \"gtest.h\"\n"]}
+    ],
+    "contrib/tests/utils_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"compression_utils_portable.h\"\n", "#include \"gtest.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"compare256.h\"\n", "#include \"zlib.h\"\n"]}
+    ],
+    "crc32.c": [
+      {"after": "#ifdef HAVE_S390X_VX\n", "before": "#endif\n", "n": 1, "add": ["#  include \"contrib/crc32vx/crc32_vx_hooks.h\"\n"]}
+    ],
+    "examples/zpipe.c": [
+      {"after": "#include <assert.h>\n", "before": "\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "google/compression_utils_portable.h": [
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ],
+    "test/minigzip.c": [
+      {"after": "\n", "before": "#include <stdio.h>\n", "n": 1, "add": ["#include \"zlib.h\"\n"]}
+    ]
+  }
+}

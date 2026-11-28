@@ -1,0 +1,74 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/libdmg-hfsplus",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/common/abstractfile.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"abstractfile.h\"\n", "#include \"common.h\"\n"]}
+    ],
+    "src/common/base64.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"abstractfile.h\"\n"]}
+    ],
+    "src/common/omaha_tag_format.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"omaha_tag_format.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/common/parse_data_param.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"parse_data_param.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"omaha_tag_format.h\"\n", "#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/common/sizedbuf.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"sizedbuf.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n"]}
+    ],
+    "src/dmg/attribution.c": [
+      {"after": "#include <zlib.h> // For crc32_combine.\n", "before": "#include <dmg/attribution.h>\n", "n": 1, "add": ["#include \"abstractfile.h\"\n", "#include \"common.h\"\n"]},
+      {"after": "#include <dmg/dmg.h>\n", "before": "\n", "n": 1, "add": ["#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/dmg/compress.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"dmg/adc.h\"\n", "#include \"dmg/dmg.h\"\n", "#include \"dmg/compress.h\"\n"]}
+    ],
+    "src/dmg/dmg.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"dmg/dmg.h\"\n", "#include \"dmg/filevault.h\"\n", "#include \"parse_data_param.h\"\n", "#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/dmg/dmglib.c": [
+      {"after": "#include <string.h>\n", "before": "#include <dmg/attribution.h>\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"abstractfile.h\"\n"]},
+      {"after": "#include <dmg/dmgfile.h>\n", "before": "\n", "n": 1, "add": ["#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/hdutil/hdutil.c": [
+      {"after": "#include <dirent.h>\n", "before": "#include <inttypes.h>\n", "n": 1, "add": ["#include \"hfs/hfslib.h\"\n"]}
+    ],
+    "src/hfs/hfs.c": [
+      {"after": "\n", "before": "#include <inttypes.h>\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"hfs/hfslib.h\"\n", "#include \"hfs/hfsplus.h\"\n", "#include \"abstractfile.h\"\n", "#include \"parse_data_param.h\"\n", "#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/hfs/hfscompress.c": [
+      {"after": "#include <zlib.h>\n", "before": "#include <hfs/hfsplus.h>\n", "n": 1, "add": ["#include \"common.h\"\n"]}
+    ],
+    "src/hfs/hfslib.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"hfs/hfscompress.h\"\n", "#include \"hfs/hfslib.h\"\n", "#include \"hfs/hfsplus.h\"\n"]}
+    ],
+    "src/hfs/xattr.c": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n", "#include \"hfs/hfsplus.h\"\n"]}
+    ],
+    "src/includes/dmg/attribution.h": [
+      {"after": "\n", "before": "#include <stdint.h>\n", "n": 1, "add": ["#include \"abstractfile.h\"\n", "#include \"common.h\"\n", "#include \"sizedbuf.h\"\n"]}
+    ],
+    "src/includes/dmg/dmg.h": [
+      {"after": "#include <hfs/hfsplus.h>\n", "before": "#include \"attribution.h\"\n", "n": 1, "add": ["#include \"abstractfile.h\"\n"]},
+      {"after": "#include \"attribution.h\"\n", "before": "#include \"compress.h\"\n", "n": 1, "add": ["#include \"common.h\"\n"]}
+    ],
+    "src/includes/dmg/dmglib.h": [
+      {"after": "#include <dmg/dmg.h>\n", "before": "#include \"compress.h\"\n", "n": 1, "add": ["#include \"abstractfile.h\"\n"]}
+    ],
+    "src/includes/hfs/hfscompress.h": [
+      {"after": "#include \"hfsplus.h\"\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n"]}
+    ],
+    "src/includes/hfs/hfslib.h": [
+      {"after": "", "before": "#include \"hfsplus.h\"\n", "n": 1, "add": ["#include \"common.h\"\n"]},
+      {"after": "#include \"hfsplus.h\"\n", "before": "\n", "n": 1, "add": ["#include \"abstractfile.h\"\n"]}
+    ],
+    "src/includes/hfs/hfsplus.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"common.h\"\n"]}
+    ]
+  }
+}

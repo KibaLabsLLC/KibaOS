@@ -23,26 +23,36 @@
    puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
    emptied part of it (which reads as undefined `ABSL_*` macros), deletions
    included, and re-applies the series' abseil hunks;
-   `KIBAOS_RESTORE_ABSEIL=0` leaves it alone. Files that survived the import
-   are not self-contained either: it dropped every `#include "absl/..."` line
-   from that directory, every quoted `#include "..."` line from
-   `third_party/protobuf`, and every quoted include from `base/`, `build/` and
-   `base/allocator/partition_allocator/src/partition_alloc`, so
-   `ci/restore-imported-includes.py` puts the 4,488 abseil lines in
-   `ci/abseil-includes.json`, the 5,929 protobuf lines in
-   `ci/protobuf-includes.json`, the 722 `base/` lines in
-   `ci/base-includes.json`, the 28 `build/` lines in
-   `ci/build-includes.json` and the 1,842 partition_alloc lines in
-   `ci/partition-alloc-includes.json` back where the Chromium copy has them,
-   inside the `#if` that needs them and with their blank lines. A manifest
+      `KIBAOS_RESTORE_ABSEIL=0` leaves it alone. Files that survived the import
+   are not self-contained either: it dropped quoted `#include "..."` lines
+   from directories across the whole imported tree, so
+   `ci/restore-imported-includes.py` puts them back from one
+   `*-includes.json` manifest per directory -- 72 manifests holding 101,999
+   lines in 34,168 files, from `third_party/grpc`'s 16,157 and
+   `third_party/blink/renderer`'s 13,761 down to `url/`'s 34 and
+   `third_party/unrar`'s one. The other large ones are `components/`
+   (10,603), `third_party/mediapipe` (9,183), `content/` (6,476),
+   `third_party/protobuf` (5,929), `third_party/abseil-cpp` (4,488), `ash/`
+   (3,497), `third_party/crashpad` (3,206), `services/` (2,828), `chromeos/`
+   (2,540), `third_party/iamf_tools` (2,260), `ui/` (2,247) and
+   `third_party/tflite_support` (2,111); every other directory the import
+   touched has a manifest of its own. Each puts its lines back where the
+   Chromium copy at the imported revision has them, inside the `#if` that
+   needs them and with their blank lines. A zlib source that lost them reads
+   as `variable has incomplete type 'void'` on the function below the
+   includes: `ZLIB_INTERNAL` is defined by `zutil.h`, so without the include
+   the compiler takes it for a type name. A manifest
    lists one directory, and `ci/base-includes.json` leaves
    `base/allocator/partition_allocator/src/partition_alloc` to the manifest
    that already owned it and records that exclusion, so no file is claimed
-   twice. The first two directories come out byte for byte as Chromium ships
-   them; the rest are repaired against the Chromium revision the import came
-   from, which each
-   manifest records in its `baseline`, so every file keeps its own revision's
-   lines and takes back only that revision's includes. Regenerate the manifest
+   twice. Every manifest is generated against the Chromium revision the
+   import came from -- `eced4855`, the revision Source batch 1/3 imported --
+   and records that in its `baseline`, so every file keeps its own revision's
+   lines and takes back only that revision's includes; restored onto Lumen's
+   copy, every file a manifest touches came back byte for byte as Chromium
+   has it, and Lumen's own edits (the restyled
+   `ash/style/system_dialog_delegate_view.cc`, for one) stayed where they
+   were. Regenerate the manifest
    when the import moves, always against the imported revision and never
    against Chromium main: main's files have moved on, so a manifest built from
    it restores headers a file did not have yet and misses ones it did, which

@@ -1,0 +1,453 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "pdf",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "accessibility.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_engine.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]}
+    ],
+    "draw_utils/shadow.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "loader/url_loader.cc": [
+      {"after": "#include \"pdf/loader/result_codes.h\"\n", "before": "#include \"third_party/blink/public/platform/web_data.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n"]}
+    ],
+    "loader/url_loader_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"third_party/blink/public/platform/web_data.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/fetch/fetch_api_request.mojom-shared.h\"\n"]}
+    ],
+    "paint_manager.cc": [
+      {"after": "#include \"pdf/paint_ready_rect.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkRegion.h\"\n", "#include \"third_party/skia/include/core/SkSamplingOptions.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "paint_manager.h": [
+      {"after": "#include \"pdf/paint_aggregator.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "paint_manager_simd.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/highway/src/hwy/foreach_target.h\"\n", "#include \"third_party/highway/src/hwy/highway.h\"\n"]}
+    ],
+    "paint_manager_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "parsed_params.h": [
+      {"after": "#include \"pdf/pdfium/pdfium_form_filler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "parsed_params_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_plugin_params.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"pdf/pdf_features.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_engine_exports.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdf_progressive_searchifier.h\"\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdf.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"pdf/document_metadata.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"pdf/document_metadata.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"base/functional/callback_forward.h\"\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdf_accessibility_constants_helper.h": [
+      {"after": "#include \"pdf/pdf_accessibility_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ui/accessibility/ax_enums.mojom-shared.h\"\n"]}
+    ],
+    "pdf_accessibility_data_handler.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]}
+    ],
+    "pdf_annotation_agent.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/annotation/annotation.mojom.h\"\n"]}
+    ],
+    "pdf_caret.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_keyboard_event.h\"\n", "before": "#include \"ui/events/keycodes/keyboard_codes.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_caret_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_keyboard_event.h\"\n", "before": "#include \"ui/events/keycodes/keyboard_codes.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "pdf_features.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "pdf_features.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "pdf_ink_brush.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_behavior.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_family.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_paint.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_tip.h\"\n", "#include \"third_party/ink/src/ink/color/color.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_brush.h": [
+      {"after": "\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_brush_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_conversions.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_coat.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_paint.h\"\n", "#include \"third_party/ink/src/ink/brush/color_function.h\"\n", "#include \"third_party/ink/src/ink/color/color.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n"]}
+    ],
+    "pdf_ink_conversions.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_conversions_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n"]}
+    ],
+    "pdf_ink_cursor.cc": [
+      {"after": "#include \"pdf/pdf_ink_brush.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkPath.h\"\n"]}
+    ],
+    "pdf_ink_cursor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_cursor_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_dict_conversions.cc": [
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_dict_conversions.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"pdf/pdf_ink_text.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_dict_conversions_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_metrics_handler.cc": [
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_metrics_handler.h": [
+      {"after": "\n", "before": "#include \"pdf/pdf_ink_brush.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdf_ink_brush.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n"]}
+    ],
+    "pdf_ink_module.cc": [
+      {"after": "#include \"pdf/message_util.h\"\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/input/web_touch_point.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush.h\"\n", "#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/geometry/intersects.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/rect.h\"\n", "#include \"third_party/ink/src/ink/rendering/skia/native/skia_renderer.h\"\n", "#include \"third_party/ink/src/ink/strokes/in_progress_stroke.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n", "#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]},
+      {"after": "#include \"ui/base/cursor/cursor.h\"\n", "before": "#include \"ui/events/event_constants.h\"\n", "n": 1, "add": ["#include \"ui/base/cursor/mojom/cursor_type.mojom.h\"\n"]}
+    ],
+    "pdf_ink_module.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/ui/thumbnail.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/strokes/in_progress_stroke.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n", "#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n"]}
+    ],
+    "pdf_ink_module_client.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/ui/thumbnail.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n"]}
+    ],
+    "pdf_ink_module_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_touch_event.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush.h\"\n", "#include \"third_party/ink/src/ink/brush/type_matchers.h\"\n", "#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/type_matchers.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]},
+      {"after": "#include \"ui/base/cursor/cursor.h\"\n", "before": "#include \"ui/events/event_constants.h\"\n", "n": 1, "add": ["#include \"ui/base/cursor/mojom/cursor_type.mojom.h\"\n"]}
+    ],
+    "pdf_ink_signature_creation_handler.cc": [
+      {"after": "#include \"pdf/pdf_ink_module_client.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/mutable_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/strokes/in_progress_stroke.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n", "#include \"third_party/ink/src/ink/types/duration.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdf_ink_signature_creation_handler.h": [
+      {"after": "#include \"base/memory/raw_ref.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"third_party/ink/src/ink/strokes/in_progress_stroke.h\"\n"]}
+    ],
+    "pdf_ink_signature_creation_handler_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPathBuilder.h\"\n", "#include \"third_party/skia/include/core/SkPathTypes.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "pdf_ink_text.h": [
+      {"after": "\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]}
+    ],
+    "pdf_ink_transform.cc": [
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/envelope.h\"\n", "#include \"third_party/ink/src/ink/geometry/rect.h\"\n"]}
+    ],
+    "pdf_ink_transform.h": [
+      {"after": "\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/page_orientation.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n"]}
+    ],
+    "pdf_ink_transform_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/geometry/envelope.h\"\n"]}
+    ],
+    "pdf_ink_undo_redo_model.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"pdf/pdf_ink_ids.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "pdf_ink_undo_redo_model_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/types/expected.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]}
+    ],
+    "pdf_progressive_searchifier.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom-forward.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdf_view_web_plugin.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/content_restriction.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/metrics_handler.h\"\n", "before": "#include \"pdf/paint_manager.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/renderer_preferences/renderer_preferences.h\"\n", "before": "#include \"third_party/blink/public/platform/platform.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/input/focus_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_widget.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n"]},
+      {"after": "#include \"ui/base/cursor/cursor.h\"\n", "before": "#include \"ui/base/text/bytes_formatting.h\"\n", "n": 1, "add": ["#include \"ui/base/cursor/mojom/cursor_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"url/gurl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]},
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n"]}
+    ],
+    "pdf_view_web_plugin.h": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/loader/result_codes.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/loader/url_loader.h\"\n", "before": "#include \"pdf/paint_manager.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]},
+      {"after": "#include \"pdf/v8_value_converter.h\"\n", "before": "#include \"third_party/blink/public/platform/cross_variant_mojo_util.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n", "#include \"third_party/blink/public/mojom/annotation/annotation.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_view_observer.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]},
+      {"after": "#include \"ui/base/cursor/cursor.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"ui/base/cursor/mojom/cursor_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/vector2d_f.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom-forward.h\"\n"]}
+    ],
+    "pdf_view_web_plugin_unittest.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/content_restriction.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/document_layout.h\"\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]},
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/base/cursor/cursor.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]},
+      {"after": "#include \"pdf/test/pdf_ink_test_helpers.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/strokes/stroke.h\"\n"]}
+    ],
+    "pdfium/accessibility_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/accessibility/accessibility_features.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_edit.h\"\n"]}
+    ],
+    "pdfium/findtext_unittest.cc": [
+      {"after": "#include \"base/strings/utf_string_conversions.h\"\n", "before": "#include \"pdf/document_layout.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "pdfium/fuzzers/pdfium_xfa_lpm_fuzzer/fuzzer.cc": [
+      {"after": "#include \"pdf/pdfium/fuzzers/pdfium_xfa_lpm_fuzzer/simple_xfa_pdf.h\"\n", "before": "#include \"testing/libfuzzer/proto/lpm_interface.h\"\n", "n": 1, "add": ["#include \"pdf/pdfium/fuzzers/pdfium_xfa_lpm_fuzzer/xfa.pb.h\"\n"]},
+      {"after": "#include \"testing/libfuzzer/proto/lpm_interface.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/testing/fuzzers/pdfium_xfa_lpm_fuzz_stub.h\"\n"]}
+    ],
+    "pdfium/fuzzers/pdfium_xfa_lpm_fuzzer/proto_to_xfa.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"pdf/pdfium/fuzzers/pdfium_xfa_lpm_fuzzer/xfa.pb.h\"\n"]}
+    ],
+    "pdfium/pdfium_api_wrappers.cc": [
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_catalog.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_api_wrappers.h": [
+      {"after": "#include \"pdf/pdfium/pdfium_engine_exports.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_assert_matching_enums.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_input_event.h\"\n", "before": "#include \"ui/events/keycodes/keyboard_codes.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdf_fwlevent.h\"\n", "#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_document.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_dataavail.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_document_metadata.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_api_wrappers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_catalog.h\"\n", "#include \"third_party/pdfium/public/fpdf_doc.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_document_metadata.h": [
+      {"after": "#include \"pdf/document_metadata.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_draw_selection_test_base.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n"]}
+    ],
+    "pdfium/pdfium_draw_selection_test_base.h": [
+      {"after": "#include \"pdf/pdfium/pdfium_test_base.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/draw_utils/coordinates.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/region_data.h\"\n", "before": "#include \"printing/units.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/base/window_open_disposition_utils.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_annot.h\"\n", "#include \"third_party/pdfium/public/fpdf_attachment.h\"\n", "#include \"third_party/pdfium/public/fpdf_catalog.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdf_ext.h\"\n", "#include \"third_party/pdfium/public/fpdf_fwlevent.h\"\n", "#include \"third_party/pdfium/public/fpdf_javascript.h\"\n", "#include \"third_party/pdfium/public/fpdf_ppo.h\"\n", "#include \"third_party/pdfium/public/fpdf_searchex.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/base/cursor/mojom/cursor_type.mojom-shared.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/vector2d_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]},
+      {"after": "#include \"skia/ext/font_utils.h\"\n", "before": "#include \"ui/gfx/geometry/vector2d_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkFontTypes.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_on_demand_searchifier.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"ui/accessibility/ax_features.mojom-features.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine.h": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/document_attachment_info.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/region_data.h\"\n", "before": "#include \"ui/gfx/geometry/insets.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-forward.h\"\n", "#include \"services/screen_ai/buildflags/buildflags.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdf_progressive.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]},
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_searchify.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom-forward.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine_client.h": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "#include \"ui/base/window_open_disposition.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"services/screen_ai/buildflags/buildflags.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/base/cursor/mojom/cursor_type.mojom-forward.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/rect.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine_exports.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"pdf/document_metadata.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"printing/nup_parameters.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_attachment.h\"\n", "#include \"third_party/pdfium/public/fpdf_catalog.h\"\n", "#include \"third_party/pdfium/public/fpdf_doc.h\"\n", "#include \"third_party/pdfium/public/fpdf_ppo.h\"\n", "#include \"third_party/pdfium/public/fpdf_structtree.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_searchify.h\"\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine_exports.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"pdf/document_metadata.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"pdf/document_metadata.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"base/functional/callback_forward.h\"\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine_exports_unittest.cc": [
+      {"after": "#include \"base/test/mock_callback.h\"\n", "before": "#include \"pdf/pdf.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_engine.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_annot.h\"\n", "#include \"third_party/pdfium/public/fpdf_text.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]},
+      {"after": "#include \"pdf/pdf_progressive_searchifier.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n"]},
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS) && BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_engine_unittest.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/document_attachment_info.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/input/web_pointer_properties.h\"\n", "before": "#include \"ui/events/keycodes/keyboard_codes.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkFontTypes.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n", "#include \"third_party/skia/include/core/SkTypes.h\"\n"]},
+      {"after": "#include \"pdf/test/pdf_ink_test_helpers.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n", "#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/ports/SkFontMgr_Fontations.h\"\n"]}
+    ],
+    "pdfium/pdfium_font_helpers.cc": [
+      {"after": "#include \"third_party/blink/public/platform/web_string.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_font_linux.cc": [
+      {"after": "#include \"third_party/blink/public/platform/web_font_description.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_font_win.cc": [
+      {"after": "#include \"third_party/blink/public/platform/web_font_description.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n", "#include \"third_party/re2/src/re2/re2.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkFontStyle.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "pdfium/pdfium_font_win.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_font_win_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_sysfontinfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_form_filler.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_input_event.h\"\n", "before": "#include \"ui/base/window_open_disposition_utils.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_annot.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/rect.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-isolate.h\"\n"]}
+    ],
+    "pdfium/pdfium_form_filler.h": [
+      {"after": "#include \"base/timer/timer.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"v8/include/v8-isolate.h\"\n"]}
+    ],
+    "pdfium/pdfium_form_filler_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/input/web_input_event.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_annot.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/size.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-isolate.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_reader.cc": [
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/geometry/tessellator.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_reader.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"pdf/pdf_ink_text.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdf_ink_text.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_reader_fuzzer.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_reader_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/geometry/intersects.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_transform.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_writer.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_ink_transform.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/brush/brush_coat.h\"\n", "#include \"third_party/ink/src/ink/brush/brush_tip.h\"\n", "#include \"third_party/ink/src/ink/geometry/mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_writer.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_ink_writer_unittest.cc": [
+      {"after": "#include \"pdf/test/test_helpers.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/geometry/intersects.h\"\n", "#include \"third_party/ink/src/ink/geometry/partitioned_mesh.h\"\n", "#include \"third_party/ink/src/ink/geometry/point.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n", "#include \"third_party/ink/src/ink/strokes/stroke.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_mem_buffer_file_write.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_save.h\"\n"]}
+    ],
+    "pdfium/pdfium_ocr.cc": [
+      {"after": "#include \"printing/units.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_ocr.h": [
+      {"after": "\n", "before": "#include \"ui/gfx/geometry/size_f.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_on_demand_searchifier.h": [
+      {"after": "#include \"pdf/pdfium/pdfium_engine.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_on_demand_searchifier_unittest.cc": [
+      {"after": "#include \"pdf/test/test_helpers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n"]}
+    ],
+    "pdfium/pdfium_page.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/page_rotation.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/accessibility/accessibility_features.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_annot.h\"\n", "#include \"third_party/pdfium/public/fpdf_catalog.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_page.h": [
+      {"after": "#include \"pdf/ui/thumbnail.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_doc.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdf_text.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]},
+      {"after": "#if BUILDFLAG(ENABLE_SCREEN_AI_SERVICE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_page_unittest.cc": [
+      {"after": "#include \"pdf/accessibility_structs.h\"\n", "before": "#include \"pdf/pdf_rect.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/accessibility/accessibility_features.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "pdfium/pdfium_permissions.h": [
+      {"after": "#include \"pdf/pdfium/pdfium_engine.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_print.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/gfx/codec/jpeg_codec.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_flatten.h\"\n", "#include \"third_party/pdfium/public/fpdf_ppo.h\"\n", "#include \"third_party/pdfium/public/fpdf_transformpage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_print.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_print_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "pdfium/pdfium_progressive_searchifier.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_searchify.h\"\n", "before": "#include \"ui/gfx/codec/jpeg_codec.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n"]}
+    ],
+    "pdfium/pdfium_progressive_searchifier.h": [
+      {"after": "#include \"pdf/pdf_progressive_searchifier.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom-forward.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n"]}
+    ],
+    "pdfium/pdfium_range.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_api_wrappers.h\"\n", "before": "#include \"ui/gfx/geometry/point.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_searchex.h\"\n"]}
+    ],
+    "pdfium/pdfium_rotation.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_edit.h\"\n"]}
+    ],
+    "pdfium/pdfium_rotation.h": [
+      {"after": "#include \"pdf/page_rotation.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_searchify.cc": [
+      {"after": "#include \"services/screen_ai/public/cpp/utilities.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdf_save.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_searchify.h": [
+      {"after": "#include \"base/functional/callback_forward.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom-forward.h\"\n", "#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n"]}
+    ],
+    "pdfium/pdfium_searchify_unittest.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/screen_ai/public/mojom/screen_ai_service.mojom.h\"\n"]}
+    ],
+    "pdfium/pdfium_test_helpers.cc": [
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n", "#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n", "#include \"third_party/skia/include/core/SkAlphaType.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n"]}
+    ],
+    "pdfium/pdfium_test_helpers.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_unsupported_features.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_engine.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_ext.h\"\n"]}
+    ],
+    "pdfium/pdfium_watermark_overlayer.cc": [
+      {"after": "#include \"pdf/pdfium/pdfium_unsupported_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/pdfium/public/fpdf_edit.h\"\n", "#include \"third_party/pdfium/public/fpdf_formfill.h\"\n", "#include \"third_party/pdfium/public/fpdf_ppo.h\"\n", "#include \"third_party/pdfium/public/fpdf_save.h\"\n", "#include \"third_party/pdfium/public/fpdfview.h\"\n"]}
+    ],
+    "pdfium/pdfium_watermark_overlayer.h": [
+      {"after": "#include \"pdf/pdf_watermark_overlayer.h\"\n", "before": "#include \"ui/gfx/geometry/size_f.h\"\n", "n": 1, "add": ["#include \"third_party/pdfium/public/cpp/fpdf_scopers.h\"\n"]}
+    ],
+    "post_message_receiver.cc": [
+      {"after": "#include \"pdf/v8_value_converter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/cppgc/allocation.h\"\n", "#include \"v8/include/v8-cppgc.h\"\n", "#include \"v8/include/v8.h\"\n"]}
+    ],
+    "post_message_receiver.h": [
+      {"after": "#include \"gin/wrappable.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "preview_mode_client.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"pdf/document_layout.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/loader/url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"ui/base/cursor/mojom/cursor_type.mojom-shared.h\"\n"]}
+    ],
+    "preview_mode_client.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"pdf/pdfium/pdfium_engine_client.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_engine_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]}
+    ],
+    "save_data_buffer_handler_for_drive.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]}
+    ],
+    "test/fake_annotation_agent_host.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/annotation/annotation.mojom.h\"\n"]}
+    ],
+    "test/fake_pdf_ink_module_client.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"pdf/page_orientation.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "test/pdf_ink_test_helpers.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"pdf/pdf_ink_conversions.h\"\n", "n": 1, "add": ["#include \"pdf/mojom/pdf.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/pdf_ink_test_helpers.h": [
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "#include \"ui/gfx/geometry/point_f.h\"\n", "n": 1, "add": ["#include \"third_party/ink/src/ink/geometry/affine_transform.h\"\n", "#include \"third_party/ink/src/ink/strokes/input/stroke_input_batch.h\"\n"]}
+    ],
+    "test/run_all_unittests.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/binder_map.h\"\n", "before": "#include \"pdf/test/test_helpers.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/web/blink.h\"\n", "before": "#include \"ui/base/resource/resource_bundle.h\"\n", "n": 1, "add": ["#include \"tools/v8_context_snapshot/buildflags.h\"\n"]},
+      {"after": "#include \"ui/base/ui_base_paths.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8.h\"\n"]}
+    ],
+    "test/test_client.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"pdf/document_layout.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/test/test_helpers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "test/test_client.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"pdf/pdfium/pdfium_engine_client.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]},
+      {"after": "#include \"pdf/pdfium/pdfium_engine_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/screen_ai/buildflags/buildflags.h\"\n"]}
+    ],
+    "test/test_helpers.cc": [
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkColorType.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkImageInfo.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n"]}
+    ],
+    "test/test_helpers.h": [
+      {"after": "#include \"third_party/blink/public/web/web_print_params.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]},
+      {"after": "#include \"ui/gfx/geometry/size_f.h\"\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ],
+    "test/test_pdfium_engine.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"pdf/document_attachment_info.h\"\n", "n": 1, "add": ["#include \"pdf/buildflags.h\"\n"]}
+    ],
+    "ui/document_properties.cc": [
+      {"after": "#include \"base/strings/string_number_conversions.h\"\n", "before": "#include \"pdf/document_metadata.h\"\n", "n": 1, "add": ["#include \"components/strings/grit/components_strings.h\"\n"]},
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/base/l10n/l10n_util.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/ulocdata.h\"\n"]}
+    ],
+    "v8_value_converter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"v8/include/v8-forward.h\"\n"]}
+    ]
+  }
+}

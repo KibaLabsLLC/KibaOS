@@ -435,9 +435,10 @@ if [[ "${apply_series}" == "1" ]]; then
 fi
 
 # The import behind the tree also took the include lines out of the trees it
-# imported: every `#include "absl/..."` line from third_party/abseil-cpp,
-# every quoted include from third_party/protobuf, and every quoted include
-# from base/ and build/ -- the Rust allocator's buildflags.h among them,
+# imported: every quoted `#include "..."` line from the directories it hit --
+# third_party/abseil-cpp, third_party/protobuf, third_party/zlib, base/,
+# build/ and the rest of the tree from ui/ and components/ to
+# third_party/blink -- the Rust allocator's buildflags.h among them,
 # without which its translation unit does not compile. The tool applies every
 # *-includes.json manifest beside it. The files it kept include nothing, so
 # the first abseil TU fails on ABSL_NAMESPACE_BEGIN and the first protobuf TU

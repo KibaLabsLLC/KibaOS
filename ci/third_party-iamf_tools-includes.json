@@ -1,0 +1,854 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/iamf_tools",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/iamf/api/conversion/channel_reorderer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/api/conversion/channel_reorderer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/api/conversion/channel_reorderer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/api/conversion/mix_presentation_conversion.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/api/conversion/mix_presentation_conversion.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n"]}
+    ],
+    "src/iamf/api/conversion/mix_presentation_conversion.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n"]}
+    ],
+    "src/iamf/api/conversion/profile_conversion.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/api/conversion/profile_conversion.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n"]}
+    ],
+    "src/iamf/api/conversion/profile_conversion.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n"]}
+    ],
+    "src/iamf/api/decoder/iamf_decoder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/api/decoder/iamf_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/api/conversion/channel_reorderer.h\"\n", "#include \"iamf/api/conversion/mix_presentation_conversion.h\"\n", "#include \"iamf/api/conversion/profile_conversion.h\"\n", "#include \"iamf/cli/obu_processor.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/api/decoder/iamf_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/include/iamf_tools/iamf_decoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/api/decoder/tests/iamf_decoder_fuzz_test.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n", "#include \"fuzztest/fuzztest.h\"\n", "#include \"gtest/gtest.h\"\n", "#include \"iamf/api/decoder/iamf_decoder.h\"\n", "#include \"iamf/cli/tests/portable/get_test_path.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/api/internal_utils/internal_utils.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/api/internal_utils/internal_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/wav_writer.h\"\n", "#include \"iamf/include/iamf_tools/iamf_decoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/api/internal_utils/internal_utils.h": [
+      {"after": "\n", "before": "namespace iamf_tools {\n", "n": 1, "add": ["#include \"iamf/cli/wav_writer.h\"\n", "#include \"iamf/include/iamf_tools/iamf_decoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/cli/ambisonics_mixer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/ambisonics_mixer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/algorithm/container.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/ambisonics_mixer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/audio_element_with_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/audio_frame_decoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/audio_frame_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/cli/codec/lpcm_decoder.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]},
+      {"after": "#ifndef IAMF_TOOLS_DISABLE_AAC_DECODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"iamf/cli/codec/aac_decoder.h\"\n"]},
+      {"after": "#ifndef IAMF_TOOLS_DISABLE_FLAC_DECODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"iamf/cli/codec/flac_decoder.h\"\n"]},
+      {"after": "#ifndef IAMF_TOOLS_DISABLE_OPUS_DECODER\n", "before": "#endif\n", "n": 1, "add": ["#include \"iamf/cli/codec/opus_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/audio_frame_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/audio_frame_with_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/channel_label.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/channel_label.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/cli/channel_label.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/cli/cli_util.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/cli_util.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/cli_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/aac_decoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/aac_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/aac_utils.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"libAACdec/include/aacdecoder_lib.h\"\n", "#include \"libSYS/include/machine_type.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/aac_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"libAACdec/include/aacdecoder_lib.h\"\n", "#include \"libSYS/include/machine_type.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/aac_encoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/aac_encoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/aac_utils.h\"\n", "#include \"iamf/cli/proto/codec_config.pb.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"libAACenc/include/aacenc_lib.h\"\n", "#include \"libSYS/include/FDK_audio.h\"\n", "#include \"libSYS/include/machine_type.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/aac_encoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/encoder_base.h\"\n", "#include \"iamf/cli/proto/codec_config.pb.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"libAACenc/include/aacenc_lib.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/aac_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"libSYS/include/FDK_audio.h\"\n", "#include \"libSYS/include/machine_type.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/decoder_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/encoder_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/encoder_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/encoder_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_decoder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/flac_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/cli/codec/flac_decoder_stream_callbacks.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/FLAC/stream_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_decoder.h": [
+      {"after": "\n", "before": "namespace iamf_tools {\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/cli/codec/flac_decoder_stream_callbacks.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/FLAC/stream_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_decoder_stream_callbacks.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/flac_decoder_stream_callbacks.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"include/FLAC/format.h\"\n", "#include \"include/FLAC/ordinals.h\"\n", "#include \"include/FLAC/stream_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_decoder_stream_callbacks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/types/span.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"include/FLAC/format.h\"\n", "#include \"include/FLAC/ordinals.h\"\n", "#include \"include/FLAC/stream_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_encoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/flac_encoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/proto/codec_config.pb.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/FLAC/format.h\"\n", "#include \"include/FLAC/ordinals.h\"\n", "#include \"include/FLAC/stream_encoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/flac_encoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/container/btree_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/encoder_base.h\"\n", "#include \"iamf/cli/proto/codec_config.pb.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/FLAC/format.h\"\n", "#include \"include/FLAC/ordinals.h\"\n", "#include \"include/FLAC/stream_encoder.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/lpcm_decoder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/lpcm_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/lpcm_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/lpcm_encoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/lpcm_encoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/lpcm_encoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/encoder_base.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_decoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/opus_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/cli/codec/opus_utils.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"include/opus.h\"\n", "#include \"include/opus_types.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/codec/decoder_base.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/opus.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_encoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/opus_encoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/opus_utils.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/opus.h\"\n", "#include \"include/opus_defines.h\"\n", "#include \"include/opus_types.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_encoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/codec/encoder_base.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/substream_channel_count.h\"\n", "#include \"include/opus.h\"\n", "#include \"include/opus_defines.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_utils.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/codec/opus_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"include/opus_defines.h\"\n"]}
+    ],
+    "src/iamf/cli/codec/opus_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/cli/decoder_main.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/flags/parse.h\"\n", "#include \"absl/flags/usage.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/api/internal_utils/internal_utils.h\"\n", "#include \"iamf/cli/wav_writer.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/include/iamf_tools/iamf_decoder_factory.h\"\n", "#include \"iamf/include/iamf_tools/iamf_decoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/cli/demixer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/demixer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/demixer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/cli/demixing_manager.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/demixing_manager.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/demixer.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/demixing_manager.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/demixer.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/descriptor_obu_parser.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/descriptor_obu_parser.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/obu_with_data_generator.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/descriptor_obu_parser.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/cli/descriptor_obus.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/node_hash_map.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/downmixer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer_factory.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/downmixer_factory.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/algorithm/container.h\"\n", "#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/downmixer.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer_factory.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/downmixer.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer_manager.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/downmixer_manager.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/downmixer_manager.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/downmixer.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/substream_frames.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/encoder_main.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/flags/flag.h\"\n", "#include \"absl/flags/parse.h\"\n", "#include \"absl/flags/usage.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/adm_to_user_metadata/app/adm_to_user_metadata_main_lib.h\"\n", "#include \"iamf/cli/encoder_main_lib.h\"\n", "#include \"iamf/cli/proto/test_vector_metadata.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"src/google/protobuf/text_format.h\"\n"]}
+    ],
+    "src/iamf/cli/encoder_main_lib.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/encoder_main_lib.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/iamf_components.h\"\n", "#include \"iamf/cli/iamf_encoder.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/parameter_block_partitioner.h\"\n", "#include \"iamf/cli/proto/encoder_control_metadata.pb.h\"\n", "#include \"iamf/cli/proto/temporal_delimiter.pb.h\"\n", "#include \"iamf/cli/proto/test_vector_metadata.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/cli/proto_conversion/channel_label_utils.h\"\n", "#include \"iamf/cli/proto_conversion/output_audio_format_utils.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/cli/wav_sample_provider.h\"\n", "#include \"iamf/cli/wav_writer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_encoder_api_types.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"src/google/protobuf/repeated_ptr_field.h\"\n"]}
+    ],
+    "src/iamf/cli/encoder_main_lib.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n"]}
+    ],
+    "src/iamf/cli/global_timing_module.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/global_timing_module.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/global_timing_module.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/iamf_components.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/iamf_components.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/itu_1770_4/loudness_calculator_factory_itu_1770_4.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/cli/obu_sequencer_iamf.h\"\n", "#include \"iamf/cli/proto/test_vector_metadata.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/cli/proto_conversion/proto_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/iamf_components.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/cli/proto/mix_presentation.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n"]}
+    ],
+    "src/iamf/cli/iamf_encoder.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/iamf_encoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/btree_map.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_frame_decoder.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/downmixer_manager.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/cli/obu_sequencer_streaming_iamf.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/cli/proto/encoder_control_metadata.pb.h\"\n", "#include \"iamf/cli/proto/temporal_delimiter.pb.h\"\n", "#include \"iamf/cli/proto/test_vector_metadata.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/cli/proto_conversion/channel_label_utils.h\"\n", "#include \"iamf/cli/proto_conversion/downmixing_reconstruction_util.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/arbitrary_obu_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/audio_element_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/audio_frame_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/codec_config_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/ia_sequence_header_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/metadata_obu_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/mix_presentation_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/parameter_block_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_utils.h\"\n", "#include \"iamf/cli/renderer_factory.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/cli/temporal_unit_view.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_encoder_api_types.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/metadata_obu.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/iamf_encoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/btree_map.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/audio_frame_decoder.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/cli/obu_sequencer_streaming_iamf.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/cli/proto/test_vector_metadata.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/audio_frame_generator.h\"\n", "#include \"iamf/cli/proto_conversion/proto_to_obu/parameter_block_generator.h\"\n", "#include \"iamf/cli/renderer_factory.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/include/iamf_tools/iamf_encoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_encoder_api_types.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/metadata_obu.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/labeled_frame.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/labeled_frame.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/labeled_frame.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/node_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/layout_renderer_factory.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/layout_renderer_factory.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/renderer/default_layout_renderer.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/cli/renderer_factory.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n"]}
+    ],
+    "src/iamf/cli/layout_renderer_factory.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/loudness_calculator_base.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/loudness_calculator_base.h\"\n"]}
+    ],
+    "src/iamf/cli/loudness_calculator_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/loudness_calculator_factory_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/loudness_calculator_factory_base.h\"\n"]}
+    ],
+    "src/iamf/cli/loudness_calculator_factory_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/loudness_calculator_base.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_processor.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_processor.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_decoder.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obu_parser.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/obu_processor_utils.h\"\n", "#include \"iamf/cli/obu_with_data_generator.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/cli/profile_filter.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/temporal_delimiter.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_processor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_decoder.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/temporal_delimiter.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_processor_utils.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_processor_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_processor_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_sequencer_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/profile_filter.h\"\n", "#include \"iamf/cli/temporal_unit_view.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/metadata_obu.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/temporal_delimiter.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/temporal_unit_view.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/metadata_obu.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_iamf.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_sequencer_iamf.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_iamf.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_streaming_iamf.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_sequencer_streaming_iamf.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_sequencer_streaming_iamf.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_with_data_generator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/obu_with_data_generator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/obu_with_data_generator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/global_timing_module.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/parameters_manager.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/audio_frame.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/parameter_block_partitioner.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/parameter_block_partitioner.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/proto/ia_sequence_header.pb.h\"\n", "#include \"iamf/cli/proto/obu_header.pb.h\"\n", "#include \"iamf/cli/proto/parameter_block.pb.h\"\n", "#include \"iamf/cli/proto/parameter_data.pb.h\"\n", "#include \"iamf/cli/proto_conversion/proto_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/obu_util.h\"\n", "#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/parameter_block_partitioner.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/proto/codec_config.pb.h\"\n", "#include \"iamf/cli/proto/ia_sequence_header.pb.h\"\n", "#include \"iamf/cli/proto/parameter_block.pb.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/parameter_block_with_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/parameters_manager.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/parameters_manager.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/log/absl_vlog_is_on.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/parameters_manager.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/probe.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/probe.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/descriptor_obu_parser.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_gain_parameter_data.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_variant.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/probe.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/iamf/cli/probe_json.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/probe_json.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/probe.h\"\n"]}
+    ],
+    "src/iamf/cli/probe_json.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/probe.h\"\n"]}
+    ],
+    "src/iamf/cli/probe_main.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/log_severity.h\"\n", "#include \"absl/flags/flag.h\"\n", "#include \"absl/flags/parse.h\"\n", "#include \"absl/flags/usage.h\"\n", "#include \"absl/log/globals.h\"\n", "#include \"absl/log/initialize.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/probe.h\"\n", "#include \"iamf/cli/probe_json.h\"\n"]}
+    ],
+    "src/iamf/cli/profile_filter.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/profile_filter.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/profile_filter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/ia_sequence_header.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n"]}
+    ],
+    "src/iamf/cli/recon_gain_generator.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/recon_gain_generator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/recon_gain_generator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_ambisonics_to_channel.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_ambisonics_to_channel.h\"\n"]},
+      {"after": "\n", "before": "namespace iamf_tools {\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/loudspeakers_renderer.h\"\n", "#include \"iamf/cli/renderer/renderer_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_ambisonics_to_channel.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/synchronization/mutex.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_binaural.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_binaural.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/cli/renderer/renderer_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"obr/audio_buffer/audio_buffer.h\"\n", "#include \"obr/renderer/audio_element_type.h\"\n", "#include \"obr/renderer/obr_impl.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_binaural.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"obr/audio_buffer/audio_buffer.h\"\n", "#include \"obr/renderer/obr_impl.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_channel_to_channel.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_channel_to_channel.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/log/absl_vlog_is_on.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/loudspeakers_renderer.h\"\n", "#include \"iamf/cli/renderer/renderer_utils.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_channel_to_channel.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_passthrough.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_passthrough.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/audio_element_renderer_passthrough.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/thread_annotations.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/default_layout_renderer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/default_layout_renderer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/time/clock.h\"\n", "#include \"absl/time/time.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/cli/renderer_factory.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/parameter_block.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/default_layout_renderer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/cli/renderer_factory.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/compressed_gains_codebook.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/get_gains.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/gains/get_gains.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/renderer/gains/precomputed_compressed_gains.h\"\n", "#include \"iamf/cli/renderer/gains/precomputed_compressed_gains_decoder.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/get_gains.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_compressed_gains.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/gains/precomputed_compressed_gains.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_compressed_gains.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_compressed_gains_decoder.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/gains/precomputed_compressed_gains_decoder.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/renderer/gains/compressed_gains_codebook.h\"\n", "#include \"iamf/cli/renderer/gains/precomputed_compressed_gains.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_compressed_gains_decoder.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/cli/renderer/gains/precomputed_compressed_gains.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_gains.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/gains/precomputed_gains.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/gains/precomputed_gains.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/layout_renderer_base.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/layout_renderer_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/layout_renderer_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/loudspeakers_renderer.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/loudspeakers_renderer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/renderer/gains/get_gains.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/loudspeakers_renderer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/renderer_utils.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer/renderer_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer/renderer_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer_factory.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/renderer_factory.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_ambisonics_to_channel.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_channel_to_channel.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_passthrough.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]},
+      {"after": "#ifndef IAMF_TOOLS_DISABLE_BINAURAL_RENDERING\n", "before": "#endif\n", "n": 1, "add": ["#include \"iamf/cli/renderer/audio_element_renderer_binaural.h\"\n"]}
+    ],
+    "src/iamf/cli/renderer_factory.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/renderer/audio_element_renderer_base.h\"\n", "#include \"iamf/obu/audio_element.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/rendering_mix_presentation_finalizer.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/cli_util.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_base.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/rendering_mix_presentation_finalizer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/demixing_manager.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/layout_renderer_factory.h\"\n", "#include \"iamf/cli/loudness_calculator_base.h\"\n", "#include \"iamf/cli/loudness_calculator_factory_base.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/cli/renderer/layout_renderer_base.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/obu/mix_presentation.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/sample_processing_utils.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/sample_processing_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/sample_processing_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/sample_processor_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/sample_processor_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/sample_processor_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/substream_frames.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n"]}
+    ],
+    "src/iamf/cli/temporal_unit_view.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/temporal_unit_view.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/algorithm/container.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/temporal_unit_view.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/audio_frame_with_data.h\"\n", "#include \"iamf/cli/parameter_block_with_data.h\"\n", "#include \"iamf/obu/arbitrary_obu.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/cli/tests/portable/get_test_path.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_reader.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/wav_reader.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"src/dsp/read_wav_file.h\"\n", "#include \"src/dsp/read_wav_info.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_reader.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"src/dsp/read_wav_info.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_sample_provider.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/wav_sample_provider.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/audio_element_with_data.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/proto/audio_frame.pb.h\"\n", "#include \"iamf/cli/proto_conversion/channel_label_utils.h\"\n", "#include \"iamf/cli/wav_reader.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/obu/codec_config.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"src/google/protobuf/repeated_ptr_field.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_sample_provider.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/channel_label.h\"\n", "#include \"iamf/cli/descriptor_obus.h\"\n", "#include \"iamf/cli/labeled_frame.h\"\n", "#include \"iamf/cli/proto/audio_frame.pb.h\"\n", "#include \"iamf/cli/wav_reader.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"src/google/protobuf/repeated_ptr_field.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_writer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/cli/wav_writer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/sample_processing_utils.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/obu/types.h\"\n", "#include \"src/dsp/write_wav_file.h\"\n"]}
+    ],
+    "src/iamf/cli/wav_writer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/cli/sample_processor_base.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/leb_generator.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/common/leb_generator.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/leb_generator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/q_format_or_floating_point.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/common/q_format_or_floating_point.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n"]}
+    ],
+    "src/iamf/common/q_format_or_floating_point.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "src/iamf/common/read_bit_buffer.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/common/read_bit_buffer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/read_bit_buffer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/utils/macros.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status_macros.h\"\n"]}
+    ],
+    "src/iamf/common/utils/map_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/functional/function_ref.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/common/utils/numeric_utils.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/common/utils/numeric_utils.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/iamf/common/utils/numeric_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n"]}
+    ],
+    "src/iamf/common/utils/obu_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/any_invocable.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/utils/validation_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/common/write_bit_buffer.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/common/write_bit_buffer.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/common/write_bit_buffer.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_decoder_factory.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/include/iamf_tools/iamf_decoder_factory.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"iamf/api/decoder/iamf_decoder.h\"\n", "#include \"iamf/include/iamf_tools/iamf_decoder_interface.h\"\n", "#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_encoder_factory.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/include/iamf_tools/iamf_encoder_factory.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/cli/iamf_components.h\"\n", "#include \"iamf/cli/iamf_encoder.h\"\n", "#include \"iamf/cli/obu_sequencer_base.h\"\n", "#include \"iamf/cli/obu_sequencer_iamf.h\"\n", "#include \"iamf/cli/proto/temporal_delimiter.pb.h\"\n", "#include \"iamf/cli/proto/user_metadata.pb.h\"\n", "#include \"iamf/cli/proto_conversion/proto_utils.h\"\n", "#include \"iamf/cli/rendering_mix_presentation_finalizer.h\"\n", "#include \"iamf/include/iamf_tools/iamf_encoder_interface.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_encoder_factory.h": [
+      {"after": "\n", "before": "#include \"iamf_encoder_interface.h\"\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/string_view.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_encoder_interface.h": [
+      {"after": "\n", "before": "#include \"iamf_tools_encoder_api_types.h\"\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_tools_api_types.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/include/iamf_tools/iamf_tools_api_types.h\"\n"]}
+    ],
+    "src/iamf/include/iamf_tools/iamf_tools_encoder_api_types.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/types/span.h\"\n"]}
+    ],
+    "src/iamf/obu/ambisonics_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/ambisonics_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/str_join.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/ambisonics_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/animated_parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/arbitrary_obu.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/arbitrary_obu.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "src/iamf/obu/arbitrary_obu.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/audio_element.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/audio_element.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/extended_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/audio_element.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/ambisonics_config.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/extended_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/audio_frame.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/audio_frame.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/audio_frame.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/cartesian_position_data.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/cartesian_position_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/cartesian_position_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/codec_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/codec_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/status_macros.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/codec_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n", "#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/aac_decoder_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/decoder_config/aac_decoder_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]},
+      {"after": "#if !defined(IAMF_TOOLS_DISABLE_AAC_DECODER)\n", "before": "#else\n", "n": 1, "add": ["#include \"libSYS/include/machine_type.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/aac_decoder_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/flac_decoder_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/decoder_config/flac_decoder_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/flac_decoder_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/lpcm_decoder_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/decoder_config/lpcm_decoder_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/lpcm_decoder_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/opus_decoder_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/decoder_config/opus_decoder_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/decoder_config/opus_decoder_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/demixing_info_parameter_data.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/demixing_info_parameter_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/demixing_info_parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/element_gain_offset_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/element_gain_offset_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/q_format_or_floating_point.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/element_gain_offset_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/q_format_or_floating_point.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/extension_parameter_data.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/extension_parameter_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/extension_parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/ia_sequence_header.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/ia_sequence_header.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "src/iamf/obu/ia_sequence_header.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "src/iamf/obu/metadata_obu.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/metadata_obu.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/functional/overload.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/metadata_obu.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/mix_gain_parameter_data.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/mix_gain_parameter_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/mix_gain_parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/mix_presentation.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/mix_presentation.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_map.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/mix_presentation.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/rendering_config.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/obu_base.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/obu_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "src/iamf/obu/obu_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "src/iamf/obu/obu_header.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/obu_header.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/no_destructor.h\"\n", "#include \"absl/container/flat_hash_set.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/obu_header.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/common/leb_generator.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/map_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/cart16_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/cart16_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/cartesian_position_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/cart16_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/cart8_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/cart8_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/cartesian_position_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/cart8_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/demixing_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/demixing_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/demixing_info_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_cart16_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/dual_cart16_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/cartesian_position_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_cart16_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_cart8_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/dual_cart8_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/cartesian_position_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_cart8_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_polar_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/dual_polar_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/polar_position_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/dual_polar_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/extended_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/extended_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/extension_parameter_data.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/extended_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/mix_gain_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/q_format_or_floating_point.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/mix_gain_parameter_data.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/mix_gain_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/q_format_or_floating_point.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/param_definition_base.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/param_definition_base.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/param_definition_base.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/param_definition_variant.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/demixing_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_polar_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/extended_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/mix_gain_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/polar_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/polar_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/polar_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/polar_position_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/polar_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/recon_gain_param_definition.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/recon_gain_param_definition.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/recon_gain_param_definition.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/subblock_schedule.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/functional/function_ref.h\"\n", "#include \"absl/log/absl_check.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/numeric_utils.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/param_definitions/subblock_schedule.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/base/nullability.h\"\n", "#include \"absl/functional/function_ref.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_format.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/parameter_block.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/parameter_block.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/memory/memory.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/obu_util.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/mix_gain_parameter_data.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/parameter_block.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/mix_gain_parameter_data.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/subblock_schedule.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n"]}
+    ],
+    "src/iamf/obu/polar_position_data.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/polar_position_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/strings/string_view.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/polar_position_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/animated_parameter_data.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n"]}
+    ],
+    "src/iamf/obu/recon_gain_info_parameter_data.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/recon_gain_info_parameter_data.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/utils/validation_utils.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/recon_gain_info_parameter_data.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/parameter_data.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/rendering_config.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/rendering_config.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/log/absl_check.h\"\n", "#include \"absl/log/absl_log.h\"\n", "#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n", "#include \"absl/types/span.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/element_gain_offset_config.h\"\n", "#include \"iamf/obu/param_definitions/cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_polar_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/polar_param_definition.h\"\n", "#include \"iamf/obu/types.h\"\n"]}
+    ],
+    "src/iamf/obu/rendering_config.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/element_gain_offset_config.h\"\n", "#include \"iamf/obu/param_definitions/cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart16_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_cart8_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/dual_polar_param_definition.h\"\n", "#include \"iamf/obu/param_definitions/param_definition_base.h\"\n", "#include \"iamf/obu/param_definitions/polar_param_definition.h\"\n"]}
+    ],
+    "src/iamf/obu/substream_channel_count.cc": [
+      {"after": " */\n", "before": "\n", "n": 1, "add": ["#include \"iamf/obu/substream_channel_count.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n"]}
+    ],
+    "src/iamf/obu/substream_channel_count.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/statusor.h\"\n"]}
+    ],
+    "src/iamf/obu/temporal_delimiter.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"iamf/common/read_bit_buffer.h\"\n", "#include \"iamf/common/utils/macros.h\"\n", "#include \"iamf/common/write_bit_buffer.h\"\n", "#include \"iamf/obu/obu_base.h\"\n", "#include \"iamf/obu/obu_header.h\"\n"]}
+    ],
+    "strip_errors.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"absl/status/status.h\"\n", "#include \"absl/status/statusor.h\"\n", "#include \"absl/strings/str_cat.h\"\n"]}
+    ]
+  }
+}

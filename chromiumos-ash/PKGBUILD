@@ -276,9 +276,10 @@ build() {
     fi
 
     # Lumen's source import also took the include lines out of the trees it
-    # imported: every `#include "absl/..."` line from third_party/abseil-cpp,
-    # every quoted include from third_party/protobuf, and every quoted include
-    # from base/ and build/ -- the Rust allocator's buildflags.h among them,
+    # imported: every quoted `#include "..."` line from the directories it
+    # hit -- third_party/abseil-cpp, third_party/protobuf, third_party/zlib,
+    # base/, build/ and the rest of the tree from ui/ and components/ to
+    # third_party/blink -- the Rust allocator's buildflags.h among them,
     # without which its translation unit does not compile. The files it kept
     # are not self-contained, so the first abseil TU fails on
     # ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`. This

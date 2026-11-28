@@ -1,0 +1,88 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/utf",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "src/runestr/runestrcat.c": [
+      {"after": "#include <stdint.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrchr.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrcmp.c": [
+      {"after": "#include <stdint.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrcpy.c": [
+      {"after": "#include <stdint.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrdup.c": [
+      {"after": "#include <stdlib.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrecpy.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrlen.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrrchr.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runestr/runestrstr.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isalnumrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isblankrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isgraphrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isprintrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/ispunctrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isvalidrune.c": [
+      {"after": "", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/isxdigitrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/runetype/runetype.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/chartorune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/fullrune.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/runelen.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/runetochar.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utfecpy.c": [
+      {"after": "#include <string.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utflen.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utfrrune.c": [
+      {"after": "#include <string.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utfrune.c": [
+      {"after": "#include <string.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utftab.c": [
+      {"after": "/* See LICENSE file for copyright and license details. */\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ],
+    "src/utf/utfutf.c": [
+      {"after": "#include <string.h>\n", "before": "\n", "n": 1, "add": ["#include \"utf.h\"\n"]}
+    ]
+  }
+}

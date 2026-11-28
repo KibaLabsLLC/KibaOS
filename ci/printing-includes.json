@@ -1,0 +1,272 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "printing",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "backend/cups_helper.cc": [
+      {"after": "#include \"printing/backend/print_backend_consts.h\"\n", "before": "#include \"printing/print_job_constants_cups.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/cups_helper_unittest.cc": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/cups_ipp_helper.cc": [
+      {"after": "#include \"printing/backend/print_backend_utils.h\"\n", "before": "#include \"printing/printing_utils.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/cups_ipp_helper_unittest.cc": [
+      {"after": "#include \"printing/backend/print_backend_utils.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/mojom/print_backend_mojom_traits.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"ui/gfx/geometry/mojom/geometry.mojom-shared.h\"\n"]}
+    ],
+    "backend/mojom/print_backend_mojom_traits.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/backend/print_backend.h\"\n", "n": 1, "add": ["#include \"printing/backend/mojom/print_backend.mojom-shared.h\"\n"]},
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/mojom/print_backend_mojom_traits_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"printing/backend/print_backend.h\"\n", "n": 1, "add": ["#include \"printing/backend/mojom/print_backend.mojom.h\"\n"]}
+    ],
+    "backend/print_backend.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_chromeos.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_consts.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "backend/print_backend_cups.cc": [
+      {"after": "#include \"printing/backend/print_backend_utils.h\"\n", "before": "#include \"printing/printing_features.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_cups.h": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_cups_ipp.cc": [
+      {"after": "#include \"printing/backend/print_backend_consts.h\"\n", "before": "#include \"printing/units.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_cups_ipp.h": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_cups_unittest.cc": [
+      {"after": "#include \"printing/backend/print_backend_consts.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_dummy.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_test_constants.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/backend/print_backend.h\"\n", "n": 1, "add": ["#include \"printing/backend/mojom/print_backend.mojom-forward.h\"\n"]}
+    ],
+    "backend/print_backend_unittest.cc": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/print_backend_utils.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "#include \"printing/units.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "backend/print_backend_utils.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "backend/print_backend_utils_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "backend/print_backend_win.cc": [
+      {"after": "#include \"printing/backend/win_helper.h\"\n", "before": "#include \"printing/printing_utils.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/printing_restrictions.h": [
+      {"after": "#if BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/test_print_backend.cc": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/test_print_backend.h": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/test_print_backend_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"printing/backend/print_backend.h\"\n", "n": 1, "add": ["#include \"printing/backend/mojom/print_backend.mojom.h\"\n"]},
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock-matchers.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "backend/win_helper.h": [
+      {"after": "#include \"base/win/scoped_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "client_info_helpers.cc": [
+      {"after": "#include \"base/types/optional_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n", "#include \"third_party/re2/src/re2/re2.h\"\n"]}
+    ],
+    "client_info_helpers.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-forward.h\"\n"]}
+    ],
+    "client_info_helpers_unittest.cc": [
+      {"after": "#include \"base/strings/string_split.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "common/metafile_utils.cc": [
+      {"after": "#include \"pdf/pdf_accessibility_constants.h\"\n", "before": "#include \"skia/ext/codec_utils.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]},
+      {"after": "#include \"third_party/blink/public/common/features.h\"\n", "before": "#include \"ui/accessibility/ax_node.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkFontMgr.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkString.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n", "#include \"third_party/skia/include/docs/SkPDFDocument.h\"\n", "#include \"third_party/skia/include/private/chromium/SkImageChromium.h\"\n"]}
+    ],
+    "common/metafile_utils.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ui/accessibility/ax_tree_update_forward.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-forward.h\"\n", "#include \"third_party/skia/include/core/SkDocument.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n"]}
+    ],
+    "common/metafile_utils_unittest.cc": [
+      {"after": "#include \"third_party/blink/public/common/features.h\"\n", "before": "#include \"ui/gfx/skia_span_util.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkData.h\"\n", "#include \"third_party/skia/include/core/SkFontStyle.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n"]}
+    ],
+    "emf_win.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "emf_win_unittest.cc": [
+      {"after": "#include \"base/win/scoped_hdc.h\"\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "metafile.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/native_drawing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom-forward.h\"\n"]}
+    ],
+    "metafile_skia.cc": [
+      {"after": "#include \"printing/metafile_agent.h\"\n", "before": "#include \"ui/gfx/geometry/size_conversions.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/docs/SkMultiPictureDocument.h\"\n"]}
+    ],
+    "metafile_skia.h": [
+      {"after": "#include \"printing/metafile.h\"\n", "before": "#include \"skia/ext/platform_canvas.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]},
+      {"after": "#include \"skia/ext/platform_canvas.h\"\n", "before": "#include \"ui/accessibility/ax_tree_update.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkRefCnt.h\"\n"]}
+    ],
+    "metafile_skia_unittest.cc": [
+      {"after": "#include \"printing/common/metafile_utils.h\"\n", "before": "#include \"skia/ext/font_utils.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/accessibility/ax_node_data.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/codec/SkCodec.h\"\n", "#include \"third_party/skia/include/codec/SkJpegDecoder.h\"\n", "#include \"third_party/skia/include/codec/SkPngRustDecoder.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkFont.h\"\n", "#include \"third_party/skia/include/core/SkFontStyle.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPicture.h\"\n", "#include \"third_party/skia/include/core/SkPictureRecorder.h\"\n", "#include \"third_party/skia/include/core/SkRect.h\"\n", "#include \"third_party/skia/include/core/SkRefCnt.h\"\n", "#include \"third_party/skia/include/core/SkSerialProcs.h\"\n", "#include \"third_party/skia/include/core/SkSize.h\"\n", "#include \"third_party/skia/include/core/SkStream.h\"\n", "#include \"third_party/skia/include/core/SkSurface.h\"\n", "#include \"third_party/skia/include/core/SkSurfaceProps.h\"\n", "#include \"third_party/skia/include/core/SkTextBlob.h\"\n", "#include \"third_party/skia/include/core/SkTypeface.h\"\n", "#include \"third_party/skia/include/docs/SkPDFDocument.h\"\n", "#include \"third_party/skia/include/encode/SkJpegEncoder.h\"\n", "#include \"ui/accessibility/ax_enums.mojom.h\"\n"]}
+    ],
+    "mojom/print_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"printing/page_range.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "mojom/printing_context_mojom_traits.cc": [
+      {"after": "#include \"mojo/public/cpp/base/string16_mojom_traits.h\"\n", "before": "#include \"printing/page_setup.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]},
+      {"after": "#include \"printing/print_settings.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"ui/gfx/geometry/mojom/geometry.mojom-shared.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"mojo/public/mojom/base/values.mojom.h\"\n"]}
+    ],
+    "mojom/printing_context_mojom_traits.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/page_setup.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n", "#include \"printing/mojom/printing_context.mojom-shared.h\"\n"]}
+    ],
+    "mojom/printing_context_mojom_traits_unittest.cc": [
+      {"after": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "before": "#include \"printing/page_range.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n", "#include \"printing/mojom/printing_context.mojom.h\"\n"]}
+    ],
+    "pdf_metafile_cg_mac.cc": [
+      {"after": "#include \"base/strings/sys_string_conversions.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "pdf_metafile_cg_mac_unittest.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_job_constants.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "print_job_constants_cups.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "print_settings.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/units.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif  // BUILDFLAG(IS_WIN)\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/page_range.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_conversion.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/print_job_constants.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_conversion_chromeos.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_conversion_chromeos_unittest.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_conversion_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_initializer_win.cc": [
+      {"after": "#include \"printing/backend/win_helper.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "print_settings_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/units.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n", "#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printed_document.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printed_document_win.cc": [
+      {"after": "#include \"base/synchronization/lock.h\"\n", "before": "#include \"printing/printed_page_win.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/page_setup.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/native_drawing_context.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_android.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"printing/print_job_constants.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]},
+      {"after": "#include \"printing/units.h\"\n", "before": "#include \"ui/android/view_android.h\"\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/ulocdata.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"printing/printing_jni_headers/PrintingContext_jni.h\"\n"]}
+    ],
+    "printing_context_android.h": [
+      {"after": "#include \"base/android/scoped_java_ref.h\"\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_chromeos.cc": [
+      {"after": "#include \"printing/backend/print_backend_utils.h\"\n", "before": "#include \"printing/client_info_helpers.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"printing/metafile.h\"\n", "before": "#include \"printing/page_setup.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_chromeos.h": [
+      {"after": "#include \"printing/backend/cups_printer.h\"\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_chromeos_unittest.cc": [
+      {"after": "#include \"printing/backend/mock_cups_printer.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_linux.cc": [
+      {"after": "#include \"printing/metafile.h\"\n", "before": "#include \"printing/print_dialog_linux_interface.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_linux.h": [
+      {"after": "#include \"base/functional/callback.h\"\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_mac.h": [
+      {"after": "#include \"base/memory/raw_ptr_exclusion.h\"\n", "before": "#include \"printing/print_job_constants.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_mac.mm": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/metafile.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"printing/metafile.h\"\n", "before": "#include \"printing/print_job_constants_cups.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_no_system_dialog.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "#include \"printing/metafile.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "printing_context_no_system_dialog.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_system_dialog_win.cc": [
+      {"after": "#include \"printing/backend/win_helper.h\"\n", "before": "#include \"printing/page_range.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_system_dialog_win.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"printing/printing_context_win.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_win.cc": [
+      {"after": "#include \"printing/backend/win_helper.h\"\n", "before": "#include \"printing/metafile.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"printing/metafile_skia.h\"\n", "before": "#include \"printing/page_setup.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_win.h": [
+      {"after": "\n", "before": "#include \"printing/printing_context.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_context_win_unittest.cc": [
+      {"after": "#include \"printing/backend/win_helper.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "printing_features.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "printing_features.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "printing_utils.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"ui/gfx/text_elider.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n", "#include \"third_party/icu/source/common/unicode/uchar.h\"\n"]}
+    ],
+    "printing_utils.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "printing_utils_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "pwg_raster_settings.h": [
+      {"after": "\n", "before": "#include \"printing/print_job_constants.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "sandbox/print_backend_sandbox_hook_linux.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"sandbox/linux/syscall_broker/broker_command.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n"]}
+    ],
+    "test_printing_context.cc": [
+      {"after": "#include \"printing/backend/print_backend.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/buildflags/buildflags.h\"\n", "#include \"printing/mojom/print.mojom.h\"\n"]}
+    ],
+    "test_printing_context.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"printing/print_settings.h\"\n", "n": 1, "add": ["#include \"printing/mojom/print.mojom.h\"\n"]}
+    ]
+  }
+}

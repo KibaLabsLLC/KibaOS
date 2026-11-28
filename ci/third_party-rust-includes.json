@@ -1,0 +1,50 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "third_party/rust",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/relocatable_or_array.h": [
+      {"after": "#pragma once\n", "before": "#include <cstdint>\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/rust_error.h": [
+      {"after": "#pragma once\n", "before": "#include \"./friend_impl.h\"\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/rust_slice_uninit.h": [
+      {"after": "#pragma once\n", "before": "\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/rust_str_uninit.h": [
+      {"after": "#pragma once\n", "before": "\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/shared_ptr.h": [
+      {"after": "#pragma once\n", "before": "#include <memory>\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/cxxbridge-cmd-v1/src/bridge/builtin/vector.h": [
+      {"after": "#pragma once\n", "before": "#include <type_traits>\n", "n": 1, "add": ["#include \"../../../include/cxx.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/harfrust_capi-v0_16/examples/subset.c": [
+      {"after": "", "before": "#include <stdio.h>\n", "n": 1, "add": ["#include \"hr-hb-subset.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/harfrust_capi-v0_16/tests/aat_source_compat.cc": [
+      {"after": "// these constants in a template. Integer macros must retain unsigned types.\n", "before": "#include <type_traits>\n", "n": 1, "add": ["#include \"hr-hb-aat.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/harfrust_capi-v0_16/tests/cplusplus.cc": [
+      {"after": "#ifdef HR_TEST_SUBSET_FIRST\n", "before": "#endif\n", "n": 1, "add": ["#include \"hr-hb-subset.h\"\n"]},
+      {"after": "#endif\n", "before": "#ifdef HR_TEST_SUBSET_LAST\n", "n": 1, "add": ["#include \"hr-hb-cplusplus.hh\"\n"]},
+      {"after": "#ifdef HR_TEST_SUBSET_LAST\n", "before": "#endif\n", "n": 1, "add": ["#include \"hr-hb-subset.h\"\n"]},
+      {"after": "// Repeated includes must not redefine the subset vtables.\n", "before": "#if defined(HR_TEST_SUBSET_FIRST) || defined(HR_TEST_SUBSET_LAST)\n", "n": 1, "add": ["#include \"hr-hb-cplusplus.hh\"\n"]},
+      {"after": "#if defined(HR_TEST_SUBSET_FIRST) || defined(HR_TEST_SUBSET_LAST)\n", "before": "#endif\n", "n": 1, "add": ["#include \"hr-hb-subset.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/harfrust_capi-v0_16/tests/source_compat.cc": [
+      {"after": "// Latin-1 byte spans without a cast. Keep the HarfBuzz source types intact.\n", "before": "#include <type_traits>\n", "n": 1, "add": ["#include \"hr-hb.h\"\n", "#include \"hr-hb-ot.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/harfrust_capi-v0_16/tests/subset/skia_runtime.cc": [
+      {"after": "// HarfRust compatibility headers for the second executable.\n", "before": "\n", "n": 1, "add": ["#include \"include/core/SkCanvas.h\"\n", "#include \"include/core/SkData.h\"\n", "#include \"include/core/SkDocument.h\"\n", "#include \"include/core/SkFont.h\"\n", "#include \"include/core/SkFontArguments.h\"\n", "#include \"include/core/SkFontMgr.h\"\n", "#include \"include/core/SkPaint.h\"\n", "#include \"include/core/SkStream.h\"\n", "#include \"include/docs/SkPDFDocument.h\"\n", "#include \"include/ports/SkFontMgr_empty.h\"\n", "#include \"modules/skshaper/include/SkShaper_harfbuzz.h\"\n", "#include \"modules/skunicode/include/SkUnicode_icu.h\"\n", "#include \"src/pdf/SkPDFGlyphUse.h\"\n", "#include \"src/pdf/SkPDFSubsetFont.h\"\n", "#include \"src/ports/SkTypeface_proxy.h\"\n"]}
+    ],
+    "chromium_crates_io/vendor/temporal_capi-v0_2/tests/c/simple.c": [
+      {"after": "", "before": "#include <stdio.h>\n", "n": 1, "add": ["#include \"ArithmeticOverflow.d.h\"\n", "#include \"Calendar.h\"\n", "#include \"DisplayCalendar.d.h\"\n", "#include \"PlainDate.h\"\n", "#include \"diplomat_runtime.h\"\n"]}
+    ],
+    "fend_core/v1/wrapper/fend_core.cc": [
+      {"after": "#include \"base/strings/string_view_rust.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/rust/fend_core/v1/wrapper/fend_core_ffi_glue.rs.h\"\n"]}
+    ]
+  }
+}

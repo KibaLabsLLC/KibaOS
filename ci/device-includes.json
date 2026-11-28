@@ -1,0 +1,1071 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "device",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "base/public/cpp/string_util.cc": [
+      {"after": "#include \"base/containers/span_rust.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/base/string_util.rs.h\"\n"]}
+    ],
+    "bluetooth/adapter.h": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n", "#include \"device/bluetooth/public/mojom/device.mojom-forward.h\"\n"]}
+    ],
+    "bluetooth/adapter_unittest.cc": [
+      {"after": "#include \"device/bluetooth/gatt_service.h\"\n", "before": "#include \"device/bluetooth/test/fake_local_gatt_service.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/advertisement.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_advertisement.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/android/outcome.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/Outcome_jni.h\"\n"]}
+    ],
+    "bluetooth/android/wrappers.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/BluetoothAdapterWrapper_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_adapter_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothAdapter_jni.h\"\n", "#include \"device/bluetooth/jni_headers/ChromeBluetoothScanFilterBuilder_jni.h\"\n", "#include \"device/bluetooth/jni_headers/ChromeBluetoothScanFilterList_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_adapter_android_unittest.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth_test_jni_headers/ChromeBluetoothLeScannerTestUtil_jni.h\"\n", "#include \"device/bluetooth_test_jni_headers/ChromeBluetoothScanFilter_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_device.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "#include \"ui/base/l10n/l10n_util.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/strings/grit/bluetooth_strings.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_device_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothDevice_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_remote_gatt_characteristic_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothRemoteGattCharacteristic_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_remote_gatt_descriptor_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothRemoteGattDescriptor_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_remote_gatt_service_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothRemoteGattService_jni.h\"\n"]}
+    ],
+    "bluetooth/bluetooth_socket_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/jni_headers/ChromeBluetoothSocket_jni.h\"\n"]}
+    ],
+    "bluetooth/bluez/ble_scan_parser/ble_scan_parser.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/bluez/ble_scan_parser/cxx.rs.h\"\n"]}
+    ],
+    "bluetooth/bluez/ble_scan_parser/ble_scan_parser_unittest.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"device/bluetooth/bluez/ble_scan_parser/scan_record.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/bluez/ble_scan_parser/cxx.rs.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_adapter_bluez.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_advertisement_bluez.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluez_dbus_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_bluez_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_device_bluez.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_gatt_service_bluez.cc": [
+      {"after": "#include \"device/bluetooth/bluez/bluetooth_adapter_bluez.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_remote_gatt_characteristic_bluez.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluez_dbus_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/bluetooth/dbus-constants.h\"\n", "#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/bluez/bluetooth_socket_bluez.cc": [
+      {"after": "#include \"net/base/net_errors.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_adapter_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluetooth_metrics_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_admin_policy_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_advertisement_monitor_application_service_provider_impl.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_advertisement_monitor_application_service_provider_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_advertisement_monitor_manager_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_advertisement_monitor_service_provider_impl.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_advertisement_monitor_service_provider_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_agent_manager_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_agent_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_agent_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_battery_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_debug_manager_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_device_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluetooth_metrics_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_application_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_application_service_provider_impl.cc": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_characteristic_client.cc": [
+      {"after": "#include \"dbus/values_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/bluetooth/dbus-constants.h\"\n", "#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_characteristic_service_provider_impl.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluetooth_gatt_characteristic_delegate_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_descriptor_client.cc": [
+      {"after": "#include \"dbus/values_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_descriptor_service_provider_impl.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluetooth_gatt_attribute_helpers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_manager_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_service_client.cc": [
+      {"after": "#include \"dbus/object_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_gatt_service_service_provider_impl.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_input_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_le_advertisement_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_le_advertisement_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_le_advertising_manager_client.cc": [
+      {"after": "#include \"dbus/object_proxy.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_profile_manager_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluetooth_metrics_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluetooth_profile_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_profile_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/bluez_dbus_manager.cc": [
+      {"after": "#include \"device/bluetooth/floss/floss_manager_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_adapter_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_device_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_admin_policy_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_adapter_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_advertisement_monitor_manager_client.cc": [
+      {"after": "#include \"base/observer_list.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_agent_manager_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_agent_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_battery_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_adapter_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_device_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_profile_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_characteristic_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_gatt_descriptor_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_characteristic_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_gatt_manager_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_descriptor_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/bluez_dbus_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_descriptor_service_provider.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_gatt_manager_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_manager_client.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_gatt_service_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_gatt_characteristic_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_input_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_device_client.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_le_advertising_manager_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_le_advertisement_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/dbus/fake_bluetooth_profile_manager_client.cc": [
+      {"after": "#include \"device/bluetooth/dbus/fake_bluetooth_profile_service_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/service_constants.h\"\n"]}
+    ],
+    "bluetooth/device.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_remote_gatt_service.h\"\n", "before": "#include \"mojo/public/cpp/bindings/self_owned_receiver.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/device.mojom.h\"\n"]}
+    ],
+    "bluetooth/discovery_session.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_discovery_session.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_bluetooth.cc": [
+      {"after": "#include \"device/bluetooth/bluetooth_adapter_factory.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_bluetooth.h": [
+      {"after": "#include \"device/bluetooth/emulation/fake_central.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom-forward.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_central.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_central.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_adapter.h\"\n", "before": "#include \"mojo/public/cpp/bindings/associated_remote.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_remote_gatt_characteristic.h": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_remote_gatt_descriptor.cc": [
+      {"after": "#include \"device/bluetooth/emulation/fake_remote_gatt_characteristic.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_remote_gatt_descriptor.h": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_remote_gatt_service.cc": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom.h\"\n"]}
+    ],
+    "bluetooth/emulation/fake_remote_gatt_service.h": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom-forward.h\"\n"]}
+    ],
+    "bluetooth/gatt_service.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_local_gatt_service.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/connect_result_type_converter.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_device.h\"\n", "before": "#include \"mojo/public/cpp/bindings/type_converter.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/emulation/fake_bluetooth_mojom_traits.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_device.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/emulation/fake_bluetooth.mojom-shared.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/gatt_characteristic_mojom_traits.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_local_gatt_characteristic.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/gatt_characteristic_permissions.mojom-shared.h\"\n", "#include \"device/bluetooth/public/mojom/gatt_characteristic_properties.mojom-shared.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/gatt_result_type_converter.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_gatt_service.h\"\n", "before": "#include \"mojo/public/cpp/bindings/type_converter.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/device.mojom.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/gatt_service_mojom_traits.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_gatt_service.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/gatt_service_error_code.mojom-shared.h\"\n"]}
+    ],
+    "bluetooth/public/mojom/uuid_mojom_traits.h": [
+      {"after": "#include \"device/bluetooth/public/cpp/bluetooth_uuid.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/uuid.mojom-shared.h\"\n"]}
+    ],
+    "bluetooth/server_socket.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/socket.h": [
+      {"after": "#include \"device/bluetooth/bluetooth_socket.h\"\n", "before": "#include \"mojo/public/cpp/system/data_pipe.h\"\n", "n": 1, "add": ["#include \"device/bluetooth/public/mojom/adapter.mojom.h\"\n"]}
+    ],
+    "bluetooth/test/bluetooth_test_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/bluetooth_test_jni_headers/Fakes_jni.h\"\n"]}
+    ],
+    "fido/attestation_statement_formats.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/bytestring.h\"\n"]}
+    ],
+    "fido/authenticator_get_assertion_response.cc": [
+      {"after": "#include \"device/fido/authenticator_data.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ecdsa.h\"\n"]}
+    ],
+    "fido/cable/fido_tunnel_device.cc": [
+      {"after": "#include \"services/network/public/cpp/constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/client_security_state.mojom.h\"\n", "#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/digest.h\"\n", "#include \"third_party/boringssl/src/include/openssl/hkdf.h\"\n"]}
+    ],
+    "fido/cable/noise.cc": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/nid.h\"\n"]}
+    ],
+    "fido/cable/noise.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/base.h\"\n"]}
+    ],
+    "fido/cable/v2_authenticator.cc": [
+      {"after": "#include \"services/network/public/cpp/constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/client_security_state.mojom.h\"\n", "#include \"services/network/public/mojom/network_context.mojom.h\"\n", "#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/obj.h\"\n"]}
+    ],
+    "fido/cable/v2_discovery.cc": [
+      {"after": "#include \"device/fido/public/features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n"]}
+    ],
+    "fido/cable/v2_discovery.h": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom-forward.h\"\n"]}
+    ],
+    "fido/cable/v2_discovery_unittest.cc": [
+      {"after": "#include \"net/base/network_anonymization_key.h\"\n", "before": "#include \"services/network/test/test_network_context.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "fido/cable/v2_handshake.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/functional/overload.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/bytestring.h\"\n", "#include \"third_party/boringssl/src/include/openssl/digest.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ecdh.h\"\n", "#include \"third_party/boringssl/src/include/openssl/hkdf.h\"\n", "#include \"third_party/boringssl/src/include/openssl/hmac.h\"\n", "#include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "#include \"third_party/boringssl/src/include/openssl/obj.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/cable/v2_handshake.h": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/base.h\"\n"]}
+    ],
+    "fido/cable/v2_handshake_fuzzer.cc": [
+      {"after": "#include \"testing/libfuzzer/libfuzzer_base_wrappers.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/obj.h\"\n"]}
+    ],
+    "fido/cable/v2_handshake_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/obj.h\"\n"]}
+    ],
+    "fido/cable/v2_test_util.cc": [
+      {"after": "#include \"services/network/public/cpp/constants.h\"\n", "before": "#include \"services/network/test/test_network_context.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/client_security_state.mojom.h\"\n"]},
+      {"after": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n"]}
+    ],
+    "fido/cable/v2_test_util.h": [
+      {"after": "#include \"device/fido/network_context_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom-forward.h\"\n"]}
+    ],
+    "fido/cable/websocket_adapter.h": [
+      {"after": "#include \"net/base/isolation_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/websocket.mojom.h\"\n"]}
+    ],
+    "fido/credential_management.cc": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/hmac.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/cros/authenticator.cc": [
+      {"after": "#include \"chromeos/dbus/u2f/u2f_client.h\"\n", "before": "#include \"components/cbor/reader.h\"\n", "n": 1, "add": ["#include \"chromeos/dbus/u2f/u2f_interface.pb.h\"\n"]},
+      {"after": "#include \"device/fido/public/fido_transport_protocol.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cros_system_api/dbus/u2f/dbus-constants.h\"\n"]}
+    ],
+    "fido/cros/authenticator.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "#include \"dbus/bus.h\"\n", "n": 1, "add": ["#include \"chromeos/dbus/u2f/u2f_interface.pb.h\"\n"]}
+    ],
+    "fido/cros/credential_store.cc": [
+      {"after": "#include \"chromeos/dbus/u2f/u2f_client.h\"\n", "before": "#include \"components/device_event_log/device_event_log.h\"\n", "n": 1, "add": ["#include \"chromeos/dbus/u2f/u2f_interface.pb.h\"\n"]}
+    ],
+    "fido/cros/discovery.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "#include \"device/fido/cros/authenticator.h\"\n", "n": 1, "add": ["#include \"chromeos/dbus/tpm_manager/tpm_manager.pb.h\"\n"]}
+    ],
+    "fido/ctap_get_assertion_request.h": [
+      {"after": "#include \"device/fido/public/public_key_credential_descriptor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webauthn/authenticator.mojom-shared.h\"\n"]}
+    ],
+    "fido/ctap_make_credential_request.h": [
+      {"after": "#include \"device/fido/public/public_key_credential_user_entity.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webauthn/authenticator.mojom-shared.h\"\n"]}
+    ],
+    "fido/ctap_request_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/nid.h\"\n"]}
+    ],
+    "fido/enclave/attestation.cc": [
+      {"after": "#include \"device/fido/enclave/attestation_report.h\"\n", "before": "#include \"device/fido/public/fido_constants.h\"\n", "n": 1, "add": ["#include \"device/fido/enclave/proto/evidence.pb.h\"\n"]},
+      {"after": "#include \"net/cert/asn1_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/asn1.h\"\n", "#include \"third_party/boringssl/src/include/openssl/bn.h\"\n", "#include \"third_party/boringssl/src/include/openssl/bytestring.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ecdsa.h\"\n", "#include \"third_party/boringssl/src/include/openssl/evp.h\"\n", "#include \"third_party/boringssl/src/include/openssl/obj.h\"\n", "#include \"third_party/boringssl/src/include/openssl/rsa.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n", "#include \"third_party/boringssl/src/pki/input.h\"\n", "#include \"third_party/boringssl/src/pki/parse_values.h\"\n", "#include \"third_party/boringssl/src/pki/parser.h\"\n"]}
+    ],
+    "fido/enclave/enclave_authenticator.cc": [
+      {"after": "#include \"components/device_event_log/device_event_log.h\"\n", "before": "#include \"crypto/random.h\"\n", "n": 1, "add": ["#include \"components/sync/protocol/webauthn_credential_specifics.pb.h\"\n"]}
+    ],
+    "fido/enclave/enclave_authenticator.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"device/fido/authenticator_get_assertion_response.h\"\n", "n": 1, "add": ["#include \"components/sync/protocol/webauthn_credential_specifics.pb.h\"\n"]},
+      {"after": "#include \"services/data_decoder/public/cpp/data_decoder.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "fido/enclave/enclave_discovery.h": [
+      {"after": "#include \"device/fido/fido_discovery_base.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "fido/enclave/enclave_protocol_utils.cc": [
+      {"after": "#include \"components/device_event_log/device_event_log.h\"\n", "before": "#include \"crypto/hash.h\"\n", "n": 1, "add": ["#include \"components/sync/protocol/webauthn_credential_specifics.pb.h\"\n"]}
+    ],
+    "fido/enclave/enclave_protocol_utils_unittest.cc": [
+      {"after": "#include \"components/device_event_log/device_event_log.h\"\n", "before": "#include \"device/fido/ctap_make_credential_request.h\"\n", "n": 1, "add": ["#include \"components/sync/protocol/webauthn_credential_specifics.pb.h\"\n"]}
+    ],
+    "fido/enclave/enclave_websocket_client.cc": [
+      {"after": "#include \"services/network/public/cpp/constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/client_security_state.mojom.h\"\n", "#include \"services/network/public/mojom/network_context.mojom.h\"\n"]}
+    ],
+    "fido/enclave/enclave_websocket_client.h": [
+      {"after": "#include \"mojo/public/cpp/system/simple_watcher.h\"\n", "before": "#include \"url/gurl.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/websocket.mojom.h\"\n"]}
+    ],
+    "fido/enclave/transact.h": [
+      {"after": "#include \"device/fido/network_context_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/network_context.mojom-forward.h\"\n"]}
+    ],
+    "fido/enclave/types.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"components/sync/protocol/webauthn_credential_specifics.pb.h\"\n"]}
+    ],
+    "fido/fido_discovery_factory.h": [
+      {"after": "#include \"device/fido/public/fido_transport_protocol.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/usb_manager.mojom.h\"\n"]}
+    ],
+    "fido/hid/fake_hid_impl_for_testing.cc": [
+      {"after": "#include \"services/device/public/cpp/hid/hid_blocklist.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "fido/hid/fake_hid_impl_for_testing.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote_set.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "fido/hid/fido_hid_device.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "fido/hid/fido_hid_device_unittest.cc": [
+      {"after": "#include \"services/device/public/cpp/hid/hid_device_filter.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "fido/hid/fido_hid_discovery.h": [
+      {"after": "#include \"services/device/public/cpp/hid/hid_device_filter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom-forward.h\"\n"]}
+    ],
+    "fido/hid/fido_hid_discovery_unittest.cc": [
+      {"after": "#include \"device/fido/mock_fido_discovery_observer.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "fido/mac/get_assertion_operation.mm": [
+      {"after": "#include \"device/fido/public/public_key_credential_user_entity.h\"\n", "before": "#include \"ui/base/l10n/l10n_util.h\"\n", "n": 1, "add": ["#include \"device/fido/strings/grit/fido_strings.h\"\n"]}
+    ],
+    "fido/mac/make_credential_operation.mm": [
+      {"after": "#include \"device/fido/public_key.h\"\n", "before": "#include \"ui/base/l10n/l10n_util.h\"\n", "n": 1, "add": ["#include \"device/fido/strings/grit/fido_strings.h\"\n"]}
+    ],
+    "fido/mac/util.mm": [
+      {"after": "#include \"base/strings/string_number_conversions.h\"\n", "before": "#include \"components/cbor/writer.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "fido/make_credential_request_handler.cc": [
+      {"after": "#include \"device/fido/win/type_conversions.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/pin.cc": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/pin_internal.cc": [
+      {"after": "#include \"crypto/random.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/evp.h\"\n", "#include \"third_party/boringssl/src/include/openssl/hmac.h\"\n", "#include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/pin_internal.h": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/base.h\"\n"]}
+    ],
+    "fido/pin_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "#include \"third_party/boringssl/src/include/openssl/nid.h\"\n"]}
+    ],
+    "fido/prf_input.cc": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/digest.h\"\n", "#include \"third_party/boringssl/src/include/openssl/hmac.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/virtual_ctap2_device.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/aes.h\"\n", "#include \"third_party/boringssl/src/include/openssl/evp.h\"\n", "#include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "#include \"third_party/boringssl/src/include/openssl/rand.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "fido/virtual_fido_device.cc": [
+      {"after": "#include \"net/cert/x509_util.h\"\n", "before": "// #include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/bn.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec.h\"\n", "#include \"third_party/boringssl/src/include/openssl/ec_key.h\"\n", "#include \"third_party/boringssl/src/include/openssl/evp.h\"\n"]},
+      {"after": "// #include \"third_party/boringssl/src/include/openssl/mem.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/rsa.h\"\n"]}
+    ],
+    "fido/win/authenticator.cc": [
+      {"after": "#include \"device/fido/win/webauthn_api.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/fake_webauthn_api.cc": [
+      {"after": "#include \"device/fido/virtual_fido_device.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/fake_webauthn_api.h": [
+      {"after": "#include \"device/fido/win/webauthn_api.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/logging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/type_conversions.cc": [
+      {"after": "#include \"device/fido/public/fido_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/type_conversions.h": [
+      {"after": "#include \"device/fido/public/fido_types.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/mojom/webauthn/authenticator.mojom-shared.h\"\n", "#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/webauthn_api.cc": [
+      {"after": "#include \"device/fido/win/type_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "fido/win/webauthn_api.h": [
+      {"after": "#include \"device/fido/public/fido_constants.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/microsoft_webauthn/src/webauthn.h\"\n"]}
+    ],
+    "gamepad/abstract_haptic_gamepad.h": [
+      {"after": "#include \"device/gamepad/gamepad_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/abstract_haptic_gamepad_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/dualshock4_controller_unittest.cc": [
+      {"after": "#include \"device/gamepad/hid_writer.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/game_controller_data_fetcher_mac.mm": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad_features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/game_controller_gamepad_unittest.mm": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gameinput_data_fetcher.h": [
+      {"after": "#include \"device/gamepad/gamepad_data_fetcher.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gameinput_data_fetcher_unittest.cc": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"device/gamepad/public/mojom/gamepad_hardware_buffer.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gamepad_data_fetcher.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-forward.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "gamepad/gamepad_haptics_manager.h": [
+      {"after": "#include \"device/gamepad/gamepad_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gamepad_monitor.h": [
+      {"after": "#include \"device/gamepad/gamepad_export.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_receiver.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gamepad_platform_data_fetcher_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/jni_headers/GamepadList_jni.h\"\n"]}
+    ],
+    "gamepad/gamepad_platform_data_fetcher_mac.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-forward.h\"\n"]}
+    ],
+    "gamepad/gamepad_provider.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepads.h\"\n", "before": "#include \"device/gamepad/simulated_gamepad_inputs.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/gamepad_service.h": [
+      {"after": "#include \"device/gamepad/normalization.h\"\n", "before": "#include \"device/gamepad/simulated_gamepad_params.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-forward.h\"\n"]}
+    ],
+    "gamepad/hid_haptic_gamepad_unittest.cc": [
+      {"after": "#include \"device/gamepad/hid_writer.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/nintendo_controller.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "gamepad/nintendo_data_fetcher.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom-forward.h\"\n"]}
+    ],
+    "gamepad/nintendo_data_fetcher_unittest.cc": [
+      {"after": "#include \"services/device/public/cpp/test/mock_hid_service.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/hid.mojom.h\"\n"]}
+    ],
+    "gamepad/public/cpp/gamepad_mojom_traits.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"mojo/public/cpp/bindings/array_traits_span.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-shared.h\"\n"]}
+    ],
+    "gamepad/public/cpp/gamepad_mojom_traits_unittest.cc": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"mojo/public/cpp/test_support/test_utils.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/raw_input_data_fetcher_win.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"device/gamepad/raw_input_gamepad_device_win.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/simulated_gamepad_data_fetcher.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"device/gamepad/simulated_gamepad_inputs.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-forward.h\"\n"]}
+    ],
+    "gamepad/wgi_data_fetcher_win.h": [
+      {"after": "#include \"device/gamepad/gamepad_id_list.h\"\n", "before": "#include \"device/gamepad/wgi_gamepad_device.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/wgi_data_fetcher_win_unittest.cc": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "#include \"device/gamepad/public/mojom/gamepad_hardware_buffer.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "gamepad/xbox_controller_mac.h": [
+      {"after": "#include \"device/gamepad/gamepad_id_list.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom-forward.h\"\n"]}
+    ],
+    "gamepad/xbox_hid_controller_unittest.cc": [
+      {"after": "#include \"device/gamepad/hid_writer.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/ar_compositor_frame_sink.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/compositing/display_private.mojom.h\"\n", "#include \"services/viz/privileged/mojom/compositing/external_begin_frame_controller.mojom.h\"\n", "#include \"services/viz/privileged/mojom/compositing/frame_sink_manager.mojom.h\"\n", "#include \"services/viz/public/mojom/compositing/compositor_frame_sink.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore.h": [
+      {"after": "#include \"device/vr/public/mojom/anchor_id.h\"\n", "before": "#include \"device/vr/public/mojom/plane_id.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]},
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "#include \"ui/display/display.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_anchor_manager.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_device.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_frame_sink_client.h\"\n", "before": "#include \"ui/android/window_android.h\"\n", "n": 1, "add": ["#include \"ipc/constants.mojom-forward.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_gl.cc": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "#include \"device/vr/util/transform_utils.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"gpu/command_buffer/client/client_shared_image.h\"\n", "before": "#include \"ui/display/display.h\"\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_gl.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"device/vr/util/fps_meter.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_impl.cc": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "#include \"ui/display/display.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n", "#include \"third_party/skia/include/core/SkBitmap.h\"\n", "#include \"third_party/skia/include/core/SkCanvas.h\"\n", "#include \"third_party/skia/include/core/SkImage.h\"\n", "#include \"third_party/skia/include/core/SkPaint.h\"\n", "#include \"third_party/skia/include/core/SkPixmap.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_impl.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_plane_manager.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/android/arcore/arcore_sdk.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/arcore-android-sdk/src/libraries/include/arcore_c_api.h\"\n"]}
+    ],
+    "vr/android/arcore/vr_service_type_converters.h": [
+      {"after": "#include \"device/vr/android/arcore/arcore_sdk.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_device.cc": [
+      {"after": "#include \"device/vr/public/cpp/features.h\"\n", "before": "\n", "n": 1, "add": ["#include \"ipc/constants.mojom-forward.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_device.h": [
+      {"after": "#include \"device/vr/android/xr_java_coordinator.h\"\n", "before": "#include \"device/vr/vr_device_base.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom-forward.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_device_params.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cardboard/src/sdk/include/cardboard.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_image_transport.cc": [
+      {"after": "#include \"device/vr/android/xr_image_transport_base.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/cardboard/src/sdk/include/cardboard.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_image_transport.h": [
+      {"after": "#include \"device/vr/android/xr_image_transport_base.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-forward.h\"\n", "#include \"third_party/cardboard/src/sdk/include/cardboard.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_render_loop.cc": [
+      {"after": "#include \"device/vr/android/cardboard/cardboard_sdk.h\"\n", "before": "#include \"device/vr/util/transform_utils.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom-shared.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_render_loop.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"gpu/ipc/common/surface_handle.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/android/cardboard/cardboard_sdk_impl.cc": [
+      {"after": "#include \"device/vr/android/xr_activity_state_handler.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cardboard/src/sdk/include/cardboard.h\"\n"]}
+    ],
+    "vr/android/cardboard/scoped_cardboard_objects.h": [
+      {"after": "#include \"base/scoped_generic.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/cardboard/src/sdk/include/cardboard.h\"\n"]}
+    ],
+    "vr/android/mailbox_to_surface_bridge.h": [
+      {"after": "#include \"gpu/command_buffer/common/shared_image_usage.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/gpu/ganesh/GrTypes.h\"\n"]}
+    ],
+    "vr/create_anchor_request.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/hit_test_subscription_data.h": [
+      {"after": "#include \"device/vr/public/mojom/hit_test_subscription_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_anchor_manager_android.cc": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_anchor_manager_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_space_based_anchor_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_depth_sensor_android.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_depth_sensor_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_view_configuration.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_graphics_binding_open_gles.cc": [
+      {"after": "#include \"gpu/ipc/common/android/android_hardware_buffer_utils.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_graphics_binding_open_gles.h": [
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_hit_test_manager_android.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_hit_test_manager_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_hit_test_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_light_estimator_android.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_light_estimator_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_light_estimator.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_mesh_manager_android.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_mesh_manager_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_mesh_manager.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_plane_manager_android.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_plane_manager_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_plane_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_scene_understanding_manager_android.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_scene_understanding_manager_android.h": [
+      {"after": "#include \"device/vr/openxr/openxr_scene_understanding_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/android/openxr_unbounded_space_provider_android.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"third_party/openxr/dev/xr_android.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]}
+    ],
+    "vr/openxr/fb/openxr_frame_rate_handler_fb.h": [
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/fb/openxr_frame_rate_handler_fb_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/fb/openxr_hand_tracker_fb.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/fb/openxr_hand_tracker_fb.h": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_handler_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-forward.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_graphics_binding_vulkan.cc": [
+      {"after": "#include \"gpu/ipc/common/surface_handle.h\"\n", "before": "#include \"ui/gfx/buffer_types.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_graphics_binding_vulkan_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_platform_helper_linux.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_platform.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_platform_helper_linux.h": [
+      {"after": "#include \"device/vr/openxr/openxr_platform_helper.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom-forward.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_vulkan_context.cc": [
+      {"after": "#include \"gpu/vulkan/vulkan_function_pointers.h\"\n", "before": "#include \"ui/gfx/extension_set.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/linux/openxr_vulkan_context.h": [
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_anchor_manager_msft.cc": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_anchor_manager_msft.h": [
+      {"after": "#include \"device/vr/openxr/openxr_space_based_anchor_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_plane_manager_msft.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_plane_manager_msft.h": [
+      {"after": "#include \"device/vr/openxr/openxr_plane_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_bounds_msft.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_msft.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_msft.h": [
+      {"after": "#include \"device/vr/openxr/msft/openxr_scene_plane_msft.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_object_msft.h": [
+      {"after": "#include \"base/types/strong_alias.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_observer_msft.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_observer_msft.h": [
+      {"after": "#include \"device/vr/openxr/msft/openxr_scene_bounds_msft.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_plane_msft.h": [
+      {"after": "#include \"device/vr/openxr/msft/openxr_scene_object_msft.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_understanding_manager_msft.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_scene_understanding_manager_msft.h": [
+      {"after": "#include \"device/vr/openxr/openxr_scene_understanding_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_unbounded_space_provider_msft.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/msft/openxr_unbounded_space_provider_msft.h": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_handler_factory.h\"\n", "before": "namespace device {\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_anchor_manager.cc": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_anchor_manager.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_api_wrapper.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"gpu/GLES2/gl2extchromium.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "#include \"ui/gfx/geometry/point3_f.h\"\n", "n": 1, "add": ["#include \"third_party/blink/public/common/features_generated.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "vr/openxr/openxr_api_wrapper.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_api_wrapper_unittest.cc": [
+      {"after": "#include \"device/vr/openxr/test/openxr_test_helper.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_composition_layer.h": [
+      {"after": "#include \"device/vr/openxr/openxr_swapchain_info.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_controller.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "#include \"device/vr/util/xr_standard_gamepad_builder.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n"]},
+      {"after": "#include \"device/vr/util/xr_standard_gamepad_builder.h\"\n", "before": "#include \"ui/gfx/geometry/decomposed_transform.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_controller.h": [
+      {"after": "#include \"device/vr/openxr/openxr_path_helper.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_debug_util.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_debug_util.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_depth_sensor.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_device.cc": [
+      {"after": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/blink/public/common/features_generated.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_device.h": [
+      {"after": "#include \"device/vr/openxr/openxr_platform_helper.h\"\n", "before": "#include \"device/vr/vr_device_base.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_extension_handle.h": [
+      {"after": "#include \"base/scoped_generic.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_extension_handler_factory.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_extension_handler_factory.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-forward.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_extension_helper.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_extension_helper.h": [
+      {"after": "#include \"device/vr/openxr/openxr_unbounded_space_provider.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_graphics_binding.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "#include \"ui/gl/gl_bindings.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_graphics_binding.h": [
+      {"after": "#include \"device/vr/openxr/openxr_swapchain_info.h\"\n", "before": "#include \"mojo/public/cpp/platform/platform_handle.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/platform/platform_handle.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_tracker.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_tracker.h": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom-forward.h\"\n", "#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom-forward.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]},
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_tracker_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_utils.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_utils.h": [
+      {"after": "\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n"]},
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hand_utils_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hit_test_manager.cc": [
+      {"after": "#include \"device/vr/public/mojom/hit_test_subscription_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_hit_test_manager.h": [
+      {"after": "#include \"device/vr/hit_test_subscription_data.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_input_helper.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_input_helper.h": [
+      {"after": "#include \"device/vr/openxr/openxr_interaction_profiles.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-forward.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_interaction_profiles.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_interaction_profile_paths.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_interaction_profiles.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepad.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_layers.h": [
+      {"after": "#include \"base/memory/raw_ptr_exclusion.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_light_estimator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_mesh_manager.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_path_helper.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_path_helper.h": [
+      {"after": "#include \"device/vr/openxr/openxr_interaction_profiles.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/openxr_interaction_profile_type.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_plane_manager.h": [
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_platform.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr_platform.h\"\n"]}
+    ],
+    "vr/openxr/openxr_platform_helper.h": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_helper.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom-forward.h\"\n"]},
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "#include \"mojo/public/cpp/system/message_pipe.h\"\n", "n": 1, "add": ["#include \"ipc/constants.mojom-forward.h\"\n"]}
+    ],
+    "vr/openxr/openxr_render_loop.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "vr/openxr/openxr_render_loop.h": [
+      {"after": "#include \"device/vr/public/mojom/anchor_id.h\"\n", "before": "#include \"device/vr/public/mojom/layer_id.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]},
+      {"after": "#include \"device/vr/public/mojom/plane_id.h\"\n", "before": "#include \"device/vr/util/fps_meter.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/platform/platform_handle.h\"\n", "before": "#include \"ui/gfx/geometry/rect_f.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_scene_understanding_manager.h": [
+      {"after": "#include \"device/vr/openxr/openxr_plane_manager.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_space_based_anchor_manager.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_anchor_manager.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_anchor_manager.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_capability_configuration_base.cc": [
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_capability_configuration_base.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_framework_manager.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_framework_manager.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_hit_test_manager.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_plane_manager.h": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_spatial_utils.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_stage_bounds_provider_basic.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"device/vr/util/stage_utils.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]}
+    ],
+    "vr/openxr/openxr_stage_bounds_provider_basic.h": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_handler_factory.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_unbounded_space_provider.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_unbounded_space_provider.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_util.cc": [
+      {"after": "#include \"base/numerics/angle_conversions.h\"\n", "before": "#include \"ui/gfx/geometry/quaternion.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/openxr/openxr_util.h": [
+      {"after": "#include \"device/vr/public/mojom/pose.h\"\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-forward.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom-forward.h\"\n"]},
+      {"after": "#include \"third_party/openxr/dev/xr_android.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_view_configuration.cc": [
+      {"after": "#include \"device/vr/public/cpp/switches.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_view_configuration.h": [
+      {"after": "\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-forward.h\"\n"]},
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_view_configuration_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "#include \"ui/gfx/geometry/size.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/openxr_visibility_mask_handler.cc": [
+      {"after": "#include \"device/vr/public/mojom/visibility_mask_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr_platform.h\"\n"]}
+    ],
+    "vr/openxr/openxr_visibility_mask_handler.h": [
+      {"after": "#include \"device/vr/public/mojom/visibility_mask_id.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/scoped_openxr_object.h": [
+      {"after": "#include \"device/vr/openxr/openxr_extension_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/test/fake_openxr_impl_api.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/test/openxr_mock_helper.cc": [
+      {"after": "#include \"device/vr/openxr/test/openxr_test_helper.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/test/xr_test_hook.test-mojom.h\"\n"]}
+    ],
+    "vr/openxr/test/openxr_test_helper.cc": [
+      {"after": "#include \"device/vr/openxr/openxr_view_configuration.h\"\n", "before": "#include \"device/vr/test/webxr_test_gamepad_utils.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/sync_call_restrictions.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/src/common/hex_and_handles.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "vr/openxr/test/openxr_test_helper.h": [
+      {"after": "#include \"device/vr/openxr/openxr_view_configuration.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/test/xr_test_hook.test-mojom.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/container/flat_hash_map.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "vr/openxr/test/openxr_trampoline.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr_loader_negotiation.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_graphics_binding_d3d11.cc": [
+      {"after": "#include \"gpu/command_buffer/common/shared_image_usage.h\"\n", "before": "#include \"ui/gfx/gpu_fence.h\"\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_graphics_binding_d3d11.h": [
+      {"after": "#include \"device/vr/windows/d3d11_texture_helper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_instance_wrapper.cc": [
+      {"after": "#include \"base/memory/singleton.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_instance_wrapper.h": [
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_platform_helper_windows.cc": [
+      {"after": "#include \"device/vr/openxr/windows/openxr_instance_wrapper.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/openxr/windows/openxr_platform_helper_windows.h": [
+      {"after": "#include \"device/vr/vr_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/openxr/src/include/openxr/openxr.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device.cc": [
+      {"after": "#include \"services/device/public/cpp/generic_sensor/sensor_reading_shared_buffer_reader.h\"\n", "before": "#include \"ui/display/display.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"device/vr/vr_device_base.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]},
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "#include \"ui/gfx/geometry/quaternion.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device_provider.cc": [
+      {"after": "#include \"device/vr/orientation/orientation_device.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device_provider.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/remote.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device_provider_unittest.cc": [
+      {"after": "#include \"services/device/public/cpp/generic_sensor/sensor_traits.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor.mojom.h\"\n", "#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_device_unittest.cc": [
+      {"after": "#include \"services/device/public/cpp/generic_sensor/sensor_traits.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor.mojom.h\"\n", "#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/orientation/orientation_session.h": [
+      {"after": "#include \"base/memory/weak_ptr.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_associated_receiver.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/public/cpp/features.cc": [
+      {"after": "#include \"base/feature_list.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/buildflags/buildflags.h\"\n"]},
+      {"after": "#include \"base/android/jni_android.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"device/vr/public/jni_headers/XrFeatureStatus_jni.h\"\n"]}
+    ],
+    "vr/public/cpp/features.h": [
+      {"after": "#include \"base/feature_list.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/buildflags/buildflags.h\"\n"]}
+    ],
+    "vr/public/cpp/session_mode.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/public/cpp/vr_device_provider.h": [
+      {"after": "#include \"device/vr/public/cpp/xr_frame_sink_client.h\"\n", "before": "#include \"mojo/public/cpp/bindings/pending_remote.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]}
+    ],
+    "vr/public/cpp/xr_frame_sink_client.h": [
+      {"after": "#include \"services/network/public/cpp/renderer_process_id.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/viz/privileged/mojom/compositing/frame_sink_manager.mojom-forward.h\"\n"]}
+    ],
+    "vr/public/cpp/xr_session_feature_set.h": [
+      {"after": "#include \"base/containers/enum_set.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/xr_session.mojom-shared.h\"\n"]}
+    ],
+    "vr/public/mojom/test/controller_frame_data.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"ui/gfx/geometry/transform.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom-shared.h\"\n", "#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n"]}
+    ],
+    "vr/public/mojom/test/layer_data.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "vr/public/mojom/test/view_data.h": [
+      {"after": "\n", "before": "#include \"ui/gfx/geometry/rect.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-shared.h\"\n", "#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "vr/public/mojom/test/xr_test_hook_mojom_traits.h": [
+      {"after": "\n", "before": "#include \"device/vr/public/mojom/test/controller_frame_data.h\"\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]},
+      {"after": "#include \"device/vr/public/mojom/test/view_data.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/test/xr_test_hook.test-mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_hand_tracking_data.mojom.h\"\n"]},
+      {"after": "#include \"skia/public/mojom/skcolor_mojom_traits.h\"\n", "before": "#include \"ui/gfx/geometry/mojom/geometry_mojom_traits.h\"\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ],
+    "vr/public/mojom/vr_service_mojom_traits.h": [
+      {"after": "#include \"device/vr/public/mojom/visibility_mask_id.h\"\n", "before": "#include \"mojo/public/cpp/bindings/struct_traits.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom-shared.h\"\n"]}
+    ],
+    "vr/test/fake_orientation_provider.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor.mojom.h\"\n"]}
+    ],
+    "vr/test/fake_orientation_provider.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor.mojom.h\"\n"]}
+    ],
+    "vr/test/fake_sensor_provider.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor.mojom.h\"\n", "#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/test/fake_sensor_provider.h": [
+      {"after": "#include \"mojo/public/cpp/bindings/receiver.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/device/public/mojom/sensor_provider.mojom.h\"\n"]}
+    ],
+    "vr/test/fake_vr_service_client.h": [
+      {"after": "\n", "before": "#include \"device/vr/vr_export.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_device.mojom.h\"\n"]}
+    ],
+    "vr/test/webxr_test_gamepad_utils.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/gamepad/public/mojom/gamepad.mojom.h\"\n"]}
+    ],
+    "vr/util/gamepad_builder.h": [
+      {"after": "#include \"device/gamepad/public/cpp/gamepads.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]}
+    ],
+    "vr/util/transform_utils.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/util/xr_standard_gamepad_builder.h": [
+      {"after": "#include \"base/component_export.h\"\n", "before": "#include \"device/vr/util/gamepad_builder.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n"]}
+    ],
+    "vr/vr_device_base.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"mojo/public/cpp/bindings/associated_remote.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/isolated_xr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/vr_service.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_device.mojom.h\"\n", "#include \"device/vr/public/mojom/xr_session.mojom.h\"\n"]}
+    ],
+    "vr/vr_device_base_unittest.cc": [
+      {"after": "#include \"device/vr/public/cpp/xr_session_feature_set.h\"\n", "before": "#include \"device/vr/test/fake_vr_device.h\"\n", "n": 1, "add": ["#include \"device/vr/public/mojom/vr_service.mojom.h\"\n"]}
+    ],
+    "vr/vr_gl_util.h": [
+      {"after": "#include \"device/vr/gl_bindings.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/skia/include/core/SkColor.h\"\n"]}
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "rlz",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "lib/financial_ping.cc": [
+      {"after": "#include \"services/network/public/cpp/simple_url_loader.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_response_head.mojom.h\"\n"]}
+    ],
+    "lib/rlz_lib.cc": [
+      {"after": "#include \"rlz/lib/string_utils.h\"\n", "before": "\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]}
+    ],
+    "lib/rlz_lib_test.cc": [
+      {"after": "#include \"services/network/public/cpp/weak_wrapper_shared_url_loader_factory.h\"\n", "before": "#include \"services/network/test/test_url_loader_factory.h\"\n", "n": 1, "add": ["#include \"services/network/public/mojom/url_loader_factory.mojom.h\"\n"]}
+    ]
+  }
+}
