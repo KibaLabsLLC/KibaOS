@@ -218,12 +218,14 @@ clang_complete() {
 
 # Chromium reads its clang toolchain from //third_party/llvm-build/Release+Asserts
 # (clang_base_path's default): bin/ holds the tools, cr_build_revision the
-# revision //tools/clang/scripts/update.py expects, and compiler-rt lives in a
-# per-target directory, lib/clang/<version>/lib/<triple>/libclang_rt.builtins.a.
-# Arch packages the binaries and a flat compiler-rt (lib/linux/...) but no
-# revision file, and the per-target archive is what the Rust standard library
-# links against: without it obj/build/rust/libcxx_cppdeps_lib.a fails with
-# "libclang_rt.builtins.a ... missing and no known rule to make it".
+# revision //tools/clang/scripts/update.py expects, and lib/clang/<version>
+# holds the builtin headers and the runtimes, compiler-rt in a per-target
+# directory, lib/<triple>/libclang_rt.builtins.a.
+# Arch packages the binaries, the builtin headers and a flat compiler-rt
+# (lib/linux/...) but no revision file. Each piece left out fails the build
+# late in Ninja: the archive is what the Rust standard library links
+# (obj/build/rust/libcxx_cppdeps_lib.a), and the headers are what a compilable
+# builtin like stddef.h is (gen/v8/metagen/layouts.json).
 CLANG_BASE_REL="third_party/llvm-build/Release+Asserts"
 
 clang_triple() {
@@ -270,11 +272,58 @@ tree_clang_revision() {
   printf '%s-%s\n' "${revision}" "${sub}"
 }
 
+# Fill in lib/clang/<version> of the tree's toolchain from the installed
+# clang's resource directory: the builtin headers (the include directory GN
+# passes to the compiler) and compiler-rt. Arch's compiler-rt is flat,
+# lib/linux/libclang_rt.<name>-<arch>.a, so the architecture suffix is dropped
+# while copying to the per-target layout Chromium asks for.
+install_clang_runtimes() {
+  local resource_dir="$1"
+  local dest="$2"
+  local triple="$3"
+  local arch="${triple%%-*}"
+  local libdir="${dest}/lib/${triple}"
+  local src name stem ext
+
+  if [[ -d "${resource_dir}/include" ]]; then
+    # rm first so headers from an older clang do not linger beside new ones.
+    rm -rf "${dest}/include" || return 1
+    mkdir -p "${dest}" || return 1
+    cp -R "${resource_dir}/include" "${dest}/include" || return 1
+  else
+    warn "clang: ${resource_dir} has no builtin include directory"
+    return 1
+  fi
+
+  mkdir -p "${libdir}" || return 1
+  if [[ -d "${resource_dir}/lib/${triple}" ]]; then
+    cp -R "${resource_dir}/lib/${triple}/." "${libdir}/" || return 1
+  fi
+  for src in "${resource_dir}"/lib/linux/libclang_rt.*-"${arch}".a \
+    "${resource_dir}"/lib/linux/clang_rt.*-"${arch}".o; do
+    [[ -f "${src}" ]] || continue
+    name="$(basename "${src}")"
+    ext="${name##*.}"
+    stem="${name%.*}"
+    name="${stem%-"${arch}"}.${ext}"
+    # Copies, not links: the same checkout is configured again inside the
+    # Arch build root, whose /usr may carry a different clang than the one
+    # that bootstrapped it. rm first so a link left by an older run is
+    # replaced instead of written through.
+    rm -f "${libdir}/${name}" || return 1
+    cp "${src}" "${libdir}/${name}" || return 1
+  done
+  [[ -f "${libdir}/libclang_rt.builtins.a" ]] || {
+    warn "clang: ${resource_dir} has no compiler-rt builtins archive for ${triple}"
+    return 1
+  }
+}
+
 # Complete that toolchain directory so the installed clang works from it.
 provide_clang_toolchain() {
   local src="$1"
   local base="${src}/${CLANG_BASE_REL}"
-  local triple version revision resource_dir archive candidate arch
+  local triple version revision resource_dir
 
   triple="$(clang_triple)" || {
     warn "clang: no Chromium runtime triple for $(uname -m)"
@@ -293,28 +342,8 @@ provide_clang_toolchain() {
     return 1
   }
 
-  archive="${base}/lib/clang/${version}/lib/${triple}/libclang_rt.builtins.a"
-  arch="${triple%%-*}"
-  for candidate in \
-    "${resource_dir}/lib/${triple}/libclang_rt.builtins.a" \
-    "${resource_dir}/lib/linux/libclang_rt.builtins-${arch}.a"; do
-    [[ -f "${candidate}" ]] || continue
-    if cmp -s "${candidate}" "${archive}"; then
-      break
-    fi
-    mkdir -p "$(dirname "${archive}")" || return 1
-    # The archive is copied, not linked: the same checkout is configured
-    # again inside the Arch build root, whose /usr may carry a different
-    # clang than the one that bootstrapped it. rm first so a link left by
-    # an older run is replaced instead of written through.
-    rm -f "${archive}" || return 1
-    cp "${candidate}" "${archive}" || return 1
-    break
-  done
-  [[ -f "${archive}" ]] || {
-    warn "clang: ${resource_dir} has no compiler-rt builtins archive for ${triple}"
-    return 1
-  }
+  install_clang_runtimes "${resource_dir}" "${base}/lib/clang/${version}" \
+    "${triple}" || return 1
 
   mkdir -p "${base}" || return 1
   printf '%s\n' "${revision}" >"${base}/cr_build_revision" || return 1
