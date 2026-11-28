@@ -9,7 +9,15 @@
 2. **depot_tools + Lumen bootstrap** — `ci/bootstrap-chromium-src.sh` clones
    `KibaLabsLLC/Lumen` (`KIBAOS_LUMEN_REPOSITORY`, default branch `main`) into
    the build tree, resolves its `DEPS` with `ci/resolve-deps.py`, and verifies
-   the patch series will apply.
+   the patch series will apply. `ci/system-tools.sh` links the build root's
+   own `gn`, `ninja` and `clang`/`llvm`/`lld` packages into the checkout and
+   has the resolver skip Chromium's prebuilt copies, so only tools pacman does
+   not provide are downloaded; `KIBAOS_SYSTEM_TOOLS=0` keeps the downloads.
+   `ci/restore-truncated-sources.py --restore-dir third_party/abseil-cpp`
+   puts the pinned `third_party/abseil-cpp` back when a checkout has lost or
+   emptied part of it (which reads as undefined `ABSL_*` macros), deletions
+   included, and re-applies the series' abseil hunks;
+   `KIBAOS_RESTORE_ABSEIL=0` leaves it alone.
 3. **Patch series** — the patches in `patches/SERIES` are applied to the
    Lumen tree. `ci/verify-patch-series.sh` and `ci/refresh-bootstrap-series.sh`
    manage this; the series is the integration contract between the two repos.

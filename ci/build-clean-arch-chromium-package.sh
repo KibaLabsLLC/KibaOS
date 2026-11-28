@@ -133,6 +133,10 @@ arch-chroot "${ARCHROOT}" /usr/bin/runuser -u aurabuild -- \
         # The experimental Clang modules build fails on the pruned abseil
         # target graph, so compile textually.
         use_clang_modules = false
+
+        # Tools the bootstrap took from pacman instead of downloading; the
+        # file is empty or absent when the Chromium toolchain is in use.
+        $(cat /build/chromium-src/out/.kibaos/system-tools.gn 2>/dev/null)
       "
     fi
     if grep -Eq "^[[:space:]]*google_(api_key|default_client_id|default_client_secret)[[:space:]]*=[[:space:]]*\"[^\"]+\"" /build/chromium-clean-out/Ash/args.gn; then

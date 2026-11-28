@@ -100,6 +100,7 @@ makedepends=(
     'nodejs'
     'patch'
     'clang'
+    'llvm'
     'lld'
     'gn'
     'python-pip'
@@ -249,18 +250,40 @@ build() {
         return
     fi
 
+    local ci_dir="${KIBAOS_CI_DIR:-${startdir}/../ci}"
+
+    # abseil-cpp is vendored in the tree's git and every TU includes it, so a
+    # header that was emptied or lost there fails as undefined ABSL_* macros
+    # far from the cause. Put the pinned copy back before ninja starts; its
+    # series hunks are re-applied with it.
+    if [ -f "${ci_dir}/restore-truncated-sources.py" ]; then
+        python3 "${ci_dir}/restore-truncated-sources.py" \
+            --tree "${chrome_src}" --restore-dir third_party/abseil-cpp \
+            --apply ||
+            echo "WARNING: abseil-cpp damage could not be repaired (see ==> source-check: above); ninja will fail on its headers" >&2
+    fi
+
     # A dependency file truncated by a bad copy surfaces much later as a
     # compile error about a declaration that is not there (abseil's
     # cycleclock.h lost its contents and the first TU to need it failed), so
     # check every checkout, nested DEPS deps included, before ninja starts.
     # Only files that still exist and are modified outside chrome/ and the
     # patch series are restored; the pruned browser subtree never comes back.
-    local ci_dir="${KIBAOS_CI_DIR:-${startdir}/../ci}"
     if [ -f "${ci_dir}/restore-truncated-sources.py" ]; then
         python3 "${ci_dir}/restore-truncated-sources.py" \
             --tree "${chrome_src}" --apply --quiet-chrome ||
             echo "WARNING: the source check above found damage it could not repair (see its ==> source-check: lines); ninja will fail on it later" >&2
     fi
+
+    # GN arguments for the tools ci/system-tools.sh took from pacman instead of
+    # Chromium's prebuilt downloads. They are written beside the checkout's own
+    # output directory, which Chromium's .gitignore covers, and are empty when
+    # the bootstrap kept the downloaded toolchain.
+    _system_tool_gn_args() {
+        if [ -r "${chrome_src}/out/.kibaos/system-tools.gn" ]; then
+            cat "${chrome_src}/out/.kibaos/system-tools.gn"
+        fi
+    }
 
     # Generate GN args without Google credentials. KibaOS uses local accounts
     # for the public release, while the runtime config remains an optional
@@ -332,6 +355,8 @@ build() {
         # was consumed as a module instead of being preprocessed. This tree is
         # pruned and patched, so compile textually as the pre-modules tree did.
         use_clang_modules = false
+
+        $(_system_tool_gn_args)
     "
     }
 

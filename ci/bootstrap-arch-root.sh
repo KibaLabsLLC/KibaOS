@@ -57,6 +57,8 @@ PACKAGES=(
   pkgconf
   ninja
   clang
+  # llvm-ar, llvm-nm and llvm-strip come from llvm, not from clang.
+  llvm
   lld
   gn
   bison

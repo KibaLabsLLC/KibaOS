@@ -32,6 +32,8 @@ SRC_DIR="${TARGET}/src"
 
 JOBS="${KIBAOS_BOOTSTRAP_JOBS:-8}"
 LEAN_SYNC="${KIBAOS_LEAN_SYNC:-1}"
+SYSTEM_TOOLS="${KIBAOS_SYSTEM_TOOLS:-1}"
+RESTORE_ABSEIL="${KIBAOS_RESTORE_ABSEIL:-1}"
 
 mode="plan"
 verify_series=0
@@ -62,10 +64,23 @@ Environment:
   KIBAOS_BOOTSTRAP_TARGET=/mnt/build/kibaos-work/lumen-bootstrap
   KIBAOS_BOOTSTRAP_JOBS=8
   KIBAOS_LEAN_SYNC=1
+  KIBAOS_SYSTEM_TOOLS=1
+  KIBAOS_RESTORE_ABSEIL=1
 
 KIBAOS_LEAN_SYNC:
   1 = Skip optional dependencies when supported by DEPS.
   0 = Perform a full dependency sync.
+
+KIBAOS_SYSTEM_TOOLS:
+  1 = Use pacman's gn, ninja and clang/llvm/lld instead of the prebuilt
+      binaries Chromium's DEPS downloads (ci/system-tools.sh).
+  0 = Download and use Chromium's toolchains.
+
+KIBAOS_RESTORE_ABSEIL:
+  1 = Put the pinned third_party/abseil-cpp back when the checkout has
+      lost or emptied part of it (ci/restore-truncated-sources.py
+      --restore-dir).
+  0 = Leave the checkout's abseil-cpp as it is.
 
 No revision is pinned. Every run fetches the latest branch HEAD.
 
@@ -207,6 +222,11 @@ echo "  target:      ${TARGET}"
 echo "  source:      ${SRC_DIR}"
 echo "  jobs:        ${JOBS}"
 echo "  lean sync:   ${lean_note}"
+if [[ "${SYSTEM_TOOLS}" == "1" ]]; then
+  echo "  tools:       pacman packages where the build root has them"
+else
+  echo "  tools:       Chromium's downloaded toolchains"
+fi
 echo "  revision:    latest branch HEAD"
 echo
 echo "  steps:"
@@ -292,6 +312,45 @@ if [[ ! -f "${SRC_DIR}/DEPS" ]]; then
 fi
 
 echo "==> Lumen checked out at ${ACTUAL_REVISION}"
+
+# abseil-cpp is vendored in Lumen's git tree and nearly every TU includes it.
+# A file that was emptied or lost there does not report itself as missing: the
+# header includes fine and declares nothing, so the first abseil TU fails on
+# ABSL_NAMESPACE_BEGIN with no clue where it went. Put the pinned copy back
+# before the series is applied on top of it.
+if [[ "${RESTORE_ABSEIL}" == "1" ]]; then
+  ABSEIL_RESTORE="${SCRIPT_DIR}/restore-truncated-sources.py"
+
+  if [[ -f "${ABSEIL_RESTORE}" ]]; then
+    echo "==> Checking the vendored abseil-cpp"
+    python3 "${ABSEIL_RESTORE}" --tree "${SRC_DIR}" \
+      --restore-dir third_party/abseil-cpp --apply ||
+      echo "warning: abseil-cpp could not be restored; the build will fail on its headers" >&2
+  else
+    echo "warning: ${ABSEIL_RESTORE} is missing; abseil-cpp damage stays as it is" >&2
+  fi
+fi
+
+# Use the build root's own GN, Ninja and Clang instead of the prebuilt copies
+# Chromium's DEPS downloads. The helper links them into the checkout and names
+# the DEPS entries to leave out; it falls back to the downloads, one tool at a
+# time, when the packages are not there.
+if [[ "${SYSTEM_TOOLS}" == "1" ]]; then
+  echo "==> Preferring Arch packages for build tools"
+
+  SYSTEM_TOOLS_SCRIPT="${SCRIPT_DIR}/system-tools.sh"
+
+  if [[ -x "${SYSTEM_TOOLS_SCRIPT}" ]]; then
+    "${SYSTEM_TOOLS_SCRIPT}" --link "${SRC_DIR}" ||
+      echo "warning: system tool setup failed; Chromium's downloads stay in use" >&2
+
+    while IFS= read -r resolver_arg; do
+      resolver_args+=("${resolver_arg}")
+    done < <("${SYSTEM_TOOLS_SCRIPT}" --resolver-args "${SRC_DIR}")
+  else
+    echo "warning: ${SYSTEM_TOOLS_SCRIPT} is missing; Chromium's toolchains stay in use" >&2
+  fi
+fi
 
 # Warn about lean-sync variables this DEPS revision does not define.
 check_lean_vars() {

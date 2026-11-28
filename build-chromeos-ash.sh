@@ -169,6 +169,10 @@ build_chrome() {
         # Chromium's experimental Clang modules build fails on the pruned
         # abseil target graph, so compile textually.
         use_clang_modules = false
+
+        # Tools taken from pacman by ci/system-tools.sh; empty when Chromium's
+        # downloaded toolchain is in use.
+        $(cat "${src_dir}/out/.kibaos/system-tools.gn" 2>/dev/null)
     " 2>&1 | tee -a "${BUILD_LOG}"
 
     # Build chrome binary and setuid sandbox helper.

@@ -29,7 +29,7 @@ cd "$CHROME_SRC"
 
 case "$MODE" in
   gn)
-    "$GN" gen "$OUT_DIR" --args='target_os = "chromeos"
+    gn_args='target_os = "chromeos"
 is_debug = false
 is_component_build = false
 is_official_build = false
@@ -38,6 +38,12 @@ use_ozone = true
 ozone_platform_wayland = true
 use_system_minigbm = true
 enable_rust = true'
+    # Tools the bootstrap took from pacman need their own arguments; absent on
+    # a checkout that uses Chromium's downloaded toolchain.
+    if [[ -r "$CHROME_SRC/out/.kibaos/system-tools.gn" ]]; then
+      gn_args+=$'\n'"$(<"$CHROME_SRC/out/.kibaos/system-tools.gn")"
+    fi
+    "$GN" gen "$OUT_DIR" --args="$gn_args"
     ;;
   targeted)
     read -r -a targets <<<"${KIBAOS_TARGETED_NINJA_TARGETS:-chromeos/dbus/power:power chromeos/ash/components/disks:disks ui/ozone/platform/wayland:wayland content/browser:browser ash}"

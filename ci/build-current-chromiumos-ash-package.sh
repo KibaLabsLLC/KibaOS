@@ -20,6 +20,17 @@ if [[ "$(id -u)" != "$(stat -c '%u' "${CHROME_SRC}")" ]]; then
   exit 2
 fi
 
+# abseil-cpp lives in the tree's git and every TU includes it: emptied or
+# lost files there fail as undefined ABSL_* names much later. Put the pinned
+# copy back first; the refresh below then re-applies the series on top.
+if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
+  python3 "${SCRIPT_DIR}/restore-truncated-sources.py" --tree "${CHROME_SRC}" \
+    --restore-dir third_party/abseil-cpp --apply || {
+    echo "error: could not restore ${CHROME_SRC}/third_party/abseil-cpp" >&2
+    exit 1
+  }
+fi
+
 CHROME_SRC="${CHROME_SRC}" KIBAOS_WORKDIR="${WORKDIR}" \
   "${SCRIPT_DIR}/refresh-bootstrap-series.sh"
 

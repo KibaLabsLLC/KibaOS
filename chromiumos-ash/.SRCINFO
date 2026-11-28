@@ -15,6 +15,7 @@ pkgbase = chromiumos-ash
 	makedepends = nodejs
 	makedepends = patch
 	makedepends = clang
+	makedepends = llvm
 	makedepends = lld
 	makedepends = gn
 	makedepends = python-pip

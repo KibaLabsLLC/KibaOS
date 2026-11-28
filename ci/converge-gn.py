@@ -71,8 +71,16 @@ def main():
     args = ap.parse_args()
 
     root = os.path.abspath(args.lumen)
+    gn_args = GN_ARGS
+    # A bootstrap that used pacman's toolchain instead of Chromium's downloads
+    # writes its gn arguments here (ci/system-tools.sh); the file is absent on
+    # a checkout synced with the downloaded toolchains.
+    system_tools = os.path.join(root, "out", ".kibaos", "system-tools.gn")
+    if os.path.isfile(system_tools):
+        with open(system_tools, encoding="utf-8") as handle:
+            gn_args += handle.read()
     cmd = [os.path.abspath(args.gn), "gen", args.out_dir,
-           "--root-target=//lumen", "--args=" + GN_ARGS]
+           "--root-target=//lumen", "--args=" + gn_args]
 
     final_text = ""
     for i in range(1, args.max_iterations + 1):
