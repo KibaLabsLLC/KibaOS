@@ -443,8 +443,10 @@ echo "==> Restoring the abseil includes the source import dropped"
 
 if ! python3 "${SCRIPT_DIR}/restore-abseil-includes.py" \
     --tree "${SRC_DIR}" --apply; then
-  echo "warning: the abseil includes could not be restored (see ==> abseil-includes:" >&2
-  echo "         above); a build now fails on its headers" >&2
+  echo "Error: the abseil includes could not be restored (see the ==>" >&2
+  echo "       abseil-includes: lines above); the build would fail on a header" >&2
+  echo "       that looks intact." >&2
+  exit 1
 fi
 
 echo
