@@ -12,9 +12,10 @@
 #       (KIBAOS_PUBLISHED_REPO), so a version that is already published keeps
 #       its published bytes.
 #   ci/release.sh stage VERSION COMMIT ISO_DIR REPO_DIR OUT_DIR
-#       Check the build, rename the ISO for VERSION, write the repository
-#       archive, SHA256SUMS and its signature, and the release notes from the
-#       CHANGELOG section for VERSION. Nothing leaves the machine.
+#       Check the build, rename the ISO for VERSION, carry the signing key the
+#       build published beside it, write the repository archive, SHA256SUMS and
+#       its signature, and the release notes from the CHANGELOG section for
+#       VERSION. Nothing leaves the machine.
 #   ci/release.sh draft OUT_DIR
 #       Tag the staged commit as vVERSION (or check an existing tag points at
 #       it), push the tag, and create the GitHub release as a draft. A person
@@ -114,6 +115,24 @@ cmd_stage() {
   done
   grep -qx "iso_signing_fingerprint=${fpr}" "$iso.build-info" || die 'the ISO was not built for the release key'
   grep -qx "repo_fingerprint=${fpr}" "$iso.build-info" || die 'the ISO trusts a repository key other than the release key'
+  # The build writes the public half of the key that signed the image beside
+  # it. Carried into the release, an image and its own key are enough to check
+  # the signature; the key still has to be the release key, so this can only
+  # publish a signer the checks below accept.
+  local iso_signing_key
+  iso_signing_key=$(sed -n 's/^iso_signing_key=//p' "$iso.build-info" | head -1)
+  if [[ -n $iso_signing_key && $iso_signing_key != not-created ]]; then
+    local key_listing
+    [[ $iso_signing_key != */* ]] || die "iso_signing_key is not a file name: ${iso_signing_key}"
+    [[ -s $iso_dir/$iso_signing_key ]] || die "missing ISO signing key: $iso_dir/$iso_signing_key"
+    key_listing=$(gpg --batch --with-colons --show-keys "$iso_dir/$iso_signing_key" 2>/dev/null) ||
+      die "the published ISO signing key cannot be read: $iso_dir/$iso_signing_key"
+    if awk -F: '$1 == "sec" {found=1} END {exit !found}' <<<"$key_listing"; then
+      die 'the published ISO signing key contains a secret key'
+    fi
+    awk -F: '$1 == "fpr" {print toupper($10)}' <<<"$key_listing" | grep -Fxq "$fpr" ||
+      die 'the published ISO signing key is not the release key'
+  fi
   verify_signature "$iso.sig" "$iso" "$fpr"
   verify_signature "$iso.sbom.spdx.json.sig" "$iso.sbom.spdx.json" "$fpr"
   verify_signature "$repo_dir/kibaos.db.sig" "$repo_dir/kibaos.db" "$fpr"
@@ -133,6 +152,21 @@ cmd_stage() {
   cp "$iso.sbom.spdx.json" "$out/$base.iso.sbom.spdx.json"
   cp "$iso.sbom.spdx.json.sig" "$out/$base.iso.sbom.spdx.json.sig"
   cp "$iso.build-info" "$out/$base.iso.build-info"
+  if [[ -n $iso_signing_key && $iso_signing_key != not-created ]]; then
+    cp "$iso_dir/$iso_signing_key" "$out/$base.iso.signing-key.gpg"
+    sed -i "s|^iso_signing_key=.*|iso_signing_key=${base}.iso.signing-key.gpg|" \
+      "$out/$base.iso.build-info"
+  fi
+  # The build records the names of the files it wrote, and the release renames
+  # the ISO. Left alone, the copied record would name sidecars that are not in
+  # the release, so every name it carries is pointed at what is actually here.
+  # Nothing signed changes: these are references, and the digest fields are
+  # untouched.
+  sed -i \
+    -e "s|^iso_signature=.*|iso_signature=${base}.iso.sig|" \
+    -e "s|^sbom_signature=.*|sbom_signature=${base}.iso.sbom.spdx.json.sig|" \
+    -e "s|^sbom_file=.*|sbom_file=${base}.iso.sbom.spdx.json|" \
+    "$out/$base.iso.build-info"
   (cd "$out" && sha256sum "$base.iso" >"$base.iso.sha256")
   gpg --armor --export "$fpr" >"$out/kibaos-repository.asc"
   gpg --export "$fpr" >"$out/kibaos-repository.gpg"
@@ -148,9 +182,14 @@ cmd_stage() {
   mkdir "$out/repository"
   cp -a "$repo_dir/." "$out/repository/"
 
-  (cd "$out" && sha256sum kibaos-repository.asc kibaos-repository.gpg "$base".iso "$base".iso.sig \
-      "$base".iso.sha256 "$base".iso.build-info "$base".iso.sbom.spdx.json \
-      "$base".iso.sbom.spdx.json.sig "$base-repository.tar.gz" >SHA256SUMS)
+  local -a checksummed=(
+    kibaos-repository.asc kibaos-repository.gpg "$base.iso" "$base.iso.sig"
+    "$base.iso.sha256" "$base.iso.build-info" "$base.iso.sbom.spdx.json"
+    "$base.iso.sbom.spdx.json.sig" "$base-repository.tar.gz"
+  )
+  [[ ! -f $out/$base.iso.signing-key.gpg ]] ||
+    checksummed+=("$base.iso.signing-key.gpg")
+  (cd "$out" && sha256sum "${checksummed[@]}" >SHA256SUMS)
   gpg --batch --yes --local-user "$fpr" --detach-sign -o "$out/SHA256SUMS.sig" "$out/SHA256SUMS"
   verify_signature "$out/SHA256SUMS.sig" "$out/SHA256SUMS" "$fpr"
 
@@ -163,7 +202,13 @@ cmd_stage() {
     printf '    gpg --import kibaos-repository.asc\n'
     printf '    gpg --verify SHA256SUMS.sig SHA256SUMS\n'
     printf '    sha256sum -c --ignore-missing SHA256SUMS\n'
-    printf '    gpg --verify %s.iso.sig %s.iso\n\n' "$base" "$base"
+    printf '    gpg --verify %s.iso.sig %s.iso\n' "$base" "$base"
+    if [[ -f $out/$base.iso.signing-key.gpg ]]; then
+      # ./ because gpgv resolves a bare --keyring name against its homedir.
+      printf '    gpgv --keyring ./%s.iso.signing-key.gpg %s.iso.sig %s.iso\n' \
+        "$base" "$base" "$base"
+    fi
+    printf '\n'
     printf -- '- ISO SHA-256: `%s`\n' "$iso_sum"
     printf -- '- Repository archive SHA-256: `%s`\n' "$repo_sum"
     printf -- '- Release key: `%s`\n' "$fpr"
@@ -194,13 +239,18 @@ cmd_draft() {
   fi
   git -C "$ROOT" push origin "refs/tags/${tag}"
   local base="kibaos-v${version}-x86_64"
+  local -a assets=(
+    "$out/$base.iso" "$out/$base.iso.sig" "$out/$base.iso.sha256"
+    "$out/$base.iso.build-info" "$out/$base.iso.sbom.spdx.json"
+    "$out/$base.iso.sbom.spdx.json.sig" "$out/$base-repository.tar.gz"
+    "$out/kibaos-repository.asc" "$out/kibaos-repository.gpg"
+    "$out/SHA256SUMS" "$out/SHA256SUMS.sig"
+  )
+  [[ ! -f $out/$base.iso.signing-key.gpg ]] ||
+    assets+=("$out/$base.iso.signing-key.gpg")
   gh release create "$tag" -R "$GH_REPO" --draft --verify-tag \
     --title "KibaOS ${version}" --notes-file "$out/notes.md" \
-    "$out/$base.iso" "$out/$base.iso.sig" "$out/$base.iso.sha256" \
-    "$out/$base.iso.build-info" "$out/$base.iso.sbom.spdx.json" \
-    "$out/$base.iso.sbom.spdx.json.sig" "$out/$base-repository.tar.gz" \
-    "$out/kibaos-repository.asc" "$out/kibaos-repository.gpg" \
-    "$out/SHA256SUMS" "$out/SHA256SUMS.sig"
+    "${assets[@]}"
   # GitHub records a digest for every asset. Each one has to be the file here.
   local name digest
   while read -r name digest; do

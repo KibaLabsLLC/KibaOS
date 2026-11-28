@@ -79,7 +79,11 @@ machine. The public half is published beside the image as
 `<image>.signing-key.gpg`, named in `<image>.build-info` by
 `iso_signing_key` next to `iso_signing_fingerprint`, and
 `ci/verify-iso-artifacts.sh IMAGE --require-signature` checks the signatures
-against that file and nothing else. `KIBAOS_ISO_RANDOM_SIGNING_KEY=0` turns the
+against that file and nothing else. For a release build, whose ISO is signed by
+the release key, `ci/release.sh stage` carries that key file into the release
+assets, so a downloaded image and its `.signing-key.gpg` are enough to check it
+without importing the repository key; an image signed by a per-build key is
+still refused. `KIBAOS_ISO_RANDOM_SIGNING_KEY=0` turns the
 per-build key off, and then `KIBAOS_REQUIRE_ISO_SIGNATURE=1` refuses to finish
 an unsigned image. The build runs the artifact gate on its own output, so an
 image that cannot be verified never reaches a release.

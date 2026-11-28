@@ -426,6 +426,10 @@ if [[ -n $ISO_SIGNING_KEY ]]; then
   sign_artifacts "$ISO_SIGNING_KEY"
   gpg --batch --verify "$iso.sig" "$iso" >/dev/null 2>&1
   gpg --batch --verify "$sbom.sig" "$sbom" >/dev/null 2>&1
+  # The public half travels with the image here too, so the release needs
+  # nothing from the builder's keyring to check what it is about to publish.
+  iso_signing_key_file=$(basename "$iso").signing-key.gpg
+  gpg --batch --export "$expected_iso_fingerprint" >"$iso.signing-key.gpg"
 elif (( ISO_RANDOM_SIGNING_KEY )); then
   iso_signing_home=$WORK_ROOT/iso-signing-keyring
   rm -rf -- "$iso_signing_home"
