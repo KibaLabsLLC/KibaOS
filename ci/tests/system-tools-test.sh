@@ -118,8 +118,13 @@ run_link >"${tmp}/link-a.log" 2>&1 || {
 
 [[ -L "${src}/buildtools/linux64/gn" ]] || fail "gn was not linked"
 [[ -L "${src}/third_party/ninja/ninja" ]] || fail "ninja was not linked"
-[[ -L "${src}/third_party/llvm-build/Release+Asserts/bin/clang++" ]] ||
-  fail "clang++ was not linked"
+if [[ ! -x "${src}/third_party/llvm-build/Release+Asserts/bin/clang++" ]] ||
+  [[ -L "${src}/third_party/llvm-build/Release+Asserts/bin/clang++" ]]; then
+  fail "clang++ was not provided as the compiler wrapper"
+fi
+grep -q 'kibaos-clang-rejected-args' \
+  "${src}/third_party/llvm-build/Release+Asserts/bin/clang++" ||
+  fail "clang++ is not the wrapper that drops unknown options"
 
 state="${src}/out/.kibaos"
 [[ -f "${state}/system-tools.conf" ]] || fail "state was not written under out/"
@@ -158,6 +163,53 @@ grep -Fxq 'src/third_party/ninja' "${tmp}/resolver-a" ||
   fail "the resolver is not told to skip Ninja"
 grep -Fxq 'src/third_party/llvm-build/Release+Asserts' "${tmp}/resolver-a" ||
   fail "the resolver is not told to skip the Clang toolchain"
+
+# I: the tree's build config passes options only the clang it pins knows. The
+# wrapper leaves a rejected one out, passes the rest through, and remembers it
+# so later compilations do not fail on it again.
+cat >"${tmp}/bin/clang" <<EOF
+#!/bin/sh
+case "\$1" in
+  -print-resource-dir) printf '%s\\n' "${resource_dir}" ; exit 0 ;;
+esac
+printf '%s\\n' "\$*" >>"${tmp}/clang-calls"
+for arg in "\$@"; do
+  case "\${arg}" in
+    -fno-module-local-hints | -fno-unknown-xclang)
+      echo "clang++: error: unknown argument: '\${arg}'" >&2
+      exit 1
+      ;;
+  esac
+done
+exit 0
+EOF
+chmod +x "${tmp}/bin/clang"
+cp "${tmp}/bin/clang" "${tmp}/bin/clang++"
+: >"${tmp}/clang-calls"
+
+"${clang_base}/bin/clang++" -fno-module-local-hints -O2 -c x.cc \
+  2>"${tmp}/link-i.log" ||
+  fail "the clang++ wrapper stopped on an option clang does not know"
+grep -Fxq -- '-fno-module-local-hints' \
+  "${clang_base}/lib/kibaos-clang-rejected-args" ||
+  fail "the rejected option was not remembered"
+grep -q 'does not know -fno-module-local-hints' "${tmp}/link-i.log" ||
+  fail "the rejected option was not reported"
+
+"${clang_base}/bin/clang++" -fno-module-local-hints -O2 -c x.cc ||
+  fail "the clang++ wrapper failed after remembering the option"
+[[ "$(wc -l <"${tmp}/clang-calls")" -eq 3 ]] ||
+  fail "the wrapper kept passing a rejected option: $(cat "${tmp}/clang-calls")"
+tail -n 1 "${tmp}/clang-calls" | grep -q -- '-O2' ||
+  fail "the wrapper dropped an option clang honours"
+
+# -Xclang carries its value: dropping the value must drop the option too.
+"${clang_base}/bin/clang++" -Xclang -fno-unknown-xclang -O2 -c x.cc \
+  2>/dev/null ||
+  fail "the clang++ wrapper stopped on an unknown -Xclang value"
+if tail -n 1 "${tmp}/clang-calls" | grep -q -- '-Xclang'; then
+  fail "the wrapper left -Xclang without the value it lost"
+fi
 
 # B: only gn and ninja are packaged; clang keeps Chromium's download, and the
 # run still succeeds so the bootstrap can carry on.
@@ -323,8 +375,8 @@ run_link KIBAOS_PACMAN=0 >"${tmp}/link-g.log" 2>&1 || {
   fail "link failed without a builtins archive"
 }
 
-if [[ -L "${src}/third_party/llvm-build/Release+Asserts/bin/clang" ]]; then
-  fail "clang was linked without a builtins archive"
+if [[ -e "${src}/third_party/llvm-build/Release+Asserts/bin/clang" ]]; then
+  fail "clang was substituted without a builtins archive"
 fi
 [[ ! -s "${src}/out/.kibaos/system-tools.gn" ]] ||
   fail "clang GN arguments were written without a builtins archive"
@@ -342,8 +394,8 @@ run_link KIBAOS_PACMAN=0 >"${tmp}/link-h.log" 2>&1 || {
   fail "link failed without the compiler-rt package"
 }
 
-if [[ -L "${src}/third_party/llvm-build/Release+Asserts/bin/clang" ]]; then
-  fail "clang was linked without the compiler-rt package"
+if [[ -e "${src}/third_party/llvm-build/Release+Asserts/bin/clang" ]]; then
+  fail "clang was substituted without the compiler-rt package"
 fi
 [[ ! -s "${src}/out/.kibaos/system-tools.gn" ]] ||
   fail "clang GN arguments were written without the compiler-rt package"
