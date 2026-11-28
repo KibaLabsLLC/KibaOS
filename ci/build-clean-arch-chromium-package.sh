@@ -58,6 +58,19 @@ series_check_workdir="${WORKDIR}/clean-series-check"
 install -d -o "${chrome_owner_uid}" -g "${chrome_owner_gid}" -m 755 \
   "${series_check_workdir}"
 
+# abseil-cpp lives in the tree's git and every TU includes it, so a header that
+# was emptied or lost there fails as undefined ABSL_* names far from the cause.
+# Put the pinned copy back as the owner, as the package build does, so this
+# validation build fails on its own behaviour and not on a damaged checkout.
+if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
+  runuser -u "${chrome_owner}" -- \
+    python3 "${SCRIPT_DIR}/restore-truncated-sources.py" \
+      --tree "${CHROME_SRC}" --restore-dir third_party/abseil-cpp --apply || {
+    echo "Could not restore ${CHROME_SRC}/third_party/abseil-cpp." >&2
+    exit 1
+  }
+fi
+
 runuser -u "${chrome_owner}" -- /usr/bin/env \
   CHROME_SRC="${CHROME_SRC}" KIBAOS_WORKDIR="${series_check_workdir}" \
   "${SCRIPT_DIR}/refresh-bootstrap-series.sh" --check
