@@ -1,0 +1,1317 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "base",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "exclude": ["allocator/partition_allocator/src/partition_alloc"],
+  "files": {
+    "allocator/allocator_check.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_WIN)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/winheap_stubs_win.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_APPLE)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n"]}
+    ],
+    "allocator/dispatcher/dispatcher.cc": [
+      {"after": "#include \"base/thread_annotations.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_hooks.h\"  // nogncheck\n"]}
+    ],
+    "allocator/dispatcher/dispatcher_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_for_testing.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "allocator/dispatcher/internal/dispatch_data.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "allocator/dispatcher/internal/dispatch_data.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_hooks.h\"  // nogncheck\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"  // nogncheck\n"]}
+    ],
+    "allocator/dispatcher/internal/dispatcher_internal.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_allocation_data.h\"  // nogncheck\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "allocator/dispatcher/internal/dispatcher_internal_unittest.cc": [
+      {"after": "#include \"base/dcheck_is_on.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_allocation_data.h\"\n"]}
+    ],
+    "allocator/dispatcher/memory_tagging.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"\n"]}
+    ],
+    "allocator/dispatcher/notification_data.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "allocator/dispatcher/tls.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n"]}
+    ],
+    "allocator/early_zone_registration_apple.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/shim/early_zone_registration_utils_apple.h\"\n"]}
+    ],
+    "allocator/partition_alloc_features.cc": [
+      {"after": "#include \"base/features.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/android_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/shim/allocator_shim_dispatch_to_noop_on_free.h\"\n"]}
+    ],
+    "allocator/partition_alloc_features.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "allocator/partition_alloc_support.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n"]},
+      {"after": "#endif\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/allocation_guard.h\"\n", "#include \"partition_alloc/allocator_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"\n", "#include \"partition_alloc/memory_reclaimer.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/debug/alias.h\"\n", "#include \"partition_alloc/partition_alloc_base/immediate_crash.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/pointers/instance_tracer.h\"\n", "#include \"partition_alloc/pointers/raw_ptr.h\"\n", "#include \"partition_alloc/random.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n", "#include \"partition_alloc/shim/allocator_shim_dispatch_to_noop_on_free.h\"\n", "#include \"partition_alloc/spinning_mutex.h\"\n", "#include \"partition_alloc/stack/stack.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/memory_reclaimer.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "allocator/partition_alloc_support.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]},
+      {"after": "    PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"\n"]}
+    ],
+    "allocator/partition_alloc_support_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n", "#include \"partition_alloc/partition_alloc_base/cpu.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n"]}
+    ],
+    "allocator/scheduler_loop_quarantine_config.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n"]}
+    ],
+    "allocator/scheduler_loop_quarantine_support.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n"]}
+    ],
+    "allocator/system_allocator_test_helper.cc": [
+      {"after": "\n", "before": "#include \"base/allocator/partition_allocator/src/partition_alloc/partition_address_space.h\"\n", "n": 1, "add": ["#include \"base/allocator/partition_allocator/src/partition_alloc/buildflags.h\"\n"]}
+    ],
+    "android/android_info.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/build_info_jni/AndroidInfo_jni.h\"\n"]},
+      {"after": "// higher.\n", "before": "using aidl::org::chromium::base::IAndroidInfo;\n", "n": 1, "add": ["#include \"aidl/org/chromium/base/IAndroidInfo.h\"\n"]}
+    ],
+    "android/apk_assets.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/ApkAssets_jni.h\"\n"]}
+    ],
+    "android/apk_info.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/build_info_jni/ApkInfo_jni.h\"\n"]},
+      {"after": "// higher.\n", "before": "using aidl::org::chromium::base::IApkInfo;\n", "n": 1, "add": ["#include \"aidl/org/chromium/base/IApkInfo.h\"\n"]}
+    ],
+    "android/application_status_listener.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_jni/ApplicationStatus_jni.h\"\n"]}
+    ],
+    "android/background_thread_pool_field_trial.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/synchronization/synchronization_buildflags.h\"\n"]}
+    ],
+    "android/base_feature_map.cc": [
+      {"after": "#include \"base/android/feature_map.h\"\n", "before": "#include \"base/feature_list.h\"\n", "n": 1, "add": ["#include \"base/base_jni/BaseFeatureMap_jni.h\"\n"]}
+    ],
+    "android/bundle_utils.cc": [
+      {"after": "#include \"base/android/jni_string.h\"\n", "before": "#include \"base/check.h\"\n", "n": 1, "add": ["#include \"base/bundle_utils_jni/BundleUtils_jni.h\"\n"]}
+    ],
+    "android/callback_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/callback_jni/Callback2_jni.h\"\n", "#include \"base/callback_jni/Callback_jni.h\"\n", "#include \"base/jni_callback_jni/JniCallbackImpl_jni.h\"\n"]}
+    ],
+    "android/child_process_service.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/process_launcher_jni/ChildProcessService_jni.h\"\n"]}
+    ],
+    "android/command_line_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/command_line_jni/CommandLine_jni.h\"\n"]}
+    ],
+    "android/content_uri_utils.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/content_uri_utils_jni/ContentUriUtils_jni.h\"\n"]}
+    ],
+    "android/cpu_features.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/CpuFeatures_jni.h\"\n"]}
+    ],
+    "android/device_info.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/build_info_jni/DeviceInfo_jni.h\"\n"]},
+      {"after": "// higher.\n", "before": "using aidl::org::chromium::base::IDeviceInfo;\n", "n": 1, "add": ["#include \"aidl/org/chromium/base/IDeviceInfo.h\"\n"]}
+    ],
+    "android/early_trace_event_binding.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_jni/EarlyTraceEvent_jni.h\"\n"]}
+    ],
+    "android/event_log.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/EventLog_jni.h\"\n"]}
+    ],
+    "android/feature_list_jni.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/features_jni/FeatureList_jni.h\"\n"]}
+    ],
+    "android/feature_map.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/features_jni/FeatureMap_jni.h\"\n"]}
+    ],
+    "android/features_jni.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/features_jni/Features_jni.h\"\n"]}
+    ],
+    "android/field_trial_list.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/FieldTrialList_jni.h\"\n"]}
+    ],
+    "android/important_file_writer_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/ImportantFileWriterAndroid_jni.h\"\n"]}
+    ],
+    "android/input_hint_checker.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/InputHintChecker_jni.h\"\n"]}
+    ],
+    "android/input_hint_checker_unittest.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_unittest_support_jni/InputHintCheckerTestUtil_jni.h\"\n"]}
+    ],
+    "android/int_string_callback.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/jni_callback_jni/IntStringCallback_jni.h\"\n"]}
+    ],
+    "android/java_exception_reporter.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/java_exception_reporter_jni/JavaExceptionReporter_jni.h\"\n"]}
+    ],
+    "android/java_handler_thread.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/JavaHandlerThread_jni.h\"\n"]}
+    ],
+    "android/java_runtime.cc": [
+      {"after": "#include \"base/numerics/safe_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/jni_zero/system_jni/Runtime_jni.h\"\n"]}
+    ],
+    "android/jni_android.cc": [
+      {"after": "#include \"base/android/jni_utils.h\"\n", "before": "#include \"base/debug/stack_trace.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/jni_zero/jni_zero.h\"\n", "n": 1, "add": ["#include \"build/robolectric_buildflags.h\"\n", "#include \"partition_alloc/pointers/raw_ptr.h\"\n"]},
+      {"after": "#include \"third_party/jni_zero/jni_zero.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/jni_zero/system_jni/Throwable_jni.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/jni_android_jni/JniAndroid_jni.h\"\n"]}
+    ],
+    "android/jni_android.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"third_party/jni_zero/jni_zero.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n", "#include \"build/robolectric_buildflags.h\"\n"]}
+    ],
+    "android/jni_android_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"build/robolectric_buildflags.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_unittest_support_jni/JniAndroidTestUtils_jni.h\"\n"]}
+    ],
+    "android/jni_callbacks_test_support.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_junit_tests_jni/JniCallbacksTest_jni.h\"\n"]}
+    ],
+    "android/jni_utils.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/jni_utils_jni/JNIUtils_jni.h\"\n"]}
+    ],
+    "android/library_loader/anchor_functions.h": [
+      {"after": "\n", "before": "#include \"base/base_export.h\"\n", "n": 1, "add": ["#include \"base/android/library_loader/anchor_functions_buildflags.h\"\n"]}
+    ],
+    "android/library_loader/library_loader_hooks.cc": [
+      {"after": "#include \"base/android/jni_string.h\"\n", "before": "#include \"base/android/library_loader/library_prefetcher.h\"\n", "n": 1, "add": ["#include \"base/android/library_loader/anchor_functions_buildflags.h\"\n"]},
+      {"after": "#include \"base/android/library_loader/library_prefetcher.h\"\n", "before": "#include \"base/at_exit.h\"\n", "n": 1, "add": ["#include \"base/android/orderfile/orderfile_buildflags.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/library_loader_jni/LibraryLoader_jni.h\"\n"]}
+    ],
+    "android/library_loader/library_prefetcher.cc": [
+      {"after": "#include \"base/android/library_loader/anchor_functions.h\"\n", "before": "#include \"base/bits.h\"\n", "n": 1, "add": ["#include \"base/android/orderfile/orderfile_buildflags.h\"\n"]}
+    ],
+    "android/library_loader/library_prefetcher.h": [
+      {"after": "\n", "before": "#include \"base/base_export.h\"\n", "n": 1, "add": ["#include \"base/android/library_loader/anchor_functions_buildflags.h\"\n"]}
+    ],
+    "android/library_loader/library_prefetcher_hooks.cc": [
+      {"after": "#include \"base/android/jni_android.h\"\n", "before": "#include \"base/android/library_loader/library_prefetcher.h\"\n", "n": 1, "add": ["#include \"base/android/library_loader/anchor_functions_buildflags.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/library_loader_jni/LibraryPrefetcher_jni.h\"\n"]}
+    ],
+    "android/meminfo_dump_provider.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"base/task/single_thread_task_runner.h\"\n", "n": 1, "add": ["#include \"base/memory_jni/MemoryInfoBridge_jni.h\"\n", "#include \"base/system_jni/Debug__MemoryInfo_jni.h\"\n"]}
+    ],
+    "android/memory_pressure_listener_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/memory_jni/MemoryPressureListener_jni.h\"\n"]}
+    ],
+    "android/memory_purge_manager_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/memory_jni/MemoryPurgeManager_jni.h\"\n"]}
+    ],
+    "android/native_uma_recorder.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/metrics_jni/NativeUmaRecorder_jni.h\"\n"]}
+    ],
+    "android/orderfile/orderfile_instrumentation.cc": [
+      {"after": "#include \"base/android/library_loader/anchor_functions.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/android/orderfile/orderfile_buildflags.h\"\n"]}
+    ],
+    "android/orderfile/orderfile_instrumentation.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/android/orderfile/orderfile_buildflags.h\"\n"]}
+    ],
+    "android/path_service_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/PathService_jni.h\"\n"]}
+    ],
+    "android/path_utils.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/path_utils_jni/PathUtils_jni.h\"\n"]}
+    ],
+    "android/radio_utils.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/RadioUtils_jni.h\"\n"]}
+    ],
+    "android/scoped_java_ref_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/jni_zero/system_jni/Integer_shared_jni.h\"\n"]}
+    ],
+    "android/scoped_service_binding_batch.cc": [
+      {"after": "#include \"base/android/jni_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/process_launcher_jni/ScopedServiceBindingBatch_jni.h\"\n"]}
+    ],
+    "android/screen_state_receiver.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/screen_state_receiver_jni/ScreenStateReceiver_jni.h\"\n"]}
+    ],
+    "android/shared_preferences/shared_preferences_manager.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_shared_preferences_jni/SharedPreferencesManager_jni.h\"\n"]}
+    ],
+    "android/statistics_recorder_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/metrics_jni/StatisticsRecorderAndroid_jni.h\"\n"]}
+    ],
+    "android/sys_utils.cc": [
+      {"after": "#include \"base/process/process_metrics.h\"\n", "before": "#include \"base/system/sys_info.h\"\n", "n": 1, "add": ["#include \"base/sys_utils_jni/SysUtils_jni.h\"\n"]}
+    ],
+    "android/task_scheduler/post_task_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_jni/PostTask_jni.h\"\n"]}
+    ],
+    "android/task_scheduler/task_runner_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_jni/TaskRunnerImpl_jni.h\"\n", "#include \"third_party/jni_zero/system_jni/Runnable_jni.h\"\n"]}
+    ],
+    "android/token_android.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/token_jni/TokenBase_jni.h\"\n", "#include \"base/token_jni/Token_jni.h\"\n"]}
+    ],
+    "android/trace_event_binding.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"third_party/jni_zero/default_conversions.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "#include \"third_party/jni_zero/default_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"  // no-presubmit-check nogncheck\n", "#include \"third_party/perfetto/protos/perfetto/config/chrome/chrome_config.gen.h\"  // nogncheck\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_minimal_jni/TraceEvent_jni.h\"\n"]}
+    ],
+    "android/trace_event_binding_unittest.cc": [
+      {"after": "// Must come after all headers that specialize `FromJniType()` / `ToJniType()`.\n", "before": "\n", "n": 1, "add": ["#include \"base/base_unittest_support_jni/TraceEventNativeTestSupport_jni.h\"\n"]}
+    ],
+    "android/unguessable_token_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/token_jni/TokenBase_jni.h\"\n", "#include \"base/token_jni/UnguessableToken_jni.h\"\n"]}
+    ],
+    "android/virtual_document_path.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/virtual_document_path_jni/VirtualDocumentPath_jni.h\"\n"]}
+    ],
+    "apple/foundation_util.mm": [
+      {"after": "#include \"base/strings/sys_string_conversions.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "apple/mach_logging.h": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "apple/mach_port_rendezvous.h": [
+      {"after": "#include \"base/thread_annotations.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/ios_buildflags.h\"\n"]}
+    ],
+    "apple/mach_port_rendezvous_mac.cc": [
+      {"after": "\n", "before": "#include \"base/apple/foundation_util.h\"\n", "n": 1, "add": ["#include \"base/apple/app_plist_size_buildflags.h\"\n"]}
+    ],
+    "apple/owned_objc.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "base64.cc": [
+      {"after": "\n", "before": "#include \"base/check.h\"\n", "n": 1, "add": ["#include \"base/base64_rust_shim.rs.h\"\n"]}
+    ],
+    "base64_perftest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "base64url_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "build_time.h": [
+      {"after": "\n", "before": "#include \"base/time/time.h\"\n", "n": 1, "add": ["#include \"base/generated_build_date.h\"\n"]}
+    ],
+    "byte_conversions_perftest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "check.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"base/debug/alias.h\"\n", "n": 1, "add": ["#include \"base/check_version_internal.h\"\n"]}
+    ],
+    "check_unittest.cc": [
+      {"after": "#include \"base/check_deref.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/check_version_internal.h\"\n"]}
+    ],
+    "command_line.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/files/file_path.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "command_line.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "command_line_unittest.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"base/files/file_path.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "containers/lru_cache_unittest.cc": [
+      {"after": "#include \"base/trace_event/memory_usage_estimator.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "containers/span.h": [
+      {"after": "#include \"base/types/to_address.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "// evaluates false.\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/bounds_checks.h\"  // nogncheck\n"]}
+    ],
+    "containers/span_unittest.cc": [
+      {"after": "#include \"base/test/gtest_util.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "cpu_unittest.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"base/strings/string_util.h\"\n", "n": 1, "add": ["#include \"base/memory/protected_memory_buildflags.h\"\n"]}
+    ],
+    "critical_closure.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/ios_buildflags.h\"\n"]}
+    ],
+    "dcheck_is_on.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/allocation_trace.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"base/debug/stack_trace.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/allocation_trace_unittest.cc": [
+      {"after": "#include \"base/debug/stack_trace.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock-matchers.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_allocation_data.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "debug/asan_invalid_access.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]}
+    ],
+    "debug/debugger.cc": [
+      {"after": "\n", "before": "#include \"base/logging.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "debug/debugger_posix.cc": [
+      {"after": "#include \"base/debug/alias.h\"\n", "before": "#include \"base/environment.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/dwarf_line_no.cc": [
+      {"after": "#include \"base/third_party/symbolize/symbolize.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr.h\"\n", "#include \"partition_alloc/pointers/raw_ref.h\"\n"]}
+    ],
+    "debug/profiler.cc": [
+      {"after": "\n", "before": "#include \"base/check.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]}
+    ],
+    "debug/stack_trace.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/features.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/config/compiler/compiler_buildflags.h\"\n"]}
+    ],
+    "debug/stack_trace.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/memory/raw_ptr.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/stack_trace_android.cc": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"base/debug/elf_reader.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/stack_trace_posix.cc": [
+      {"after": "#include \"base/containers/span_writer.h\"\n", "before": "#include \"base/memory/raw_ptr.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]},
+      {"after": "\n", "before": "#include \"base/debug/debugger.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]},
+      {"after": "#include \"base/debug/debugger.h\"\n", "before": "#include \"base/debug/stack_trace.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "debug/stack_trace_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/containers/span.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]},
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/immediate_crash.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "feature.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/feature_internal.h\"\n", "n": 1, "add": ["#include \"base/feature_buildflags.h\"\n"]}
+    ],
+    "feature_list_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/feature_list_internal.h\"\n", "n": 1, "add": ["#include \"base/feature_buildflags.h\"\n"]}
+    ],
+    "features.cc": [
+      {"after": "#include \"base/threading/platform_thread.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "files/file_path_unittest.cc": [
+      {"after": "#include \"testing/platform_test.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "files/file_tracing.h": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/string_helpers.h\"\n"]}
+    ],
+    "files/file_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "files/file_util_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/file_utils_jni/FileUtils_jni.h\"\n"]}
+    ],
+    "files/file_util_posix.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "files/file_util_unittest.cc": [
+      {"after": "#include \"base/uuid.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "files/file_util_win.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "#include \"base/containers/span.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "fuchsia/scoped_service_publisher_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"base/testfidl/cpp/fidl.h\"\n"]}
+    ],
+    "fuchsia/test_component_context_for_process_unittest.cc": [
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"base/testfidl/cpp/fidl.h\"\n"]}
+    ],
+    "fuchsia/test_interface_impl.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/testfidl/cpp/fidl.h\"\n"]}
+    ],
+    "fuchsia/time_zone_data_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "functional/bind_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "hash/sha1.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "i18n/android_locale.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/LocaleUtils_jni.h\"\n"]}
+    ],
+    "i18n/break_iterator.cc": [
+      {"after": "#include \"base/synchronization/lock.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ubrk.h\"\n", "#include \"third_party/icu/source/common/unicode/uchar.h\"\n", "#include \"third_party/icu/source/common/unicode/uloc.h\"\n", "#include \"third_party/icu/source/common/unicode/ustring.h\"\n"]}
+    ],
+    "i18n/build_utf8_validator_tables.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/utf8.h\"\n"]}
+    ],
+    "i18n/case_conversion.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uchar.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/ustring.h\"\n"]}
+    ],
+    "i18n/case_conversion_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/usearch.h\"\n"]}
+    ],
+    "i18n/character_encoding.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ucnv.h\"\n"]}
+    ],
+    "i18n/encoding_detection.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/ced/src/compact_enc_det/compact_enc_det.h\"\n"]}
+    ],
+    "i18n/file_util_icu.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uniset.h\"\n", "#include \"third_party/icu/source/i18n/unicode/coll.h\"\n"]}
+    ],
+    "i18n/icu4c_tag_converter.cc": [
+      {"after": "#include \"base/no_destructor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n"]},
+      {"after": "#define IMPL_LANGUAGECODE_TAG_NAME(tag, name) tag,\n", "before": "#undef IMPL_LANGUAGECODE_TAG_NAME\n", "n": 1, "add": ["#include \"base/i18n/internal/canonical_language_tags.inc\"\n"]}
+    ],
+    "i18n/icu4c_tag_converter.h": [
+      {"after": "#include \"base/i18n/base_i18n_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n"]}
+    ],
+    "i18n/icu_string_conversions.cc": [
+      {"after": "#include \"base/types/fixed_array.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/ucnv.h\"\n", "#include \"third_party/icu/source/common/unicode/ucnv_cb.h\"\n", "#include \"third_party/icu/source/common/unicode/ucnv_err.h\"\n", "#include \"third_party/icu/source/common/unicode/ustring.h\"\n"]}
+    ],
+    "i18n/icu_util.cc": [
+      {"after": "#include \"base/threading/scoped_blocking_call.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n", "#include \"third_party/icu/source/common/unicode/putil.h\"\n", "#include \"third_party/icu/source/common/unicode/uclean.h\"\n", "#include \"third_party/icu/source/common/unicode/udata.h\"\n", "#include \"third_party/icu/source/common/unicode/utrace.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_FUCHSIA)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n"]},
+      {"after": "    BUILDFLAG(IS_CHROMEOS) || (BUILDFLAG(IS_LINUX) && !BUILDFLAG(IS_CASTOS))\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/icubridge/calendar.cc": [
+      {"after": "#include \"base/i18n/tag_converters.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/i18n/unicode/calendar.h\"\n"]}
+    ],
+    "i18n/icubridge/date_time_formatter.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/i18n/unicode/datefmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/dtptngen.h\"\n", "#include \"third_party/icu/source/i18n/unicode/measfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/smpdtfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/icubridge/date_time_formatter.h": [
+      {"after": "#include \"base/types/pass_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n"]}
+    ],
+    "i18n/icubridge/date_time_formatter_unittest.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock-matchers.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "i18n/icubridge/default_icu_locale.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n"]}
+    ],
+    "i18n/icubridge/default_icu_locale_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n"]}
+    ],
+    "i18n/icubridge/icu_bridge_helpers.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/uvernum.h\"\n"]},
+      {"after": "#if U_ICU_VERSION_MAJOR_NUM >= 59\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/char16ptr.h\"\n"]}
+    ],
+    "i18n/icubridge/list_formatter.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n", "#include \"third_party/icu/source/i18n/unicode/listformatter.h\"\n", "#include \"third_party/icu/source/i18n/unicode/ulistformatter.h\"\n"]}
+    ],
+    "i18n/icubridge/list_formatter.h": [
+      {"after": "#include \"base/types/pass_key.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/i18n/unicode/listformatter.h\"\n"]}
+    ],
+    "i18n/icubridge/normalizer.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/rust/chromium_crates_io/vendor/icu_capi-v2/bindings/cpp/icu4x/ComposingNormalizer.hpp\"\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/normalizer2.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n"]}
+    ],
+    "i18n/icubridge/supported_locales.cc": [
+      {"after": "#include \"base/no_destructor.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uloc.h\"\n"]}
+    ],
+    "i18n/icubridge/supported_locales_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uloc.h\"\n"]},
+      {"after": "#define IMPL_LANGUAGECODE_TAG_NAME(tag, name) GetKnownLanguageTag(tag),\n", "before": "#undef IMPL_LANGUAGECODE_TAG_NAME\n", "n": 1, "add": ["#include \"base/i18n/internal/canonical_language_tags.inc\"\n"]}
+    ],
+    "i18n/internal/bcp47_known_subtags.h": [
+      {"after": "#define IMPL_BCP47_LANGUAGE(tag) tag,\n", "before": "#undef IMPL_BCP47_LANGUAGE\n", "n": 1, "add": ["#include \"base/i18n/internal/bcp47_languages.inc\"\n"]},
+      {"after": "#define IMPL_BCP47_SCRIPT(tag) tag,\n", "before": "#undef IMPL_BCP47_SCRIPT\n", "n": 1, "add": ["#include \"base/i18n/internal/bcp47_scripts.inc\"\n"]},
+      {"after": "#define IMPL_BCP47_REGION(tag) tag,\n", "before": "#undef IMPL_BCP47_REGION\n", "n": 1, "add": ["#include \"base/i18n/internal/bcp47_regions.inc\"\n"]},
+      {"after": "#define IMPL_BCP47_VARIANT(tag) tag,\n", "before": "#undef IMPL_BCP47_VARIANT\n", "n": 1, "add": ["#include \"base/i18n/internal/bcp47_variants.inc\"\n"]}
+    ],
+    "i18n/language_tag_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n"]},
+      {"after": "  {tag, #name, GetKnownLanguageTag(tag)},\n", "before": "#undef IMPL_LANGUAGECODE_TAG_NAME\n", "n": 1, "add": ["#include \"base/i18n/internal/canonical_language_tags.inc\"\n"]}
+    ],
+    "i18n/message_formatter.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n", "#include \"third_party/icu/source/i18n/unicode/fmtable.h\"\n", "#include \"third_party/icu/source/i18n/unicode/msgfmt.h\"\n"]}
+    ],
+    "i18n/message_formatter.h": [
+      {"after": "#include \"base/i18n/base_i18n_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uversion.h\"\n"]}
+    ],
+    "i18n/message_formatter_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/i18n/unicode/datefmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/msgfmt.h\"\n"]}
+    ],
+    "i18n/number_formatting.cc": [
+      {"after": "#include \"base/threading/thread_local.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/ustring.h\"\n", "#include \"third_party/icu/source/i18n/unicode/numfmt.h\"\n"]}
+    ],
+    "i18n/number_formatting_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "i18n/number_formatting_unittest.cc": [
+      {"after": "#include \"base/threading/simple_thread.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/ures.h\"\n", "#include \"third_party/icu/source/i18n/unicode/curramt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/currunit.h\"\n", "#include \"third_party/icu/source/i18n/unicode/dcfmtsym.h\"\n", "#include \"third_party/icu/source/i18n/unicode/decimfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/numfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/numsys.h\"\n", "#include \"third_party/icu/source/i18n/unicode/unum.h\"\n", "#include \"third_party/icu/source/i18n/unicode/unumberformatter.h\"\n", "#include \"third_party/icu/source/i18n/unicode/usearch.h\"\n"]}
+    ],
+    "i18n/rtl.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/uchar.h\"\n", "#include \"third_party/icu/source/common/unicode/uscript.h\"\n", "#include \"third_party/icu/source/i18n/unicode/coll.h\"\n"]}
+    ],
+    "i18n/rtl_unittest.cc": [
+      {"after": "#include \"testing/platform_test.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/i18n/unicode/usearch.h\"\n"]}
+    ],
+    "i18n/streaming_utf8_validator_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/utf8.h\"\n"]}
+    ],
+    "i18n/string_compare.cc": [
+      {"after": "#include \"base/strings/utf_string_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n"]}
+    ],
+    "i18n/string_compare.h": [
+      {"after": "#include \"base/i18n/base_i18n_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/coll.h\"\n"]}
+    ],
+    "i18n/string_search.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/usearch.h\"\n"]}
+    ],
+    "i18n/string_search_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/usearch.h\"\n"]}
+    ],
+    "i18n/time_formatting.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/utypes.h\"\n", "#include \"third_party/icu/source/i18n/unicode/datefmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/dtptngen.h\"\n", "#include \"third_party/icu/source/i18n/unicode/measfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/smpdtfmt.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/time_formatting.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uversion.h\"\n"]}
+    ],
+    "i18n/time_formatting_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif  // BUILDFLAG(IS_CHROMEOS)\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/time_formatting_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uversion.h\"\n", "#include \"third_party/icu/source/i18n/unicode/calendar.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n", "#include \"third_party/icu/source/i18n/unicode/tzfmt.h\"\n"]}
+    ],
+    "i18n/timezone.cc": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/timezone_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/common/unicode/strenum.h\"\n", "#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "i18n/transliterator.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/i18n/transliterator_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(BUILD_RUST_TRANSLIT)\n", "before": "#include \"base/strings/string_view_rust.h\"\n", "n": 1, "add": ["#include \"base/i18n/transliterator.rs.h\"\n"]},
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "#if UCONFIG_NO_TRANSLITERATION\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/translit.h\"\n"]}
+    ],
+    "i18n/transliterator_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/test/gtest_util.h\"\n", "n": 1, "add": ["#include \"base/i18n/transliterator_buildflags.h\"\n"]}
+    ],
+    "i18n/unicodestring.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/unistr.h\"\n", "#include \"third_party/icu/source/common/unicode/uvernum.h\"\n"]},
+      {"after": "#if U_ICU_VERSION_MAJOR_NUM >= 59\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/char16ptr.h\"\n"]}
+    ],
+    "immediate_crash.h": [
+      {"after": "#include \"base/compiler_specific.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/fuzzing_buildflags.h\"\n"]}
+    ],
+    "immediate_crash_unittest.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"base/compiler_specific.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "ios/ios_util.h": [
+      {"after": "#include \"base/files/file_path.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/ios_buildflags.h\"\n"]}
+    ],
+    "ios/sim_header_shims.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "json/json_reader.cc": [
+      {"after": "#include \"third_party/rust/serde_json_lenient/v0_2/wrapper/functions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/rust/serde_json_lenient/v0_2/wrapper/lib.rs.h\"\n"]}
+    ],
+    "json/json_reader_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "location_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "logging.cc": [
+      {"after": "#include \"base/logging/logging_settings.h\"\n", "before": "#include \"base/no_destructor.h\"\n", "n": 1, "add": ["#include \"base/logging/rust_logger/rust_logger.h\"\n"]},
+      {"after": "#include \"third_party/abseil-cpp/absl/cleanup/cleanup.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/log_message.pbzero.h\"\n"]}
+    ],
+    "logging/rust_logger/print_rust_log_ffi.cc": [
+      {"after": "#include \"base/logging/log_severity.h\"\n", "before": "#include \"third_party/rust/cxx/v1/cxx.h\"\n", "n": 1, "add": ["#include \"base/logging/rust_logger/print_rust_log.rs.h\"\n"]}
+    ],
+    "logging/rust_logger/unittests.cc": [
+      {"after": "#include \"base/logging/log_severity.h\"\n", "before": "#include \"base/test/gtest_util.h\"\n", "n": 1, "add": ["#include \"base/logging/rust_logger/test_support.rs.h\"\n"]}
+    ],
+    "logging_unittest.cc": [
+      {"after": "#include \"base/run_loop.h\"\n", "before": "#include \"base/strings/strcat.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]}
+    ],
+    "mac/process_requirement.cc": [
+      {"after": "#include \"base/types/expected_macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "memory/aligned_memory.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#include \"base/process/memory.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n", "#include \"partition_alloc/shim/allocator_shim.h\"        // nogncheck\n"]}
+    ],
+    "memory/aligned_memory_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"              // nogncheck\n", "#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n"]}
+    ],
+    "memory/discardable_shared_memory.cc": [
+      {"after": "#include \"base/numerics/safe_math.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"  // nogncheck\n"]}
+    ],
+    "memory/discardable_shared_memory_unittest.cc": [
+      {"after": "#include \"base/trace_event/process_memory_dump.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "memory/platform_shared_memory_mapper_win.cc": [
+      {"after": "#include \"base/logging.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]}
+    ],
+    "memory/platform_shared_memory_region_win.cc": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/oom.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n"]}
+    ],
+    "memory/protected_memory.h": [
+      {"after": "#include \"base/memory/page_size.h\"\n", "before": "#include \"base/memory/raw_ref.h\"\n", "n": 1, "add": ["#include \"base/memory/protected_memory_buildflags.h\"\n"]}
+    ],
+    "memory/protected_memory_unittest.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"base/synchronization/lock.h\"\n", "n": 1, "add": ["#include \"base/memory/protected_memory_buildflags.h\"\n"]}
+    ],
+    "memory/raw_ptr.h": [
+      {"after": "// facade header for ease of typing.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr.h\"  // IWYU pragma: export\n"]}
+    ],
+    "memory/raw_ptr_asan_allocator.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_bound_arg_tracker.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_bound_arg_tracker.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_event.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#include \"base/threading/platform_thread.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_hooks.cc": [
+      {"after": "#include \"base/memory/raw_ptr_asan_service.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_hooks.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_service.cc": [
+      {"after": "#include \"base/task/thread_pool/thread_group.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_allocation_data.h\"\n", "#include \"partition_alloc/partition_alloc_hooks.h\"\n"]},
+      {"after": "#include \"build/sanitizers/sanitizer_shared_hooks.h\"  // nogncheck\n", "before": "#endif  // PA_BUILDFLAG(USE_ASAN_BACKUP_REF_PTR_V2)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_service.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "memory/raw_ptr_asan_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#include \"base/test/task_environment.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"\n"]}
+    ],
+    "memory/raw_ptr_cast.h": [
+      {"after": "// facade header for ease of typing.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_cast.h\"  // IWYU pragma: export\n"]}
+    ],
+    "memory/raw_ptr_exclusion.h": [
+      {"after": "// facade header for ease of typing.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ptr_exclusion.h\"  // IWYU pragma: export\n"]}
+    ],
+    "memory/raw_ref.h": [
+      {"after": "// facade header for ease of typing.\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/pointers/raw_ref.h\"  // IWYU pragma: export\n"]}
+    ],
+    "memory/reentrancy_guard.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#include \"base/hash/hash.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_base/scoped_clear_last_error.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread.h\"\n", "#include \"partition_alloc/partition_alloc_base/threading/platform_thread_ref.h\"\n", "#include \"partition_alloc/partition_alloc_check.h\"\n", "#include \"partition_alloc/partition_lock.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/yield_processor.h\"\n"]}
+    ],
+    "memory/reentrancy_guard_unittest.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/build_config.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "memory/safety_checks.h": [
+      {"after": "#include \"base/pending_task.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/safety_checks.h\"  // nogncheck\n"]}
+    ],
+    "memory/safety_checks_unittest.cc": [
+      {"after": "#include \"base/feature_list.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_address_space.h\"\n", "#include \"partition_alloc/partition_root.h\"\n", "#include \"partition_alloc/partition_stats.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n", "#include \"partition_alloc/tagging.h\"\n"]},
+      {"after": "#if !PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]}
+    ],
+    "memory/sanitized_object.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_public_constants.h\"  // nogncheck\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]}
+    ],
+    "memory/sanitized_object.h": [
+      {"after": "#include \"base/export_template.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/fnv1a_consteval.h\"  // nogncheck\n"]}
+    ],
+    "memory/shared_memory_switch.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "memory/shared_memory_tracker.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "memory/weak_ptr.h": [
+      {"after": "#include \"base/synchronization/atomic_flag.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "memory_coordinator/memory_consumer_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/memory_coordinator_jni/MemoryConsumerRegistration_jni.h\"\n"]}
+    ],
+    "message_loop/message_pump_android.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"  // nogncheck\n"]}
+    ],
+    "message_loop/message_pump_for_io.h": [
+      {"after": "\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/message_loop/ios_cronet_buildflags.h\"\n"]}
+    ],
+    "message_loop/message_pump_for_io_event_win.cc": [
+      {"after": "#include \"base/win/scoped_handle.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_message_pump.pbzero.h\"\n"]}
+    ],
+    "message_loop/message_pump_kqueue.cc": [
+      {"after": "#include \"base/time/time_override.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "message_loop/message_pump_win.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_message_pump.pbzero.h\"\n"]}
+    ],
+    "metrics/field_trial.h": [
+      {"after": "#include \"base/types/pass_key.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "metrics/histogram_shared_memory.h": [
+      {"after": "#include \"base/metrics/persistent_memory_allocator.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "metrics/metrics_hashes.cc": [
+      {"after": "#include \"base/numerics/byte_conversions.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/md5.h\"\n", "#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "native_library_unittest.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "observer_list.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "power_monitor/battery_level_provider.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/power_monitor/power_monitor_buildflags.h\"\n"]}
+    ],
+    "power_monitor/battery_state_sampler.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/power_monitor/power_monitor_buildflags.h\"\n"]}
+    ],
+    "power_monitor/battery_state_sampler.h": [
+      {"after": "#include \"base/power_monitor/battery_level_provider.h\"\n", "before": "#include \"base/power_monitor/sampling_event_source.h\"\n", "n": 1, "add": ["#include \"base/power_monitor/power_monitor_buildflags.h\"\n"]}
+    ],
+    "power_monitor/battery_state_sampler_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/power_monitor/sampling_event_source.h\"\n", "n": 1, "add": ["#include \"base/power_monitor/power_monitor_buildflags.h\"\n"]}
+    ],
+    "power_monitor/power_monitor.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "power_monitor/power_monitor_device_source_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_jni/PowerMonitorReading_jni.h\"\n", "#include \"base/base_jni/PowerMonitor_jni.h\"\n"]}
+    ],
+    "process/current_process.h": [
+      {"after": "#include \"base/synchronization/lock.h\"\n", "before": "#include \"build/buildflag.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_enums.pbzero.h\"\n"]}
+    ],
+    "process/kill_win.cc": [
+      {"after": "#include \"base/process/process_iterator.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"\n"]}
+    ],
+    "process/launch.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "process/memory.cc": [
+      {"after": "\n", "before": "#include \"base/debug/alias.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"  // nogncheck\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/page_allocator.h\"  // nogncheck\n"]}
+    ],
+    "process/memory.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/oom.h\"  // nogncheck\n"]}
+    ],
+    "process/memory_fuchsia.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "process/memory_linux.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#elif !PA_BUILDFLAG(MEMORY_TOOL_REPLACES_ALLOCATOR) && defined(LIBC_GLIBC)\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"  // nogncheck\n"]}
+    ],
+    "process/memory_mac.mm": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/shim/allocator_interception_apple.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "process/memory_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/page_allocator.h\"\n"]},
+      {"after": "#include \"base/process/memory_unittest_mac.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_interception_apple.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "process/memory_win.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "before": "#endif  // PA_BUILDFLAG(USE_ALLOCATOR_SHIM)\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "process/process.h": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "process/process_fuchsia.cc": [
+      {"after": "\n", "before": "#include \"base/fuchsia/default_job.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "process/process_metrics_posix.cc": [
+      {"after": "\n", "before": "#include \"base/logging.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]},
+      {"after": "#include \"base/logging.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "process/process_metrics_unittest.cc": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "process/process_posix.cc": [
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"base/files/scoped_file.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_IOS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"TargetConditionals.h\"\n"]}
+    ],
+    "process/process_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/win/windows_version.h\"\n", "n": 1, "add": ["#include \"base/win/base_win_buildflags.h\"\n"]}
+    ],
+    "process/process_util_unittest.cc": [
+      {"after": "#if BUILDFLAG(IS_ANDROID)\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/lss/linux_syscall_support.h\"\n"]}
+    ],
+    "process/process_win.cc": [
+      {"after": "\n", "before": "#include \"base/features.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "profiler/core_unwinders_ios.cc": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/profiler/profiler_buildflags.h\"\n"]}
+    ],
+    "profiler/stack_copier.cc": [
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"  // nogncheck\n"]}
+    ],
+    "profiler/stack_sampler.cc": [
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"  // nogncheck\n"]}
+    ],
+    "profiler/stack_sampler_ios.cc": [
+      {"after": "#include \"base/memory/ptr_util.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/profiler/profiler_buildflags.h\"\n"]}
+    ],
+    "profiler/stack_sampling_profiler.cc": [
+      {"after": "#include \"base/memory/singleton.h\"\n", "before": "#include \"base/profiler/stack_buffer.h\"\n", "n": 1, "add": ["#include \"base/profiler/profiler_buildflags.h\"\n"]}
+    ],
+    "profiler/stack_sampling_profiler_java_test_util.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_profiler_test_support_jni/TestSupport_jni.h\"\n"]}
+    ],
+    "profiler/stack_sampling_profiler_test_util.cc": [
+      {"after": "#include \"base/profiler/native_unwinder_android_memory_regions_map.h\"\n", "before": "#include \"base/profiler/stack_buffer.h\"\n", "n": 1, "add": ["#include \"base/profiler/profiler_buildflags.h\"\n"]}
+    ],
+    "profiler/stack_sampling_profiler_unittest.cc": [
+      {"after": "#include \"base/notimplemented.h\"\n", "before": "#include \"base/profiler/sample_metadata.h\"\n", "n": 1, "add": ["#include \"base/profiler/profiler_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]}
+    ],
+    "protobuf_hardening_test.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"base/protobuf_hardening_test_support.pb.h\"\n"]}
+    ],
+    "rand_util.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/rand.h\"\n"]}
+    ],
+    "rand_util_fuchsia.cc": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/rand.h\"\n"]}
+    ],
+    "rand_util_posix.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/rand.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)\n", "n": 1, "add": ["#include \"third_party/lss/linux_syscall_support.h\"\n"]}
+    ],
+    "rand_util_win.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/rand.h\"\n"]}
+    ],
+    "run_loop.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "sampling_heap_profiler/lock_free_address_hash_set_unittest.cc": [
+      {"after": "#include \"base/threading/simple_thread.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "sampling_heap_profiler/sampling_heap_churn_profiler_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "sampling_heap_profiler/sampling_heap_profiler.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc.h\"  // nogncheck\n"]}
+    ],
+    "sampling_heap_profiler/sampling_heap_profiler_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim.h\"\n"]}
+    ],
+    "security_unittest.cc": [
+      {"after": "#include \"base/memory/free_deleter.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "strings/safe_sprintf_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_config.h\"\n"]}
+    ],
+    "strings/utf_string_conversions_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "synchronization/lock.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/annotations.h\"\n"]}
+    ],
+    "synchronization/lock_impl.h": [
+      {"after": "#include \"base/synchronization/lock_subtle.h\"\n", "before": "#include \"base/thread_annotations.h\"\n", "n": 1, "add": ["#include \"base/synchronization/synchronization_buildflags.h\"\n"]}
+    ],
+    "synchronization/lock_impl_posix.cc": [
+      {"after": "#include \"base/synchronization/lock_subtle.h\"\n", "before": "#include \"base/system/sys_info.h\"\n", "n": 1, "add": ["#include \"base/synchronization/synchronization_buildflags.h\"\n"]}
+    ],
+    "synchronization/waitable_event.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "synchronization/waitable_event.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "synchronization/waitable_event_watcher.h": [
+      {"after": "#include \"base/task/sequenced_task_runner.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "task/common/task_annotator.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n", "#include \"base/tracing_buildflags.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_mojo_event_info.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/task_execution.pbzero.h\"\n"]}
+    ],
+    "task/common/task_annotator_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/partition_alloc_for_testing.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n", "#include \"partition_alloc/scheduler_loop_quarantine_support.h\"\n"]}
+    ],
+    "task/current_thread.h": [
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#include \"base/message_loop/message_pump_for_io.h\"\n", "n": 1, "add": ["#include \"base/message_loop/ios_cronet_buildflags.h\"\n"]}
+    ],
+    "task/execution_fence_unittest.cc": [
+      {"after": "#include \"base/test/test_timeouts.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "task/responsiveness/calculator.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n"]}
+    ],
+    "task/sequence_manager/sequence_manager_impl.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "task/sequence_manager/sequence_manager_impl_unittest.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "task/sequence_manager/task_queue.h": [
+      {"after": "#include \"base/trace_event/base_tracing_forward.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "task/sequence_manager/thread_controller.h": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "task/sequenced_task_runner_rust_shim.cc": [
+      {"after": "#include \"base/functional/bind.h\"\n", "before": "#include \"base/memory/scoped_refptr.h\"\n", "n": 1, "add": ["#include \"base/functional/callback.rs.h\"\n"]}
+    ],
+    "task/thread_pool/task_tracker.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"base/values.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "task/thread_pool/thread_pool_impl_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/containers/span.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]}
+    ],
+    "task/thread_pool/worker_thread.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_config.h\"  // nogncheck\n"]},
+      {"after": "    PA_CONFIG(THREAD_CACHE_SUPPORTED)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/thread_cache.h\"  // nogncheck\n"]}
+    ],
+    "task/thread_pool/worker_thread_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_config.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/shim/allocator_shim.h\"\n", "#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "    PA_CONFIG(THREAD_CACHE_SUPPORTED)\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC) &&\n", "n": 1, "add": ["#include \"partition_alloc/extended_api.h\"\n", "#include \"partition_alloc/thread_cache.h\"\n"]}
+    ],
+    "test/android/java_handler_thread_helpers.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/test/base_unittests_jni_headers/JavaHandlerThreadHelpers_jni.h\"\n"]}
+    ],
+    "test/android/url_utils.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/test/test_support_jni_headers/UrlUtils_jni.h\"\n"]}
+    ],
+    "test/clang_profiling.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "test/clang_profiling_android.cc": [
+      {"after": "#include \"base/android/jni_android.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/clang_profiler_jni/ClangProfiler_jni.h\"\n"]}
+    ],
+    "test/fuzztest_support.h": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/fuzztest/src/fuzztest/fuzztest.h\"\n"]}
+    ],
+    "test/gtest_util.h": [
+      {"after": "#include \"base/check.h\"\n", "before": "#include \"base/macros/if.h\"\n", "n": 1, "add": ["#include \"base/debug/debugging_buildflags.h\"\n"]}
+    ],
+    "test/icu_test_util.cc": [
+      {"after": "#include \"base/i18n/tag_converters.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "test/icu_test_util.h": [
+      {"after": "#include \"base/i18n/test/scoped_icu_locale.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uversion.h\"\n"]}
+    ],
+    "test/launcher/test_launcher.cc": [
+      {"after": "#include \"base/at_exit.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "test/launcher/test_launcher_fork_server.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]}
+    ],
+    "test/launcher/unit_test_launcher.h": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "test/library_loader/early_native_test_helper.cc": [
+      {"after": "#include \"base/trace_event/trace_log.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_javatests_jni/EarlyNativeTest_jni.h\"\n"]}
+    ],
+    "test/memory/dangling_ptr_instrumentation.cc": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n"]}
+    ],
+    "test/memory/dangling_ptr_instrumentation.h": [
+      {"after": "#include \"base/types/expected.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/dangling_raw_ptr_checks.h\"\n"]}
+    ],
+    "test/multiprocess_test_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/test/test_support_jni_headers/MainReturnCodeResult_jni.h\"\n", "#include \"base/test/test_support_jni_headers/MultiprocessTestClientLauncher_jni.h\"\n"]}
+    ],
+    "test/perf_test_suite.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "test/scoped_not_fatal_until_severity_override.cc": [
+      {"after": "#include \"base/check.h\"\n", "before": "#include \"base/logging/log_severity.h\"\n", "n": 1, "add": ["#include \"base/check_version_internal.h\"\n"]}
+    ],
+    "test/test_file_util_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/test/base_unittests_jni_headers/ContentUriTestUtils_jni.h\"\n"]}
+    ],
+    "test/test_pending_task_unittest.cc": [
+      {"after": "#include \"base/trace_event/traced_value.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "test/test_proto_loader_unittest.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"base/test/test.pb.h\"\n"]}
+    ],
+    "test/test_suite.cc": [
+      {"after": "#include \"base/time/time.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/uloc.h\"\n"]},
+      {"after": "#if BUILDFLAG(IS_LINUX)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/tagging.h\"  // nogncheck\n"]}
+    ],
+    "test/test_suite.h": [
+      {"after": "#include \"base/test/tracing/trace_to_file.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "test/test_support_ios.mm": [
+      {"after": "#include \"base/test/test_switches.h\"\n", "before": "#include \"testing/coverage_util_ios.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n", "#include \"build/ios_buildflags.h\"\n"]}
+    ],
+    "test/test_timeouts.cc": [
+      {"after": "\n", "before": "#include \"base/check_op.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]},
+      {"after": "#include \"base/check_op.h\"\n", "before": "#include \"base/command_line.h\"\n", "n": 1, "add": ["#include \"base/clang_profiling_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/chromeos_buildflags.h\"\n"]}
+    ],
+    "test/thread_pool_test_helpers_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/base_java_test_support_uncommon_jni/ThreadPoolTestHelpers_jni.h\"\n"]}
+    ],
+    "test/tracing/test_trace_processor.cc": [
+      {"after": "#include \"base/strings/string_util.h\"\n", "before": "#include \"base/threading/thread_restrictions.h\"\n", "n": 1, "add": ["#include \"base/test/chrome_track_event.descriptor.h\"\n", "#include \"base/test/perfetto_sql_stdlib.h\"\n"]},
+      {"after": "#include \"base/trace_event/trace_event_impl.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/chrome_config.h\"  // IWYU pragma: keep\n", "#include \"third_party/perfetto/protos/perfetto/config/trace_config.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/extension_descriptor.pbzero.h\"\n"]}
+    ],
+    "test/tracing/test_trace_processor.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "test/tracing/test_trace_processor_example_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/trace_config.gen.h\"\n"]}
+    ],
+    "test/tracing/test_trace_processor_impl.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/trace_processor/trace_processor.h\"\n"]}
+    ],
+    "test/tracing/trace_test_utils.cc": [
+      {"after": "#include \"base/tracing/perfetto_platform.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "threading/platform_thread_android.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/tasks_jni/ThreadUtils_jni.h\"\n"]}
+    ],
+    "threading/platform_thread_apple.mm": [
+      {"after": "#include \"base/threading/threading_features.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "threading/platform_thread_posix.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"  // nogncheck\n"]}
+    ],
+    "threading/platform_thread_unittest.cc": [
+      {"after": "#include \"base/threading/threading_features.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/blink_buildflags.h\"\n"]}
+    ],
+    "threading/platform_thread_win.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/stack/stack.h\"\n"]}
+    ],
+    "threading/scoped_blocking_call.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/source_location.pbzero.h\"\n"]}
+    ],
+    "threading/sequence_local_storage_map_unittest.cc": [
+      {"after": "#include \"base/memory/raw_ptr.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "threading/thread_local_storage.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "time/time_exploded_icu.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/locid.h\"\n", "#include \"third_party/icu/source/i18n/unicode/calendar.h\"\n", "#include \"third_party/icu/source/i18n/unicode/gregocal.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "time/time_exploded_posix.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/chromecast_buildflags.h\"\n"]}
+    ],
+    "time/time_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/icu/source/common/unicode/utypes.h\"\n", "#include \"third_party/icu/source/i18n/unicode/timezone.h\"\n"]}
+    ],
+    "time/time_win_perftest.cc": [
+      {"after": "#include \"testing/perf/perf_result_reporter.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "tools_sanity_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/compiler_specific.h\"\n", "n": 1, "add": ["#include \"base/cfi_buildflags.h\"\n"]},
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"base/threading/thread.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]}
+    ],
+    "trace_event/address_space_dump_provider.cc": [
+      {"after": "#include \"base/trace_event/process_memory_dump.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]}
+    ],
+    "trace_event/address_space_dump_provider.h": [
+      {"after": "#include \"base/trace_event/memory_dump_provider.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/address_space_stats.h\"\n"]}
+    ],
+    "trace_event/application_state_proto_android.h": [
+      {"after": "#include \"base/base_export.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_application_state_info.pbzero.h\"\n"]}
+    ],
+    "trace_event/base_tracing_forward.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_value_forward.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/builtin_categories.h": [
+      {"after": "#include \"base/trace_event/common/trace_event_common.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "trace_event/common/trace_event_common.h": [
+      {"after": "// Pull in the tracing macro definitions from Perfetto.\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event.h\"  // IWYU pragma: export\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_legacy.h\"  // IWYU pragma: export\n"]}
+    ],
+    "trace_event/etw_interceptor_win.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/container/inlined_vector.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/common/interceptor_descriptor.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace_packet.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/debug_annotation.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_event.pbzero.h\"\n"]}
+    ],
+    "trace_event/etw_interceptor_win.h": [
+      {"after": "#include \"base/trace_event/trace_logging_minimal_win.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/interceptor.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_state_tracker.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/track_event/track_event_config.gen.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/interned_args_helper.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_interned_data_index.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/interned_data/interned_data.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/profiling/profile_common.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/log_message.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/source_location.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/task_execution.pbzero.h\"\n"]}
+    ],
+    "trace_event/interned_args_helper.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track_event_interned_data_index.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/interned_data/interned_data.pbzero.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider.cc": [
+      {"after": "#include \"base/trace_event/process_memory_dump.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider.h": [
+      {"after": "\n", "before": "#include \"base/base_export.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_stats.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/malloc_dump_provider_apple.cc": [
+      {"after": "#include \"base/trace_event/malloc_dump_provider_internal.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider_fuchsia.cc": [
+      {"after": "#include \"base/trace_event/malloc_dump_provider_internal.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider_internal.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider_mallinfo.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider_partition_alloc.cc": [
+      {"after": "#include \"base/trace_event/process_memory_dump.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"  // nogncheck\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/in_slot_metadata.h\"        // nogncheck\n", "#include \"partition_alloc/partition_alloc_config.h\"  // nogncheck\n"]},
+      {"after": "#include \"base/time/time.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/shim/allocator_shim_default_dispatch_to_partition_alloc.h\"\n"]},
+      {"after": "#if PA_CONFIG(THREAD_CACHE_ALLOC_STATS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/malloc_dump_provider_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/strings/strcat.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]},
+      {"after": "#include \"base/memory/sanitized_object.h\"\n", "before": "#endif  // PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/partition_root.h\"\n"]}
+    ],
+    "trace_event/malloc_dump_provider_win.cc": [
+      {"after": "#include \"base/trace_event/process_memory_dump.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/memory_allocator_dump.cc": [
+      {"after": "#include \"base/values.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/memory_graph.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace_packet.pbzero.h\"\n"]}
+    ],
+    "trace_event/memory_allocator_dump_guid.cc": [
+      {"after": "#include \"base/strings/stringprintf.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/sha2.h\"\n"]}
+    ],
+    "trace_event/memory_dump_manager.cc": [
+      {"after": "#include \"base/trace_event/traced_value.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]},
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/dynamic_annotations.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/memory_dump_manager_unittest.cc": [
+      {"after": "\n", "before": "#include \"base/at_exit.h\"\n", "n": 1, "add": ["#include \"base/allocator/buildflags.h\"\n"]}
+    ],
+    "trace_event/memory_dump_provider.h": [
+      {"after": "#include \"base/notreached.h\"\n", "before": "#include \"base/trace_event/memory_dump_request_args.h\"\n", "n": 1, "add": ["#include \"base/trace_event/memory_dump_provider_name_variants.h\"\n"]}
+    ],
+    "trace_event/memory_infra_background_allowlist.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/strings/ascii.h\"\n", "n": 1, "add": ["#include \"partition_alloc/buildflags.h\"\n"]}
+    ],
+    "trace_event/memory_pressure_level_proto.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/memory_pressure_level_proto.h": [
+      {"after": "#include \"base/memory/memory_pressure_level.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n"]}
+    ],
+    "trace_event/optional_trace_event.h": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"build/buildflag.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "trace_event/perfetto_proto_appender.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/protozero/contiguous_memory_range.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/debug_annotation.pbzero.h\"\n"]}
+    ],
+    "trace_event/perfetto_proto_appender.h": [
+      {"after": "#include \"base/trace_event/trace_arguments.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/protozero/contiguous_memory_range.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/debug_annotation.pbzero.h\"\n"]}
+    ],
+    "trace_event/process_memory_dump.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/trace/memory_graph.pbzero.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/trace_packet.pbzero.h\"\n"]}
+    ],
+    "trace_event/trace_arguments.h": [
+      {"after": "#include \"base/trace_event/common/trace_event_common.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n", "#include \"third_party/perfetto/include/perfetto/protozero/scattered_heap_buffer.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/traced_value.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/debug_annotation.pbzero.h\"\n"]}
+    ],
+    "trace_event/trace_config.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/config/track_event/track_event_config.gen.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/trace_event.h": [
+      {"after": "#include \"base/trace_event/traced_value_support.h\"\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_args.h\"\n"]}
+    ],
+    "trace_event/trace_event_impl.cc": [
+      {"after": "#include \"base/trace_event/traced_value.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "trace_event/trace_event_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/config/chrome/chrome_config.gen.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/trace_log.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/console_interceptor.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/core/chrome_config.h\"  // IWYU pragma: keep\n", "#include \"third_party/perfetto/include/perfetto/tracing/event_context.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/internal/track_event_internal.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/internal/track_event_legacy.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/track_event_category_registry.h\"\n", "#include \"third_party/perfetto/protos/perfetto/config/interceptor_config.gen.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_event.pbzero.h\"\n"]},
+      {"after": "#include \"base/memory/scoped_refptr.h\"\n", "before": "#endif\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/ext/trace_processor/export_json.h\"  // nogncheck\n", "#include \"third_party/perfetto/include/perfetto/trace_processor/basic_types.h\"  // nogncheck\n", "#include \"third_party/perfetto/include/perfetto/trace_processor/status.h\"  // nogncheck\n", "#include \"third_party/perfetto/include/perfetto/trace_processor/trace_processor_storage.h\"  // nogncheck\n"]}
+    ],
+    "trace_event/trace_log.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/core/trace_config.h\"  // IWYU pragma: keep\n", "#include \"third_party/perfetto/include/perfetto/tracing/tracing.h\"\n"]}
+    ],
+    "trace_event/traced_value_support.h": [
+      {"after": "#include \"base/unguessable_token.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/traced_proto.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/traced_value.h\"\n"]}
+    ],
+    "trace_event/traced_value_support_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "trace_event/typed_macros.h": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]},
+      {"after": "// the lambda definition. So included here for convenience.\n", "before": "\n", "n": 1, "add": ["#include \"base/tracing/protos/chrome_track_event.pbzero.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/event_context.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/string_helpers.h\"\n"]}
+    ],
+    "trace_event/typed_macros_embedder_support.h": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/internal/track_event_internal.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/track_event.pbzero.h\"\n"]}
+    ],
+    "trace_event/user_action.cc": [
+      {"after": "#include \"base/trace_event/typed_macros.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/tracing/track.h\"\n", "#include \"third_party/perfetto/protos/perfetto/trace/track_event/chrome_user_event.pbzero.h\"\n"]}
+    ],
+    "tracing/perfetto_platform.cc": [
+      {"after": "#include \"base/tracing/perfetto_task_runner.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "tracing/perfetto_platform.h": [
+      {"after": "#include \"base/threading/thread_local_storage.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/base/thread_utils.h\"\n", "#include \"third_party/perfetto/include/perfetto/tracing/platform.h\"\n"]}
+    ],
+    "tracing/perfetto_task_runner.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/base/task_runner.h\"\n"]}
+    ],
+    "tracing/trace_time.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/base/time.h\"\n"]}
+    ],
+    "tracing/trace_time.h": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/protos/perfetto/common/builtin_clock.pbzero.h\"\n"]}
+    ],
+    "types/expected_macros_perftest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/google_benchmark/src/include/benchmark/benchmark.h\"\n"]}
+    ],
+    "types/strong_alias_unittest.cc": [
+      {"after": "#include \"third_party/abseil-cpp/absl/hash/hash_testing.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "unguessable_token.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/mem.h\"\n"]}
+    ],
+    "uuid.h": [
+      {"after": "#include \"base/containers/span.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/base/config.h\"\n", "n": 1, "add": ["#include \"build/robolectric_buildflags.h\"\n"]},
+      {"after": "#include \"base/android/jni_string.h\"\n", "before": "#include \"third_party/abseil-cpp/absl/numeric/int128.h\"\n", "n": 1, "add": ["#include \"base/system_jni/UUID_jni.h\"\n"]}
+    ],
+    "values.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"base/types/to_address.h\"\n", "n": 1, "add": ["#include \"base/tracing_buildflags.h\"\n"]}
+    ],
+    "values_unittest.cc": [
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/perfetto/include/perfetto/test/traced_value_test_support.h\"\n"]}
+    ],
+    "version_info/android/channel_getter.cc": [
+      {"after": "// Must come after all headers that specialize FromJniType() / ToJniType().\n", "before": "\n", "n": 1, "add": ["#include \"base/version_info/android/version_constants_bridge_jni/VersionConstantsBridge_jni.h\"\n"]}
+    ],
+    "version_info/nix/version_extra_utils.cc": [
+      {"after": "#include \"base/strings/strcat.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "version_info/nix/version_extra_utils_unittest.cc": [
+      {"after": "#include \"base/version_info/channel.h\"\n", "before": "#include \"testing/gmock/include/gmock/gmock.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "version_info/version_info.h": [
+      {"after": "\n", "before": "#include \"base/version_info/channel.h\"\n", "n": 1, "add": ["#include \"base/sanitizer_buildflags.h\"\n"]},
+      {"after": "#include \"base/version_info/channel.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"base/version_info/version_info_values.h\"\n", "#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "version_info/version_string.cc": [
+      {"after": "#if BUILDFLAG(IS_CHROMEOS)\n", "before": "#endif\n", "n": 1, "add": ["#include \"build/util/LASTCHANGE_commit_position.h\"\n"]}
+    ],
+    "win/limited_access_features.cc": [
+      {"after": "#include \"base/win/hstring_reference.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "win/limited_access_features_unittest.cc": [
+      {"after": "#include \"base/win/scoped_com_initializer.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "win/scoped_handle_test_dll.cc": [
+      {"after": "\n", "before": "#include \"base/win/current_module.h\"\n", "n": 1, "add": ["#include \"base/win/base_win_buildflags.h\"\n"]}
+    ],
+    "win/scoped_handle_verifier.cc": [
+      {"after": "#include \"base/trace_event/trace_event.h\"\n", "before": "#include \"base/win/current_module.h\"\n", "n": 1, "add": ["#include \"base/win/base_win_buildflags.h\"\n"]}
+    ],
+    "win/sid.cc": [
+      {"after": "#include \"base/win/windows_version.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/boringssl/src/include/openssl/sha.h\"\n"]}
+    ],
+    "win/trust_util.cc": [
+      {"after": "#include \"base/win/scoped_wintrust_data.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "win/trust_util_unittest.cc": [
+      {"after": "#include \"base/path_service.h\"\n", "before": "#include \"build/build_config.h\"\n", "n": 1, "add": ["#include \"build/branding_buildflags.h\"\n"]}
+    ],
+    "win/win_includes_unittest.cc": [
+      {"after": "#include \"base/win/win_util.h\"\n", "before": "\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc-inl.h\"\n", "#include \"partition_alloc/partition_tls.h\"\n", "#include \"partition_alloc/spinning_mutex.h\"\n"]}
+    ]
+  }
+}

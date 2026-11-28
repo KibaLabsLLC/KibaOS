@@ -435,12 +435,15 @@ if [[ "${apply_series}" == "1" ]]; then
 fi
 
 # The import behind the tree also took the include lines out of the trees it
-# vendored: every `#include "absl/..."` line from third_party/abseil-cpp, and
-# every quoted include from third_party/protobuf. The files it kept include
-# nothing, so the first abseil TU fails on ABSL_NAMESPACE_BEGIN and the first
-# protobuf TU on `absl`. Last, after the source check above: that check
-# restores any modified file it does not recognise, and these files are
-# modified on purpose.
+# imported: every `#include "absl/..."` line from third_party/abseil-cpp,
+# every quoted include from third_party/protobuf, and every quoted include
+# from base/ and build/ -- the Rust allocator's buildflags.h among them,
+# without which its translation unit does not compile. The tool applies every
+# *-includes.json manifest beside it. The files it kept include nothing, so
+# the first abseil TU fails on ABSL_NAMESPACE_BEGIN and the first protobuf TU
+# on `absl`. Last, after the source check above: that check restores any
+# modified file it does not recognise, and these files are modified on
+# purpose.
 echo "==> Restoring the includes the source import dropped"
 
 if ! python3 "${SCRIPT_DIR}/restore-imported-includes.py" \

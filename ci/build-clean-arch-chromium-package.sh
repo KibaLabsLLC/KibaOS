@@ -73,10 +73,11 @@ fi
 
 # The import behind that tree also took its include lines -- every
 # `#include "absl/..."` line from abseil-cpp, every quoted include from
-# protobuf -- so the headers it kept include nothing and the first abseil TU
-# fails on ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`.
-# Restore them as the owner too, so this build fails on its own behaviour
-# rather than on a stripped checkout.
+# protobuf, and every quoted include from base/ and build/ -- so the headers it
+# kept include nothing and the first abseil TU fails on ABSL_NAMESPACE_BEGIN
+# while the first protobuf TU fails on `absl`. Every manifest beside the tool
+# is applied. Restore them as the owner too, so this build fails on its own
+# behaviour rather than on a stripped checkout.
 if [[ -f "${SCRIPT_DIR}/restore-imported-includes.py" ]]; then
   runuser -u "${chrome_owner}" -- \
     python3 "${SCRIPT_DIR}/restore-imported-includes.py" \

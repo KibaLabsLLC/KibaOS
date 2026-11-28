@@ -27,6 +27,15 @@ the first protobuf TU fails on its own types:
   ../../third_party/protobuf/src/google/protobuf/any_lite.cc:25:24:
   error: use of undeclared identifier 'absl'
 
+The same import took the quoted include lines out of `build/` and `base/`, which
+are not vendored dependencies and so had nobody to restore them: 13 files and
+28 lines under `build/`, including the Rust allocator's `buildflags.h` include
+-- without it `BUILDFLAG(RUST_ALLOCATOR_USES_PARTITION_ALLOC)` is undefined and
+the allocator's translation unit does not compile -- and 745 files with 2,564
+lines under `base/` (1,842 of them partition_alloc's, which already had a
+manifest), where the first `DCHECK` header reached fails on a buildflag of its
+own.
+
 Each manifest names one directory of the tree, the include lines that
 directory lost, and every block with the two lines it sat between. One run
 restores them all. Restoring a block where it was is what makes the result
@@ -69,6 +78,13 @@ stops the build with its name instead of leaving a header that compiles
 wrong. Applying is verified rather than assumed: each written file is read
 back, the restore is run over it again and must find nothing, and every
 include the manifest names for it must be present.
+
+`--exclude-dir` keeps a subtree out of a manifest when another manifest
+already owns it: `base/` lost its includes too, but
+`base/allocator/partition_allocator/src/partition_alloc` is
+`partition-alloc-includes.json`'s, so that directory is listed once and the
+two repairs cannot disagree. The exclusion is written into the manifest, so
+the reason for a subtree that is not there stays with the file that omits it.
 
 `--generate` rebuilds one manifest from two trees, deterministically, so it
 is never hand-edited: pass Chromium's copy of the directory as the baseline
@@ -275,7 +291,15 @@ def baseline_note(baseline_dir, ref, directory):
     return "%s from an unversioned baseline" % directory
 
 
-def generate(baseline_dir, tree_dir, directory, include, ref=""):
+def excluded(rel, prefixes):
+    """True when `rel` is `prefixes` or sits under one of them."""
+    for prefix in prefixes:
+        if rel == prefix or rel.startswith(prefix + "/"):
+            return True
+    return False
+
+
+def generate(baseline_dir, tree_dir, directory, include, ref="", exclude=()):
     """The manifest for `tree_dir` as a damaged copy of `baseline_dir`.
 
     Every run of lines the tree lost that held an include the pattern names
@@ -283,7 +307,8 @@ def generate(baseline_dir, tree_dir, directory, include, ref=""):
     run, so the block goes back where the run was. A run that also lost
     something else records only its includes: the rest is a difference
     between the two trees (a BUILD.gn entry, a symbol list, a revision
-    change) and putting it back would be a guess.
+    change) and putting it back would be a guess. `exclude` names subtrees of
+    `directory` another manifest owns; they are recorded, not repaired here.
     """
     base_root = os.path.join(baseline_dir, directory)
     tree_root = os.path.join(tree_dir, directory)
@@ -293,6 +318,8 @@ def generate(baseline_dir, tree_dir, directory, include, ref=""):
         for name in sorted(filenames):
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, base_root)
+            if excluded(rel, exclude):
+                continue
             other = os.path.join(tree_root, rel)
             if not os.path.isfile(other):
                 continue
@@ -338,6 +365,7 @@ def generate(baseline_dir, tree_dir, directory, include, ref=""):
         "baseline": baseline_note(baseline_dir, ref, directory),
         "directory": directory,
         "include": include.pattern,
+        "exclude": list(exclude),
         "files": files,
     }
 
@@ -347,8 +375,10 @@ def write_manifest(path, manifest):
     out = ["{",
            '  "baseline": %s,' % json.dumps(manifest["baseline"]),
            '  "directory": %s,' % json.dumps(manifest["directory"]),
-           '  "include": %s,' % json.dumps(manifest["include"]),
-           '  "files": {']
+           '  "include": %s,' % json.dumps(manifest["include"])]
+    if manifest.get("exclude"):
+        out.append('  "exclude": %s,' % json.dumps(manifest["exclude"]))
+    out.append('  "files": {')
     names = sorted(manifest["files"])
     for number, name in enumerate(names):
         out.append("    %s: [" % json.dumps(name))
@@ -472,6 +502,10 @@ def main():
     ap.add_argument("--include-pattern", metavar="REGEX",
                     help="the include lines --generate records and the "
                          "repair owns")
+    ap.add_argument("--exclude-dir", action="append", default=[],
+                    metavar="PATH",
+                    help="tree-relative subtree --generate leaves to another "
+                         "manifest (repeatable)")
     args = ap.parse_args()
 
     tree = os.path.abspath(args.tree)
@@ -505,13 +539,34 @@ def main():
             print("error: no %s under %s" % (args.dir, baseline),
                   file=sys.stderr)
             return 2
+        exclude = []
+        for path in args.exclude_dir:
+            clean = os.path.normpath(path).strip("/")
+            if os.path.isabs(path) or ".." in clean.split("/"):
+                print("error: --exclude-dir must stay inside the tree: %s"
+                      % path, file=sys.stderr)
+                return 2
+            if clean == args.dir:
+                print("error: --exclude-dir cannot be the whole directory: %s"
+                      % path, file=sys.stderr)
+                return 2
+            if not clean.startswith(os.path.normpath(args.dir).strip("/")
+                                    + "/"):
+                print("error: --exclude-dir is outside %s: %s"
+                      % (args.dir, path), file=sys.stderr)
+                return 2
+            exclude.append(os.path.relpath(clean, args.dir))
         manifest = generate(baseline, tree, args.dir, include,
-                            args.baseline_ref)
+                            args.baseline_ref, exclude)
         write_manifest(args.manifest[0], manifest)
         blocks = sum(len(hunks) for hunks in manifest["files"].values())
-        print(PREFIX + "%s: wrote %d block(s) in %d file(s) to %s"
-              % (args.dir, blocks, len(manifest["files"]),
-                 args.manifest[0]))
+        message = (PREFIX + "%s: wrote %d block(s) in %d file(s) to %s"
+                   % (args.dir, blocks, len(manifest["files"]),
+                      args.manifest[0]))
+        if manifest["exclude"]:
+            message += " (leaving %s to another manifest)" % ", ".join(
+                manifest["exclude"])
+        print(message)
         return 0
 
     paths = args.manifest or default_manifests()

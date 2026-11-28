@@ -32,10 +32,13 @@ if [[ -f "${SCRIPT_DIR}/restore-truncated-sources.py" ]]; then
 fi
 
 # The import behind the tree also took its include lines: every `#include
-# "absl/..."` line from abseil-cpp and every quoted include from protobuf, so
-# the headers it kept include nothing and the first abseil TU fails on
-# ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`. Restore them
-# before the refresh applies the series.
+# "absl/..."` line from abseil-cpp, every quoted include from protobuf, and
+# every quoted include from base/ and build/ -- the Rust allocator's
+# buildflags.h among them, without which its translation unit does not compile.
+# The headers it kept include nothing, so the first abseil TU fails on
+# ABSL_NAMESPACE_BEGIN while the first protobuf TU fails on `absl`. Every
+# *-includes.json manifest beside the tool is applied. Restore them before the
+# refresh applies the series.
 if [[ -f "${SCRIPT_DIR}/restore-imported-includes.py" ]]; then
   python3 "${SCRIPT_DIR}/restore-imported-includes.py" --tree "${CHROME_SRC}" \
     --apply || {

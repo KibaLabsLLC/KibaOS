@@ -1,0 +1,53 @@
+{
+  "baseline": "chromium/src eced485506a890a0dfd13843d83e7dcbb75a0462 (main at 2026-11-25T14:34:43Z, the revision Source batch 1/3 imported)",
+  "directory": "build",
+  "include": "^\\s*#\\s*include\\s+\"",
+  "files": {
+    "rust/allocator/allocator_impls.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/allocator/buildflags.h\"\n"]},
+      {"after": "#if BUILDFLAG(RUST_ALLOCATOR_USES_PARTITION_ALLOC)\n", "before": "#elif BUILDFLAG(RUST_ALLOCATOR_USES_ALIGNED_MALLOC)\n", "n": 1, "add": ["#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n", "#include \"partition_alloc/shim/allocator_shim.h\"        // nogncheck\n"]}
+    ],
+    "rust/tests/test_cpp_api_from_rust/target_depending_only_on_bindings.cc": [
+      {"after": "// https://crbug.com/546044516\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_cpp_api_from_rust/rust_lib.h\"\n"]}
+    ],
+    "rust/tests/test_cpp_api_from_rust/unittests.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"build/rust/tests/test_cpp_api_from_rust/rust_lib.h\"\n"]},
+      {"after": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/rs_std/char.h\"\n", "#include \"third_party/crubit/support/rs_std/rs_alloc.h\"\n"]}
+    ],
+    "rust/tests/test_cpp_including_rust/main.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_static_library/src/lib.rs.h\"\n"]}
+    ],
+    "rust/tests/test_cpp_including_rust/shared_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_shared_library/src/lib.rs.h\"\n", "#include \"partition_alloc/buildflags.h\"\n", "#include \"partition_alloc/partition_alloc_constants.h\"\n", "#include \"partition_alloc/partition_alloc_public_constants.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/partition_address_space.h\"\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"\n"]}
+    ],
+    "rust/tests/test_cpp_including_rust/static_unittest.cc": [
+      {"after": "\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_static_library/src/lib.rs.h\"\n", "#include \"partition_alloc/buildflags.h\"\n"]},
+      {"after": "#if PA_BUILDFLAG(HAS_64_BIT_POINTERS)\n", "before": "#else\n", "n": 1, "add": ["#include \"partition_alloc/partition_address_space.h\"  // nogncheck\n"]},
+      {"after": "#else\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/address_pool_manager_bitmap.h\"  // nogncheck\n"]},
+      {"after": "#if PA_BUILDFLAG(USE_PARTITION_ALLOC_AS_MALLOC)\n", "before": "#endif\n", "n": 1, "add": ["#include \"partition_alloc/bucket_lookup.h\"              // nogncheck\n", "#include \"partition_alloc/partition_alloc_constants.h\"  // nogncheck\n"]}
+    ],
+    "rust/tests/test_cxx_cfg/cxx_cfg_unittest.cc": [
+      {"after": "#include \"build/build_config.h\"\n", "before": "#include \"testing/gtest/include/gtest/gtest.h\"\n", "n": 1, "add": ["#include \"build/rust/tests/test_cxx_cfg/custom_buildflags.h\"\n", "#include \"build/rust/tests/test_cxx_cfg/cxx_cfg_lib.rs.h\"\n"]}
+    ],
+    "rust/tests/test_cxx_circular/cxx_circular_shim.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_cxx_circular/cxx_circular.rs.h\"\n"]}
+    ],
+    "rust/tests/test_rust_api_from_cpp/lifetimes/explicit_lifetimes.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"third_party/crubit/support/lifetime_annotations.h\"\n"]}
+    ],
+    "rust/tests/test_rust_api_from_cpp/mutual_recursion/parity.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_api_from_cpp/mutual_recursion/is_odd.h\"\n"]}
+    ],
+    "rust/tests/test_rust_api_from_cpp/round_trip/cpp_lib_using_rust_type.h": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_api_from_cpp/round_trip/rust_lib_with_rust_type.h\"\n"]}
+    ],
+    "rust/tests/test_rust_api_from_cpp/round_trip/unittests.cc": [
+      {"after": "\n", "before": "#include \"build/rust/tests/test_rust_api_from_cpp/self_contained_target_header2.h\"\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_api_from_cpp/round_trip/rust_lib_using_cpp_type.h\"\n"]}
+    ],
+    "rust/tests/test_rust_calling_cpp/main.cc": [
+      {"after": "\n", "before": "\n", "n": 1, "add": ["#include \"build/rust/tests/test_rust_calling_cpp/rust_calling_cpp_rlib.rs.h\"\n"]}
+    ]
+  }
+}

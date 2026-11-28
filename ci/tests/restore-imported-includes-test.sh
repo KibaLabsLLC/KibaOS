@@ -355,4 +355,78 @@ for bad in /absolute/path ../escape; do
     [[ ${status} -eq 2 ]] || fail "file '${bad}' exited ${status}, expected 2"
 done
 
+echo "==> a subtree another manifest owns is recorded, not repaired"
+python3 "${tool}" --generate --baseline "${work}/mixed/base" \
+    --tree "${work}/mixed/tree" --dir "${abseil}" \
+    --include-pattern "${abseil_include}" \
+    --exclude-dir "${abseil}/absl/base" \
+    --manifest "${work}/exclude.json" >"${out}" 2>&1 ||
+    fail "--generate with --exclude-dir failed"
+grep -q 'leaving absl/base to another manifest' "${out}" ||
+    fail "the exclusion was not reported"
+if ! python3 - "${work}/exclude.json" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+assert data["exclude"] == ["absl/base"], data.get("exclude")
+assert data["files"] == {}, sorted(data["files"])
+EOF
+then
+    fail "the excluded subtree is still in the manifest"
+fi
+
+echo "==> an exclusion outside the manifest's directory is refused"
+for bad in '../escape' "${abseil}" 'other/dir'; do
+    status=0
+    python3 "${tool}" --generate --baseline "${baseline}" --tree "${tree}" \
+        --dir "${abseil}" --include-pattern "${abseil_include}" \
+        --exclude-dir "${bad}" --manifest "${work}/bad-exclude.json" \
+        >"${out}" 2>&1 || status=$?
+    [[ ${status} -eq 2 ]] ||
+        fail "--exclude-dir '${bad}' exited ${status}, expected 2"
+done
+
+echo "==> the manifests beside the tool cover base/ and build/ without --manifest"
+mkdir -p "${work}/empty"
+status=0
+python3 "${tool}" --tree "${work}/empty" >"${out}" 2>&1 || status=$?
+[[ ${status} -eq 0 ]] ||
+    fail "the default manifest run exited ${status}, expected 0"
+for directory in \
+    third_party/abseil-cpp \
+    third_party/protobuf/src \
+    base \
+    build \
+    base/allocator/partition_allocator/src/partition_alloc; do
+    grep -q "==> imported-includes: ${directory}: " "${out}" ||
+        fail "no manifest beside the tool covers ${directory}"
+done
+
+echo "==> build-includes.json restores the allocator's buildflag include"
+if ! python3 - "${repo_root}/ci/build-includes.json" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+assert data["directory"] == "build", data["directory"]
+lines = [line for hunk in data["files"]["rust/allocator/allocator_impls.cc"]
+         for line in hunk["add"]]
+assert '#include "build/rust/allocator/buildflags.h"\n' in lines, lines
+EOF
+then
+    fail "the build manifest does not restore the allocator's buildflag include"
+fi
+
+echo "==> base-includes.json leaves partition_alloc to its own manifest"
+if ! python3 - "${repo_root}/ci/base-includes.json" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+prefix = "allocator/partition_allocator/src/partition_alloc"
+assert data["directory"] == "base", data["directory"]
+assert data["exclude"] == [prefix], data.get("exclude")
+assert not [name for name in data["files"]
+            if name == prefix or name.startswith(prefix + "/")], \
+    "the base manifest claims partition_alloc"
+EOF
+then
+    fail "the base manifest does not exclude partition_alloc"
+fi
+
 echo "==> all imported include cases passed"

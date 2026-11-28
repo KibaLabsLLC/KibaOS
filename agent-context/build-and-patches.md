@@ -26,15 +26,21 @@
    `KIBAOS_RESTORE_ABSEIL=0` leaves it alone. Files that survived the import
    are not self-contained either: it dropped every `#include "absl/..."` line
    from that directory, every quoted `#include "..."` line from
-   `third_party/protobuf`, and every quoted include from
+   `third_party/protobuf`, and every quoted include from `base/`, `build/` and
    `base/allocator/partition_allocator/src/partition_alloc`, so
    `ci/restore-imported-includes.py` puts the 4,488 abseil lines in
    `ci/abseil-includes.json`, the 5,929 protobuf lines in
-   `ci/protobuf-includes.json` and the 1,842 partition_alloc lines in
+   `ci/protobuf-includes.json`, the 722 `base/` lines in
+   `ci/base-includes.json`, the 28 `build/` lines in
+   `ci/build-includes.json` and the 1,842 partition_alloc lines in
    `ci/partition-alloc-includes.json` back where the Chromium copy has them,
-   inside the `#if` that needs them and with their blank lines. The first two
-   directories come out byte for byte as Chromium ships them; partition_alloc
-   is repaired against the Chromium revision the import came from, which each
+   inside the `#if` that needs them and with their blank lines. A manifest
+   lists one directory, and `ci/base-includes.json` leaves
+   `base/allocator/partition_allocator/src/partition_alloc` to the manifest
+   that already owned it and records that exclusion, so no file is claimed
+   twice. The first two directories come out byte for byte as Chromium ships
+   them; the rest are repaired against the Chromium revision the import came
+   from, which each
    manifest records in its `baseline`, so every file keeps its own revision's
    lines and takes back only that revision's includes. Regenerate the manifest
    when the import moves, always against the imported revision and never
