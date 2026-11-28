@@ -1,0 +1,98 @@
+diff --git a/buildtools/third_party/libc++/BUILD.gn b/buildtools/third_party/libc++/BUILD.gn
+index 65cd5e7..acdf7be 100644
+--- a/buildtools/third_party/libc++/BUILD.gn
++++ b/buildtools/third_party/libc++/BUILD.gn
+@@ -457,6 +457,54 @@ target(libcxx_target_type, "libc++") {
+   # TODO(crbug.com/40273848): Move this build file to
+   # third_party/libc++/BUILD.gn once submodule migration is done.
+   sources = [
++    "//third_party/libc++/src/src/algorithm.cpp",
++    "//third_party/libc++/src/src/any.cpp",
++    "//third_party/libc++/src/src/atomic.cpp",
++    "//third_party/libc++/src/src/barrier.cpp",
++    "//third_party/libc++/src/src/bind.cpp",
++    "//third_party/libc++/src/src/call_once.cpp",
++    "//third_party/libc++/src/src/charconv.cpp",
++    "//third_party/libc++/src/src/chrono.cpp",
++    "//third_party/libc++/src/src/condition_variable.cpp",
++    "//third_party/libc++/src/src/condition_variable_destructor.cpp",
++    "//third_party/libc++/src/src/debugging.cpp",
++    "//third_party/libc++/src/src/error_category.cpp",
++    "//third_party/libc++/src/src/exception.cpp",
++    "//third_party/libc++/src/src/filesystem/directory_iterator.cpp",
++    "//third_party/libc++/src/src/filesystem/filesystem_clock.cpp",
++    "//third_party/libc++/src/src/filesystem/filesystem_error.cpp",
++    "//third_party/libc++/src/src/filesystem/operations.cpp",
++    "//third_party/libc++/src/src/filesystem/path.cpp",
++    "//third_party/libc++/src/src/functional.cpp",
++    "//third_party/libc++/src/src/future.cpp",
++    "//third_party/libc++/src/src/hash.cpp",
++    "//third_party/libc++/src/src/ios.cpp",
++    "//third_party/libc++/src/src/ios.instantiations.cpp",
++    "//third_party/libc++/src/src/iostream.cpp",
++    "//third_party/libc++/src/src/locale.cpp",
++    "//third_party/libc++/src/src/memory.cpp",
++    "//third_party/libc++/src/src/mutex.cpp",
++    "//third_party/libc++/src/src/mutex_destructor.cpp",
++    "//third_party/libc++/src/src/new_handler.cpp",
++    "//third_party/libc++/src/src/new_helpers.cpp",
++    "//third_party/libc++/src/src/optional.cpp",
++    "//third_party/libc++/src/src/random.cpp",
++    "//third_party/libc++/src/src/random_shuffle.cpp",
++    "//third_party/libc++/src/src/regex.cpp",
++    "//third_party/libc++/src/src/ryu/d2fixed.cpp",
++    "//third_party/libc++/src/src/ryu/d2s.cpp",
++    "//third_party/libc++/src/src/ryu/f2s.cpp",
++    "//third_party/libc++/src/src/shared_mutex.cpp",
++    "//third_party/libc++/src/src/stdexcept.cpp",
++    "//third_party/libc++/src/src/string.cpp",
++    "//third_party/libc++/src/src/strstream.cpp",
++    "//third_party/libc++/src/src/system_error.cpp",
++    "//third_party/libc++/src/src/thread.cpp",
++    "//third_party/libc++/src/src/typeinfo.cpp",
++    "//third_party/libc++/src/src/valarray.cpp",
++    "//third_party/libc++/src/src/variant.cpp",
++    "//third_party/libc++/src/src/vector.cpp",
++    "//third_party/libc++/src/src/verbose_abort.cpp",
+   ]
+ 
+   if (is_apple || (!is_asan && !is_tsan && !is_msan)) {
+@@ -477,6 +525,9 @@ target(libcxx_target_type, "libc++") {
+   include_dirs = [ "//third_party/libc++/src/src" ]
+   if (is_win) {
+     sources += [
++      "//third_party/libc++/src/src/support/win32/locale_win32.cpp",
++      "//third_party/libc++/src/src/support/win32/support.cpp",
++      "//third_party/libc++/src/src/support/win32/thread_win32.cpp",
+     ]
+     configs -= [ "//build/config/win:winver" ]
+     configs += [ ":winver" ]
+diff --git a/buildtools/third_party/libc++abi/BUILD.gn b/buildtools/third_party/libc++abi/BUILD.gn
+index 9ebcbbb..6ec1ff1 100644
+--- a/buildtools/third_party/libc++abi/BUILD.gn
++++ b/buildtools/third_party/libc++abi/BUILD.gn
+@@ -25,10 +25,24 @@ target(libcxxabi_target_type, "libc++abi") {
+   # TODO(crbug.com/40273848): Move this build file to
+   # third_party/libc++/BUILD.gn once submodule migration is done
+   sources = [
++    "//third_party/libc++abi/src/src/abort_message.cpp",
++    "//third_party/libc++abi/src/src/cxa_aux_runtime.cpp",
++    "//third_party/libc++abi/src/src/cxa_default_handlers.cpp",
++    "//third_party/libc++abi/src/src/cxa_exception.cpp",
++    "//third_party/libc++abi/src/src/cxa_exception_storage.cpp",
++    "//third_party/libc++abi/src/src/cxa_handlers.cpp",
+ 
+     # This file is supposed to be used in fno-exception builds of
+     # libc++abi.  We build lib++/libc++abi with exceptions enabled.
+     #"//third_party/libc++abi/src/src/cxa_noexception.cpp",
++    "//third_party/libc++abi/src/src/cxa_personality.cpp",
++    "//third_party/libc++abi/src/src/cxa_vector.cpp",
++    "//third_party/libc++abi/src/src/cxa_virtual.cpp",
++    "//third_party/libc++abi/src/src/fallback_malloc.cpp",
++    "//third_party/libc++abi/src/src/private_typeinfo.cpp",
++    "//third_party/libc++abi/src/src/stdlib_exception.cpp",
++    "//third_party/libc++abi/src/src/stdlib_stdexcept.cpp",
++    "//third_party/libc++abi/src/src/stdlib_typeinfo.cpp",
+   ]
+ 
+   if (!is_tsan) {

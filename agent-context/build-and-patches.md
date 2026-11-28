@@ -76,9 +76,16 @@ Full builds need Docker, ~15 GB free space, and Linux.
   (e.g. `0071-files-a-cut-file-stays-dimmed.patch`). Match the tone and
   numbering when adding patches.
 - The `00xx-files-*` range builds the KibaOS Files app port inside Ash;
-  `0162`–`0180` reconcile the build after the `chrome/` cut (GN parse fixes,
-  dropped chrome dependency edges, restored protos/buildflags); `0900` is the
-  GN evaluation convergence step that runs last.
+  `0162`–`0184` reconcile the build after the `chrome/` cut (GN parse fixes,
+  dropped chrome dependency edges, restored protos/buildflags, and the GN list
+  entries the pruner emptied); `0900` is the GN evaluation convergence step
+  that runs last.
+- List entries whose paths only exist after dependency sync are restored by a
+  patch rather than by `ci/repair-pruned-gn.py`: the tool adopts an upstream
+  line only when every path it names exists in the checkout, and
+  `third_party/libc++` and `third_party/libc++abi` arrive from `DEPS`. That is
+  why `0184` declares their sources; without it each archive is built empty
+  and every executable fails to link on `std::__Cr` symbols.
 - `patches/generated/` holds machine-produced content. Do not hand-edit it;
   regenerate via CI tooling instead.
 
